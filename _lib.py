@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+ignore = [
+    "SKL",
+    "PROM",
+    "HEGIC",
+    "XVS",
+    "SCRT",
+    "ALPHA",
+    "CTK",
+    "AXS",
+    "BOT",
+    "AKRO",
+    "HARD",
+    "KP3RBNB",
+    "REN",
+    "RENBTC",
+    "UNFI",
+    "SLP",
+    "CVP",
+    "FOR",
+    "SKL",
+    "BVND",
+    "DF",
+    "GRT",
+    "1INCH",
+]

@@ -1,0 +1,81 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © lavventura
+
+//@version=4
+//
+// @author LazyBear
+//
+// If you use this code in its original/modified form, do drop me a note.
+//
+strategy(title="WaveTrend with Crosses [LazyBear]", shorttitle="WT_CROSS_LB", initial_capital=1000,currency=currency.USD,default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+n1 = input(10, "Channel Length")
+n2 = input(21, "Average Length")
+obLevel1 = input(60, "Over Bought Level 1")
+obLevel2 = input(53, "Over Bought Level 2")
+osLevel1 = input(-60, "Over Sold Level 1")
+osLevel2 = input(-53, "Over Sold Level 2")
+
+ap = hlc3
+esa = ema(ap, n1)
+d = ema(abs(ap - esa), n1)
+ci = (ap - esa) / (0.015 * d)
+tci = ema(ci, n2)
+
+wt1 = tci
+wt2 = sma(wt1,4)
+
+plot(0, color=gray)
+plot(obLevel1, color=red)
+plot(osLevel1, color=green)
+plot(obLevel2, color=red)
+plot(osLevel2, color=green)
+
+plot(wt1, color=green)
+plot(wt2, color=red)
+plot(wt1-wt2, color=blue, style=area, transp=80)
+
+plot(cross(wt1, wt2) ? wt2 : na, color = color.black , style=shape.circle, linewidth = 3)
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red:color.lime) , style = shape.circle, linewidth = 2)
+
+barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? color.aqua:color.yellow) : na)
+
+// --------------------------------------------------
+wt1_past = wt1[1]
+wt2_past = wt2[1]
+
+divlong = wt1 > wt2 and wt1_past < wt2_past and wt1_past < osLevel2
+divshort = wt1 < wt2 and wt1_past > wt2_past and wt1_past > obLevel2
+
+data1 = divlong
+plotshape(data1, style=shape.xcross,location=location.bottom, color=color.green, size = size.tiny, title="WT_up")
+
+data2 = divshort
+plotshape(data2, style=shape.xcross,location=location.top, color=color.red, size = size.tiny, title="WT_down")
+plotshape(data1 or data2, style=shape.xcross,location=location.absolute, color=color.gray, title="WT_BOTH")
+//
+plot(cross(wt1, wt2) ? wt2 : na, color=color.black,style = shape.circle, linewidth = 3)
+plot(cross(wt1, wt2) ? wt2 : na, color=(wt2 - wt1 > 0 ? color.red:color.lime) , style=shape.circle, linewidth = 2)
+//
+
+fromYear = input(2020, "Backtest Start Year")
+fromMonth = input(1, "Backtest Start Month")
+fromDay = input(2, "Backtest Start Day")
+testPeriodStart = timestamp(fromYear,fromMonth,fromDay,0,0)
+
+thruYear = input(2021, "Backtest Stop Year")
+thruMonth = input(12, "Backtest Stop Month")
+thruDay = input(30, "Backtest Stop Day")
+testPeriodStop = timestamp(thruYear,thruMonth,thruDay,0,0)
+
+start     = timestamp(fromYear, fromMonth, fromDay, 00, 00)  // backtest start window
+finish    = timestamp(thruYear, thruMonth, thruDay, 23, 59)  // backtest finish window
+window()  => time >= start and time <= finish ? true : false
+
+divcrosslong  = wt1 - wt2 < 0
+divcrossshort = wt1 - wt2 > 0
+
+strategy.entry("Long", strategy.long, when=window() and divlong)
+strategy.close("Long", when=window() and divcrosslong)
+
+strategy.entry("Short",strategy.short, when=window() and divshort)
+strategy.close("Short", when=window() and divcrossshort)

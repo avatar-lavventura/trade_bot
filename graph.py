@@ -17,6 +17,7 @@ import requests
 from binance.client import Client
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
+
 from utils import log, utc_to_local
 
 HOME = str(Path.home())
