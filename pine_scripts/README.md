@@ -29,3 +29,12 @@ BUY SIGNAL 15 Minute
 ==================
 {{exchange}}:{{ticker}}, price = {{close}}, volume = {{volume}}
 ```
+
+-----------------
+
+- Squeeze momentum by LazyBear
+- [Custom timeframe indicator by
+ChrisMoody](https://www.tradingview.com/script/OQx7vju0-MacD-Custom-Indicator-Multiple-Time-Frame-All-Available-Options/)
+- [VWAP oscillator by filbfilb](https://www.tradingview.com/script/9Zc2BnWa-VWAP-Oscillator/)
+- [TonyUX EMA scalper by tux](https://www.tradingview.com/script/egfSfN1y-TonyUX-EMA-Scalper-Buy-Sell/)
+- [EMA 20/50/100/200](https://www.tradingview.com/script/48ZWvclR-EMA-20-50-100-200/)

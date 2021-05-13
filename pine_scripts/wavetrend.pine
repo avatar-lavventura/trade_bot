@@ -1,7 +1,7 @@
 //
 // @author LazyBear
 //
-// If you use this code in its original/modified form, do drop me a note.
+// If you use this code in its original/modified form, do drop me a note. Base code
 // link: https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT/
 //
 study(title="WaveTrend [LazyBear]", shorttitle="WT_LB")

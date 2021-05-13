@@ -46,10 +46,11 @@ from pathlib import Path
 import requests
 from binance.client import Client
 from bs4 import BeautifulSoup
-from utils import log, run
 
+import _lib
 import binance_lib
 from binance_lib import futures_history, get_futures_usd, positions
+from utils import log, popen_communicate, run
 
 HOME = str(Path.home())
 
@@ -63,9 +64,6 @@ At the current time Binance rate limits are:
 100,000 orders per 24hrs
 
 To run: nohup python -u ./binance_track.py > cmd.log &
-
-Requirements:
-python3 -m pip install python-binance
 """
 
 SEP = "====================================================================================="
@@ -75,40 +73,16 @@ headers = {
         " Safari/537.36"
     )
 }
-# MAIN_ASSET = "BNB"
-MAIN_ASSET = "BTC"
+
+MAIN_ASSET = "BTC"  # "BNB"
 SLEEP_DURATION = 45
 ignore_balance_list = ["EON", "ADD", "MEETONE", "ATD", "EOP"]
-ignore = [
-    "SKL",
-    "PROM",
-    "HEGIC",
-    "XVS",
-    "SCRT",
-    "ALPHA",
-    "CTK",
-    "AXS",
-    "BOT",
-    "AKRO",
-    "HARD",
-    "KP3RBNB",
-    "REN",
-    "RENBTC",
-    "UNFI",
-    "SLP",
-    "CVP",
-    "FOR",
-    "SKL",
-    "BVND",
-    "DF",
-    "GRT",
-    "1INCH",
-]
+ignore = _lib.ignore
 start = 0
 TIME_TO_FORCE_BUY = 0.1
 PERCENT_TO_BUY = 95
 SYMBOL = None
-FUTURE_AMOUNT_TO_TRADE = 50.0
+FUTURE_AMOUNT_TO_TRADE = 1000
 client = None
 found_ones = []  # noqa
 msg = []
@@ -120,11 +94,16 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("--trade", type=bool, default=False, help="FOO!")
 parser.add_argument("--log", type=bool, default=False, help="FOO!")
+parser.add_argument("--lag", type=bool, default=0, help="FOO!")
 parser.add_argument("bar", nargs="*", default=[1, 2, 3], help="BAR!")
 args = parser.parse_args()
 
 is_trade = vars(args)["trade"]
 is_log = vars(args)["log"]
+lag_time = vars(args)["lag"]
+
+p, output, error = popen_communicate(["bash", "public_ip.sh"])
+print(output)
 
 
 def transfer_futures_to_spot(amount):
@@ -135,7 +114,24 @@ def transfer_spot_to_futures(amount):
     client.futures_account_transfer(asset="USDT", amount=float(amount), type="1")
 
 
-def check_binence_obj():
+def transfer_spot_to_margin(amount):
+    client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
+
+
+def get_balance_margin_USDT():
+    try:
+        _len = len(client.get_margin_account()["userAssets"])
+        for x in range(_len):
+            if client.get_margin_account()["userAssets"][x]["asset"] == "USDT":
+                balance_USDT = client.get_margin_account()["userAssets"][x]["free"]
+                return float(balance_USDT)
+    except:
+        pass
+
+    return 0
+
+
+def check_binance_obj():
     global client
     try:
         client = load_obj("binance")
@@ -169,14 +165,43 @@ def _trade(client, usdt_balance):
     if not is_log:
         block_print()
 
-    com, _symbol, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
+    com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
     futures_usd = get_futures_usd(client, is_both=False)
+    margin_usdt = get_balance_margin_USDT()
+    total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
+    log(f"==> Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ", end="")
+    log(f"TOTAL={total_balance}", color="green")
 
-    log(
-        f"==> Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | "
-        f"TOTAL={float(futures_usd) + float(usdt_balance)}"
-    )
-    log("Funding Fee:", color="red")
+    if float(futures_usd) > FUTURE_AMOUNT_TO_TRADE:
+        try:
+            amount = float(futures_usd) - FUTURE_AMOUNT_TO_TRADE
+            transfer_futures_to_spot(amount)
+            log(f"==> Transfered {_format(amount)} from futures to spot")
+        except:
+            pass
+
+    objs = client.futures_position_information(limit=100)
+    for future in objs:
+        amount = future["positionAmt"]
+        if float(amount) != 0.0:
+            _symbol = future["symbol"]  # in order to retreive active position
+            break
+
+    # if float(total_balance) > FUTURE_AMOUNT_TO_TRADE:
+    #     try:
+    #         amount = float(total_balance) - FUTURE_AMOUNT_TO_TRADE
+    #         transfer_spot_to_margin(amount)
+    #         log(f"==> Transfered {_format(amount)} from spot to margin")
+    #     except:
+    #         transfer_futures_to_spot(amount)
+    #         log(f"==> Transfered {_format(amount)} from futures to spot")
+    #         try:
+    #             transfer_spot_to_margin(amount - 0.01)
+    #             log(f"==> Transfered {_format(amount)} from spot to margin")
+    #         except:
+    #             pass
+
+    log("\nFunding Fee:", color="cyan")
     current_date = date.today()
     for key, value in funding_dict.items():
         fund_fee = value[0]
@@ -190,16 +215,15 @@ def _trade(client, usdt_balance):
             daily_progress += fund_fee
 
     if daily_progress < 0:
-        log(f"\ndaily_progress={daily_progress}", color="red")
+        log(f"\ndp={daily_progress}", color="red")
     else:
-        log(f"\ndaily_progress={daily_progress}", color="green")
+        log(f"\ndp={daily_progress}", color="green")
 
     if not is_log:
         enable_print()
 
     while True:
-        output = positions(client, latest_symbol_income, daily_progress, _symbol)
-        if not output:
+        if not positions(client, latest_symbol_income, daily_progress, _symbol):
             if seperate_line_line:
                 log(SEP, color="cyan")
                 if futures_usd != 0 and float(futures_usd) > FUTURE_AMOUNT_TO_TRADE:
@@ -230,7 +254,10 @@ def _trade(client, usdt_balance):
         else:
             seperate_line_line = True
 
-        time.sleep(0.25)
+        if lag_time > 0:
+            time.sleep(lag_time * 60)
+        else:
+            time.sleep(0.25)
 
 
 def block_print():
@@ -252,7 +279,6 @@ def get_free_balance():
 
 def sell_market(asset, symbol):
     free = client.get_asset_balance(asset=asset)["free"]
-
     order = client.order_market_sell(symbol=symbol, quantity=free)
     print(order)
 
@@ -333,8 +359,8 @@ def telegram_msg(text, _receipt=""):
             print("## Attempting to send telegram message")
         if msg:
             _mail = "\n".join(msg)
-            _mail = text + "\nbinance_symbols@" + str(found_ones) + "\n" + _mail
-            msg_to_send = str(_mail) + "\n=====================================\n" + str(_receipt)
+            _mail = f"{text}\nbinance_symbols@{found_ones}\n{_mail}"
+            msg_to_send = f"{_mail}\n=====================================\n{_receipt}"
             start = time.time()
         else:
             msg_to_send = str(text)
@@ -466,7 +492,7 @@ def _run():
                 except:
                     pass
 
-                print("found:" + found + " => " + str(output))
+                print(f"found:{found} ==> {output}")
                 f_ones.append(found)
 
     if flag:
@@ -479,7 +505,7 @@ def _run():
 
 
 if __name__ == "__main__":
-    client, balances = check_binence_obj()
+    client, balances = check_binance_obj()
     for balance in balances["balances"]:
         if balance["asset"] == "USDT":
             usdt_balance = balance["free"]
