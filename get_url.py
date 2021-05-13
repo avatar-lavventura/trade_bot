@@ -9,6 +9,7 @@ from operator import itemgetter
 from selenium import webdriver
 from selenium.webdriver import FirefoxOptions
 from selenium.webdriver.support.ui import WebDriverWait
+
 from utils import log
 
 opts = FirefoxOptions()

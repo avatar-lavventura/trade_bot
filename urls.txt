@@ -12,7 +12,6 @@ https://www.binance.com/en/futuresng-activity/leaderboard/D6DD3C1DED5FE1B0D21ABE
 https://www.binance.com/en/futuresng-activity/leaderboard/E5852BC4048072876B8E8C05FCFEAB72?tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/ADD906157DBA24F0C920D7E0415DA54C?tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/87BBCF4C3A0590F4F2ED4E5CD8A6314F?tradeType=PERPETUAL
-https://www.binance.com/en/futuresng-activity/leaderboard/7FB8444BB3075C5637841BC599DAB444&tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/4523370F6C90301FB137081886CEF2F6&tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/EDC64DFEB4C166D44B6EC1B2B92F39E4&tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/F16B28EC7539E81C67683C34EB945738&tradeType=PERPETUAL
@@ -24,3 +23,4 @@ https://www.binance.com/en/futuresng-activity/leaderboard/402E3359E20C868A236F7B
 https://www.binance.com/en/futuresng-activity/leaderboard/F9A3442BBBEFA1E9A472B78844EB721B&tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/F9A3442BBBEFA1E9A472B78844EB721B&tradeType=PERPETUAL
 https://www.binance.com/en/futuresng-activity/leaderboard/9726ADA9C9B6B5285E1E8031C931A7E3&tradeType=PERPETUAL
+https://www.binance.com/en/futuresng-activity/leaderboard/7FB8444BB3075C5637841BC599DAB444&tradeType=PERPETUAL

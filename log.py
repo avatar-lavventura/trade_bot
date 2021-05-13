@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from dateutil.parser import parse
 from matplotlib import pyplot
 from matplotlib.animation import FuncAnimation
+
 from utils import log, utc_to_local
 
 HOME = str(Path.home())
@@ -53,7 +54,6 @@ def update(frame):
 if __name__ == "__main__":
     p_temp = 0
     mark_temp = 0
-
     side = ""
     side_m = ""
 
