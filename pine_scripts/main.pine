@@ -1,31 +1,21 @@
 //@version=4
+strategy(title="uabmeacd", shorttitle="uabmacd", overlay=false, initial_capital=1000, calc_on_every_tick=false, pyramiding=0, currency=currency.USD, default_qty_type=strategy.percent_of_equity, default_qty_value=20, commission_type=strategy.commission.percent, commission_value=0.01)
 // study(title="uabmacd",shorttitle="uabmacd")
-strategy(
-     title="uabmeacd",
-     shorttitle="uabmacd",
-     overlay=false,
-     initial_capital=1000,
-     calc_on_every_tick=false,
-     pyramiding=0,
-     currency=currency.USD,
-     default_qty_type=strategy.percent_of_equity,
-     default_qty_value=20,
-     commission_type=strategy.commission.percent,
-     commission_value=0.01)
 
 fromYear = input(2021, "Backtest Start Year")
 fromMonth = input(3, "Backtest Start Month")
-fromDay = input(14, "Backtest Start Day")
+fromDay = input(1, "Backtest Start Day")
 
 thruYear = input(2021, "Backtest Stop Year")
 thruMonth = input(12, "Backtest Stop Month")
 thruDay = input(30, "Backtest Stop Day")
 
+//==========
 // WaveTrend
 // =========
 n1 = input(10, "Channel Length")
 n2 = input(21, "Average Length")
-obLevel1 = input(60, "Over Bought Level 1")
+obLevel1 = input(60, "Over Bought Level 1")  // etc: 74
 obLevel2 = input(53, "Over Bought Level 2")
 osLevel1 = input(-60, "Over Sold Level 1")
 osLevel2 = input(-53, "Over Sold Level 2")
@@ -55,10 +45,15 @@ barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? color.aqua : color.yellow) : na)
 wt1_past_1 = wt1[1]
 wt2_past_1 = wt2[1]
 
+wt1_past_2 = wt1[2]
+wt2_past_2 = wt2[2]
+
 divcrosslong  = wt1 < wt2
 divcrossshort = wt1 > wt2
 
+__divcrosslong  = divcrosslong and wt1_past_1 < wt2_past_1 and wt1_past_2 > wt2_past_2
 _divcrosslong  = divcrosslong and wt1_past_1 > wt2_past_1
+
 _divcrossshort = divcrossshort and wt1_past_1 < wt2_past_1
 
 // _divlong = _divcrossshort and wt1_past_1 < osLevel2
@@ -77,9 +72,6 @@ testPeriodStop = timestamp(thruYear,thruMonth,thruDay,0,0)
 start     = timestamp(fromYear, fromMonth, fromDay, 00, 00)  // backtest start window
 finish    = timestamp(thruYear, thruMonth, thruDay, 23, 59)  // backtest finish window
 window()  => time >= start and time <= finish ? true : false
-
-alertcondition(_divcrossshort, title='LONG,BAR_CROSS',  message='DOGEUSDT,LONG,BAR_CROSS,price={{close}}, volume={{volume}}')
-alertcondition(_divcrosslong,  title='SHORT,BAR_CROSS', message='DOGEUSDT,SHORT,BAR_CROSS,price={{close}},volume={{volume}}')
 
 // alertcondition(_divcrossshort, title='LONG,EVERY_MIN',  message='DOGEUSDT,LONG,MIN,price={{close}}, volume={{volume}}')
 // alertcondition(_divcrosslong,  title='SHORT,EVERY_MIN', message='DOGEUSDT,SHORT,MIN,price={{close}},volume={{volume}}')
@@ -101,10 +93,6 @@ alertcondition(_divcrosslong,  title='SHORT,BAR_CROSS', message='DOGEUSDT,SHORT,
 //     linewidth=3, title="Short Take Profit")
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-strategy.entry("Long", strategy.long, when=window() and _divcrossshort)
-strategy.close("Long", when=window() and _divcrosslong)
-strategy.entry("Short",strategy.short, when=window() and _divcrosslong)
-strategy.close("Short", when=window() and _divcrossshort)
 
 //if (strategy.position_size > 0)
 //    strategy.exit(id="XL TP", limit=longExitPrice)
@@ -112,3 +100,92 @@ strategy.close("Short", when=window() and _divcrossshort)
 //if (strategy.position_size < 0)
 //    strategy.exit(id="XS TP", limit=shortExitPrice)
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+// Squeeze Momentum Strategy
+// =========================
+length = input(12, title="BB Length")
+mult = input(2.0, title="BB MultFactor")
+lengthKC = input(16, title="KC Length")
+mult_kc = input(1.5, title="KC MultFactor")
+
+
+//FILTERS
+useMomAverage = input(false, title="Filter for Momenutum value", type=input.bool)
+MomentumMin = input(20, title="Min for momentum")
+
+// Calculate BB
+src = ohlc4
+
+ma_1 = sma(src, length)
+ma_2 = sma(src, lengthKC)
+range_ma = sma(high - low, lengthKC)
+
+dev = mult * stdev(src, length)
+
+upper_bb = ma_1 + dev
+lower_bb = ma_1 - dev
+
+upper_kc = ma_2 + range_ma * mult_kc
+lower_kc = ma_2 - range_ma * mult_kc
+
+sqz_on = lower_bb > lower_kc and upper_bb < upper_kc
+sqz_off = lower_bb < lower_kc and upper_bb > upper_kc
+no_sqz = sqz_on == false and sqz_off == false
+
+val = linreg(src - avg(avg(highest(hl2, lengthKC), lowest(low, lengthKC)), sma(hl2, lengthKC)), lengthKC, 0)
+
+bcolor = iff(val > 0, iff(val > nz(val[1]), color.lime, color.green), iff(val < nz(val[1]), color.red, color.maroon))
+scolor = no_sqz ? color.blue : sqz_on ? color.black : color.aqua
+
+//LOGIC
+//momentum filter
+filterMom = useMomAverage ? abs(val) > MomentumMin / 100000 ? true : false : true
+
+//standard condition
+longCondition = scolor[1] != color.aqua and scolor == color.aqua and bcolor == color.lime and filterMom
+exitLongCondition = bcolor == color.green
+shortCondition = scolor[1] != color.aqua and scolor == color.aqua and bcolor == color.red and filterMom
+exitShortCondition = bcolor == color.maroon
+
+// Risk Management Sysyem
+stop_loss = input(defval = 600, title="Stop Loss", minval = 0)
+take_profit = input(defval = 1000, title="Take Profit", minval = 0)
+trailing_stop = input(defval = 20, title="Trailing Stop", minval = 0)
+// If the zero value is set for stop loss, take profit or trailing stop, then the function is disabled
+s_loss = stop_loss >= 1 ? stop_loss : na
+tk_profit = take_profit >= 1 ? take_profit : na
+tr_stop = trailing_stop >= 1 ? trailing_stop : na
+//====================================================================================================
+src_fast = close, len_fast = input(5, minval=1, title="Length Fast RSI")
+src_slow = close, len_slow = input(15,minval=1, title="Length Slow RSI")
+up_fast = rma(max(change(src_fast), 0), len_fast)
+down_fast = rma(-min(change(src_fast), 0), len_fast)
+rsi_fast = down_fast == 0 ? 100 : up_fast == 0 ? 0 : 100 - (100 / (1 + up_fast / down_fast))
+up_slow = rma(max(change(src_slow), 0), len_slow)
+down_slow = rma(-min(change(src_slow), 0), len_slow)
+rsi_slow = down_slow == 0 ? 100 : up_slow == 0 ? 0 : 100 - (100 / (1 + up_slow / down_slow))
+//plotfast = plot(rsi_fast, color=blue)
+//plotslow = plot(rsi_slow, color=orange)
+divergence = rsi_fast - rsi_slow
+// plotdiv = plot(divergence, color = divergence > 0 ? color.lime:color.red, linewidth = 2)
+//band1 = hline(70,color=green)
+//band0 = hline(30,color=red)
+band = hline(0)
+rsi_divlong = divergence >=0
+rsi_divshort = divergence <=0
+// =================================================================================================================
+alertcondition(_divcrossshort, title='LONG,BAR_CROSS',  message='DOGEUSDT,LONG,BAR_CROSS,price={{close}}, volume={{volume}}')
+//
+alertcondition((_divcrosslong and rsi_divlong),  title='SHORT,CLOSE_POS_DivRSI', message='DOGEUSDT,SHORT,CLOSE_POS,price={{close}},volume={{volume}}')
+//
+alertcondition((_divcrosslong and sqz_on),  title='SHORT,BAR_CROSS', message='DOGEUSDT,SHORT,BAR_CROSS,price={{close}},volume={{volume}}')
+// alertcondition(_divcrosslong and sqz_on,  title='SHORT,BAR_CROSS_SQ', message='DOGEUSDT,SHORT,BAR_CROSS_SQ,price={{close}},volume={{volume}}')
+// =================================================================================================================
+strategy.entry("Long", strategy.long, when=window() and _divcrossshort)
+strategy.close("Long", when=window() and _divcrosslong and rsi_divlong)
+// // strategy.close("Long", when=window() and (_divcrosslong))
+// strategy.entry("Short",strategy.short, when=window() and _divcrosslong and sqz_on)
+_obLevel1 = 95
+// strategy.entry("Short",strategy.short, when=window() and _divcrosslong and (sqz_on or wt2 > obLevel1))
+strategy.entry("Short",strategy.short, when=window() and _divcrosslong and sqz_on)
+strategy.close("Short", when=window() and _divcrossshort and rsi_divshort)

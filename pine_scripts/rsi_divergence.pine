@@ -1,6 +1,3 @@
-//@version=4
-
-study(title="RSI Divergence", shorttitle="RSI_D")
 // link: https://in.tradingview.com/script/fH6e5TuN-RSI-Divergence/
 // ==> normal RSI: check double or
 // triple top/bottom on a chart meanwhile RSI is descending/ascending (check the
@@ -11,6 +8,8 @@ study(title="RSI Divergence", shorttitle="RSI_D")
 // cross zero line in the opposite way you get a sell signal (the line become
 // red)
 
+//@version=4
+study(title="RSI Divergence", shorttitle="RSI_D")
 src_fast = close, len_fast = input(5, minval=1, title="Length Fast RSI")
 src_slow = close, len_slow = input(14,minval=1, title="Length Slow RSI")
 up_fast = rma(max(change(src_fast), 0), len_fast)
