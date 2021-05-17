@@ -3,7 +3,7 @@
 import datetime
 
 from actions import parse_webhook
-from buy import trade, strategy_exit
+from buy import strategy_exit, trade
 from flask import Flask, abort, request
 from user_setup import check_binance_obj
 
@@ -83,7 +83,7 @@ def webhook():
             elif _type == "MIN" and not IS_EVERY_MINUTE:
                 pass
             elif _type == "CLOSE_POS":
-                strategy_exit(output, side)
+                strategy_exit(output, side, client)
             else:
                 if LATEST_POSITION != side:  # if the position reversed
                     if is_trade:

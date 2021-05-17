@@ -35,7 +35,7 @@ def sell(symbol, amount, client):
     print(f"{order}\n")
 
 
-def strategy_exit(symbol, side):
+def strategy_exit(symbol, side, client):
     futures = client.futures_position_information(symbol=symbol)
     for future in futures:
         amount = future["positionAmt"]
@@ -73,7 +73,7 @@ def trade(client, data_msg):
         bar_close_decision = side  # required for sync if side is revered within bar
         print(f"==> BAR_CLOSE={bar_close_decision}")
 
-    if not strategy_exit(symbol, side):
+    if not strategy_exit(symbol, side, client):
         return
 
     time.sleep(0.1)
