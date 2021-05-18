@@ -1,3 +1,11 @@
+--force
+
+.idea/
+
+data/
+
+.env_secret
+
 .binance.txt
 
 cmd.log
@@ -23,3 +31,17 @@ symbols.pk
 .symbols.pk
 
 .binance.pk
+
+ngrok_ip
+
+node_modules/
+
+user_data/
+
+package-lock.json
+
+pairs_temp.csv
+
+tradingview-alerts/config.yml
+
+bot/.env_secret

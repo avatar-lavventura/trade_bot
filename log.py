@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 
-import datetime
 import os
-import re
 import time
 from datetime import datetime
 from pathlib import Path
-from random import randrange
 
 from binance.client import Client
-from bs4 import BeautifulSoup
-from dateutil.parser import parse
 from matplotlib import pyplot
-from matplotlib.animation import FuncAnimation
 
-from utils import log, utc_to_local
+from bot.tools import log
 
 HOME = str(Path.home())
 

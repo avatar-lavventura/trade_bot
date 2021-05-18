@@ -9,9 +9,8 @@ from os.path import expanduser
 from pathlib import Path
 from typing import Union
 
+import broker._utils.colored_traceback as colored_traceback
 from dotenv import load_dotenv
-
-import _utils.colored_traceback as colored_traceback
 
 # from web3 import Web3
 # import eblocbroker.Contract as Contract
@@ -57,7 +56,7 @@ class QuietExit(Exception):
 class ENV:
     def __init__(self) -> None:
         self.HOME = expanduser("~")
-        env_file = Path(f"{self.HOME}/.eBlocBroker/") / ".env"
+        env_file = Path(f"{self.HOME}/.ebloc-broker/") / ".env"
         _env = dict()
         try:
             with open(env_file) as f:
@@ -191,4 +190,3 @@ except Exception as e:
 BLOCK_DURATION = 15
 RECONNECT_ATTEMPTS = 5
 RECONNECT_SLEEP = 15
-IS_THREADING_ENABLED = False

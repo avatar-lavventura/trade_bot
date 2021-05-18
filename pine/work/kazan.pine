@@ -1,0 +1,132 @@
+//@version=4
+strategy(title="alpy_kazan", shorttitle="alpy_kazan",
+     calc_on_order_fills=false, initial_capital=100, default_qty_value=100, process_orders_on_close=true,
+     default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1)
+
+length = input(14, title="BB Length")
+mult = input(2.0, title="BB MultFactor")
+lengthKC = input(17, title="KC Length")
+mult_kc = input(1.5, title="KC MultFactor")
+
+
+//FILTERS
+useMomAverage = input(false, title="Filter for Momenutum value", type=input.bool)
+MomentumMin = input(20, title="Min for momentum")
+
+// Calculate BB
+srcc = ohlc4
+
+ma_1 = sma(srcc, length)
+ma_2 = sma(srcc, lengthKC)
+range_ma = sma(high - low, lengthKC)
+
+dev = mult * stdev(srcc, length)
+
+upper_bb = ma_1 + dev
+lower_bb = ma_1 - dev
+
+upper_kc = ma_2 + range_ma * mult_kc
+lower_kc = ma_2 - range_ma * mult_kc
+
+sqz_on = lower_bb > lower_kc and upper_bb < upper_kc
+sqz_off = lower_bb < lower_kc and upper_bb > upper_kc
+no_sqz = sqz_on == false and sqz_off == false
+
+fromMonth = input(3)
+fromDay = input(1)
+thruMonth = input(5)
+thruDay = input(31)
+fromYear = input(2021)
+thruYear = input(2021)
+
+// WaveTrend
+// =========
+n1 = input(8)
+n2 = input(21)
+
+// time_frame = input(title="Other Time Frame", type=input.resolution, defval="30")
+ap = hlc3 //security(syminfo.tickerid, time_frame, hlc3, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_close = close // security(syminfo.tickerid, time_frame, close, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+src = ohlc4 //security(syminfo.tickerid, time_frame, ohlc4, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_high = high // security(syminfo.tickerid, time_frame, high, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_low = low //security(syminfo.tickerid, time_frame, low, barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+_hl2 = hl2 //security(syminfo.tickerid, time_frame, hl2, barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+
+// RSI-divergence
+src_fast = _close, len_fast = input(5,  minval=1, title="Length Fast RSI") // 5
+src_slow = _close, len_slow = input(14, minval=1, title="Length Slow RSI") // 14
+// ============================================================================
+testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
+testPeriodStop  = timestamp(thruYear, thruMonth, thruDay, 0, 0)
+start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+
+// WaveTrend
+// =========
+obLevel1 = input(70, "Over Bought Level 1")
+obLevel2 = input(53, "Over Bought Level 2")
+osLevel1 = input(-70, "Over Sold Level 1")
+osLevel2 = input(-53, "Over Sold Level 2")
+
+esa = ema(ap, n1)
+d = ema(abs(ap - esa), n1)
+ci = (ap - esa) / (0.015 * d)
+tci = ema(ci, n2)
+wt1 = tci
+wt2 = sma(wt1, 4)
+
+plot(obLevel1, color=color.red)
+plot(osLevel1, color=color.green)
+plot(obLevel2, color=color.red, style=3)
+plot(osLevel2, color=color.green, style=3)
+plot(wt1, color=color.green)
+plot(wt2, color=color.red)
+plot(wt1 - wt2, color=color.blue, style=plot.style_area, transp=80)
+
+plot(cross(wt1, wt2) ? wt2 : na, color=color.black , style=plot.style_circles, linewidth=3)
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 > wt1 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
+barcolor(cross(wt1, wt2) ? (wt2 > wt1 ? color.aqua : color.yellow) : na)
+
+wt1_past_1 = wt1[1]
+wt2_past_1 = wt2[1]
+divcrosslong  = wt1 < wt2
+divcrossshort = wt1 > wt2
+_divcrosslong  = divcrosslong and wt1_past_1 > wt2_past_1
+_divcrossshort = divcrossshort and wt1_past_1 < wt2_past_1
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth = 2)
+
+// RSI-divergence
+up_fast = rma(max(change(src_fast), 0), len_fast)
+down_fast = rma(-min(change(src_fast), 0), len_fast)
+rsi_fast = down_fast == 0 ? 100 : up_fast == 0 ? 0 : 100 - (100 / (1 + up_fast / down_fast))
+up_slow = rma(max(change(src_slow), 0), len_slow)
+down_slow = rma(-min(change(src_slow), 0), len_slow)
+rsi_slow = down_slow == 0 ? 100 : up_slow == 0 ? 0 : 100 - (100 / (1 + up_slow / down_slow))
+divergence = rsi_fast - rsi_slow
+band = hline(0)
+rsi_divlong = divergence > 0
+rsi_divshort = divergence < 0
+
+doo = minute % 5 == 0 and second == 0 and divcrossshort and rsi_divlong
+plotchar(doo, "test", "▲", location.bottom, size = size.small)
+
+doo1 =  minute % 5 == 0 and second == 0 and divcrosslong and rsi_divshort
+plotchar(doo1, "tes2", "•", location.abovebar, color.red, size = size.small)
+
+//if (minute % 5 == 0 and second == 0 and barstate.isconfirmed)
+
+strategy.entry("Long", strategy.long, when=window() and (_divcrossshort or (divcrossshort and strategy.position_size[1] < 0)) and rsi_divlong)
+strategy.entry("Short",strategy.short, when=window() and (_divcrosslong or (divcrosslong and strategy.position_size[1] > 0)) and rsi_divshort)
+strategy.close("Long", when=window() and divcrosslong and rsi_divshort)
+strategy.close("Short", when=window() and divcrossshort and rsi_divlong)
+
+inpTrailStop    = input(defval = 1500, title = "Trailing Stop Loss", minval = 0)
+inpTrailOffset  = input(defval = 0, title = "Trailing Stop Loss Offset", minval = 0)
+
+strategy.exit("Exit Long", from_entry = "Long", trail_points=inpTrailStop, trail_offset=inpTrailOffset)
+strategy.exit("Exit Short", from_entry = "Short", trail_points = inpTrailStop, trail_offset = inpTrailOffset)
+
+// // {{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}},{{close}}

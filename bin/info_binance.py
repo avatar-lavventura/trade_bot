@@ -237,7 +237,8 @@ def run():
     for found in found_ones:
         if found not in ignore:
             try:
-                org_symbols[found]
+                # org_symbols[found]
+                pass
             except:
                 flag = True
                 output = ""

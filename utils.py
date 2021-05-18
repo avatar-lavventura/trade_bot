@@ -23,11 +23,11 @@ from typing import Dict
 
 import base58
 import pytz
+from broker._utils._getch import _Getch
 from pygments import formatters, highlight, lexers
 from termcolor import colored
 
 import config
-from _utils._getch import _Getch
 from config import env, logging
 
 Qm = b"\x12 "
@@ -606,7 +606,9 @@ def is_ipfs_on() -> bool:
 
 def is_process_on(process_name, name, process_count=0, port=None, is_print=True) -> bool:
     """Checks wheather the process runs on the background.
-    Doc: https://stackoverflow.com/a/6482230/2402577"""
+
+    __ https://stackoverflow.com/a/6482230/2402577
+    """
     p1 = Popen(["ps", "aux"], stdout=PIPE)
     p2 = Popen(["grep", "-v", "flycheck_"], stdin=p1.stdout, stdout=PIPE)
     p1.stdout.close()  # type: ignore
