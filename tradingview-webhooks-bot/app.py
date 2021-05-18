@@ -3,20 +3,19 @@
 import datetime
 
 from actions import parse_webhook
-from buy import strategy_exit, trade
+from buy import BotHelper, trade, Strategy
 from flask import Flask, abort, request
 from user_setup import check_binance_obj
-
 from binance_lib import get_futures_usd
 
 # Create Flask object called app.
 app = Flask(__name__)
 client, balances = check_binance_obj()
-ASSET_NAME = "DOGEUSDT"
+fund_times = [19, 3, 11]
 LATEST_POSITION = None
 IS_EVERY_MINUTE = False
 is_trade = True
-fund_times = [19, 3, 11]
+bot = BotHelper(client)
 # TODO: before 15 close all positions if in gain
 
 
@@ -71,25 +70,21 @@ def webhook():
         if data_msg:
             print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
             print(f" * Current date and time: {now}")
-            print(data_msg)
-            chunks = data_msg.split(",")
-            output = chunks[0]
-            side = chunks[1]
-            _type = chunks[2]
+            strategy = Strategy(data_msg)
 
-            print(f" * LATEST_POSITION={LATEST_POSITION}")
-            if output == "TEST":
+            if strategy.symbol == "TEST":
                 print("==> TEST message successfully received")
-            elif _type == "MIN" and not IS_EVERY_MINUTE:
-                pass
-            elif _type == "CLOSE_POS":
-                strategy_exit(output, side, client)
-            else:
-                if LATEST_POSITION != side:  # if the position reversed
-                    if is_trade:
-                        trade(client, data_msg)
+            elif is_trade:
+                if strategy.market_position == "flat":
+                    bot.strategy_exit(strategy)
+                else:
+                    print(f"==> LATEST_POSITION={LATEST_POSITION}")
 
-                    LATEST_POSITION = side
+                    if LATEST_POSITION != strategy.side:  # if the position reversed
+                        trade(client, strategy)
+                        LATEST_POSITION = strategy.side
+                    else:
+                        print("==> Did not entered trading")
             print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
             return "", 200
         else:
@@ -104,7 +99,6 @@ if __name__ == "__main__":
     margin_usdt = client_helper.get_balance_margin_USDT()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
 
-    print(f" * ASSET_NAME={ASSET_NAME}")
     print(f" * Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ")
     print(f" * is_trade={is_trade}")
     now = datetime.datetime.now()
