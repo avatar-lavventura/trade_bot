@@ -20,7 +20,8 @@ class Strategy:
         if "enter" in data_msg:
             if is_print:
                 log(f" * {_time()} ", end="")
-                log(",".join(data_msg.split(", (", 1)[0].split(",")[0:3]), "green")
+                _join = data_msg.split(", (", 1)[0].split(",")[0:4]
+                log(",".join(_join), "green")
 
         try:
             self.chunks = data_msg.split(",")

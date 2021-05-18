@@ -1,6 +1,8 @@
 * [BASIC RISK AND MONEY MANAGEMENT](https://pastebin.com/sqJUcbjp)
-The most important rule in investing/trading is to protect your capital at all
-cost. Protecting your capital is more important than missing an opportunity;
+**The most important rule in investing/trading is to protect your capital at all
+cost.**
+
+Protecting your capital is more important than missing an opportunity;
 once you lose your capital it's game over but there will always be opportunities
 in the market. That's why you must use a stop loss (sell stop order) on every
 trade.
@@ -13,8 +15,9 @@ two ways traders can apply the 1% (or whichever percentage they choose)
 rule. The first is to only use 1% of capital to buy a single asset (Equal Dollar
 Method). The second is to use as much capital is needed for a trade, but apply a
 stop loss to the position so no more than 1% of the account is lost if the trade
-goes the wrong way (*Equal Risk Method*).  Further Explanation of the 1% Risk
-Rule
+goes the wrong way (*Equal Risk Method*).
+
+** Further Explanation of the 1% Risk Rule:
 
 **The rule is applied so that no single trade causes a massive loss in the
 account.**
