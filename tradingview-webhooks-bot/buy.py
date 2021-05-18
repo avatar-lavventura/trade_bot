@@ -6,8 +6,8 @@
 
 import time
 from pathlib import Path
-
 from user_setup import check_binance_obj
+from utils import log
 
 HOME = str(Path.home())
 AMOUNT = 700

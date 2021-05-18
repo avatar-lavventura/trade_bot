@@ -8,6 +8,7 @@ from flask import Flask, abort, request
 from user_setup import check_binance_obj
 
 from binance_lib import get_futures_usd
+from utils import log
 
 # Create Flask object called app.
 app = Flask(__name__)
@@ -26,13 +27,12 @@ for balance in balances["balances"]:
         break
 
 
-def _format(value, decimal=2):
-    return format(float(value), ".2f")
-
-
 class ClientHelper:
     def __init__(self, client):
         self.client = client
+
+    def _format(self, value, decimal=2):
+        return format(float(value), ".2f")
 
     def transfer_futures_to_spot(self, amount):
         self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
@@ -69,7 +69,7 @@ def webhook():
         # Parse the string data from tradingview into a python dict
         data_msg = parse_webhook(request.get_data(as_text=True))
         if data_msg:
-            print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
             print(f" * Current date and time: {now}")
             print(data_msg)
             chunks = data_msg.split(",")
@@ -103,15 +103,10 @@ if __name__ == "__main__":
     futures_usd = get_futures_usd(client, is_both=False)
     margin_usdt = client_helper.get_balance_margin_USDT()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
-
     print(f" * ASSET_NAME={ASSET_NAME}")
     print(f" * Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ")
     print(f" * is_trade={is_trade}")
     now = datetime.datetime.now()
     print(f" * Current date and time: {now}")
-    print(" * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
-    # app.debug = True
-    app.run()
-    # app.run(host="0.0.0.0", port="33")
-    # app.run(host="34.89.13.197", port="5000")
-    # 1640463783:AAGZ3k1ox9--LnjfVPdsXX2xvAxn-VFXmeo
+    log(" * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
+    app.run()  # app.debug = True
