@@ -6,11 +6,14 @@
 
 import time
 from pathlib import Path
-
 from user_setup import check_binance_obj
+from utils import log
 
 HOME = str(Path.home())
-AMOUNT = 20
+AMOUNT = {}
+AMOUNT["DOGEUSDT"] = 1240
+# AMOUNT = 8000  # 1000Shibi
+# TODO: 300$ lik al yap
 
 
 class Strategy:
@@ -23,11 +26,11 @@ class Strategy:
         self.market_position = self.chunks[2]
         self.prev_market_position = self.chunks[3]
         self.timenow = self.chunks[4]
-        print(f"symbol={self.symbol}")
-        print(f"side={self.side}")
-        print(f"market_position={self.market_position}")
-        print(f"prev_market_position={self.prev_market_position}")
-        print(f"timenow={self.timenow}")
+        log(f"==> symbol={self.symbol}")
+        log(f"==> side={self.side}")
+        log(f"==> market_position={self.market_position}")
+        log(f"==> prev_market_position={self.prev_market_position}")
+        log(f"==> timenow={self.timenow}")
 
 
 class BotHelper:
@@ -36,7 +39,6 @@ class BotHelper:
 
     def buy(self, symbol, amount):
         amount = abs(float(amount))
-        print(f"amount={amount}")
         try:
             order = self.client.futures_create_order(
                 symbol=symbol, side="BUY", type="MARKET", quantity=amount, reduceOnly=False
@@ -53,12 +55,15 @@ class BotHelper:
         print(f"amount={amount}")
         try:
             order = self.client.futures_create_order(symbol=symbol, side="SELL", type="MARKET", quantity=amount)
+            print(f"{order}\n")
         except:
-            order = self.client.futures_create_order(
-                symbol=symbol, side="SELL", type="MARKET", quantity=amount, reduceOnly=True
-            )
-
-        print(f"{order}\n")
+            try:
+                order = self.client.futures_create_order(
+                    symbol=symbol, side="SELL", type="MARKET", quantity=amount, reduceOnly=True
+                )
+                print(f"{order}\n")
+            except Exception as e:
+                print(str(e))  # ReduceOnly Order is rejected or // Margin is insufficient.
 
     def strategy_exit(self, strategy):
         futures = self.client.futures_position_information(symbol=strategy.symbol)
@@ -73,36 +78,36 @@ class BotHelper:
 
                 print(f"==> {open_position_side}_x{future['leverage']}")
                 if strategy.market_position == "flat":
-                    print(f"==> CLOSING {open_position_side} position")
+                    log(f"==> CLOSING {open_position_side} position")
                     if open_position_side == "long":
                         self.sell(strategy.symbol, amount)
                     else:
                         self.buy(strategy.symbol, amount)
                 elif strategy.market_position != open_position_side:
-                    print(f"==> CLOSING {open_position_side} position")
+                    log(f"==> CLOSING {open_position_side} position")
                     if strategy.market_position == "short":
                         self.sell(strategy.symbol, amount)
                     else:
                         self.buy(strategy.symbol, amount)
                 else:
-                    print("Warning: already opened position side and requested position side is same. Do nothing.")
+                    log("Warning: already opened position side and requested position side is same. Do nothing.")
                     return False
         return True
 
 
 def trade(client, strategy):
-    print("==> Attempt for trading")
+    log("==> Attempt for trading")
     bot = BotHelper(client)
     if not bot.strategy_exit(strategy):
         return
 
     time.sleep(0.1)
     if strategy.market_position != "flat":
-        print(f"==> OPENING {strategy.side} order")
+        log(f"==> OPENING {strategy.side} order")
         if strategy.side == "buy":
-            bot.buy(strategy.symbol, AMOUNT)
+            bot.buy(strategy.symbol, AMOUNT[strategy.symbol])
         elif strategy.side == "sell":
-            bot.sell(strategy.symbol, AMOUNT)
+            bot.sell(strategy.symbol, AMOUNT[strategy.symbol])
 
 
 if __name__ == "__main__":  # noqa: C901
