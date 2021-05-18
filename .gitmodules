@@ -1,0 +1,3 @@
+[submodule "ebloc-broker"]
+	path = ebloc_broker
+	url = https://github.com/ebloc/ebloc-broker

@@ -1,0 +1,191 @@
+//
+// @author altoson
+//
+//@version=4
+// < 75 bandi yesil oldu mu bak
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy",
+     calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=true)
+
+upperBandValue = input(3.0, title = "Short Offset")
+lowerBandValue = input(3.0, title = "Long Offset")
+
+is_product = false
+fromMonth = 7
+fromDay   = 1
+thruMonth = 12
+thruDay   = 30
+fromYear  = 2021
+thruYear  = 2021
+testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
+testPeriodStop  = timestamp(thruYear, thruMonth, thruDay, 0, 0)
+start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+is_long  = strategy.position_size > 0
+is_short = strategy.position_size < 0
+_timenow = timenow / 1000
+n = 2 // williams_fractial
+SLEEP_SECONDS = 75
+
+// VWMA
+// ====
+len = 24
+src = security(syminfo.tickerid, "60", hlc3)
+ma = vwma(src, len)
+plot(ma, title="VWMA", color=color.blue)
+upperBand = plot(ma * (1 + upperBandValue / 100), title="Upper Band", color=color.red)
+lowerBand = plot(ma * (1 - lowerBandValue / 100), title="Lower Band", color=color.green)
+
+// RSI
+// ===
+lenRSI = 14
+srcRSI = hlc3
+// srcRSI = security(syminfo.tickerid, "10", hlc3)
+upRSI = rma(max(change(srcRSI), 0), lenRSI)
+downRSI = rma(-min(change(srcRSI), 0), lenRSI)
+rsi = downRSI == 0 ? 100 : upRSI == 0 ? 0 : 100 - (100 / (1 + upRSI / downRSI))
+obRSI = rsi[n] >= 70
+osRSI = rsi[n] <= 30
+
+// Up_Fractal
+// ==========
+bool upflagDownFrontier = true
+bool upflagUpFrontier0 = true
+bool upflagUpFrontier1 = true
+bool upflagUpFrontier2 = true
+bool upflagUpFrontier3 = true
+bool upflagUpFrontier4 = true
+
+for i = 1 to n
+    upflagDownFrontier := upflagDownFrontier and (high[n-i] < high[n])
+    upflagUpFrontier0  := upflagUpFrontier0  and (high[n+i] < high[n])
+    upflagUpFrontier1  := upflagUpFrontier1  and (high[n+1] <= high[n] and high[n+i + 1] < high[n])
+    upflagUpFrontier2  := upflagUpFrontier2  and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+i + 2] < high[n])
+    upflagUpFrontier3  := upflagUpFrontier3  and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+3] <= high[n] and high[n+i + 3] < high[n])
+    upflagUpFrontier4  := upflagUpFrontier4  and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+3] <= high[n] and high[n+4] <= high[n] and high[n+i + 4] < high[n])
+
+flagUpFrontier = upflagUpFrontier0 or upflagUpFrontier1 or upflagUpFrontier2 or upflagUpFrontier3 or upflagUpFrontier4
+upFractal = (upflagDownFrontier and flagUpFrontier)
+
+// Down_Fractal
+// ============
+bool downflagDownFrontier = true
+bool downflagUpFrontier0 = true
+bool downflagUpFrontier1 = true
+bool downflagUpFrontier2 = true
+bool downflagUpFrontier3 = true
+bool downflagUpFrontier4 = true
+
+for i = 1 to n
+    downflagDownFrontier := downflagDownFrontier and (low[n-i] > low[n])
+    downflagUpFrontier0 := downflagUpFrontier0 and (low[n+i] > low[n])
+    downflagUpFrontier1 := downflagUpFrontier1 and (low[n+1] >= low[n] and low[n+i + 1] > low[n])
+    downflagUpFrontier2 := downflagUpFrontier2 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+i + 2] > low[n])
+    downflagUpFrontier3 := downflagUpFrontier3 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+3] >= low[n] and low[n+i + 3] > low[n])
+    downflagUpFrontier4 := downflagUpFrontier4 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+3] >= low[n] and low[n+4] >= low[n] and low[n+i + 4] > low[n])
+
+flagDownFrontier = downflagUpFrontier0 or downflagUpFrontier1 or downflagUpFrontier2 or downflagUpFrontier3 or downflagUpFrontier4
+downFractal = (downflagDownFrontier and flagDownFrontier)
+
+// VWMA
+// ====
+longVWMA  = close <= ma * (1 - lowerBandValue / 100)
+shortVWMA = close >= ma * (1 + lowerBandValue / 100)
+
+if not is_product
+    longVWMA  := low  <= ma * (1 - lowerBandValue / 100)
+    shortVWMA := high >= ma * (1 + lowerBandValue / 100)
+
+// Alerts
+//=======
+buy_signal  = osRSI and longVWMA  and downFractal
+sell_signal = obRSI and shortVWMA and upFractal and close > 0.015  // applies only for USDT-pairs
+
+posSize = abs(strategy.position_size)
+tp = input(title="Target Profit %", defval=0.5)
+_tp_long  = 0.05
+_tp_short = 0.05
+
+time_mod = _timenow % 1000000000
+if is_product
+    if buy_signal
+        if strategy.opentrades[0] == 0 or is_short
+            strategy.entry("Long", strategy.long, qty=time_mod, when=window(), alert_message="enter")
+        else
+            if time_mod > (abs(strategy.position_size[0]) + SLEEP_SECONDS)
+                if strategy.position_size[0] != 0
+                    strategy.close_all(when=window())
+                else
+                    strategy.entry("Long", strategy.long, qty=time_mod, when=window(), alert_message="enter")
+
+    if sell_signal
+        if strategy.opentrades[0] == 0 or is_long
+            strategy.entry("Short", strategy.short, qty=time_mod, when=window(), alert_message="enter")
+        else
+            if time_mod > (abs(strategy.position_size[0]) + SLEEP_SECONDS)
+                if strategy.position_size[0] != 0
+                    strategy.close_all(when=window())
+                else
+                    strategy.entry("Short", strategy.short, qty=time_mod, when=window(), alert_message="enter")
+else
+    if buy_signal
+        if posSize == 0
+            strategy.entry("Long", strategy.long, when=window(), alert_message="enter")
+
+        if posSize != 0 and is_long and strategy.position_avg_price > close and ((strategy.position_avg_price-close) / close) >= _tp_long
+            strategy.entry("LL_dca", strategy.long, qty=posSize * 2, when=window())
+
+    if sell_signal
+        if posSize == 0
+            strategy.entry("Short", strategy.short, when=window(), alert_message="enter")
+
+        if posSize != 0 and is_short and strategy.position_avg_price < close and ((close - strategy.position_avg_price) / close) >= _tp_short
+            strategy.entry("SS_dca", strategy.short, qty=posSize * 2, when=window())
+
+if is_product
+    if strategy.position_size[0] != 0 and strategy.position_avg_price < close and abs(close/strategy.position_avg_price) >= (1 + tp / 100)
+        strategy.close_all(when=window())
+
+    if strategy.position_size[0] != 0 and strategy.position_size < 0 and close <= strategy.position_avg_price * 0.995
+        strategy.close_all(when=window())
+else
+    if is_long and strategy.position_avg_price < close and abs(close/strategy.position_avg_price) >= (1 + tp / 100)
+        strategy.close_all(when=window())
+
+    if is_short and close <= strategy.position_avg_price * 0.995
+        strategy.close_all(when=window())
+
+// Some Work
+// // WaveTrend Cross
+// // ===============
+// wave_trend_time = input("60", title = "WaveTrend Time")
+// ap = security(syminfo.tickerid, wave_trend_time, hlc3)
+// n1 = 10  //Channel Length
+// n2 = 21  //Average Length
+// esa = ema(ap, n1)
+// d = ema(abs(ap - esa), n1)
+// ci = (ap - esa) / (0.015 * d)
+// tci = ema(ci, n2)
+// wt1 = tci  // green-line
+// wt2 = sma(wt1, 4)  // red-line
+// is_div_long  = wt1 > wt2 and wt1 <= 0
+// is_div_short = wt1 < wt2 and wt2 >= 0
+
+// // RSI Divergence
+// close_60 = security(syminfo.tickerid, "60", close)
+// src_fast = close_60
+// src_slow = close_60
+// len_fast = 5   // Length Fast RSI
+// len_slow = 14  // Length Slow RSI
+// up_fast = rma(max(change(src_fast), 0), len_fast)
+// down_fast = rma(-min(change(src_fast), 0), len_fast)
+// rsi_fast = down_fast == 0 ? 100 : up_fast == 0 ? 0 : 100 - (100 / (1 + up_fast / down_fast))
+// up_slow = rma(max(change(src_slow), 0), len_slow)
+// down_slow = rma(-min(change(src_slow), 0), len_slow)
+// rsi_slow = down_slow == 0 ? 100 : up_slow == 0 ? 0 : 100 - (100 / (1 + up_slow / down_slow))
+// divergence = rsi_fast - rsi_slow

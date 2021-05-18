@@ -1,0 +1,15 @@
+files:
+  input: pairs_spot.csv
+tradingview:
+  chartUrl: https://www.tradingview.com/chart/nJT5Lkp9/?symbol=BITSTAMP%3ABTCUSD
+  interval: 1D  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+alert:
+  condition:
+    primaryLeft: alpy_spot
+  actions:
+    notifyOnApp: false
+    showPopup: false
+    sendEmail: false
+    webhook:
+      enabled: true
+      url: "https://altoson-bot.duckdns.org/webhook"

@@ -1,0 +1,162 @@
+//@version=4
+strategy(title="alpy_kazan", shorttitle="alpy_kazan",
+     calc_on_order_fills=false, initial_capital=100, default_qty_value=100,
+     process_orders_on_close=true,
+     default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1)
+
+Periods = input(title="ATR Period", type=input.integer, defval=15)
+src = input(hlc3, title="Source")
+Multiplier = input(title="ATR Multiplier", type=input.float, step=0.1, defval=4.0)
+changeATR= input(title="Change ATR Calculation Method ?", type=input.bool, defval=true)
+showsignals = input(title="Show Buy/Sell Signals ?", type=input.bool, defval=false)
+highlighting = input(title="Highlighter On/Off ?", type=input.bool, defval=true)
+barcoloring = input(title="Bar Coloring On/Off ?", type=input.bool, defval=true)
+atr2 = sma(tr, Periods)
+atr= changeATR ? atr(Periods) : atr2
+up=src-(Multiplier*atr)
+up1 = nz(up[1],up)
+up := close[1] > up1 ? max(up,up1) : up
+dn=src+(Multiplier*atr)
+dn1 = nz(dn[1], dn)
+dn := close[1] < dn1 ? min(dn, dn1) : dn
+trend = 1
+trend := nz(trend[1], trend)
+trend := trend == -1 and close > dn1 ? 1 : trend == 1 and close < up1 ? -1 : trend
+upPlot = plot(trend == 1 ? up : na, title="Up Trend", style=plot.style_linebr, linewidth=2, color=color.green)
+buySignal = trend == 1 and trend[1] == -1
+plotshape(buySignal ? up : na, title="UpTrend Begins", location=location.absolute, style=shape.circle, size=size.tiny, color=color.green, transp=0)
+plotshape(buySignal and showsignals ? up : na, title="Buy", text="Buy", location=location.absolute, style=shape.labelup, size=size.tiny, color=color.green, textcolor=color.white, transp=0)
+dnPlot = plot(trend == 1 ? na : dn, title="Down Trend", style=plot.style_linebr, linewidth=2, color=color.red)
+sellSignal = trend == -1 and trend[1] == 1
+plotshape(sellSignal ? dn : na, title="DownTrend Begins", location=location.absolute, style=shape.circle, size=size.tiny, color=color.red, transp=0)
+plotshape(sellSignal and showsignals ? dn : na, title="Sell", text="Sell", location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.red, textcolor=color.white, transp=0)
+mPlot = plot(ohlc4, title="", style=plot.style_circles, linewidth=0)
+longFillColor = highlighting ? (trend == 1 ? color.green : color.white) : color.white
+shortFillColor = highlighting ? (trend == -1 ? color.red : color.white) : color.white
+fill(mPlot, upPlot, title="UpTrend Highligter", color=longFillColor)
+fill(mPlot, dnPlot, title="DownTrend Highligter", color=shortFillColor)
+FromMonth = input(defval = 3, title = "From Month", minval = 1, maxval = 12)
+FromDay   = input(defval = 1, title = "From Day", minval = 1, maxval = 31)
+FromYear  = input(defval = 2021, title = "From Year", minval = 999)
+ToMonth   = input(defval = 1, title = "To Month", minval = 1, maxval = 12)
+ToDay     = input(defval = 1, title = "To Day", minval = 1, maxval = 31)
+ToYear    = input(defval = 9999, title = "To Year", minval = 999)
+start     = timestamp(FromYear, FromMonth, FromDay, 00, 00)
+finish    = timestamp(ToYear, ToMonth, ToDay, 23, 59)
+window()  => time >= start and time <= finish ? true : false
+longCondition = buySignal
+
+///////////////////////////////////////////////////////////////////////////////////////////
+length = input(14, title="BB Length")
+mult = input(2.0, title="BB MultFactor")
+lengthKC = input(17, title="KC Length")
+mult_kc = input(1.5, title="KC MultFactor")
+
+
+//FILTERS
+useMomAverage = input(false, title="Filter for Momenutum value", type=input.bool)
+MomentumMin = input(20, title="Min for momentum")
+
+// Calculate BB
+srcc = ohlc4
+
+ma_1 = sma(srcc, length)
+ma_2 = sma(srcc, lengthKC)
+range_ma = sma(high - low, lengthKC)
+
+dev = mult * stdev(srcc, length)
+
+upper_bb = ma_1 + dev
+lower_bb = ma_1 - dev
+
+upper_kc = ma_2 + range_ma * mult_kc
+lower_kc = ma_2 - range_ma * mult_kc
+
+sqz_on = lower_bb > lower_kc and upper_bb < upper_kc
+sqz_off = lower_bb < lower_kc and upper_bb > upper_kc
+no_sqz = sqz_on == false and sqz_off == false
+
+// WaveTrend
+// =========
+n1 = input(4)
+n2 = input(21)
+
+// time_frame = input(title="Other Time Frame", type=input.resolution, defval="30")
+ap = hlc3 //security(syminfo.tickerid, time_frame, hlc3, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_close = close // security(syminfo.tickerid, time_frame, close, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_ohlc4 = ohlc4 //security(syminfo.tickerid, time_frame, ohlc4, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_high = high // security(syminfo.tickerid, time_frame, high, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+_low = low //security(syminfo.tickerid, time_frame, low, barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+_hl2 = hl2 //security(syminfo.tickerid, time_frame, hl2, barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+
+// RSI-divergence
+src_fast = _close, len_fast = input(5,  minval=1, title="Length Fast RSI") // 5
+src_slow = _close, len_slow = input(14, minval=1, title="Length Slow RSI") // 14
+// ============================================================================
+
+// WaveTrend
+// =========
+obLevel1 = input(70, "Over Bought Level 1")
+obLevel2 = input(53, "Over Bought Level 2")
+osLevel1 = input(-70, "Over Sold Level 1")
+osLevel2 = input(-53, "Over Sold Level 2")
+
+esa = ema(ap, n1)
+d = ema(abs(ap - esa), n1)
+ci = (ap - esa) / (0.015 * d)
+tci = ema(ci, n2)
+wt1 = tci
+wt2 = sma(wt1, 4)
+
+plot(obLevel1, color=color.red)
+plot(osLevel1, color=color.green)
+plot(obLevel2, color=color.red, style=3)
+plot(osLevel2, color=color.green, style=3)
+plot(wt1, color=color.green)
+plot(wt2, color=color.red)
+plot(wt1 - wt2, color=color.blue, style=plot.style_area, transp=80)
+
+plot(cross(wt1, wt2) ? wt2 : na, color=color.black , style=plot.style_circles, linewidth=3)
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 > wt1 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
+barcolor(cross(wt1, wt2) ? (wt2 > wt1 ? color.aqua : color.yellow) : na)
+
+wt1_past_1 = wt1[1]
+wt2_past_1 = wt2[1]
+divcrosslong  = wt1 < wt2
+divcrossshort = wt1 > wt2
+_divcrosslong  = divcrosslong and wt1_past_1 > wt2_past_1
+_divcrossshort = divcrossshort and wt1_past_1 < wt2_past_1
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth = 2)
+
+// RSI-divergence
+up_fast = rma(max(change(src_fast), 0), len_fast)
+down_fast = rma(-min(change(src_fast), 0), len_fast)
+rsi_fast = down_fast == 0 ? 100 : up_fast == 0 ? 0 : 100 - (100 / (1 + up_fast / down_fast))
+up_slow = rma(max(change(src_slow), 0), len_slow)
+down_slow = rma(-min(change(src_slow), 0), len_slow)
+rsi_slow = down_slow == 0 ? 100 : up_slow == 0 ? 0 : 100 - (100 / (1 + up_slow / down_slow))
+divergence = rsi_fast - rsi_slow
+band = hline(0)
+rsi_divlong = divergence > 0
+rsi_divshort = divergence < 0
+
+strategy.entry("Long", strategy.long, when=window() and longCondition and divcrossshort and rsi_divlong)
+strategy.entry("Short",strategy.short, when=window() and sellSignal and divcrosslong and rsi_divshort)
+strategy.close("Long", when=window() and sellSignal and divcrosslong and rsi_divshort and sqz_off)
+strategy.close("Short", when=window() and longCondition and divcrossshort and rsi_divlong and sqz_off)
+
+
+//strategy.entry("BUY", strategy.long, when = window() and longCondition and divcrossshort and rsi_divlong)
+//strategy.entry("SELL", strategy.short, when = window() and sellSignal and divcrosslong and rsi_divshort)
+buy1= barssince(buySignal)
+sell1 = barssince(sellSignal)
+color1 = buy1[1] < sell1[1] ? color.green : buy1[1] > sell1[1] ? color.red : na
+barcolor(barcoloring ? color1 : na)
+
+inpTrailStop    = input(defval = 5000, title = "Trailing Stop Loss", minval = 0)
+inpTrailOffset  = input(defval = 0, title = "Trailing Stop Loss Offset", minval = 0)
+
+strategy.exit("Exit Long", from_entry = "Long", trail_points=inpTrailStop, trail_offset=inpTrailOffset)
+strategy.exit("Exit Short", from_entry = "Short", trail_points = inpTrailStop, trail_offset = inpTrailOffset)

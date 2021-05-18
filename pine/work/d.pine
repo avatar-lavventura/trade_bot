@@ -1,0 +1,127 @@
+//@version=4
+strategy(title="uabmeacd", shorttitle="uabmacd", overlay=false, calc_on_order_fills=false, initial_capital=500, default_qty_value=300, default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0, currency=currency.USD, commission_type=strategy.commission.percent, commission_value=0.01)
+
+fromYear = input(2021, "Backtest Start Year")
+fromMonth = input(3, "Backtest Start Month")
+fromDay = input(1, "Backtest Start Day")
+
+thruYear = input(2021, "Backtest Stop Year")
+thruMonth = input(12, "Backtest Stop Month")
+thruDay = input(30, "Backtest Stop Day")
+
+testPeriodStart = timestamp(fromYear,fromMonth,fromDay,0,0)
+testPeriodStop = timestamp(thruYear,thruMonth,thruDay,0,0)
+start     = timestamp(fromYear, fromMonth, fromDay, 00, 00)  // backtest start window
+finish    = timestamp(thruYear, thruMonth, thruDay, 23, 59)  // backtest finish window
+window()  => time >= start and time <= finish ? true : false
+
+// WaveTrend
+// =========
+n1 = input(9, "Channel Length")  // 10
+n2 = input(20, "Average Length")  // 21
+obLevel1 = input(70, "Over Bought Level 1")  // etc: 74
+obLevel2 = input(53, "Over Bought Level 2")
+osLevel1 = input(-70, "Over Sold Level 1")
+osLevel2 = input(-53, "Over Sold Level 2")
+
+ap = hlc3
+esa = ema(ap, n1)
+d = ema(abs(ap - esa), n1)
+ci = (ap - esa) / (0.015 * d)
+tci = ema(ci, n2)
+
+wt1 = tci
+wt2 = sma(wt1, 4)
+
+plot(obLevel1, color=color.red)
+plot(osLevel1, color=color.green)
+plot(obLevel2, color=color.red, style=3)
+plot(osLevel2, color=color.green, style=3)
+plot(wt1, color=color.green)
+plot(wt2, color=color.red)
+plot(wt1-wt2, color=color.blue, style=plot.style_area, transp=80)
+
+plot(cross(wt1, wt2) ? wt2 : na, color=color.black , style=plot.style_circles, linewidth=3)
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 > wt1 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
+barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? color.aqua : color.yellow) : na)
+
+wt1_past_1 = wt1[1]
+wt2_past_1 = wt2[1]
+divcrosslong  = wt1 < wt2
+divcrossshort = wt1 > wt2
+_divcrosslong  = divcrosslong and wt1_past_1 > wt2_past_1
+_divcrossshort = divcrossshort and wt1_past_1 < wt2_past_1
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth = 2)
+
+// Squeeze Momentum Strategy
+// =========================
+length = input(12, title="BB Length")
+mult = input(2.0, title="BB MultFactor")
+lengthKC = input(16, title="KC Length")
+mult_kc = input(1.5, title="KC MultFactor")
+
+//FILTERS
+useMomAverage = input(false, title="Filter for Momenutum value", type=input.bool)
+MomentumMin = input(20, title="Min for momentum")
+
+// Calculate BB
+src = ohlc4
+ma_1 = sma(src, length)
+ma_2 = sma(src, lengthKC)
+range_ma = sma(high - low, lengthKC)
+dev = mult * stdev(src, length)
+upper_bb = ma_1 + dev
+lower_bb = ma_1 - dev
+upper_kc = ma_2 + range_ma * mult_kc
+lower_kc = ma_2 - range_ma * mult_kc
+sqz_on = lower_bb > lower_kc and upper_bb < upper_kc
+sqz_off = lower_bb < lower_kc and upper_bb > upper_kc
+no_sqz = sqz_on == false and sqz_off == false
+val = linreg(src - avg(avg(highest(hl2, lengthKC), lowest(low, lengthKC)), sma(hl2, lengthKC)), lengthKC, 0)
+bcolor = iff(val > 0, iff(val > nz(val[1]), color.lime, color.green), iff(val < nz(val[1]), color.red, color.maroon))
+scolor = no_sqz ? color.blue : sqz_on ? color.black : color.aqua
+
+//LOGIC //momentum filter
+filterMom = useMomAverage ? abs(val) > MomentumMin / 100000 ? true : false : true
+
+//standard condition
+longCondition = scolor[1] != color.aqua and scolor == color.aqua and bcolor == color.lime and filterMom
+exitLongCondition = bcolor == color.green
+shortCondition = scolor[1] != color.aqua and scolor == color.aqua and bcolor == color.red and filterMom
+exitShortCondition = bcolor == color.maroon
+//====================================================================================================
+src_fast = close, len_fast = input(5, minval=1, title="Length Fast RSI")
+src_slow = close, len_slow = input(14,minval=1, title="Length Slow RSI")
+up_fast = rma(max(change(src_fast), 0), len_fast)
+down_fast = rma(-min(change(src_fast), 0), len_fast)
+rsi_fast = down_fast == 0 ? 100 : up_fast == 0 ? 0 : 100 - (100 / (1 + up_fast / down_fast))
+up_slow = rma(max(change(src_slow), 0), len_slow)
+down_slow = rma(-min(change(src_slow), 0), len_slow)
+rsi_slow = down_slow == 0 ? 100 : up_slow == 0 ? 0 : 100 - (100 / (1 + up_slow / down_slow))
+divergence = rsi_fast - rsi_slow
+band = hline(0)
+rsi_divlong = divergence > 0
+rsi_divshort = divergence < 0
+
+// {{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}
+_obLevel1 = 95
+strategy.entry("Long", strategy.long, when=window() and divcrossshort and rsi_divlong, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+strategy.close("Long", when=window() and _divcrosslong and rsi_divlong, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// todo: divcrosslong enable if less than the long position
+posSize = abs(strategy.position_size)
+isLong  = (strategy.position_size > 0)
+doo=strategy.position_avg_price > close
+strategy.entry("Short",strategy.short, when=window() and _divcrosslong and sqz_on and rsi_divshort, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+strategy.close("Short", when=window() and _divcrossshort and rsi_divshort and exitShortCondition, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.exit(id="XS STP", profit=close * 0.27 / syminfo.mintick)
+// =======================================================================================================
+// strategy.entry("Long", strategy.long, when=window() and divcrossshort, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.close("Long", when=window() and _divcrosslong, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.entry("Short",strategy.short, when=window() and _divcrosslong and sqz_on, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.close("Short", when=window() and _divcrossshort and exitShortCondition, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.exit(id="XS STP", profit=close * 0.04 / syminfo.mintick)
+
+// strategy.entry("Long", strategy.long, when=window() and _divcrossshort, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.close("Long", when=window() and _divcrosslong and rsi_divshort, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.entry("Short",strategy.short, when=window() and _divcrosslong, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
+// strategy.close("Short", when=window() and _divcrossshort and rsi_divlong, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")

@@ -140,7 +140,7 @@ def positions(_symbol=None):
             old_base = float(future["positionAmt"]) * float(future["entryPrice"]) / float(future["leverage"])
             old_base = old_base - comm
             old_new = old_base + change
-            _margin = float(future["isolatedMargin"]) + float(future["unRealizedProfit"]) * -1
+            # _margin = float(future["isolatedMargin"]) + float(future["unRealizedProfit"]) * -1
             change, pc = percent_change(old_new, old_new, change)
             log(
                 f" [ entry={future['entryPrice']}] [ asks={_asks} ] [ marked={future['markPrice']} ] ["

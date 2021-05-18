@@ -54,3 +54,7 @@
 
 - ETH veya BTC ye gore durumuna bak 0.1 gibi degere yaklasmis mi, volume artip
   baya yukseltebilirler
+
+- Profit from Binance Funding: https://www.youtube.com/watch?v=DoibtunxbsI
+
+- https://coinalyze.net/waves/usdt/binance/liquidation-chart/wavesusdt_perp_lq/

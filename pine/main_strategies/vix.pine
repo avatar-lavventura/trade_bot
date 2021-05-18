@@ -1,0 +1,31 @@
+//@version=4
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy_vix",
+     calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=false)
+
+// CM_Williams_Vix_Fix
+pd = input(22, title="LookBack Period Standard Deviation High")
+bbl = input(20, title="Bolinger Band Length")
+mult = input(2.0    , minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+lb = input(50  , title="Look Back Period Percentile High")
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+pl = input(1.01, title="Lowest Percentile - 1.10=90%, 1.05=95%, 1.01=99%")
+hp = input(false, title="Show High Range - Based on Percentile and LookBack Period?")
+sd = input(false, title="Show Standard Deviation Line?")
+wvf = ((highest(close, pd)-low)/(highest(close, pd)))*100
+sDev = mult * stdev(wvf, bbl)
+midLine = sma(wvf, bbl)
+_upperBand = midLine + sDev
+// lowerBand = midLine - sDev
+rangeHigh = (highest(wvf, lb)) * ph
+rangeLow = (lowest(wvf, lb)) * pl
+col = wvf >= _upperBand or wvf >= rangeHigh ? color.lime : color.gray
+plot(hp and rangeHigh ? rangeHigh : na, title="Range High Percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
+plot(hp and rangeLow ? rangeLow : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(sd and _upperBand ? _upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
+
+plot(wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth = 4, color=col)
