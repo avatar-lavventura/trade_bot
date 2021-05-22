@@ -1,0 +1,131 @@
+//@version=4
+strategy(title="alpy",
+     shorttitle="alpy_kazan2",
+     calc_on_order_fills=false, initial_capital=100, default_qty_value=15,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=true)
+
+fromMonth = input(1)
+fromDay = input(1)
+thruMonth = input(12)
+thruDay = input(30)
+fromYear = input(2021)
+thruYear = input(2021)
+testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
+testPeriodStop  = timestamp(thruYear, thruMonth, thruDay, 0, 0)
+start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+
+// WaveTrend
+// =========
+n1 = input(10, "Channel Length")
+n2 = input(21, "Average Length")
+obLevel1 = input(70, "Over Bought Level 1")
+obLevel2 = input(53, "Over Bought Level 2")
+osLevel1 = input(-70, "Over Sold Level 1")
+osLevel2 = input(-53, "Over Sold Level 2")
+
+ap = security(syminfo.tickerid, "5", hlc3, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+esa = ema(ap, n1)
+d = ema(abs(ap - esa), n1)
+ci = (ap - esa) / (0.015 * d)
+tci = ema(ci, n2)
+
+wt1 = tci
+wt2 = sma(wt1,4)
+
+wt1_past_1 = wt1[1]
+wt2_past_1 = wt2[1]
+divcrosslong  = wt1 < wt2
+divcrossshort = wt1 > wt2
+_divcrosslong  = divcrosslong and wt1_past_1 > wt2_past_1
+_divcrossshort = divcrossshort and wt1_past_1 < wt2_past_1
+
+/////////////////////////////////////////////////////////////////////////////////
+n = input(title="Periods", defval=2, minval=2, type=input.integer)
+
+// UpFractal
+bool upflagDownFrontier = true
+bool upflagUpFrontier0 = true
+bool upflagUpFrontier1 = true
+bool upflagUpFrontier2 = true
+bool upflagUpFrontier3 = true
+bool upflagUpFrontier4 = true
+
+for i = 1 to n
+    upflagDownFrontier := upflagDownFrontier and (high[n-i] < high[n])
+    upflagUpFrontier0 := upflagUpFrontier0 and (high[n+i] < high[n])
+    upflagUpFrontier1 := upflagUpFrontier1 and (high[n+1] <= high[n] and high[n+i + 1] < high[n])
+    upflagUpFrontier2 := upflagUpFrontier2 and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+i + 2] < high[n])
+    upflagUpFrontier3 := upflagUpFrontier3 and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+3] <= high[n] and high[n+i + 3] < high[n])
+    upflagUpFrontier4 := upflagUpFrontier4 and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+3] <= high[n] and high[n+4] <= high[n] and high[n+i + 4] < high[n])
+flagUpFrontier = upflagUpFrontier0 or upflagUpFrontier1 or upflagUpFrontier2 or upflagUpFrontier3 or upflagUpFrontier4
+
+upFractal = (upflagDownFrontier and flagUpFrontier)
+
+// downFractal
+bool downflagDownFrontier = true
+bool downflagUpFrontier0 = true
+bool downflagUpFrontier1 = true
+bool downflagUpFrontier2 = true
+bool downflagUpFrontier3 = true
+bool downflagUpFrontier4 = true
+
+for i = 1 to n
+    downflagDownFrontier := downflagDownFrontier and (low[n-i] > low[n])
+    downflagUpFrontier0 := downflagUpFrontier0 and (low[n+i] > low[n])
+    downflagUpFrontier1 := downflagUpFrontier1 and (low[n+1] >= low[n] and low[n+i + 1] > low[n])
+    downflagUpFrontier2 := downflagUpFrontier2 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+i + 2] > low[n])
+    downflagUpFrontier3 := downflagUpFrontier3 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+3] >= low[n] and low[n+i + 3] > low[n])
+    downflagUpFrontier4 := downflagUpFrontier4 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+3] >= low[n] and low[n+4] >= low[n] and low[n+i + 4] > low[n])
+flagDownFrontier = downflagUpFrontier0 or downflagUpFrontier1 or downflagUpFrontier2 or downflagUpFrontier3 or downflagUpFrontier4
+
+downFractal = (downflagDownFrontier and flagDownFrontier)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+len = 24
+src = security(syminfo.tickerid, "60", hlc3, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+//src = hlc3
+ma = vwma(src, len)
+plot(ma, title="VWMA", color=color.blue)
+upperBandValue = input(2, title = "Short Offset")
+lowerBandValue = input(2, title= "Long Offset")
+lower_band = ma * (1 - lowerBandValue / 100)
+higher_band = ma * (1 + upperBandValue / 100)
+upperBand = plot(higher_band, title="Upper Band", color=color.red)
+lowerBand = plot(lower_band, title="Lower Band", color=color.green)
+
+tp = input(title="Target Profit %", defval=0.50)
+_tp_long = input(0.05, title = "tp")
+_tp_short = input(0.05, title = "tp")
+posSize = abs(strategy.position_size)
+is_long = 1
+is_short = 1
+
+_timenow = timenow / 1000
+time_long_flag = 0
+time_short_flag = 0
+
+if is_long == 1
+    if close < lower_band and downFractal // and posSize == 0// and divcrossshort// and posSize == 0
+        strategy.entry("Long", strategy.long, when=window(), alert_message="enter")
+
+    if posSize != 0 and strategy.position_size > 0 and strategy.position_avg_price > close and ((strategy.position_avg_price-close) / close) >= _tp_long
+        strategy.entry("LL_dca", strategy.long, qty=posSize*2, when=window())
+
+if is_short == 1 and close > 1.0
+    if close > higher_band and upFractal and divcrosslong // and posSize == 0
+        strategy.entry("Short", strategy.short, when=window(), alert_message="enter")
+
+    if posSize != 0 and strategy.position_size < 0 and strategy.position_avg_price < close and ((close - strategy.position_avg_price) / close) >= _tp_short
+        strategy.entry("SS_dca", strategy.short, qty=posSize*2, when=window())
+
+if strategy.position_avg_price < close and abs(close/strategy.position_avg_price) >= (1+tp/100)
+    strategy.close_all(when=window())
+
+if strategy.position_size < 0 and close <= strategy.position_avg_price * 0.995
+    strategy.close_all(when=window())
+
+// {{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}},{{strategy.position_size}},{{strategy.order.alert_message}},{{close}}

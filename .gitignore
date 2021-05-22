@@ -23,3 +23,19 @@ symbols.pk
 .symbols.pk
 
 .binance.pk
+
+ngrok_ip
+
+node_modules/
+
+user_data/
+
+package-lock.json
+
+pairs_temp.csv
+
+.ip
+
+tradingview-alerts/config.yml
+
+bot/.env_secret

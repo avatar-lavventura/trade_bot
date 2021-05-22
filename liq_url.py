@@ -16,12 +16,12 @@ opts.add_argument("--headless")
 
 urls = []
 names = []
-counter = dict()
-entries = dict()
+counter = dict()  # noqa
+entries = dict()  # noqa
 
 
 def get_url(url):
-    log(f"==> {url} ")
+    log(f"==> {url} ", end="")
     # use firefox to get page with javascript generated content
     with closing(webdriver.Firefox(options=opts)) as browser:
         browser.get(url)
@@ -121,7 +121,7 @@ for idx, url in enumerate(urls):
         # _colorize_traceback()
         pass
 
-log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="blue")
+log("=========================================================================", color="blue")
 counter_x = sorted(counter.items(), key=itemgetter(1), reverse=True)
 counter_dict = {}
 for co in counter_x:

@@ -1,0 +1,73 @@
+{
+    "name": "@alleyway/add-tradingview-alerts-tool",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:alleyway/add-tradingview-alerts-tool.git"
+    },
+    "bugs": {
+        "url": "https://github.com/alleyway/add-tradingview-alerts-tool/issues"
+    },
+    "description": "Add TradingView Alerts in bulk",
+    "type": "module",
+    "main": "./dist/index.js",
+    "bin": {
+        "atat": "./dist/cli.js"
+    },
+    "files": [
+        "src",
+        "dist",
+        "tsconfig.json"
+    ],
+    "scripts": {
+        "build": "npx tsc",
+        "atat": "./dist/cli.js",
+        "prepublishOnly": "npm run build",
+        "show-deprecation": "echo New command-line program - no need for git checkout. Install with \\\"npx @alleyway/create-tradingview-alerts-home\\\" ",
+        "fetch:binance-futures": "npm run show-deprecation",
+        "fetch:binance": "npm run show-deprecation",
+        "fetch:binanceus": "npm run show-deprecation",
+        "fetch:ftx": "npm run show-deprecation",
+        "fetch:coinbase": "npm run show-deprecation",
+        "fetch:bittrex": "npm run show-deprecation",
+        "add-alerts": "npm run show-deprecation",
+        "release": "npx release-it",
+        "release-beta": "npx release-it --preRelease=beta",
+        "prepare": "husky install"
+    },
+    "keywords": [
+        "tradingview",
+        "alerts",
+        "3commas",
+        "indicator"
+    ],
+    "author": "Michael Lake",
+    "license": "MIT",
+    "version": "1.8.7",
+    "devDependencies": {
+        "@release-it/bumper": "^2.0.0",
+        "husky": "^6.0.0",
+        "release-it": "^14.6.1",
+        "typescript": "^4.2.3"
+    },
+    "dependencies": {
+        "@fast-csv/format": "^4.3.5",
+        "@fast-csv/parse": "^4.3.6",
+        "commander": "^7.2.0",
+        "consola": "^2.15.3",
+        "csv-parser": "^3.0.0",
+        "fast-csv": "^4.3.6",
+        "kleur": "^4.1.4",
+        "node-fetch": "^2.6.1",
+        "pacote": "^11.3.3",
+        "prompts": "^2.4.1",
+        "puppeteer": "^9.1.1",
+        "regex-parser": "^2.2.11",
+        "source-map-support": "^0.5.19",
+        "strip-bom-stream": "^4.0.0",
+        "yaml": "^1.10.0"
+    },
+    "private": false,
+    "engines": {
+        "node": ">= 14.0.0"
+    }
+}

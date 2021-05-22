@@ -1,0 +1,84 @@
+//@version=4
+study(title="VWMA 1hr + WF", shorttitle="VWMA1HRWF", overlay=true)
+
+////VWMA
+len = 24
+src = security(syminfo.tickerid, "60", hlc3)
+ma = vwma(src, len)
+plot(ma, title="VWMA", color=color.blue)
+upperBandValue = input(2.5, title = "Short Offset")
+lowerBandValue = input(2.5, title= "Long Offset")
+upperBand = plot(ma*(1+upperBandValue/100), title="Upper Band", color=color.red)
+lowerBand = plot(ma*(1-lowerBandValue/100), title="Lower Band", color=color.green)
+////WF
+n = 2
+
+// UpFractal
+bool upflagDownFrontier = true
+bool upflagUpFrontier0 = true
+bool upflagUpFrontier1 = true
+bool upflagUpFrontier2 = true
+bool upflagUpFrontier3 = true
+bool upflagUpFrontier4 = true
+
+for i = 1 to n
+    upflagDownFrontier := upflagDownFrontier and (high[n-i] < high[n])
+    upflagUpFrontier0 := upflagUpFrontier0 and (high[n+i] < high[n])
+    upflagUpFrontier1 := upflagUpFrontier1 and (high[n+1] <= high[n] and high[n+i + 1] < high[n])
+    upflagUpFrontier2 := upflagUpFrontier2 and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+i + 2] < high[n])
+    upflagUpFrontier3 := upflagUpFrontier3 and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+3] <= high[n] and high[n+i + 3] < high[n])
+    upflagUpFrontier4 := upflagUpFrontier4 and (high[n+1] <= high[n] and high[n+2] <= high[n] and high[n+3] <= high[n] and high[n+4] <= high[n] and high[n+i + 4] < high[n])
+
+flagUpFrontier = upflagUpFrontier0 or upflagUpFrontier1 or upflagUpFrontier2 or upflagUpFrontier3 or upflagUpFrontier4
+upFractal = (upflagDownFrontier and flagUpFrontier)
+
+// downFractal
+bool downflagDownFrontier = true
+bool downflagUpFrontier0 = true
+bool downflagUpFrontier1 = true
+bool downflagUpFrontier2 = true
+bool downflagUpFrontier3 = true
+bool downflagUpFrontier4 = true
+
+for i = 1 to n
+    downflagDownFrontier := downflagDownFrontier and (low[n-i] > low[n])
+    downflagUpFrontier0 := downflagUpFrontier0 and (low[n+i] > low[n])
+    downflagUpFrontier1 := downflagUpFrontier1 and (low[n+1] >= low[n] and low[n+i + 1] > low[n])
+    downflagUpFrontier2 := downflagUpFrontier2 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+i + 2] > low[n])
+    downflagUpFrontier3 := downflagUpFrontier3 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+3] >= low[n] and low[n+i + 3] > low[n])
+    downflagUpFrontier4 := downflagUpFrontier4 and (low[n+1] >= low[n] and low[n+2] >= low[n] and low[n+3] >= low[n] and low[n+4] >= low[n] and low[n+i + 4] > low[n])
+
+flagDownFrontier = downflagUpFrontier0 or downflagUpFrontier1 or downflagUpFrontier2 or downflagUpFrontier3 or downflagUpFrontier4
+downFractal = (downflagDownFrontier and flagDownFrontier)
+
+plotshape(downFractal, style=shape.triangledown, location=location.belowbar, offset=-n, color=color.maroon, size = size.small)
+plotshape(upFractal, style=shape.triangleup,   location=location.abovebar, offset=-n, color=color.olive, size = size.small)
+
+// RSI
+lenRSI = 14
+// srcRSI = security(syminfo.tickerid, "10", hlc3)
+srcRSI = hlc3
+upRSI = rma(max(change(srcRSI), 0), lenRSI)
+downRSI = rma(-min(change(srcRSI), 0), lenRSI)
+rsi = downRSI == 0 ? 100 : upRSI == 0 ? 0 : 100 - (100 / (1 + upRSI / downRSI))
+
+// VWMA
+longVWMA  = low  <= ma * (1 - lowerBandValue / 100)
+shortVWMA = high >= ma * (1 + lowerBandValue / 100)
+
+// RSI
+obRSI = rsi[2] >= 70
+osRSI = rsi[2] <= 30
+// plot(rsi,"doo")
+// Alerts
+// ======
+buy_signal  = osRSI and longVWMA  and downFractal
+sell_signal = obRSI and shortVWMA and upFractal
+
+alertcondition(buy_signal, title="LONG")
+alertcondition(sell_signal, title="SHORT")
+
+if buy_signal
+    label.new(bar_index, na, "LONG", color=color.green, textcolor=color.black, style=label.style_label_up, size=size.tiny, yloc=yloc.belowbar)
+if sell_signal
+    label.new(bar_index, na, "SHORT", color=color.red, textcolor=color.black, style=label.style_label_down, size=size.tiny, yloc=yloc.abovebar)
