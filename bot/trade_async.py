@@ -12,11 +12,9 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 
 import bot.helper as helper
-from bot.run_coroutine import run_coroutine
 from bot.user_setup import check_binance_obj
 
 HOME = str(Path.home())
-DCA = [5, 10, 25]
 load_dotenv(override=True)
 INITIAL_USDT_QTY = float(os.getenv("INITIAL_USDT_QTY"))
 INITIAL_BTC_QTY = float(os.getenv("INITIAL_BTC_QTY"))
@@ -470,7 +468,6 @@ class BotHelper:
                     await self.sell()
         except Exception as e:
             log(str(e))
-            # _colorize_traceback(e)
 
     async def trade(self):
         try:
@@ -531,7 +528,7 @@ class BotHelper:
 
         strategy = Strategy(data_msg, is_print)
         if "enter" in data_msg and is_print:
-            future_positions = run_coroutine(helper.exchange.future.fetch_positions())
+            future_positions = await helper.exchange.future.fetch_positions()
             for position in future_positions:
                 if abs(float(position["info"]["positionInitialMargin"])) > 0.0:
                     log(f" {position['symbol'].replace('/USDT', '')} ", end="", color="cyan")
@@ -546,7 +543,7 @@ class BotHelper:
 
         output = await self.check_on_going_positions(strategy)
         if "enter" not in strategy.position_alert_msg or strategy.symbol == "TEST" or output:
-            log(f"Warning: ignore, nothing to do. {strategy.position_alert_msg}")
+            # log(f"Warning: ignore, nothing to do. {strategy.position_alert_msg}")
             pass
         elif strategy.market == "BTC" and strategy.is_sell():
             log("Warning: Ignore BTC pair, no need to sell.")
@@ -556,10 +553,12 @@ class BotHelper:
         return True
 
 
+client, balances = check_binance_obj()
+bot = BotHelper(client)
+
+
 if __name__ == "__main__":
     data_msg = "LUNAUSDTPERP,buy,enter"
-    client, _ = check_binance_obj()
-    bot = BotHelper(client)
     bot.strategy = Strategy(data_msg)
     balances = client.get_account()
     # try:

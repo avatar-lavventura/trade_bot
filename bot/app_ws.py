@@ -14,7 +14,6 @@ from gevent.pywsgi import WSGIServer
 from trade import BotHelper
 from user_setup import check_binance_obj
 
-import bot.helper as helper
 from bot.client_helper import ClientHelper
 from bot.run_coroutine import run_coroutine
 
@@ -22,7 +21,7 @@ load_dotenv()
 
 loop = asyncio.get_event_loop()
 app = Flask(__name__)
-app.debug = False
+app.debug = True
 
 client, balances = check_binance_obj()
 bot = BotHelper(client)
@@ -34,14 +33,24 @@ for balance in balances["balances"]:
         break
 
 
+async def _ok(text):
+    print("running")
+
+
 async def ok(text):
-    log(text, color="green")
+    print(text)
+    await _ok()
 
 
 @app.route("/")
 def root():
+    import bot.helper as helper
+
     text = f"==>  {_time()}"
     run_coroutine(ok(text))
+    doo = run_coroutine(helper.exchange.future.fetch_ticker("BTC/USDT"))
+    print(doo)
+
     run_coroutine(bot.trade_main("LUNAUSDTPERP,buy,enter"),)
     return text
 

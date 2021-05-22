@@ -24,7 +24,7 @@ except:
 
 class Exchange:
     def __init__(self):
-        print("====================================================================")
+        print("====================================================================helperrrrrrrrrrrrrrrrrrrrrrrr")
         ops = {
             "apiKey": api_key,
             "secret": api_secret,
