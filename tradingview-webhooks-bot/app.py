@@ -20,6 +20,8 @@ LATEST_POSITION = None
 IS_EVERY_MINUTE = False
 is_trade = True
 bot = BotHelper(client)
+MAX_POSITION_NUMBER = 2
+
 
 for balance in balances["balances"]:
     if balance["asset"] == "USDT":
@@ -78,8 +80,12 @@ def webhook():
             log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
             log(f" * Current date and time: {_time()}")
             strategy = Strategy(data_msg)
-
-            if strategy.symbol == "TEST":
+            open_position_size = bot.open_positions()
+            log(f"open_position_size={open_position_size}")
+            breakpoint()  # DEBUG
+            if open_position_size > MAX_POSITION_NUMBER:
+                log(f"Warning: There is already ongoing {MAX_POSITION_NUMBER} positions, nothing to do.")
+            elif strategy.symbol == "TEST":
                 log("==> TEST message successfully received")
             elif is_trade:
                 log(f"==> LATEST_POSITION={LATEST_POSITION}")
@@ -125,12 +131,17 @@ if __name__ == "__main__":
     futures_usd = get_futures_usd(client, is_both=False)
     margin_usdt = client_helper.get_balance_margin_USDT()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
+
+    filename = "ngrok_ip"
+    with open(filename) as f:
+        ngrok_ip = f.readlines()
+
     print(" * s t a r t i n g", flush=True)
+    log(f" * {ngrok_ip[0].rstrip()}")
     log(f" * is_trade={is_trade}")
     log(f" * Futures={futures_usd} USD | SPOT={client_helper._format(usdt_balance)} USD | MARGIN={margin_usdt} ")
     log(f" * Current date and time: {_time()}")
+    bot.open_positions()
     log(" * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
-    # Production
-    http_server = WSGIServer(("", 5000), app)  # https://stackoverflow.com/a/53918402/2402577
+    http_server = WSGIServer(("", 5000), app)
     http_server.serve_forever()
-    # app.run(debug=True)  # Debug/Development

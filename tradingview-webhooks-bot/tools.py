@@ -7,7 +7,6 @@ import traceback
 from datetime import datetime
 
 import pytz
-from broker.config import env
 from pygments import formatters, highlight, lexers
 from pytz import timezone
 from rich.traceback import install
@@ -125,20 +124,7 @@ def log(text="", color=None, filename=None, end=None, is_bold=True, flush=False)
         elif text in ["FAILED", "ERROR"]:
             color = "red"
 
-    if threading.current_thread().name != "MainThread" and env.IS_THREADING_ENABLED:
-        filename = log_files[threading.current_thread().name]
-    elif not filename:
-        try:
-            if env.log_filename:
-                filename = env.log_filename
-            else:
-                filename = env.DRIVER_LOG
-
-            if not os.path.isfile(filename):
-                filename = "program.log"
-        except:
-            filename = "program.log"
-
+    filename = "program.log"
     f = open(filename, "a")
     if color:
         if is_bold:
