@@ -16,6 +16,7 @@ while [ -z "$NGROK_PUBLIC_URL" ]; do
     echo -n "."
 done
 
+echo "http://$NGROK_PUBLIC_URL/webhook" > ngrok_ip
 echo "ngrok_public_url ==> http://$NGROK_PUBLIC_URL/webhook"
 echo ""
 tail -f ngrok.log

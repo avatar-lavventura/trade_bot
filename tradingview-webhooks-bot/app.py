@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
-import datetime
+from datetime import datetime
 
 from actions import parse_webhook
 from buy import BotHelper, Strategy, trade
 from flask import Flask, abort, request
+from gevent.pywsgi import WSGIServer
+from pytz import timezone
+from tools import log
 from user_setup import check_binance_obj
+
 from binance_lib import get_futures_usd
-from utils import log
 
 # Create Flask object called app.
 app = Flask(__name__)
@@ -17,13 +20,17 @@ LATEST_POSITION = None
 IS_EVERY_MINUTE = False
 is_trade = True
 bot = BotHelper(client)
-# TODO: before 15 close all positions if in gain
-
 
 for balance in balances["balances"]:
     if balance["asset"] == "USDT":
         usdt_balance = balance["free"]
         break
+
+
+def _time():
+    format = "%Y-%m-%d %H:%M:%S"
+    country_time = datetime.now(timezone("Europe/Istanbul"))
+    return country_time.strftime(format)
 
 
 class ClientHelper:
@@ -69,28 +76,42 @@ def webhook():
         data_msg = parse_webhook(request.get_data(as_text=True))
         if data_msg:
             log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
-            print(f" * Current date and time: {now}")
+            log(f" * Current date and time: {_time()}")
             strategy = Strategy(data_msg)
 
             if strategy.symbol == "TEST":
                 log("==> TEST message successfully received")
             elif is_trade:
+                log(f"==> LATEST_POSITION={LATEST_POSITION}")
                 if strategy.market_position == "flat":
-                    bot.strategy_exit(strategy)
+                    # DOGEUSDTPERP,sell,flat,long
+                    # 11:36:02  11:36:01 may come 2 millisecond differ
+                    live_pos_side = bot.get_open_position_side(strategy.symbol)
+                    log(f"==> live_pos_side={live_pos_side}")
+                    # if not LATEST_POSITION or strategy.prev_market_position == LATEST_POSITION:
+                    if strategy.prev_market_position == live_pos_side:
+                        bot.strategy_exit(strategy)
+                        LATEST_POSITION = strategy.market_position
+                        log(f"==> UPDATED_LATEST_POSITION={LATEST_POSITION}")
                 else:
-                    log(f"==> LATEST_POSITION={LATEST_POSITION}")
-
-                    if LATEST_POSITION != strategy.side:  # if the position reversed
+                    if strategy.prev_market_position != strategy.market_position:
                         try:
                             trade(client, strategy)
-                            log("SUCCESS in trade", color="green")  # if not try again in 15 seconds in case binance frozes
+                            log(
+                                "SUCCESS in trade", color="green"
+                            )  # if not try again in 15 seconds in case binance frozes
                         except Exception as e:
                             log(str(e), color="red")
                             pass
 
-                        LATEST_POSITION = strategy.side
+                        LATEST_POSITION = strategy.market_position
+                        log(f"==> UPDATED_LATEST_POSITION={LATEST_POSITION}")
                     else:
-                        log("==> Did not entered any trading")
+                        log("## Didn't do any trading")
+                        log(f"==> LATEST_POSITION={LATEST_POSITION}")
+                        log(f"==> prev_market_position={strategy.prev_market_position}")
+                        log(f"==> strategy_side={strategy.side}")
+
             log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
             return "", 200
         else:
@@ -104,9 +125,12 @@ if __name__ == "__main__":
     futures_usd = get_futures_usd(client, is_both=False)
     margin_usdt = client_helper.get_balance_margin_USDT()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
-    print(f" * Futures={futures_usd} USD | SPOT={client_helper._format(usdt_balance)} USD | MARGIN={margin_usdt} ")
-    print(f" * is_trade={is_trade}")
-    now = datetime.datetime.now()
-    print(f" * Current date and time: {now}")
+    print(" * s t a r t i n g", flush=True)
+    log(f" * is_trade={is_trade}")
+    log(f" * Futures={futures_usd} USD | SPOT={client_helper._format(usdt_balance)} USD | MARGIN={margin_usdt} ")
+    log(f" * Current date and time: {_time()}")
     log(" * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="cyan")
-    app.run()  # app.debug = True
+    # Production
+    http_server = WSGIServer(("", 5000), app)  # https://stackoverflow.com/a/53918402/2402577
+    http_server.serve_forever()
+    # app.run(debug=True)  # Debug/Development
