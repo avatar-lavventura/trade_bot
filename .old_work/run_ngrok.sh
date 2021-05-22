@@ -15,6 +15,17 @@ while [ -z "$NGROK_PUBLIC_URL" ]; do
     echo -n "."
 done
 
+<<<<<<< HEAD:.old_work/run_ngrok.sh
 echo "http://$NGROK_PUBLIC_URL/webhook" > .ip
 printf "ngrok_public_url ==> http://$NGROK_PUBLIC_URL/webhook"
 printf "Keep track of logs:\ntail -f ngrok.log"
+||||||| parent of db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short):tradingview-webhooks-bot/run_ngrok.sh
+echo "ngrok_public_url ==> http://$NGROK_PUBLIC_URL/webhook"
+echo ""
+tail -f ngrok.log
+=======
+echo "http://$NGROK_PUBLIC_URL/webhook" > ngrok_ip
+echo "ngrok_public_url ==> http://$NGROK_PUBLIC_URL/webhook"
+echo ""
+tail -f ngrok.log
+>>>>>>> db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short):tradingview-webhooks-bot/run_ngrok.sh

@@ -1,0 +1,528 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// ©️ zyl42
+
+//@version=4
+strategy(title="WaveTrend with Crosses [LazyBear]",shorttitle="WT_CROSS",initial_capital=1000,currency=currency.USD,default_qty_value=10,default_qty_type=strategy.percent_of_equity)
+
+
+//----Ichimoku----
+ichi_moku = input(title="Ichimoku Cloud Visible", type=input.bool, defval=true)
+langingSpanVis = input(title="Lagging Span Visible", type=input.bool, defval=false)
+conversionLineVis = input(title="Conversion Line Visible", type=input.bool, defval=false)
+baseLineVis = input(title="Base Line Visible", type=input.bool, defval=false)
+
+conversionPeriods = input(defval=9, minval=1, title="Conversion Line Periods")
+basePeriods = input(defval=26, minval=1, title="Base Line Periods")
+laggingSpan2Periods = input(defval=52, minval=1, title="Lagging Span 2 Periods")
+displacement = input(defval=26, minval=1, title="Displacement")
+
+donchian(len) => avg(lowest(len), highest(len))
+
+conversionLine = donchian(conversionPeriods)
+baseLine = donchian(basePeriods)
+leadLine1 = avg(conversionLine, baseLine)
+leadLine2 = donchian(laggingSpan2Periods)
+
+ichimokuFText=crossover(conversionLine, baseLine) or conversionLine > baseLine ? "buyy":"selll"
+//ichimokuOText=crossover(offset(leadLine1, displacement-1), offset(leadLine2, displacement-1)) or offset(leadLine1, displacement-1) > offset(leadLine2, displacement-1) ? "AL":"SAT"
+ichimokuAText=crossover(close, high[displacement-1]) or close > high[displacement-1] ? "B":"S"
+//ichimokuCText=((close[1]>leadLine1 and close>leadLine1) and (close[1]>leadLine2 and close>leadLine2))?"AL":"SAT"
+
+plot(conversionLineVis ? conversionLine : na, color=#0496ff, title="Conversion Line")
+plot(baseLineVis ? baseLine : na, color=#991515, title="Base Line")
+plot(langingSpanVis ? close:na, offset = -displacement + 1, color=#459915, title="Lagging Span")
+
+ip1 = plot(ichi_moku ? leadLine1 : na, offset=displacement-1, color=color.green, title="Lead 1", transp=80)
+ip2 = plot(ichi_moku ? leadLine2 : na, offset=displacement-1, color=color.red, title="Lead 2", transp=80)
+fill(ip1, ip2, color=leadLine1 > leadLine2 ? color.green : color.red, transp=80)
+
+ichimokuText="ICHIMOKU\n"+ "Fiyat___: " + ichimokuFText + "\nArtçı___: " +ichimokuAText+ "\n"
+//ichimokuText="ICHIMOKU\n"+ "Fiyat__: " + ichimokuFText + "\nÖncü_: " + ichimokuOText + "\nArtçı__: " +ichimokuAText+ "\nFiyat > Bulut : " + ichimokuCText+"\n"
+//----Ichimoku----
+
+//----NKRAL----
+nkral = input(title="nKRAL Visible", type=input.bool, defval=true)
+nkrala = input(defval=1,     title = "nKRAL HASSASİYET")
+nkralc = input(defval=10,    title = "nKRAL AYARLARI")
+nkralh = input(defval=true, title = "nKRAL FARKLI BAKIŞ")
+
+xATR  = atr(nkralc)
+nLoss = nkrala * xATR
+
+nkralsrc = nkralh ? security(heikinashi(syminfo.tickerid), timeframe.period, close, lookahead = false) : close
+
+xATRTrailingStop = 0.0
+xATRTrailingStop := iff(nkralsrc > nz(xATRTrailingStop[1], 0) and nkralsrc[1] > nz(xATRTrailingStop[1], 0), max(nz(xATRTrailingStop[1]), nkralsrc - nLoss),
+   iff(nkralsrc < nz(xATRTrailingStop[1], 0) and nkralsrc[1] < nz(xATRTrailingStop[1], 0), min(nz(xATRTrailingStop[1]), nkralsrc + nLoss),
+   iff(nkralsrc > nz(xATRTrailingStop[1], 0), nkralsrc - nLoss, nkralsrc + nLoss)))
+
+pos = 0
+pos :=  iff(nkralsrc[1] < nz(xATRTrailingStop[1], 0) and nkralsrc > nz(xATRTrailingStop[1], 0), 1,
+   iff(nkralsrc[1] > nz(xATRTrailingStop[1], 0) and nkralsrc < nz(xATRTrailingStop[1], 0), -1, nz(pos[1], 0)))
+
+xcolor = pos == -1 ? color.red: pos == 1 ? color.green : color.blue
+
+ema   = ema(nkralsrc,1)
+above = crossover(ema, xATRTrailingStop)
+below = crossover(xATRTrailingStop, ema)
+
+buy  = nkralsrc > xATRTrailingStop and above
+sell = nkralsrc < xATRTrailingStop and below
+
+barbuy  = nkralsrc > xATRTrailingStop
+barsell = nkralsrc < xATRTrailingStop
+
+_buy = nkral ? buy : na
+_sell = nkral ? sell : na
+plotshape(_buy,  title = "Buy",  text = 'ALu',  style = shape.labelup,   location = location.belowbar, color= color.green, textcolor = color.white, transp = 0, size = size.small)
+plotshape(_sell, title = "Sell", text = 'SATu', style = shape.labeldown, location = location.abovebar, color= color.red,   textcolor = color.white, transp = 0, size = size.small)
+// here
+barcolor(nkral and barbuy  ? color.aqua : na)
+barcolor(nkral and barsell ? color.red   : na)
+nkralText = barbuy ? "nKRAL__: AL \n":"nKRAL__: SAT\n"
+//----NKRAL----
+
+//----İZCİ LABEL----
+ema5 = ema(close, 5)
+ema13 = ema(close, 13)
+izciText=crossover(ema5, ema13) or ema5 > ema13?"İZCİ__: AL \n":"İZCİ__: SAT\n"
+//----İZCİ LABEL----
+
+//----STR LABEL----
+ema21 = ema(close, 21)
+strText=crossover(ema5, ema21) or ema5 > ema21?"STR___: AL \n":"STR___: SAT\n"
+//----STR LABEL----
+
+//----Parabolic SAR----
+psar = input(title="Parabolic Sar Visible", type=input.bool, defval=false)
+start = input(0.02)
+increment = input(0.02)
+maximum = input(0.2, "Max Value")
+
+sar_1 = sar(start, increment, maximum)
+out = psar ? sar_1 : na
+
+psarText = sar_1 < close?"PSAR___: AL \n":"PSAR___: SAT\n"
+
+plot(out, "ParabolicSAR", color=#000000, linewidth=2, style=3)
+//----Parabolic SAR----
+
+//----Bollinger Bands----
+b_b = input(title="Bollinger Bands Visible", type=input.bool, defval=true)
+length = input(20, minval=1)
+src = input(close, title="Source")
+mult = input(2.0, minval=0.001, maxval=50)
+
+sma_1 = sma(src, length)
+basis = b_b ? sma_1 : na
+stdev_1 = stdev(src, length)
+dev = b_b ? mult * stdev_1 : na
+upper = b_b ? basis + dev : na
+lower = b_b ? basis - dev : na
+
+midline=plot(basis, color=color.black, linewidth=2, transp=90)
+bp1 = plot(upper, color=#801dad, linewidth=1)
+bp2 = plot(lower, color=#801dad, linewidth=1)
+fill(bp1, midline, color=#3388bb, transp=99)
+fill(midline, bp2, color=#991515, transp=99)
+//----Bollinger Bands----
+
+//----MPT55----
+mptVis = input(title="MPT55 Visible", type=input.bool, defval=false)
+res = input(title="Main SuperTrend Time Frame ", type=input.resolution, defval="480")
+Factor=input(1, minval=1,maxval = 100)
+Pd=input(1, minval=1,maxval = 100)
+default_qty_value=100
+
+Up=hl2-(Factor*atr(Pd))
+Dn=hl2+(Factor*atr(Pd))
+MUp=security(syminfo.tickerid,res,hl2-(Factor*atr(Pd)))
+MDn=security(syminfo.tickerid,res,hl2+(Factor*atr(Pd)))
+
+Mclose=security(syminfo.tickerid,res,close)
+
+var float TrendUp = na
+var float TrendDown = na
+var float MTrendUp = na
+var float MTrendDown = na
+var float Trend = na
+var float Tsl = na
+
+TrendUp:=close[1]>TrendUp[1]? max(Up,TrendUp[1]) : Up
+TrendDown:=close[1]<TrendDown[1]? min(Dn,TrendDown[1]) : Dn
+
+MTrendUp:=Mclose[1]>MTrendUp[1]? max(MUp,MTrendUp[1]) : MUp
+MTrendDown:=Mclose[1]<MTrendDown[1]? min(MDn,MTrendDown[1]) : MDn
+
+Trend := close > TrendDown[1] ? 1: close< TrendUp[1]? -1: nz(Trend[1],1)
+Tsl := Trend==1? TrendUp: TrendDown
+
+mptSat = mptVis?cross(Tsl,close) and close<Tsl : na
+mptAl = mptVis?cross(close,Tsl) and close>Tsl : na
+
+plotshape(mptSat , style=shape.triangledown, text="SELL",color=#991515,size=size.small, location=location.abovebar,transp=0)
+plotshape(mptAl , style=shape.triangleup, text="BUY",color=#3388bb,size=size.small, location=location.belowbar,transp=0)
+
+mptText = cross(close,Tsl) or close>Tsl?"MPT55__: al \n":"MPT55__: sat\n"
+//cross_1 = cross(Tsl,close)
+//barcolor(cross(Tsl,close) and Tsl < close ? #3388bb : cross_1 and close > Tsl ? color.purple : close < open ? #991515 : #459915)
+//----MPT55----
+
+//----EFSANE1----
+efsaneVis=input(defval=false, title="EFSANE1 Visible")
+sae = input(defval=false, title="EFSANE1 Bar Color Sell")
+sce = input(defval=false, title="EFSANE1 Bar Color Buy")
+//st = input(defval=true, title="EFSANE1 Top/Bottom Trend")
+pa = input(defval=false, title="EFSANE1 Buy/Sell Arrow")
+
+//EMA Definitions
+emaSlow = ema(close, 62)
+emaFast = ema(close, 38)
+//Aggressive Entry or Alert To Potential Trade
+pullbackUpT() =>
+    emaFast > emaSlow and close < emaFast
+pullbackDnT() =>
+    emaFast < emaSlow and close > emaFast
+//Conservative Entry Code For Highlight Bars
+entryUpT() =>
+    emaFast > emaSlow and close[1] < emaFast and close > emaFast
+entryDnT() =>
+    emaFast < emaSlow and close[1] > emaFast and close < emaFast
+//Conservative Entry True/False Condition
+entryUpTrend = emaFast > emaSlow and close[1] < emaFast and close > emaFast ? 1 : 0
+entryDnTrend = emaFast < emaSlow and close[1] > emaFast and close < emaFast ? 1 : 0
+//Define Up and Down Trend for Trend Arrows at Top and Bottom of Screen
+upTrend = emaFast >= emaSlow
+downTrend = emaFast < emaSlow
+//Definition for Conseervative Entry Up and Down PlotArrows
+codiff = entryUpTrend == 1 ? entryUpTrend : 0
+codiff2 = entryDnTrend == 1 ? entryDnTrend : 0
+//Color definition for Moving Averages
+col = emaFast > emaSlow ? color.lime : emaFast < emaSlow ? color.red : color.yellow
+//Moving Average Plots and Fill
+p1 = plot(efsaneVis ? emaSlow : na, title="Slow MA", style=plot.style_linebr, linewidth=4, color=col)
+p2 = plot(efsaneVis ? emaFast : na, title="Slow MA", style=plot.style_linebr, linewidth=2, color=col)
+fill(p1, p2, color=color.silver, transp=50)
+//Aggressive Entry, Conservative Entry Highlight Bars
+pullbackDnT_1 = pullbackDnT()
+barcolor(sae and pullbackUpT() ? color.yellow : sae and pullbackDnT_1 ? color.yellow : na)
+entryDnT_1 = entryDnT()
+barcolor(sce and entryUpT() ? color.aqua : sce and entryDnT_1 ? color.aqua : na)
+//Trend Triangles at Top and Bottom of Screen
+//plotshape(st and upTrend ? upTrend : na, title="Conservative Buy Entry Triangle", style=shape.triangleup, location=location.bottom, color=color.green, transp=0, offset=0)
+//plotshape(st and downTrend ? downTrend : na, title="Conservative Short Entry Triangle", style=shape.triangledown, location=location.top, color=color.red, transp=0, offset=0)
+efsaneBirText = upTrend ? "EFSANE1__: ALLLL \n" : "EFSANE1__: SATTTTT\n"
+//Plot Arrows OR Letters B and S for Buy Sell Signals
+plotarrow(pa and codiff ? codiff : na, title="Up Entry Arrow", colorup=color.blue, maxheight=30, minheight=30, transp=0)
+plotarrow(pa and codiff2 * -1 ? codiff2 * -1 : na, title="Down Entry Arrow", colordown=color.red, maxheight=30, minheight=30, transp=0)
+//----EFSANE1----
+
+//----EFSANE2----
+efsaneIkiVis = input(title="EFSANE2 Visible", type=input.bool, defval=false)
+barsBack = input(title="ATR Period", defval=1)
+multplierFactor = input(title="ATR multplierFactoriplier", step=0.1, defval=3.0)
+
+atr = multplierFactor * atr(barsBack)
+
+longStop = hl2 - atr
+longStopPrev = nz(longStop[1], longStop)
+longStop := close[1] > longStopPrev ? max(longStop, longStopPrev) : longStop
+
+shortStop = hl2 + atr
+shortStopPrev = nz(shortStop[1], shortStop)
+shortStop := close[1] < shortStopPrev ? min(shortStop, shortStopPrev) : shortStop
+
+direction = 1
+direction := nz(direction[1], direction)
+direction := direction == -1 and close > shortStopPrev ? 1 : direction == 1 and close < longStopPrev ? -1 : direction
+
+var valueToPlot = 0.0
+if (direction == 1)
+    valueToPlot := longStop
+else
+    valueToPlot := shortStop
+
+plot(efsaneIkiVis ? (valueToPlot)  : na, title="BuyLine", linewidth=2, color = (direction == 1 ? color.green : color.red))
+plotshape(efsaneIkiVis ? (direction == 1 and direction[1] == -1 ? longStop : na) : na, title="A L ", style=shape.labelup, location=location.absolute, size=size.normal, text="BU", transp=0, textcolor = color.white, color=color.green)
+plotshape(efsaneIkiVis ? (direction == -1 and direction[1] == 1 ? shortStop : na) : na, title="S A T", style=shape.labeldown, location=location.absolute, size=size.normal, text="SE", transp=0, textcolor = color.white, color=color.red)
+efsaneIkiText = (direction == 1) ? "EFSANE2__: ALa \n" : "EFSANE2__: SATa\n"
+//----EFSANE2----
+
+//----Fibonacci---
+fibVis = input(title="Fibonacci Visible", type=input.bool, defval=true)
+FPeriod = input(144, title="Fibonacci Period")
+plotF1618 = input(title="Fibonacci Plot 1.618 Level?", type=input.bool, defval=false)
+
+fibThema = input(title = "Fibonacci Thema", defval="Thema1", options = ['Thema1', 'Thema2'])
+fibBarCount = input(title="Fibonacci Bar Count", type=input.integer, defval=144, minval=1, maxval=1000)
+
+Fhigh = fibVis ? (highest(FPeriod)) : na
+Flow = fibVis ? (lowest(FPeriod)) : na
+FH = highestbars(high, FPeriod)
+FL = lowestbars(low, FPeriod)
+downfibo = FH < FL
+
+F0 = fibVis ? ( downfibo ? Flow : Fhigh ) : na
+F236 = fibVis ? ( downfibo ? (Fhigh - Flow) * 0.236 + Flow : Fhigh - (Fhigh - Flow) * 0.236 ) : na
+F382 = fibVis ? ( downfibo ? (Fhigh - Flow) * 0.382 + Flow : Fhigh - (Fhigh - Flow) * 0.382 ) : na
+F500 = fibVis ? ( downfibo ? (Fhigh - Flow) * 0.500 + Flow : Fhigh - (Fhigh - Flow) * 0.500 ) : na
+F618 = fibVis ? ( downfibo ? (Fhigh - Flow) * 0.618 + Flow : Fhigh - (Fhigh - Flow) * 0.618 ) : na
+F786 = fibVis ? ( downfibo ? (Fhigh - Flow) * 0.786 + Flow : Fhigh - (Fhigh - Flow) * 0.786 ) : na
+F1000 = fibVis ? ( downfibo ? (Fhigh - Flow) * 1.000 + Flow : Fhigh - (Fhigh - Flow) * 1.000 ) : na
+F1618 = fibVis ? ( downfibo ? (Fhigh - Flow) * 1.618 + Flow : Fhigh - (Fhigh - Flow) * 1.618 ) : na
+
+Fcolor = downfibo ? #459915 : #266fa3 //#E41019 //
+Foffset = downfibo ? FH : FL
+
+var line vpp_p = na
+var line vs1_p = na
+var line vs2_p = na
+var line vs3_p = na
+var line vr1_p = na
+var line vr2_p = na
+var line vr3_p = na
+var line vr4_p = na
+
+if barstate.islast
+    vpp_p := line.new(bar_index[fibBarCount], F0, bar_index, F0, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=3)
+    vs1_p := line.new(bar_index[fibBarCount], F236, bar_index, F236, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=2)
+    vs2_p := line.new(bar_index[fibBarCount], F382, bar_index, F382, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=2)
+    vs3_p := line.new(bar_index[fibBarCount], F500, bar_index, F500, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=2)
+    vr1_p := line.new(bar_index[fibBarCount], F618, bar_index, F618, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=3)
+    vr2_p := line.new(bar_index[fibBarCount], F786, bar_index, F786, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=2)
+    vr3_p := line.new(bar_index[fibBarCount], F1000, bar_index, F1000, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=3)
+    vr4_p := (plotF1618 and F1618 ? line.new(bar_index[fibBarCount], F1618, bar_index, F1618, color=Fcolor, style =  line.style_dotted, extend = (fibThema == "Thema1" ? extend.none:extend.both), width=2): na)
+    line.delete(vpp_p[1])
+    line.delete(vs1_p[1])
+    line.delete(vs2_p[1])
+    line.delete(vs3_p[1])
+    line.delete(vr1_p[1])
+    line.delete(vr2_p[1])
+    line.delete(vr3_p[1])
+    line.delete(vr4_p[1])
+
+//plot((fibThema == "Thema2" ? F0 : na), color=Fcolor, linewidth=3, trackprice=true, show_last=1, title='0', transp=0)
+//plot((fibThema == "Thema2" ? F236 : na),  color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='0.236', transp=0)
+//plot((fibThema == "Thema2" ? F382 : na), color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='0.382', transp=0)
+//plot((fibThema == "Thema2" ? F500 : na), color=Fcolor, linewidth=2, trackprice=true, show_last=1, title='0.5', transp=0)
+//plot((fibThema == "Thema2" ? F618 : na), color=Fcolor, linewidth=3, trackprice=true, show_last=1, title='0.618', transp=0)
+//plot((fibThema == "Thema2" ? F786 : na), color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='0.786', transp=0)
+//plot((fibThema == "Thema2" ? F1000 : na), color=Fcolor, linewidth=3, trackprice=true, show_last=1, title='1', transp=0)
+//plot((fibThema == "Thema2" ? (plotF1618 and F1618 ? F1618 : na) : na), color=Fcolor, linewidth=3, trackprice=true, show_last=1, title='1.618', transp=0)
+
+plotshape(F0, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="0", offset=50, transp=30)
+plotshape(F236, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="0.236", offset=50, transp=30)
+plotshape(F382, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="0.382", offset=50, transp=30)
+plotshape(F500, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="0.5", offset=50, transp=30)
+plotshape(F618, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="0.618", offset=50, transp=30)
+plotshape(F786, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="0.786", offset=50, transp=30)
+plotshape(F1000, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="1", offset=50, transp=30)
+plotshape(plotF1618 and F1618 ? F1618 : na, style=shape.labeldown, location=location.absolute, color=Fcolor, textcolor=color.white, show_last=1, text="%161.8", offset=50, transp=30)
+
+plotshape(Flow, style=shape.labelup, location=location.absolute, size=size.small, color=color.red, textcolor=color.black, show_last=1, offset=45, text="Low", transp=50)
+plotshape(Fhigh, style=shape.labeldown, location=location.absolute, size=size.small, color=color.red, textcolor=color.black, show_last=1, offset=45,text="High", transp=50)
+//----Fibonacci---
+
+//----Üssel Ortalamalar
+ema5Vis = input(title="EMA5 Visible", type=input.bool, defval=false)
+ema9Vis = input(title="EMA9 Visible", type=input.bool, defval=false)
+ema13Vis = input(title="EMA13 Visible", type=input.bool, defval=false)
+ema21Vis = input(title="EMA21 Visible", type=input.bool, defval=false)
+ema50Vis = input(title="EMA50 Visible", type=input.bool, defval=false)
+ema100Vis = input(title="EMA100 Visible", type=input.bool, defval=false)
+ema200Vis = input(title="EMA200 Visible", type=input.bool, defval=false)
+ema377Vis = input(title="EMA377 Visible", type=input.bool, defval=false)
+ema610Vis = input(title="EMA610 Visible", type=input.bool, defval=false)
+
+//ema5 izci içerisinde hesaplandı
+plot(ema5Vis ? ema5 : na, color=color.black, linewidth=2, title="EMA-5")
+
+ema9=ema(close, 9)
+plot(ema9Vis ? ema9 : na, color=color.purple, linewidth=2, title="EMA-9")
+
+//ema13 izci içerisinde hesaplandı
+plot(ema13Vis ? ema13 : na, color=color.teal, linewidth=2, title="EMA-13")
+
+//ema21 izci içerisinde hesaplandı
+plot(ema21Vis ? ema21 : na, color=color.red, linewidth=2, title="EMA-21")
+
+ema50=ema(close, 50)
+plot(ema50Vis ? ema50 : na, color=color.green, linewidth=2, title="EMA-50")
+
+ema100=ema(close, 100)
+plot(ema100Vis ? ema100 : na, color=color.orange, linewidth=2, title="EMA-100")
+
+ema200=ema(close, 200)
+plot(ema200Vis ? ema200 : na, color=color.blue, linewidth=2, title="EMA-200")
+
+ema377=ema(close, 377)
+plot(ema377Vis ? ema377 : na, color=color.purple, linewidth=2, title="EMA-377")
+
+ema610=ema(close, 610)
+plot(ema610Vis ? ema610 : na, color=color.green, linewidth=2, title="EMA-610")
+//----Üssel Ortalamalar
+
+//----Ralli Habercisi----
+ralliVis = input(title="Ralli Habercisi Visible", type=input.bool, defval=false)
+plotshape(cross(ema50, ema200) and ema50[1] < ema200[1] ? true : na, style=shape.diamond, text="GOLDEN\nCROSS", color=#FFD700,size=size.small, location=location.top,transp= (ralliVis ? 0:100))
+plotshape(cross(ema21, ema50) and ema21[1] < ema50[1] ? true : na, style=shape.diamond, text="SILVER\nCROSS",color=#0044ff,size=size.small, location=location.bottom,transp=(ralliVis ? 0:100))
+plotshape(cross(ema50, ema200) and ema50[1] > ema200[1] ? true : na, style=shape.triangleup, text="DEATH\nCROSS",color=color.black,size=size.small, location=location.bottom,transp=(ralliVis ? 0:100))
+//----Ralli Habercisi----
+
+//----MACD----
+// Getting inputs
+MACDfast_length = input(title="MACD Fast Length", type=input.integer, defval=12)
+MACDslow_length = input(title="MACD Slow Length", type=input.integer, defval=26)
+MACDsrc = input(title="Source", type=input.source, defval=close)
+MACDsignal_length = input(title="MACD Signal Smoothing", type=input.integer, minval = 1, maxval = 50, defval = 9)
+MACDsma_source = input(title="MACD Simple MA(Oscillator)", type=input.bool, defval=false)
+MACDsma_signal = input(title="MACD Simple MA(Signal Line)", type=input.bool, defval=false)
+
+// Calculating
+MACDfast_ma = MACDsma_source ? sma(MACDsrc, MACDfast_length) : ema(MACDsrc, MACDfast_length)
+MACDslow_ma = MACDsma_source ? sma(MACDsrc, MACDslow_length) : ema(MACDsrc, MACDslow_length)
+macd = MACDfast_ma - MACDslow_ma
+signal = MACDsma_signal ? sma(macd, MACDsignal_length) : ema(macd, MACDsignal_length)
+macdText = cross(macd,signal) or macd>signal?"MACD__: ALO \n":"MACD__: SATO\n"
+//----MACD----
+
+//----ÖNCÜ----
+len = input(9, minval=1, title="Öncü Length")
+
+high_ = highest(hl2, len)
+low_ = lowest(hl2, len)
+
+round_(val) => val > .99 ? .999 : val < -.99 ? -.999 : val
+
+value = 0.0
+value := round_(.66 * ((hl2 - low_) / max(high_ - low_, .001) - .5) + .67 * nz(value[1]))
+
+fish1 = 0.0
+fish1 := .5 * log((1 + value) / max(1 - value, .001)) + .5 * nz(fish1[1])
+
+fish2 = fish1[1]
+
+oncuText=crossover(fish1,fish2) or fish1>fish2?"ÖNCÜ__: ALsdfsdf \n":"ÖNCÜ__: SATdsfsdf\n"
+
+//----ÖNCÜ----
+
+//----ÖNCÜ2----
+oncuIkilength = input(5, minval=1, title="ÖNCÜ2 Length")
+oncuIkismoothK = input(3, minval=1, title="ÖNCÜ2 smoothK")
+oncuIkismoothD = input(3, minval=1, title="ÖNCÜ2 smoothD")
+k = ema(stoch(close, high, low, oncuIkilength), oncuIkismoothK)
+d = ema(k, oncuIkismoothD)
+oncuIkiText=crossover(d, k) or d<k?"ÖNCÜ2__: ALkkkkkk \n":"ÖNCÜ2__: SATkkkkkk\n"
+//----ÖNCÜ2----
+
+//----PAS----
+rsi_length           = input(defval = 14, title = "PAS RSI Length", type = input.integer, minval = 1)
+rsi_smooth_length    = input(defval = 9, title = "PAS RSI Smooth Length", type = input.integer, minval = 1)
+rsi_threshold_period = input(defval = 25, title = "PAS RSI Period", type = input.integer, minval = 1)
+rsi_overbought       = input(defval = 0.8, title = "PAS RSI Overbought", type = input.float, minval = 0, maxval = 1)
+rsi_oversold         = input(defval = 0.2, title = "PAS RSI Oversold ", type = input.float, minval = 0, maxval = 1)
+
+tma_enable = input(defval = true, title = "PAS TMA Enable")
+tma_length = input(defval = 3, title = "PAS TMA Length", minval = 2)
+tma_factor = input(defval = 1, title = "PAS TMA Factor", step = 0.1, minval = 0.1)
+
+get_ift(values, smooth_length) =>
+    smoothed = wma(0.1 * values, smooth_length)
+    (exp(2 * smoothed) - 1) / (exp(2 * smoothed) + 1)
+
+get_gd(values, length, factor) =>
+    ema(values, length) * (1 + factor) - ema(ema(values, length), length) * factor
+
+get_tma(values, length, factor) =>
+    get_gd(get_gd(get_gd(values, length, factor), length, factor), length, factor)
+
+values = tma_enable ? get_tma(close, tma_length, tma_factor) : close
+rsi = rsi(values, rsi_length)
+ift = get_ift(rsi - 50, rsi_smooth_length)
+
+min = lowest(ift, rsi_threshold_period)
+max = highest(ift, rsi_threshold_period)
+
+range = max - min
+mid = min + 0.5 * range
+
+pasText = ift >= mid?"PAS___: AjnjL \n":"PAS___: SAddfsdfT\n"
+//----PAS----
+
+//----TRB----
+TTIlength1 = input(14, minval=1, title="TTI")
+TTIma_length = input(13, minval=1, title="PMI")
+TRBsrc = input(close, title="Source")
+TRBma1 = sma(TRBsrc, TTIlength1)
+TRBcci1 = (TRBsrc - TRBma1) / (0.040 * dev(TRBsrc, TTIlength1))
+
+trbAl = (TRBcci1 > ema(TRBcci1, TTIma_length)) ?"TRB___: AL \n":"TRB___: SAT\n"
+trbTrend = TRBcci1 > 0 ? "TRB___: PT \n":"TRB___: NT\n"
+trbText = trbAl + trbTrend
+//----TRB----
+
+//----Aroon----
+Aroonlength = input(14, minval=1)
+Aroonupper = 100 * (highestbars(high, Aroonlength+1) + Aroonlength)/Aroonlength
+Aroonlower = 100 * (lowestbars(low, Aroonlength+1) + Aroonlength)/Aroonlength
+aroonText = Aroonupper > Aroonlower or crossover(Aroonupper,Aroonlower)?"AROON__: ALsana \n":"AROON__: SATsana\n"
+//----Aroon----
+
+//----Label----
+bolme="--------------------"
+altSatir="\n"
+
+labelVis = input(defval=true, title="Indicator Panel Visible", type=input.bool)
+labelSize = input(title="Indicator Panel Size", defval="Normal", options=["Normal", "Large", "Huge"])
+
+ichimokuLabelVis = input(defval=true, title="Ichimoku Label Visible", type=input.bool)
+nkralLabelVis = input(defval=true, title="nKral Label Visible", type=input.bool)
+izciLabelVis = input(defval=true, title="İzci Label Visible", type=input.bool)
+strLabelVis = input(defval=true, title="Str Label Visible", type=input.bool)
+psarLabelVis = input(defval=true, title="Parabolik Sar Label Visible", type=input.bool)
+mptLabelVis = input(defval=true, title="MPT55 Label Visible", type=input.bool)
+efseneBirLabelVis = input(defval=true, title="Efsane1 Label Visible", type=input.bool)
+efseneIkiLabelVis = input(defval=true, title="Efsane2 Label Visible", type=input.bool)
+macdLabelVis = input(defval=true, title="Macd Label Visible", type=input.bool)
+oncuLabelVis = input(defval=true, title="Öncü Label Visible", type=input.bool)
+oncuIkiLabelVis = input(defval=true, title="Öncü2 Label Visible", type=input.bool)
+pasLabelVis = input(defval=true, title="Pas Label Visible", type=input.bool)
+trbLabelVis = input(defval=true, title="TRB Label Visible", type=input.bool)
+aroonLabelVis = input(defval=true, title="Aroon Label Visible", type=input.bool)
+
+var label l = na
+
+if labelVis and barstate.islast
+    l := label.new(bar_index,na)
+    label.set_size(l, (labelSize == "Normal" ? size.normal: labelSize == "Large" ? size.large : size.huge))
+    label.set_style(l, label.style_label_upper_left)
+    label.set_yloc(l,yloc=yloc.belowbar)
+    //label.set_xloc(l, leadLine1, xloc=xloc.bar_index)
+    label.set_text(l, bolme + altSatir + (ichimokuLabelVis ? ( ichimokuText + bolme + altSatir) : "" ) + (nkralLabelVis ? (nkralText) : "" ) + (izciLabelVis ? (izciText) : "" ) + (strLabelVis ? (strText) : "" ) + (psarLabelVis ? (psarText) : "" ) + (mptLabelVis ? (mptText) : "" ) + (efseneBirLabelVis ? (efsaneBirText) : "" ) + (efseneIkiLabelVis ? (efsaneIkiText) : "" ) + (not nkralLabelVis and not izciLabelVis and not strLabelVis and not psarLabelVis and not mptLabelVis and not efseneIkiLabelVis and not efseneBirLabelVis ? "" : (bolme + altSatir)) + (macdLabelVis ? (macdText) : "" ) + (oncuLabelVis ? (oncuText) : "" ) + (oncuIkiLabelVis ? (oncuIkiText) : "" ) + (pasLabelVis ? (pasText) : "") + (trbLabelVis ? (trbText) : "") + (aroonLabelVis ? (aroonText) : "") + (not macdLabelVis and not oncuLabelVis and not oncuIkiLabelVis and not pasLabelVis and not trbLabelVis and not aroonLabelVis? "" : (bolme)))
+    label.set_textalign(l,text.align_left)
+    label.set_textcolor(l,color.white)
+    label.set_color(l, #459915)
+    label.set_tooltip(l,"İndikatör Paneli")
+    label.delete(l[1])
+//----Label----
+
+
+fromYear = input(2020, "Backtest Start Year")
+fromMonth = input(1, "Backtest Start Month")
+fromDay = input(2, "Backtest Start Day")
+testPeriodStart = timestamp(fromYear,fromMonth,fromDay,0,0)
+
+thruYear = input(2021, "Backtest Stop Year")
+thruMonth = input(12, "Backtest Stop Month")
+thruDay = input(30, "Backtest Stop Day")
+testPeriodStop = timestamp(thruYear,thruMonth,thruDay,0,0)
+
+sstart     = timestamp(fromYear, fromMonth, fromDay, 00, 00)  // backtest start window
+ffinish    = timestamp(thruYear, thruMonth, thruDay, 23, 59)  // backtest finish window
+window()  => time >= sstart and time <= ffinish ? true : false
+
+strategy.entry("Long", strategy.long, when=window() and _buy)
+strategy.close("Long", when=window() and _sell)
+
+strategy.entry("Short",strategy.short, when=window() and _sell)
+strategy.close("Short", when=window() and  _buy)

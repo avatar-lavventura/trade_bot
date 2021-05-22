@@ -7,7 +7,14 @@ from pathlib import Path
 
 from binance.client import Client
 from matplotlib import pyplot
+<<<<<<< HEAD
 from bot.tools import log
+||||||| parent of db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
+from matplotlib.animation import FuncAnimation
+
+from utils import log, utc_to_local
+=======
+>>>>>>> db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
 
 HOME = str(Path.home())
 

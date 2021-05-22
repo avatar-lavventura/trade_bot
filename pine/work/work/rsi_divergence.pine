@@ -1,0 +1,40 @@
+// link: https://in.tradingview.com/script/fH6e5TuN-RSI-Divergence/
+// ==> normal RSI: check double or
+// triple top/bottom on a chart meanwhile RSI is descending/ascending (check the
+// example on chart)
+//
+// ==> signal line: when RSI Divergence cross zero line from bottom to top you
+// get a buy signal (the line become green), vice versa when the RSI Divergence
+// cross zero line in the opposite way you get a sell signal (the line become
+// red)
+
+//@version=4
+study(title="RSI Divergence", shorttitle="RSI_D")
+src_fast = close, len_fast = input(5, minval=1, title="Length Fast RSI")
+src_slow = close, len_slow = input(14,minval=1, title="Length Slow RSI")
+up_fast = rma(max(change(src_fast), 0), len_fast)
+down_fast = rma(-min(change(src_fast), 0), len_fast)
+rsi_fast = down_fast == 0 ? 100 : up_fast == 0 ? 0 : 100 - (100 / (1 + up_fast / down_fast))
+up_slow = rma(max(change(src_slow), 0), len_slow)
+down_slow = rma(-min(change(src_slow), 0), len_slow)
+rsi_slow = down_slow == 0 ? 100 : up_slow == 0 ? 0 : 100 - (100 / (1 + up_slow / down_slow))
+//plotfast = plot(rsi_fast, color=blue)
+//plotslow = plot(rsi_slow, color=orange)
+divergence = rsi_fast - rsi_slow
+plotdiv = plot(divergence, color = divergence > 0 ? color.lime:color.red, linewidth = 2)
+//band1 = hline(70,color=green)
+//band0 = hline(30,color=red)
+band = hline(0)
+
+divergence_past = divergence[1]
+divlong = divergence >=0 and divergence_past <= 0
+divshort = divergence <=0 and divergence_past >= 0
+
+alertcondition(divlong, title='Div Long', message='Div Long')
+alertcondition(divshort, title='Div Short', message='Div Short')
+
+data1 = divlong
+plotshape(data1, style=shape.triangleup,location=location.bottom, color=color.green , title="DivUp")
+
+data2 = divshort
+plotshape(data2, style=shape.triangledown, location=location.top, color=color.red,title="DivDown")

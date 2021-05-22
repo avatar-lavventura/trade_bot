@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 aiodns==3.0.0
 aiofiles==0.7.0
 aiohttp==3.7.4.post0
@@ -31,7 +32,25 @@ distlib==0.3.2
 filelock==3.0.12
 flake8==3.9.2
 Flask==2.0.1
+||||||| parent of db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
+=======
+aiodns==2.0.0
+aiohttp==3.7.4.post0
+async-timeout==3.0.1
+attrs==21.2.0
+backcall==0.2.0
+ccxt==1.49.73
+certifi==2020.12.5
+cffi==1.14.5
+chardet==4.0.0
+click==8.0.1
+cryptography==3.4.7
+dateparser==1.0.0
+decorator==5.0.9
+Flask==2.0.1
+>>>>>>> db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
 forex-python==1.5
+<<<<<<< HEAD
 gevent==21.1.2
 git-filter-repo==2.33.0
 greenlet==1.1.1
@@ -123,3 +142,45 @@ yarl==1.6.3
 yfinance==0.1.63
 zope.event==4.5.0
 zope.interface==5.4.0
+||||||| parent of db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
+ipdb==0.13.7
+ccxt==1.49.73
+=======
+gevent==21.1.2
+greenlet==1.1.0
+idna==2.10
+importlib-metadata==4.0.1
+ipdb==0.13.7
+ipython==7.23.1
+ipython-genutils==0.2.0
+itsdangerous==2.0.1
+jedi==0.18.0
+Jinja2==3.0.1
+multidict==5.1.0
+parso==0.8.2
+pexpect==4.8.0
+prompt-toolkit==3.0.18
+ptyprocess==0.7.0
+pycares==4.0.0
+pycparser==2.20
+Pygments==2.9.0
+python-dateutil==2.8.1
+pytz==2021.1
+regex==2021.4.4
+requests==2.25.1
+simplejson==3.17.2
+six==1.16.0
+termcolor==1.1.0
+toml==0.10.2
+traitlets==5.0.5
+typing-extensions==3.10.0.0
+tzlocal==2.1
+ujson==4.0.2
+urllib3==1.26.4
+wcwidth==0.2.5
+websockets==9.0.2
+Werkzeug==2.0.1
+yarl==1.6.3
+zipp==3.4.1
+zope.event==4.5.0
+>>>>>>> db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
