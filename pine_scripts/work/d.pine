@@ -1,5 +1,5 @@
 //@version=4
-strategy(title="uabmeacd", shorttitle="uabmacd", overlay=false, calc_on_order_fills=false, initial_capital=300, default_qty_value=300, default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0, currency=currency.USD, commission_type=strategy.commission.percent, commission_value=0.01)
+strategy(title="uabmeacd", shorttitle="uabmacd", overlay=false, calc_on_order_fills=false, initial_capital=500, default_qty_value=300, default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0, currency=currency.USD, commission_type=strategy.commission.percent, commission_value=0.01)
 
 fromYear = input(2021, "Backtest Start Year")
 fromMonth = input(3, "Backtest Start Month")
@@ -109,10 +109,8 @@ strategy.entry("Long", strategy.long, when=window() and divcrossshort and rsi_di
 strategy.close("Long", when=window() and _divcrosslong and rsi_divlong, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
 // todo: divcrosslong enable if less than the long position
 posSize = abs(strategy.position_size)
-
-is_long  = (strategy.position_size > 0)
-doo=strategy.position_avg_price > close and is_long
-
+isLong  = (strategy.position_size > 0)
+doo=strategy.position_avg_price > close
 strategy.entry("Short",strategy.short, when=window() and _divcrosslong and sqz_on and rsi_divshort, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
 strategy.close("Short", when=window() and _divcrossshort and rsi_divshort and exitShortCondition, alert_message ="{{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}}")
 // strategy.exit(id="XS STP", profit=close * 0.27 / syminfo.mintick)
