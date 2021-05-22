@@ -16,6 +16,8 @@ from utils import log, utc_to_local
 =======
 >>>>>>> db205bf (Performance from 03.01 => 731% ALL | 518% Long , 213% Short)
 
+from bot.tools import log
+
 HOME = str(Path.home())
 
 x_data, y_data, z_data = [], [], []

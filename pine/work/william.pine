@@ -1,14 +1,15 @@
 //@version=4
 strategy(title="VWMA 1hr", shorttitle="VWMA1HR",
-     calc_on_order_fills=false, initial_capital=100, default_qty_value=100, process_orders_on_close=true,
-     default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=0,
+     calc_on_order_fills=false, initial_capital=100, default_qty_value=10,
+     process_orders_on_close=true,
+     default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=10000,
      currency=currency.USD, commission_type=strategy.commission.percent,
      commission_value=0.1, overlay=true)
 
 fromMonth = input(5)
-fromDay = input(20)
-thruMonth = input(5)
-thruDay = input(25)
+fromDay = input(23)
+thruMonth = input(12)
+thruDay = input(30)
 fromYear = input(2021)
 thruYear = input(2021)
 testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
@@ -19,7 +20,6 @@ window() => time >= start and time <= finish ? true : false
 
 //////////////////////////////////////////////////////////////////////////////////
 n = input(title="Periods", defval=2, minval=2, type=input.integer)
-
 
 // UpFractal
 bool upflagDownFrontier = true
@@ -70,9 +70,16 @@ lowerBandValue = input(3.5, title= "Long Offset")
 upperBand = plot(ma*(1+upperBandValue/100), title="Upper Band", color=color.red)
 lowerBand = plot(ma*(1-lowerBandValue/100), title="Lower Band", color=color.green)
 
-doo = ma*(1+upperBandValue/100)
-if close > doo and downFractal
-    strategy.entry("Short", strategy.long, when=window())
+posSize = abs(strategy.position_size)
 
-if strategy.position_avg_price > close and abs((strategy.position_avg_price-close) / close) >= 0.05
+_value = ma*(1-upperBandValue/100)
+if posSize == 0 and close < _value and lowerBandValue
+    strategy.entry("Long", strategy.long, when=window())
+
+if posSize != 0 and  strategy.position_size > 0 and strategy.position_avg_price > close and ((strategy.position_avg_price-close) / close) >= 0.05
+    strategy.entry("LLong", strategy.long, qty=posSize*2, when=window())
+
+if strategy.position_avg_price < close and abs((strategy.position_avg_price-close) / close) >= 0.02
     strategy.close_all(when=window())
+
+// {{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}},{{strategy.position_size}}
