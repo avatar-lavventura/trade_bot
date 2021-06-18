@@ -43,14 +43,16 @@ import time
 from datetime import date, datetime
 from pathlib import Path
 
-import requests
-from binance.client import Client
-from bs4 import BeautifulSoup
-
 import _lib
 import binance_lib
-from binance_lib import futures_history, get_futures_usd, positions
-from utils import log, popen_communicate, run
+import requests
+from binance.client import Client
+from binance_lib import futures_history, positions
+from broker.utils import popen_communicate, run
+from bs4 import BeautifulSoup
+from tools import log
+
+from bot.client_helper import ClientHelper
 
 HOME = str(Path.home())
 
@@ -82,8 +84,9 @@ start = 0
 TIME_TO_FORCE_BUY = 0.1
 PERCENT_TO_BUY = 95
 SYMBOL = None
-FUTURE_AMOUNT_TO_TRADE = 300
+FUTURE_AMOUNT_TO_TRADE = 1000
 client = None
+client_helper = None
 found_ones = []  # noqa
 msg = []
 
@@ -133,6 +136,7 @@ def get_balance_margin_USDT():
 
 def check_binance_obj():
     global client
+    global client_helper
     try:
         client = load_obj("binance")
     except:
@@ -149,6 +153,7 @@ def check_binance_obj():
         save_obj("binance", client)
 
     try:
+        client_helper = ClientHelper(client)
         balances = client.get_account()
         return client, balances
     except requests.exceptions.ConnectionError:
@@ -157,16 +162,17 @@ def check_binance_obj():
 
 
 def _format(value, decimal=2):
-    return format(float(value), ".2f")
+    return format(float(value), "." + str(decimal) + "f")
 
 
 def _trade(client, usdt_balance):
+    _symbol = None
     seperate_line_line = True
     if not is_log:
         block_print()
 
     com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
-    futures_usd = get_futures_usd(client, is_both=False)
+    futures_usd = client_helper.get_futures_usdt(is_both=False)
     margin_usdt = get_balance_margin_USDT()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
     log(f"==> Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ", end="")
@@ -222,6 +228,9 @@ def _trade(client, usdt_balance):
     if not is_log:
         enable_print()
 
+    if not _symbol:
+        breakpoint()  # DEBUG
+
     while True:
         if not positions(client, latest_symbol_income, daily_progress, _symbol):
             if seperate_line_line:
@@ -236,7 +245,7 @@ def _trade(client, usdt_balance):
                     try:
                         # transfer_spot_to_futures(FUTURE_AMOUNT_TO_TRADE)
                         # time.sleep(0.25)
-                        futures_usd = get_futures_usd(client, is_both=False)
+                        futures_usd = client_helper.get_futures_usdt(is_both=False)
                         log(f"==> Futures={futures_usd} USD")
                     except Exception as e:
                         log(f"sport=>futures {e}", color="red")
@@ -248,7 +257,7 @@ def _trade(client, usdt_balance):
                 pass
                 # # TODO: here when there is no position, update with new positon if opened
                 # time.sleep(0.25)
-                # futures_usd = get_futures_usd(client, is_both=False)
+                # futures_usd = get_futures_usdt(is_both=False)
                 # if futures_usd != 0 and float(futures_usd) > FUTURE_AMOUNT_TO_TRADE:
                 #     transfer_futures_to_spot(float(futures_usd) - FUTURE_AMOUNT_TO_TRADE)
         else:
@@ -543,15 +552,14 @@ if __name__ == "__main__":
 
     current_btc_price_USD = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
     current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
-    current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
-    futures_usd = get_futures_usd(client)
+    # current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
+    futures_usd = client_helper.get_futures_usdt()
     log(f"==> Futures={futures_usd} USD")
     own_usd = 0.0
     own_usd = sum_btc * float(current_btc_price_USD)
     own_try = sum_btc * float(current_btc_price_TRY)
     print("Spot => %.8f BTC == " % sum_btc, end="")
-    print("%.8f USD == " % own_usd, end="")
-    print("%.8f TRY" % own_try)
+    print("%.8f USD == " % own_usd)
     print("overview => %.2f USD" % (float(own_usd) + float(futures_usd)))
     for asset in client.futures_account_balance():
         name = asset["asset"]

@@ -12,10 +12,11 @@ HOME = str(Path.home())
 client = None
 
 
-def save_obj(name, syms=None):
+def save_obj(name, client=None):
     _file = f".{name}.pk"
-    if syms is None:
+    if client is None:
         syms = {}
+        balances = client.get_account()
         _balances = balances["balances"]
         for balance in _balances:
             syms[balance["asset"]] = True

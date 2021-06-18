@@ -1,0 +1,8 @@
+files:
+  input: binance_usdt_pairs.csv
+tradingview:
+  chartUrl: https://www.tradingview.com/chart/wPk30wM1/
+  interval: 15m
+alert:
+  condition:
+    primaryLeft: alpy

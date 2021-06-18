@@ -3,7 +3,6 @@
 # TODO: symbol check when new position is created with different symbol, apply
 #       when there is no positon at the moment
 # TODO:if <0% put a sell limit at entry price (resque)
-# TODO: before each order cancell all orders try/catch
 # TODO: firefox'da dene daha hizli olabilir
 # TODO: put stop-loss right away
 # TODO: l= latest price fetch wrong // check fetch price sometimes wrong value is obtained
@@ -16,11 +15,10 @@ import sys
 import time
 from decimal import Decimal
 
+from broker.libs.math import _percent_change, percent_change
 from dateutil.parser import parse
 from forex_python.converter import CurrencyRates
 from tools import _colorize_traceback, log, timestamp_to_local, utc_to_local
-
-from libs.math import _percent_change, percent_change
 
 c = CurrencyRates()
 
@@ -107,8 +105,6 @@ def the_sum(aList):
 
 def futures_history(client, _symbol=None):
     name_temp = "hello_world"
-    # _lira = c.get_rate("USD", "TRY")  # TODO: halts once in a while
-    _lira = 1
     _COMMISSON = 0
     commission_flag = False
     _sum = 0.0
@@ -207,7 +203,6 @@ def futures_history(client, _symbol=None):
                 local_dt = utc_to_local(dt)
                 latest_time = local_dt.strftime("%H:%M:%S")
                 if local_dt.strftime("%d") != _day:
-                    lira = float(daily_progress) * float(_lira)
                     if daily_progress != 0.0:
                         print("This is the message that will be deleted", end="\r")
 
@@ -218,9 +213,7 @@ def futures_history(client, _symbol=None):
 
                     if daily_progress != 0.0:
                         log(
-                            f"{arrow_in} {format(daily_progress, '.2f')}$ {format(lira, '.2f')}"
-                            f" TRY {arrow_out} {dt.strftime('%d/%m/%Y')}",
-                            color=_color,
+                            f"{arrow_in} {format(daily_progress, '.2f')}$ {arrow_out}", color=_color,
                         )
 
                     daily_progress = 0
@@ -293,34 +286,16 @@ def futures_history(client, _symbol=None):
             log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", color="red", end="")
 
     log(latest_time, color="blue")
-
-    lira = float(daily_progress) * float(_lira)
     if daily_progress > 0:
         _color = "green"
     else:
         _color = "red"
 
     log(
-        f"{arrow_in} {format(daily_progress, '.2f')}$ {format(lira, '.2f')} TRY {arrow_out} {dt.strftime('%d/%m/%Y')} ",
-        color=_color,
+        f"{arrow_in} {format(daily_progress, '.2f')}$ {arrow_out}", color=_color,
     )
     log("")
     return _COMMISSON, latest_symbol_income, daily_progress, funding_dict
-
-
-def get_futures_usd(client, is_both=True):
-    futures_usd = 0.0
-    for asset in client.futures_account_balance():
-        name = asset["asset"]
-        balance = float(asset["balance"])
-        if name == "USDT":
-            futures_usd += balance
-
-        if name == "BNB" and is_both:
-            current_bnb_price_USD = client.get_symbol_ticker(symbol="BNBUSDT")["price"]
-            futures_usd += balance * float(current_bnb_price_USD)
-
-    return format(futures_usd, ".2f")
 
 
 def positions(client, latest_symbol_income, daily_progress, _symbol=None):
@@ -367,13 +342,6 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
                 else:
                     log(f"dp={format(daily_progress, '.2f')}$", color="red")
 
-            _balance = format(float(get_futures_usd(client)) + float(change), ".4f")
-            if float(_balance) > 0.0:
-                _lira = 1
-                # _lira = c.get_rate("USD", "TRY")
-                lira = float(_balance) * float(_lira)
-                lira = format(lira, ".2f")
-
             marked = format(float(future["markPrice"]), ".6f")
             change = format(change, ".8f")
             pc = percent_change(_margin, change, end="")
@@ -390,7 +358,6 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
             else:
                 log("")
 
-            # log(f" ({lira} TRY)", color="blue")
             # save_me(pc, side, future, client, _symbol, SAVE_LIMIT=50)
             # gain_control(pc, side, future, client, _symbol, price_to_consider)
             return True

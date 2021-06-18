@@ -11,7 +11,8 @@
 - Before buying it look for its BTC graph
 - Look for "W", its a good sign for a pump
 
-# TOLGA
+--------------
+
 - izle: https://www.youtube.com/watch?v=UX4Jcv8vXkk
 - yazdigin bot divergence
 bulunca wallet balance in 1% i ile pozisyon alsin, pozisyonu kapamak icin aldigi

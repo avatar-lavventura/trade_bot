@@ -25,3 +25,9 @@ symbols.pk
 .binance.pk
 
 ngrok_ip
+
+node_modules/
+
+user_data/
+
+package-lock.json

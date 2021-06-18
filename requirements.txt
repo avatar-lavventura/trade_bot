@@ -1,1 +1,2 @@
 ccxt==1.49.73
+forex-python==1.5

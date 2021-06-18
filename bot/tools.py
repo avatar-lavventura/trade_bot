@@ -42,9 +42,9 @@ def WHERE(back=0):
 
 
 def _time():
-    _format = "%Y-%m-%d %H:%M:%S"
+    format = "%Y-%m-%d %H:%M:%S"
     country_time = datetime.now(timezone("Europe/Istanbul"))
-    return country_time.strftime(_format)
+    return country_time.strftime(format)
 
 
 def timestamp_to_local(posix_time: int, zone="Europe/Istanbul"):
@@ -60,20 +60,21 @@ def utc_to_local(utc_dt, zone="Europe/Istanbul"):
     return local_tz.normalize(local_dt)
 
 
-def _colorize_traceback(string=None):
+def _colorize_traceback(message=None):
     """Logs the traceback."""
     tb_text = "".join(traceback.format_exc())
     lexer = lexers.get_lexer_by_name("pytb", stripall=True)
     # to check: print $terminfo[colors]
     formatter = formatters.get_formatter_by_name("terminal")
     tb_colored = highlight(tb_text, lexer, formatter)
-    if not string:
-        log(f"{[WHERE(1)]} ", "blue", None)
+    if not message:
+        log(f"{[WHERE(1)]} ", color="blue")
     else:
-        log(f"[{WHERE(1)} {string}] ", "blue", None, end=False)
+        log(f"[{WHERE(1)}] ", color="blue", end="")
+        log(f"E: {message}")
 
     _tb_colored = tb_colored.rstrip()
-    if not _tb_colored:
+    if _tb_colored:
         log(_tb_colored)
 
 

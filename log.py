@@ -8,6 +8,8 @@ from pathlib import Path
 from binance.client import Client
 from matplotlib import pyplot
 
+from bot.tools import log
+
 HOME = str(Path.home())
 
 x_data, y_data, z_data = [], [], []

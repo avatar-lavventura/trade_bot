@@ -1,13 +1,14 @@
 //@version=4
-strategy(title="alpy", shorttitle="alpy",
-     calc_on_order_fills=true, initial_capital=100, default_qty_value=5,
-     process_orders_on_close=true,
-     default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=3,
+strategy(title="alpy",
+     shorttitle="alpy_kazan2",
+     calc_on_order_fills=false, initial_capital=100, default_qty_value=15,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
      currency=currency.USD, commission_type=strategy.commission.percent,
      commission_value=0.1, overlay=true)
 
-fromMonth = input(5)
-fromDay = input(23)
+fromMonth = input(1)
+fromDay = input(1)
 thruMonth = input(12)
 thruDay = input(30)
 fromYear = input(2021)
@@ -18,7 +19,32 @@ start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
 
-//////////////////////////////////////////////////////////////////////////////////
+// WaveTrend
+// =========
+n1 = input(10, "Channel Length")
+n2 = input(21, "Average Length")
+obLevel1 = input(70, "Over Bought Level 1")
+obLevel2 = input(53, "Over Bought Level 2")
+osLevel1 = input(-70, "Over Sold Level 1")
+osLevel2 = input(-53, "Over Sold Level 2")
+
+ap = security(syminfo.tickerid, "5", hlc3, barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+esa = ema(ap, n1)
+d = ema(abs(ap - esa), n1)
+ci = (ap - esa) / (0.015 * d)
+tci = ema(ci, n2)
+
+wt1 = tci
+wt2 = sma(wt1,4)
+
+wt1_past_1 = wt1[1]
+wt2_past_1 = wt2[1]
+divcrosslong  = wt1 < wt2
+divcrossshort = wt1 > wt2
+_divcrosslong  = divcrosslong and wt1_past_1 > wt2_past_1
+_divcrossshort = divcrossshort and wt1_past_1 < wt2_past_1
+
+/////////////////////////////////////////////////////////////////////////////////
 n = input(title="Periods", defval=2, minval=2, type=input.integer)
 
 // UpFractal
@@ -64,28 +90,42 @@ src = security(syminfo.tickerid, "60", hlc3, barmerge.gaps_off, lookahead=barmer
 //src = hlc3
 ma = vwma(src, len)
 plot(ma, title="VWMA", color=color.blue)
-upperBandValue = input(3, title = "Short Offset")
-lowerBandValue = input(3, title= "Long Offset")
-upperBand = plot(ma*(1+upperBandValue/100), title="Upper Band", color=color.red)
-lowerBand = plot(ma*(1-lowerBandValue/100), title="Lower Band", color=color.green)
+upperBandValue = input(2, title = "Short Offset")
+lowerBandValue = input(2, title= "Long Offset")
+lower_band = ma * (1 - lowerBandValue / 100)
+higher_band = ma * (1 + upperBandValue / 100)
+upperBand = plot(higher_band, title="Upper Band", color=color.red)
+lowerBand = plot(lower_band, title="Lower Band", color=color.green)
 
+tp = input(title="Target Profit %", defval=0.50)
+_tp_long = input(0.05, title = "tp")
+_tp_short = input(0.05, title = "tp")
 posSize = abs(strategy.position_size)
+is_long = 1
+is_short = 1
 
-_value = ma*(1-lowerBandValue/100)
+_timenow = timenow / 1000
+time_long_flag = 0
+time_short_flag = 0
 
-if close < _value and downFractal
-    strategy.entry("Long", strategy.long, when=window(), alert_message="enter")
+if is_long == 1
+    if close < lower_band and downFractal // and posSize == 0// and divcrossshort// and posSize == 0
+        strategy.entry("Long", strategy.long, when=window(), alert_message="enter")
 
-_tp = input(0.05, title = "tp")
-if posSize != 0 and  strategy.position_size > 0 and strategy.position_avg_price > close and ((strategy.position_avg_price-close) / close) >= _tp
-    strategy.entry("LLong", strategy.long, qty=posSize*2, when=window())
+    if posSize != 0 and strategy.position_size > 0 and strategy.position_avg_price > close and ((strategy.position_avg_price-close) / close) >= _tp_long
+        strategy.entry("LL_dca", strategy.long, qty=posSize*2, when=window())
 
-if close >= strategy.position_avg_price * 1.005
+if is_short == 1 and close > 1.0
+    if close > higher_band and upFractal and divcrosslong // and posSize == 0
+        strategy.entry("Short", strategy.short, when=window(), alert_message="enter")
+
+    if posSize != 0 and strategy.position_size < 0 and strategy.position_avg_price < close and ((close - strategy.position_avg_price) / close) >= _tp_short
+        strategy.entry("SS_dca", strategy.short, qty=posSize*2, when=window())
+
+if strategy.position_avg_price < close and abs(close/strategy.position_avg_price) >= (1+tp/100)
     strategy.close_all(when=window())
 
-// inpTrailStop    = input(defval = 5000, title = "Trailing Stop Loss", minval = 0)
-// inpTrailOffset  = input(defval = 0, title = "Trailing Stop Loss Offset", minval = 0)å
-// strategy.exit("Exit Long", from_entry = "Long", trail_points=inpTrailStop, trail_offset=inpTrailOffset)
-// strategy.exit("Exit Short", from_entry = "Short", trail_points = inpTrailStop, trail_offset = inpTrailOffset)
+if strategy.position_size < 0 and close <= strategy.position_avg_price * 0.995
+    strategy.close_all(when=window())
 
-// {{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}},{{strategy.position_size}},{{strategy.order.alert_message}}
+// {{ticker}},{{strategy.order.action}},{{strategy.market_position}},{{strategy.prev_market_position}},{{timenow}},{{strategy.position_size}},{{strategy.order.alert_message}},{{close}}

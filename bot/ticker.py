@@ -5,11 +5,11 @@ import asyncio
 import ccxt.async_support as ccxt  # noqa: E402
 
 # https://github.com/ccxt/ccxt/tree/master/examples/py
+INITIAL_BTC_QTY = 0.0002
+SLEEP_TIME = 1
 
-SLEEP_TIME = 15
 
-
-async def main(symbol):
+async def main(symbol, default_type):
     # you can set enableRateLimit = True to enable the built-in rate limiter
     # this way you request rate will never hit the limit of an exchange
     # the library will throttle your requests to avoid that
@@ -17,7 +17,7 @@ async def main(symbol):
     flag = False
     exchange = ccxt.binance(
         {
-            "options": {"defaultType": "future"},
+            "options": {"default_type": default_type},
             "enableRateLimit": True,  # this option enables the built-in rate limiter
         }
     )
@@ -31,9 +31,9 @@ async def main(symbol):
             if not flag:
                 print(ticker)
                 flag = True
-            print(ticker["close"])
+            print(ticker["last"])
+            print(INITIAL_BTC_QTY / float(ticker["last"]))
             await asyncio.sleep(SLEEP_TIME)  # https://stackoverflow.com/a/61764275/2402577
-
         except ccxt.RequestTimeout as e:
             print("[" + type(e).__name__ + "]")
             print(str(e)[0:200])
@@ -52,5 +52,7 @@ async def main(symbol):
             break  # won't retry
 
 
-symbol = "NEO/USDT"
-asyncio.get_event_loop().run_until_complete(main(symbol))
+# symbol = "NEO/USDT"
+symbol = "NEO/BTC"
+symbol = "BTC/USDT"
+asyncio.get_event_loop().run_until_complete(main(symbol, "spot"))
