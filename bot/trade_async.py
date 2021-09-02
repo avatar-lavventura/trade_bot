@@ -122,11 +122,12 @@ class BotHelper:
 
     def get_exchange_future_timestamp(self):
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
-        self.bar_index = int(int((self.unix_timestamp_ms - 1) / 900))
+        self.current_bar_index = int(int((self.unix_timestamp_ms - 1) / 900))
 
     async def is_usdt_open(self, symbol, all_positions_log=False) -> bool:
         future_positions = await helper.exchange.future.fetch_positions()
         self.get_exchange_future_timestamp()
+        log(self.current_bar_index, "yellow")
         if all_positions_log:
             for position in future_positions:
                 initial_margin = abs(float(position["info"]["isolatedWallet"]))
@@ -399,7 +400,11 @@ class BotHelper:
                 " PASS"
             )
 
-        initial_amount = config.INITIAL_USDT_QTY / current_price
+        if self.strategy.is_buy():
+            initial_amount = config.INITIAL_USDT_QTY_LONG / current_price
+        else:  # short
+            initial_amount = config.INITIAL_USDT_QTY_SHORT / current_price
+
         self.strategy.position_size = float(self.get_initial_amount(initial_amount, "USDT"))
         self.update_position_size(current_price)
         # TODO: re-check `self.strategy.position_size * order` > INITIAL_ENTER_PRICE
@@ -503,7 +508,7 @@ class BotHelper:
                 except Exception as e:
                     _colorize_traceback(e)
             else:
-                log(f"   already open position {self.unix_timestamp_ms} {self.bar_index}")
+                log(f"   already open position {self.unix_timestamp_ms} {self.current_bar_index}")
 
     async def trade(self):
         try:
