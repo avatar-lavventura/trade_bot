@@ -1,11 +1,11 @@
 //@version=4
 strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
-    shorttitle="alpy_vix",
-    calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
-    process_orders_on_close=true, default_qty_type=strategy.cash,
-    calc_on_every_tick=true, pyramiding=100000,
-    currency=currency.USD, commission_type=strategy.commission.percent,
-    commission_value=0.1, overlay=false)
+     shorttitle="alpy_vix",
+     calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=false)
 
 is_add_alerts_live = true  // true when adding alerts for alpy-bot via script
 fromMonth = 2
@@ -33,9 +33,8 @@ len = 24
 ma = vwma(src, len)
 longVWMA  = close <= ma * (1 - lower_band_value / 100)
 shortVWMA = close >= ma * (1 + lower_band_value / 100)
-if not is_add_alerts_live
-    longVWMA  := low  <= ma * (1 - lower_band_value / 100)
-    shortVWMA := high >= ma * (1 + lower_band_value / 100)
+_longVWMA  = low  <= ma * (1 - lower_band_value / 100)
+_shortVWMA = high >= ma * (1 + lower_band_value / 100)
 
 // CM_Williams_Vix_Fix
 pd = input(22, title="LookBack Period Standard Deviation High")
@@ -65,8 +64,8 @@ closeLower  = (close <= close[1])
 closeHigher = (close >= close[1])
 buy_signal  = (col[1] == color.lime and col == color.gray) and longVWMA  and closeLower
 sell_signal = (col[1] == color.lime and col == color.gray) and shortVWMA and closeHigher and close > 1.0
-// buy_signal  := (col[1] == color.lime and col == color.gray) and longVWMA  and (low <= close[1])
-// sell_signal := (col[1] == color.lime and col == color.gray) and shortVWMA and (high => close[1])
+// buy_signal  := (col[1] == color.lime and col == color.gray) and _longVWMA  and (low <= close[1])
+// sell_signal := (col[1] == color.lime and col == color.gray) and _shortVWMA and (high >= close[1])
 
 pos_size = abs(strategy.position_size)
 tp = input(title="Target Profit %", defval=0.5)  // %5

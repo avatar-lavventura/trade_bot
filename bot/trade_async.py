@@ -122,11 +122,12 @@ class BotHelper:
 
     def get_exchange_future_timestamp(self):
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
-        self.bar_index = int(int((self.unix_timestamp_ms - 1) / 900))
+        self.current_bar_index = int(int((self.unix_timestamp_ms - 1) / 900))
 
     async def is_usdt_open(self, symbol, all_positions_log=False) -> bool:
         future_positions = await helper.exchange.future.fetch_positions()
         self.get_exchange_future_timestamp()
+        log(self.current_bar_index, "yellow")
         if all_positions_log:
             for position in future_positions:
                 initial_margin = abs(float(position["info"]["isolatedWallet"]))
@@ -503,7 +504,7 @@ class BotHelper:
                 except Exception as e:
                     _colorize_traceback(e)
             else:
-                log(f"   already open position {self.unix_timestamp_ms} {self.bar_index}")
+                log(f"   already open position {self.unix_timestamp_ms} {self.current_bar_index}")
 
     async def trade(self):
         try:
