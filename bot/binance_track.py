@@ -47,9 +47,9 @@ import requests
 from binance.client import Client
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
+from ebloc_broker.broker._utils.tools import log, run
 
 from bot.client_helper import ClientHelper
-from ebloc_broker.broker._utils.tools import log, run
 
 HOME = str(Path.home())
 
