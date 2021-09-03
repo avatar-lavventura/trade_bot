@@ -42,7 +42,7 @@ stock drops 50%, your stop will be triggered at the first available bid price at
 1. Determine how much of your total capital you're willing to risk per trade
 2. Place your stop loss on the chart
 3. Determine your position size (the number of shares you can buy):
-   [calculator](https://chartyourtrade.com/position-size-calculator)
+   https://chartyourtrade.com/position-size-calculator
 
 Trading is hard. Don't trade if you don't have an edge. Deciding when to enter a
 trade, where to put a stop loss and when to exit requires skills.

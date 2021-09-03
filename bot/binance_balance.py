@@ -4,15 +4,15 @@ import asyncio
 import os
 import time
 
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
+
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
 bot_async = BotHelperAsync()
-is_start = True
 
 
 def future_stats(usdt_balance, unix_timestamp_ms):
@@ -138,7 +138,6 @@ async def process_main(channel=None):
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
-    global is_start
     if channel:
         bot_async.channel = channel
 
@@ -147,7 +146,7 @@ async def process_main(channel=None):
     unix_timestamp_ms = helper.exchange.get_future_timestamp()
     try:
         *_, usdt_balance = await bot_async.spot_balance()
-        if usdt_balance > 0.0 and not is_start:
+        if usdt_balance > 0.0 and not helper.is_start:
             log("")
 
         usdt_balance += float(bot_async.futures_balance["total"]["USDT"])
@@ -155,13 +154,12 @@ async def process_main(channel=None):
         # TODO: pozisyonlarin o anki son fiyati olmali?
         future_positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(future_positions, usdt_balance, unix_timestamp_ms)
-        if not is_printed and not is_start:
+        if not is_printed and not helper.is_start:
             delete_last_line()
 
-        if not is_printed or is_start:
+        if not is_printed or helper.is_start:
             future_stats(usdt_balance, unix_timestamp_ms)
-            is_start = False
-
+            helper.is_start = False
     except KeyError:
         _exit("E: KeyError")
         os._exit(0)  # kill the process

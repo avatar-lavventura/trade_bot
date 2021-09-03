@@ -3,11 +3,11 @@
 import asyncio
 
 from _mongodb import Mongo
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _timestamp, log
 from pymongo import MongoClient
 
 from bot.config import config
 from bot.my_balance import fetch_balance, get_silver
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _timestamp, log
 
 mc = MongoClient()
 mongoDB = Mongo(mc, mc["trader_bot"]["timestamp"])
@@ -26,7 +26,7 @@ async def main():
     config.config["portfolio"]["_TOTAL"] = float(total_balance)
     log(f"total_balance={total_balance}")
     mongoDB.add_item(time_now, config.config["portfolio"])
-    log("success")
+    log("SUCCESS")
 
 
 if __name__ == "__main__":

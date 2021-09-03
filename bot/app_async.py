@@ -4,10 +4,9 @@ import asyncio
 import logging
 
 import quart.flask_patch  # noqa
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit
 from flask import abort, request  # noqa
 from quart import Quart
-
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
@@ -71,22 +70,23 @@ async def notify():  # noqa
 
 @app.route("/webhook", methods=["POST"])
 async def webhook():
-    if request.method == "POST":
-        data_msg = request.get_data(as_text=True)
-        if data_msg:
-            try:
-                await do_trade(data_msg.rstrip())
-                return "OK"
-            except KeyError:
-                _exit("==========================EXCEPTION catched==========================")
-            except Exception as e:
-                _colorize_traceback(e)
-
-            return "", 200
-        else:
-            abort(403)
-    else:
+    """Receive webhook from tradingview."""
+    if request.method != "POST":
         abort(400)
+
+    data_msg = request.get_data(as_text=True)
+    if data_msg:
+        try:
+            await do_trade(data_msg.rstrip())
+            return "OK"
+        except KeyError:
+            _exit("==========================EXCEPTION catched==========================")
+        except Exception as e:
+            _colorize_traceback(e)
+
+        return "", 200
+    else:
+        abort(403)
 
 
 def main():

@@ -4,10 +4,10 @@ import asyncio
 import time
 from pathlib import Path
 
+from ebloc_broker.broker._utils.tools import _colorize_traceback, log
 from user_setup import check_binance_obj
 
 from bot.bot_helper_async import BotHelperAsync
-from ebloc_broker.broker._utils.tools import _colorize_traceback, log
 
 HOME = str(Path.home())
 bot_async = BotHelperAsync()
@@ -16,7 +16,6 @@ bot_async = BotHelperAsync()
 async def main():
     """Set levereage for USDT and BUSD."""
     await bot_async._load_markets()
-
     client, _ = check_binance_obj()
     futures = client.futures_position_information()
     for future in futures:

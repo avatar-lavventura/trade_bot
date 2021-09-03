@@ -6,11 +6,11 @@ from time import sleep
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 from pymongo import MongoClient
 
 from bot import helper
 from bot.config import config
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 
 is_trade = True
 
@@ -400,7 +400,11 @@ class BotHelper:
                 " PASS"
             )
 
-        initial_amount = config.INITIAL_USDT_QTY / current_price
+        if self.strategy.is_buy():
+            initial_amount = config.INITIAL_USDT_QTY_LONG / current_price
+        else:  # short
+            initial_amount = config.INITIAL_USDT_QTY_SHORT / current_price
+
         self.strategy.position_size = float(self.get_initial_amount(initial_amount, "USDT"))
         self.update_position_size(current_price)
         # TODO: re-check `self.strategy.position_size * order` > INITIAL_ENTER_PRICE

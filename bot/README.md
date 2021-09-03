@@ -8,9 +8,11 @@
 - [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)
 --------------------------------------------------------------------------------
 # [Nginx setup](http://alpyr.duckdns.org:81/)
+```
 admin@example.com
 changeme
-
+```
+--------------------------------------------------------------------------------
 ```
 sudo ufw allow 80
 sudo ufw allow 81
@@ -86,3 +88,11 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 - [fake gmail address generator and inbox](https://maildim.com/)
 - TV_username_last_used => `roxanroxanroxan_4`
 - [Binance Minimum Trading Rules](https://liquidation.atsutane.net/calc)
+
+# Git Push:
+```
+# https://github.com/newren/git-filter-repo#how-do-i-install-it
+git filter-repo --invert-paths --path '.DS_Store' --use-base-name
+git remote add origin https://github.com/avatar-lavventura/trade_bot.git
+git push --set-upstream origin dev -f
+```

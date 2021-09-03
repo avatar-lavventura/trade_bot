@@ -2,9 +2,10 @@
 
 import asyncio
 
+from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
+
 from bot import helper
 from bot.config import config
-from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
 
 
 class TakeProfit:
@@ -22,7 +23,12 @@ class TakeProfit:
     def get_profit_amount(self, side, amount=0.0) -> float:
         amount = abs(float(amount))
         index = 0
-        if amount > config.INITIAL_USDT_QTY + config.INITIAL_USDT_QTY / 2:
+        if side == "long":
+            quantity = config.INITIAL_USDT_QTY_LONG
+        elif side == "short":
+            quantity = config.INITIAL_USDT_QTY_SHORT
+
+        if amount > (quantity + quantity / 2):
             # if the initial margin is more than first opened position amount
             index = 1
 

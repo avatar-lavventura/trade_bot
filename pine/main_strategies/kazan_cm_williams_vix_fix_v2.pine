@@ -1,0 +1,96 @@
+//@version=4
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy_vix",
+     calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=false)
+
+is_add_alerts_live = true  // true when adding alerts for alpy-bot via script
+fromMonth = 2
+fromDay   = 1
+thruMonth = 12
+thruDay   = 30
+fromYear  = 2021
+thruYear  = 2021
+testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
+testPeriodStop  = timestamp(thruYear, thruMonth, thruDay, 0, 0)
+start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+is_long  = strategy.position_size > 0
+is_short = strategy.position_size < 0
+_timenow = timenow / 1000
+SLEEP_SECONDS = 90
+
+// VWMA
+// ====
+lower_band_value = input(3.0, title = "Long Offset")
+upper_band_value = input(3.0, title = "Short Offset")
+src = hlc3
+len = 24
+ma = vwma(src, len)
+longVWMA  = close <= ma * (1 - lower_band_value / 100)
+shortVWMA = close >= ma * (1 + lower_band_value / 100)
+_longVWMA  = low  <= ma * (1 - lower_band_value / 100)
+_shortVWMA = high >= ma * (1 + lower_band_value / 100)
+
+// CM_Williams_Vix_Fix
+pd = input(22, title="LookBack Period Standard Deviation High")
+bbl = input(20, title="Bolinger Band Length")
+mult = input(2.0    , minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+lb = input(50  , title="Look Back Period Percentile High")
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+pl = input(1.01, title="Lowest Percentile - 1.10=90%, 1.05=95%, 1.01=99%")
+hp = input(false, title="Show High Range - Based on Percentile and LookBack Period?")
+sd = input(false, title="Show Standard Deviation Line?")
+wvf = ((highest(close, pd)-low)/(highest(close, pd)))*100
+sDev = mult * stdev(wvf, bbl)
+midLine = sma(wvf, bbl)
+_upperBand = midLine + sDev
+rangeHigh = (highest(wvf, lb)) * ph
+rangeLow = (lowest(wvf, lb)) * pl
+col = wvf >= _upperBand or wvf >= rangeHigh ? color.lime : color.gray
+plot(hp and rangeHigh ? rangeHigh : na, title="Range High Percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
+plot(hp and rangeLow ? rangeLow : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(sd and _upperBand ? _upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
+plot(wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=col)
+
+// Alerts
+//=======
+//: Sell signal applies only for USDT-pairs using "close > 1.0"
+closeLower  = (close <= close[1] * 0.999)  // (close <= close[1])
+closeHigher = (close >= close[1] * 1.001)  // (close >= close[1])
+buy_signal  = (col[1] == color.lime and col == color.gray) and longVWMA  and closeLower
+sell_signal = (col[1] == color.lime and col == color.gray) and shortVWMA and closeHigher and close > 1.0
+// buy_signal  := (col[1] == color.lime and col == color.gray) and _longVWMA  and (low <= close[1])
+// sell_signal := (col[1] == color.lime and col == color.gray) and _shortVWMA and (high >= close[1])
+pos_size = abs(strategy.position_size)
+tp = input(title="Target Profit %", defval=0.5)  // %5
+_tp_long  = 0.05
+_tp_short = 0.05
+if strategy.position_size[0] != 0
+   // close position for alpy-bot new incoming alerts
+    if bar_index > abs(strategy.position_size) or (col[1] == color.gray and col == color.gray)
+        strategy.close_all(when=window())
+
+if buy_signal
+    if strategy.opentrades[0] == 0 or is_short
+        strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message="enter")
+    else
+        if bar_index > abs(strategy.position_size)
+            if strategy.position_size[0] != 0
+                strategy.close_all(when=window())
+            else
+                strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message="enter")
+
+if sell_signal
+    if strategy.opentrades[0] == 0 or is_long
+        strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message="enter")
+    else
+        if bar_index > abs(strategy.position_size)
+            if strategy.position_size[0] != 0
+                strategy.close_all(when=window())
+            else
+                strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message="enter")
