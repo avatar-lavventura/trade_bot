@@ -1,0 +1,9 @@
+* alpy
+** TODO Spot tarafinda 4h cross sinyal 3AM oncesi gelirse al
+** TODO PULL already open positions from yaml that is written by binance_balance.py
+** TODO  `bar_index` on pine strategy
+** TODO save timestamp for orders to record its bar_index
+or compare current bar_index value with latest position's bar index.
+** TODO Carry usdt from spot if there not enough in futures
+** TODO Give alert if 10% is locked and alert came for that pair
+** TODO  futuresda olmayip spotta olan usdt pairlerini cikar

@@ -1,3 +1,0 @@
-- Ilk order >7$ dan fazla ise iptal et KSMUSDT min 0.1 20$ lik acabiliyor
-- binance balcane date koy
--  * 2021-06-28 17:43:54 ZRXUSDTPERP,sell,enter,0.694  ... dan sonra acik pozlari da goster
