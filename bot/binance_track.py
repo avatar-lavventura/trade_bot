@@ -44,12 +44,11 @@ from pathlib import Path
 
 import binance_lib
 import requests
-from binance.client import Client
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
-from ebloc_broker.broker._utils.tools import log, run
 
-from bot.client_helper import ClientHelper
+from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils.tools import log, run
 
 HOME = str(Path.home())
 
@@ -131,51 +130,18 @@ def get_balance_margin_USDT():
     return 0
 
 
-def check_binance_obj():
-    global client
-    global client_helper
-    try:
-        client = load_obj("binance")
-    except:
-        _file = f"{HOME}/.binance.txt"
-        if not os.path.exists(_file):
-            with open(_file, "w"):
-                pass
-
-        file1 = open(_file, "r")
-        Lines = file1.readlines()
-        api_key = str(Lines[0].strip())
-        api_secret = str(Lines[1].strip())
-        client = Client(api_key, api_secret)
-        save_obj("binance", client)
-
-    try:
-        client_helper = ClientHelper(client)
-        balances = client.get_account()
-        return client, balances
-    except requests.exceptions.ConnectionError:
-        log("ConnectionError", "red")
-        sys.exit()
-
-
 def _format(value, decimal=2):
     return format(float(value), "." + str(decimal) + "f")
 
 
-def _trade(client, usdt_balance, is_trade=True):
-    _symbol = None
+def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_income):
     seperate_line_line = True
-    if not is_log:
-        block_print()
-
-    com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
-    sys.exit(1)  # delete to continue ====
+    _symbol = None
     futures_usd = client_helper.get_futures_usdt(is_both=False)
     margin_usdt = get_balance_margin_USDT()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
     log(f"==> Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ", end="")
     log(f"TOTAL={_format(total_balance)}", "green")
-
     if float(futures_usd) > FUTURE_AMOUNT_TO_TRADE:
         try:
             amount = float(futures_usd) - FUTURE_AMOUNT_TO_TRADE
@@ -268,6 +234,14 @@ def _trade(client, usdt_balance, is_trade=True):
             time.sleep(lag_time * 60)
         else:
             time.sleep(0.25)
+
+
+def _trade(client, usdt_balance, is_trade=True):
+    if not is_log:
+        block_print()
+
+    com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
+    # _trade_cont(funding_dict, daily_progress, latest_symbol_income)
 
 
 def block_print():
@@ -410,10 +384,6 @@ def save_obj(name, syms=None):
 
 def load_obj(name):
     _file = f".{name}.pk"
-    if not os.path.exists(_file):
-        with open(_file, "w"):
-            pass
-
     with open(_file, "rb") as f:
         return pickle.load(f)
 
@@ -515,6 +485,7 @@ def _run():
 
 if __name__ == "__main__":
     client, balances = check_binance_obj()
+    # client.futures_account_balance()[1]["withdrawAvailable"]
     for balance in balances["balances"]:
         if balance["asset"] == "USDT":
             usdt_balance = balance["free"]
@@ -524,7 +495,6 @@ if __name__ == "__main__":
     print(client.get_asset_balance(asset=MAIN_ASSET))
     info = client.get_account()
     free_asset = get_free_balance()
-
     # margin ===============================================
     # print(client.get_open_margin_orders(symbol='ETHBTC'))
     # for d in client.get_margin_account()['userAssets']:

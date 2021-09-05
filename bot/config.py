@@ -19,12 +19,12 @@ class Config:
         self.config = Yaml("config.yaml")
         self.timestamp = Yaml("timestamp.yaml")
         self.goal = Yaml("goal.yaml")
+        self.status = Yaml("status.yaml")
         #
         self.TRBINANCE_USDT = self.config["TRBINANCE"]["USDT"]
         #
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
         self.TP = self.config["setup"]["TP"]
-        self.SLEEP_TIME = self.config["setup"]["SLEEP_TIME"]
         self.LOCKED_PERCENT_LIMIT_USDT = self.config["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
         self.LOCKED_PERCENT_LIMIT_SPOT = self.config["setup"]["LOCKED_PERCENT_LIMIT_SPOT"]
         self.PERCENT_CHANGE_TO_ADD_USDT = self.config["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]
