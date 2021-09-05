@@ -6,3 +6,5 @@
 or compare current bar_index value with latest position's bar index.
 ** TODO Carry usdt from spot if there not enough in futures
 ** TODO Give alert if 10% is locked and alert came for that pair
+** TODO Futuresda olmayip spotta olan usdt pairlerini cikar
+** TODO run_app log disable writing into a file?

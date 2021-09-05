@@ -3,13 +3,13 @@
 import asyncio
 import os
 import time
-
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
+from typing import Dict
 
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
 bot_async = BotHelperAsync()
@@ -17,7 +17,7 @@ bot_async = BotHelperAsync()
 
 def future_stats(usdt_balance, unix_timestamp_ms):
     log(f" * Futures={format(usdt_balance, '.2f')}", end="")
-    log("_______________________________________", "blue", end="")
+    log("___________________________________________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
 
@@ -36,7 +36,7 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
 
     Delta change track is applied. Rounding may cause some error. ex: 1.2497 ~= 1.25
     """
-    cancel_count = {}
+    cancel_count = {}  # type: Dict[str, int]
     position_amt = abs(position_amt)
     limit_price = float(limit_price)
     open_orders = await helper.exchange.future.fetch_open_orders(symbol)
@@ -72,12 +72,14 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
 async def process_future_positions(future_positions, usdt_balance, unix_timestamp_ms):
     print_flag = False
     usdt_balance += config.TRBINANCE_USDT  # USDT on trbinance is added
+    count = 0
     for position in future_positions:
         #: Indicates total locked amount without applying any gain or loss
         isolated_wallet = abs(float(position["info"]["isolatedWallet"]))
         #: Indicates amount of collateral that is locked up
         initial_margin = abs(float(position["info"]["initialMargin"]))
         if isolated_wallet > 0.0:
+            count += 1
             if not print_flag:
                 future_stats(usdt_balance, unix_timestamp_ms)
                 print_flag = True
@@ -106,7 +108,7 @@ async def process_future_positions(future_positions, usdt_balance, unix_timestam
             log(f"{_str} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", end="")
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
-            asset_percent_change = percent_change(initial=entry_price, change=change, is_arrow_print=False, end="")
+            asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
             per = (100.0 * initial_margin) / usdt_balance
             _per = format(per, ".2f")
             log("| ", "white", end="")
@@ -125,11 +127,13 @@ async def process_future_positions(future_positions, usdt_balance, unix_timestam
 
                     log(order["info"])
                 else:
-                    log("\n    ", end="")
-                    log(f"Warning: Total locked amount exceeds {_per}%", end="")
+                    if float(_per) < 100:
+                        log("\n    ", end="")
+                        log(f"Warning: Total locked amount is more than {_per}%", end="")
 
             await cancel_check_orders(symbol, limit_price, _side, entry_price, position_amt)
 
+    config.status["futures"]["pos_count"] = count
     return print_flag
 
 
@@ -149,15 +153,17 @@ async def process_main(channel=None):
         if usdt_balance > 0.0 and not helper.is_start:
             log("")
 
+        config.status["futures"]["free"] = float(bot_async.futures_balance["free"]["USDT"]) + usdt_balance
         usdt_balance += float(bot_async.futures_balance["total"]["USDT"])
         usdt_balance += float(bot_async.futures_balance["total"]["BUSD"])
+        # TODO: write into a file + spot USDT
         # TODO: pozisyonlarin o anki son fiyati olmali?
         future_positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(future_positions, usdt_balance, unix_timestamp_ms)
         if not is_printed and not helper.is_start:
             delete_last_line()
 
-        if not is_printed or helper.is_start:
+        if not is_printed and helper.is_start:
             future_stats(usdt_balance, unix_timestamp_ms)
             helper.is_start = False
     except KeyError:
@@ -168,12 +174,20 @@ async def process_main(channel=None):
         await asyncio.sleep(30)
 
 
-async def main():
+async def _sleep(sleep_time: int = 1):
+    """Sleep async.
+
+    __ https://stackoverflow.com/a/61764275/2402577
+    """
+    await asyncio.sleep(sleep_time)
+
+
+async def _main():  # noqa
     while True:
         try:
             await process_main()
-            # https://stackoverflow.com/a/61764275/2402577
-            await asyncio.sleep(bot_async.SLEEP_TIME)
+            # _sleep(20)
+
         except Exception as e:
             _colorize_traceback(e)
         finally:
@@ -184,12 +198,12 @@ async def main():
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(main())
+        loop.run_until_complete(_main())
     except KeyboardInterrupt:
         loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
         time.sleep(120)
-        loop.run_until_complete(main())
+        loop.run_until_complete(_main())
     finally:
         log("Program finished.", "green")

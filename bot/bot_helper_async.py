@@ -2,10 +2,9 @@
 
 import asyncio
 
-from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
-
 from bot import helper
 from bot.config import config
+from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
 
 
 class TakeProfit:
@@ -25,7 +24,7 @@ class TakeProfit:
         index = 0
         if side == "long":
             quantity = config.INITIAL_USDT_QTY_LONG
-        elif side == "short":
+        else:  # side == "short":
             quantity = config.INITIAL_USDT_QTY_SHORT
 
         if amount > (quantity + quantity / 2):
@@ -34,7 +33,7 @@ class TakeProfit:
 
         if side == "long":
             return self.TAKE_PROFIT_LONG[index]
-        elif side == "short":
+        else:  # side == "short":
             return self.TAKE_PROFIT_SHORT[index]
 
 
@@ -43,7 +42,7 @@ TP = TakeProfit()
 
 class BotHelperAsync:
     def __init__(self):
-        self.SLEEP_TIME = config.SLEEP_TIME
+        pass
 
     async def close(self):
         """Close async function.
@@ -96,6 +95,7 @@ class BotHelperAsync:
         """Calculate USDT balance in spot."""
         usdt_amount = 0.0
         sum_btc = 0.0
+        count = 0
         balances = await helper.exchange.spot.fetch_balance()
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
@@ -105,6 +105,8 @@ class BotHelperAsync:
                     sum_btc += quantity
                 else:
                     if asset not in ["USDT", "BNB"]:
+                        # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
+                        count += 1
                         price = await self.spot_fetch_ticker(asset)
                         sum_btc += quantity * float(price)
                     elif asset == "USDT":
@@ -125,6 +127,7 @@ class BotHelperAsync:
                 except:
                     pass
 
+        config.status["spot"]["pos_count"] = count
         return own_usd, float(usdt_amount)
 
     async def spot_order(self, quantity, symbol, side):

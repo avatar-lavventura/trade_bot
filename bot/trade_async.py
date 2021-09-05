@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
 
+import re
 import time
 from time import sleep
 
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 from pymongo import MongoClient
 
 from bot import helper
+from bot.client_helper import DiscordClient
 from bot.config import config
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 
 is_trade = True
 
 
 class Strategy:
     def __init__(self, data_msg, is_print=True):
+        self.unix_timestamp_ms: "int" = 0
         if "enter" in data_msg:
             if is_print:
                 log(f" * {_time()} ", end="")
-                _join = data_msg.split(", (", 1)[0].split(",")[0:4]
-                log(",".join(_join), "green")
+                join = data_msg.split(", (", 1)[0].split(",")[0:4]
+                self.current_bar_index = re.search("@ (.*)filled", data_msg).group(1)
+                log(f"{','.join(join)},{self.current_bar_index}", "green")
 
         try:
             self.chunks = data_msg.split(",")
@@ -65,7 +69,7 @@ class BotHelper:
         self.strategy = Strategy("")
         self.bot_async = BotHelperAsync()
         if discord_client:
-            self.discord_client = discord_client
+            self.discord_client: "DiscordClient" = discord_client
 
     async def symbol_price(self, symbol, default_type):
         try:
@@ -95,6 +99,8 @@ class BotHelper:
         elif self.strategy.side == "SELL":
             return "BUY"
 
+        return "FLAT"
+
     def _futures_cancel_order(self):
         """Cancel if already opened orders."""
         orders = self.client.futures_get_all_orders(symbol=self.strategy.symbol.replace("/", ""), type="LIMIT")
@@ -113,7 +119,6 @@ class BotHelper:
         for balance in balances["balances"]:
             if balance["asset"] not in ["BTC", "BNB", "USDT"]:
                 if float(balance["locked"]) > 0.0 or float(balance["free"]) > 0.0:
-                    # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
                     btc_open_position_size += 1
                     if not flag:
                         flag = True
@@ -122,12 +127,12 @@ class BotHelper:
 
     def get_exchange_future_timestamp(self):
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
-        self.current_bar_index = int(int((self.unix_timestamp_ms - 1) / 900))
+        self.current_bar_index_local = int(int((self.unix_timestamp_ms - 1) / 900))
 
     async def is_usdt_open(self, symbol, all_positions_log=False) -> bool:
         future_positions = await helper.exchange.future.fetch_positions()
         self.get_exchange_future_timestamp()
-        log(self.current_bar_index, "yellow")
+        # log(self.current_bar_index, "yellow")
         if all_positions_log:
             for position in future_positions:
                 initial_margin = abs(float(position["info"]["isolatedWallet"]))
@@ -143,6 +148,7 @@ class BotHelper:
         return False
 
     async def get_usdt_open_position_count(self, is_print=False) -> int:
+        """Return number of open positions."""
         count = 0
         try:
             future_positions = await helper.exchange.future.fetch_positions()
@@ -442,7 +448,7 @@ class BotHelper:
             except Exception as e:
                 _colorize_traceback(e)
 
-    def get_open_position_side(self, _symbol) -> bool:
+    def get_open_position_side(self, _symbol) -> str:
         futures = self.client.futures_position_information(symbol=_symbol)
         for future in futures:
             amount = future["positionAmt"]
@@ -472,13 +478,12 @@ class BotHelper:
 
     async def check_on_going_positions(self, strategy) -> bool:
         if strategy.market == "USDTPERP":
-            usdt_open_position_size = await self.get_usdt_open_position_count()
-            if usdt_open_position_size >= config.USDT_MAX_POSITION_NUMBER:
+            print(config.status["futures"]["pos_count"])  # delete me
+            if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_NUMBER:
                 # log(f"Warning: There is already ongoing {USDT_MAX_POSITION_NUMBER} of positions.")
                 return True
         elif strategy.market == "BTC":
-            btc_open_position_size = self.get_btc_open_positions()
-            if btc_open_position_size >= config.SPOT_MAX_POSITION_NUMBER:
+            if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION_NUMBER:
                 # log(f"Warning: There is already ongoing {SPOT_MAX_POSITION_NUMBER} of positions")
                 return True
         return False
@@ -508,7 +513,7 @@ class BotHelper:
                 except Exception as e:
                     _colorize_traceback(e)
             else:
-                log(f"   already open position {self.unix_timestamp_ms} {self.current_bar_index}")
+                log(f"   already open position {self.unix_timestamp_ms}")
 
     async def trade(self):
         try:
@@ -519,19 +524,26 @@ class BotHelper:
             await helper.exchange.future.close()
             await helper.exchange.spot.close()
 
-    async def trade_main(self, data_msg, discord_client=None):
-        if "enter_" in data_msg:
-            log(data_msg, "green")
-            await self.discord_client.send_msg(data_msg)
+    async def trade_main(self, data_msg):
+        if "alert_" in data_msg:
+            log(f"[{_time()}] ", "cyan", end="")
+            tv_position_size = re.search("@ (.*)filled", data_msg).group(1)
+            trimmed_msg = f"{data_msg.split(', (', 1)[0]},{tv_position_size}"
+            log(trimmed_msg, is_bold=True)
+            await self.discord_client.send_msg(trimmed_msg)
             return True
 
         strategy = Strategy(data_msg, is_print=True)
         try:
-            strategy.position_alert_msg
-        except:
+            strategy.position_alert_msg  # noqa
+            self.pre_check()
+        except Exception as e:
+            if data_msg:
+                log(e)
+
             return True
 
-        output = await self.check_on_going_positions(strategy)
+        output = await self.check_on_going_positions(strategy)  # TODO fetch from binance_balance.py
         if "enter" not in strategy.position_alert_msg or strategy.symbol == "TEST" or output:
             pass
         elif strategy.market == "BTC" and strategy.is_sell():
@@ -540,3 +552,12 @@ class BotHelper:
             await self._trade(strategy)
 
         return True
+
+    def pre_check(self):
+        """Fast to read from usdt.yaml.
+
+        It is read from the file that is updated from binance_balance.py
+        """
+        free_usdt = config.status["futures"]["free"]
+        if free_usdt < config.INITIAL_USDT_QTY_LONG or free_usdt < config.INITIAL_USDT_QTY_SHORT:
+            raise Exception(f"Not enough free USDT({free_usdt})")

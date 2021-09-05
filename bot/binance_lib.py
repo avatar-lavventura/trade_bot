@@ -15,6 +15,8 @@ import sys
 import time
 
 from dateutil.parser import parse
+from forex_python.converter import CurrencyRates
+
 from ebloc_broker.broker._utils.tools import (
     _colorize_traceback,
     _percent_change,
@@ -23,14 +25,10 @@ from ebloc_broker.broker._utils.tools import (
     timestamp_to_local,
     utc_to_local,
 )
-from forex_python.converter import CurrencyRates
 
 c = CurrencyRates()
-
-TOTAL_BALANCE = 5000
-GAIN_LIMIT = 10
 START_POSITION = False
-
+TOTAL_BALANCE = 1000
 _arrow = "=============="
 arrow_in = _arrow + ">"
 arrow_out = "<" + _arrow

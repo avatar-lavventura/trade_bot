@@ -5,6 +5,7 @@ from email.utils import parsedate
 from pathlib import Path
 
 import ccxt.async_support as ccxt
+
 from ebloc_broker.broker._utils.tools import unix_time_millis
 from ebloc_broker.broker._utils.yaml import Yaml
 
@@ -18,9 +19,10 @@ class Exchange:
             "options": {"adustForTimeDifference": True},
             # "verbose": True,
         }
-        helper_cfg = None
         self.future = ccxt.binanceusdm(ops)
         self.spot = ccxt.binance(ops)
+        ops = None
+        helper_cfg = None
 
     def get_future_timestamp(self):
         parsed_date = parsedate(self.future.last_response_headers["Date"])

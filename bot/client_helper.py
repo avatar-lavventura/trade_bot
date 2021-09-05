@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import discord
+
 from ebloc_broker.broker._utils.tools import log
 from ebloc_broker.broker._utils.yaml import Yaml
 
@@ -18,7 +19,7 @@ class DiscordClient:
         self.TOKEN = _config["discord"]["TOKEN"]
         self.channel_id = _config["discord"]["CHANNEL_ALPY"]
 
-    async def send_message(self, msg="OK"):
+    async def send_msg(self, msg="OK"):
         await self.bot.wait_until_ready()
         channel = self.bot.get_channel(self.channel_id)
         await channel.send(msg)
@@ -40,17 +41,17 @@ class ClientHelper:
     def transfer_spot_to_margin(self, amount):
         self.client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
 
-    def get_balance_margin_USDT(self):
+    def get_balance_margin_USDT(self) -> float:
         try:
             _len = len(self.client.get_margin_account()["userAssets"])
             for x in range(_len):
                 if self.client.get_margin_account()["userAssets"][x]["asset"] == "USDT":
-                    balance_USDT = self.lient.get_margin_account()["userAssets"][x]["free"]
+                    balance_USDT = self.client.get_margin_account()["userAssets"][x]["free"]
                     return float(balance_USDT)
         except:
             pass
 
-        return 0
+        return 0.0
 
     def spot_balance(self, balances=None):
         sum_btc = 0.0
