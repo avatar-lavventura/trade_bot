@@ -3,14 +3,11 @@
 import os
 import pickle
 import sys
-from pathlib import Path
-
 import requests
 from binance.client import Client
-
-HOME = str(Path.home())
+from pathlib import Path
 client = None
-
+HOME = str(Path.home())
 
 def save_obj(name, client=None):
     _file = f".{name}.pk"
