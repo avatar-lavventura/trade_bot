@@ -483,15 +483,8 @@ def _run():
             time.sleep(60)
 
 
-if __name__ == "__main__":
-    client, balances = check_binance_obj()
-    # client.futures_account_balance()[1]["withdrawAvailable"]
-    for balance in balances["balances"]:
-        if balance["asset"] == "USDT":
-            usdt_balance = balance["free"]
-            break
-
-    _trade(client, usdt_balance, is_trade)
+def trade_cont(client, balances):
+    global msg
     print(client.get_asset_balance(asset=MAIN_ASSET))
     info = client.get_account()
     free_asset = get_free_balance()
@@ -504,7 +497,6 @@ if __name__ == "__main__":
     # ua = {d['asset']: d for d in data['userAssets']}
     # print(ua['BTC']['free'])
     # ======================================================
-    total = 0
     sum_btc = 0.0
     for _balance in balances["balances"]:
         asset = _balance["asset"]
@@ -550,6 +542,17 @@ if __name__ == "__main__":
         msg = []
         time.sleep(SLEEP_DURATION)
 
+
+if __name__ == "__main__":
+    client, balances = check_binance_obj()
+    # client.futures_account_balance()[1]["withdrawAvailable"]
+    for balance in balances["balances"]:
+        if balance["asset"] == "USDT":
+            usdt_balance = balance["free"]
+            break
+
+    _trade(client, usdt_balance, is_trade)
+    # trade_cont(client, balances)
 
 # try:
 #     details = client.get_max_margin_transfer(asset="BTC")

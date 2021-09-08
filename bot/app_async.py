@@ -64,9 +64,7 @@ async def startup():
 
 @app.route("/")
 async def notify():  # noqa
-    msg = "OK"
-    print(msg)
-    return msg
+    return "OK"
 
 
 @app.route("/webhook", methods=["POST"])
@@ -78,7 +76,9 @@ async def webhook():
     data_msg = request.get_data(as_text=True)
     if data_msg:
         try:
-            await do_trade(data_msg.rstrip())
+            if "enter" in data_msg or "alert" in data_msg:
+                await do_trade(data_msg.rstrip())
+
             return "OK"
         except KeyError:
             _exit("==========================EXCEPTION catched==========================")
