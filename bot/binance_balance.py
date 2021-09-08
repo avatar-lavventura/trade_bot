@@ -27,8 +27,7 @@ async def _create_limit__order(symbol, position_amt, limit_price, side):
     elif side == "SELL":
         order = await helper.exchange.future.create_limit_buy_order(symbol, position_amt, limit_price)
 
-    log("")
-    log(order["info"])
+    log(f"\n{order['info']}")
 
 
 async def cancel_check_orders(symbol, limit_price, side, entry_price, position_amt) -> None:
@@ -156,14 +155,13 @@ async def process_main(channel=None):
         config.status["futures"]["free"] = float(bot_async.futures_balance["free"]["USDT"]) + usdt_balance
         usdt_balance += float(bot_async.futures_balance["total"]["USDT"])
         usdt_balance += float(bot_async.futures_balance["total"]["BUSD"])
-        # TODO: write into a file + spot USDT
         # TODO: pozisyonlarin o anki son fiyati olmali?
         future_positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(future_positions, usdt_balance, unix_timestamp_ms)
         if not is_printed and not helper.is_start:
             delete_last_line()
 
-        if not is_printed and helper.is_start:
+        if not is_printed or helper.is_start:
             future_stats(usdt_balance, unix_timestamp_ms)
             helper.is_start = False
     except KeyError:
@@ -186,8 +184,7 @@ async def _main():  # noqa
     while True:
         try:
             await process_main()
-            # _sleep(20)
-
+            await _sleep(22)
         except Exception as e:
             _colorize_traceback(e)
         finally:

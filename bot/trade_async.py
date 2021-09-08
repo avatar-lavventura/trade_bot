@@ -476,17 +476,15 @@ class BotHelper:
         except Exception as e:
             log(str(e), "yellow")
 
-    async def check_on_going_positions(self, strategy) -> bool:
-        if strategy.market == "USDTPERP":
-            print(config.status["futures"]["pos_count"])  # delete me
+    def check_on_going_positions(self):
+        if self.strategy.market == "USDTPERP":
             if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_NUMBER:
                 # log(f"Warning: There is already ongoing {USDT_MAX_POSITION_NUMBER} of positions.")
-                return True
-        elif strategy.market == "BTC":
+                raise Exception("")
+        elif self.strategy.market == "BTC":
             if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION_NUMBER:
                 # log(f"Warning: There is already ongoing {SPOT_MAX_POSITION_NUMBER} of positions")
-                return True
-        return False
+                raise Exception("")
 
     async def _trade(self, strategy):
         if strategy.market_position == "flat":
@@ -533,23 +531,22 @@ class BotHelper:
             await self.discord_client.send_msg(trimmed_msg)
             return True
 
-        strategy = Strategy(data_msg, is_print=True)
+        self.strategy = Strategy(data_msg, is_print=True)
         try:
-            strategy.position_alert_msg  # noqa
+            self.strategy.position_alert_msg  # noqa
             self.pre_check()
         except Exception as e:
-            if data_msg:
+            if "enter" in data_msg:
                 log(e)
 
             return True
 
-        output = await self.check_on_going_positions(strategy)  # TODO fetch from binance_balance.py
-        if "enter" not in strategy.position_alert_msg or strategy.symbol == "TEST" or output:
+        if "enter" not in self.strategy.position_alert_msg or self.strategy.symbol == "TEST":
             pass
-        elif strategy.market == "BTC" and strategy.is_sell():
+        elif self.strategy.market == "BTC" and self.strategy.is_sell():
             log("Warning: Ignore BTC pair, no need to sell.")
         elif is_trade:
-            await self._trade(strategy)
+            await self._trade(self.strategy)
 
         return True
 
@@ -561,3 +558,5 @@ class BotHelper:
         free_usdt = config.status["futures"]["free"]
         if free_usdt < config.INITIAL_USDT_QTY_LONG or free_usdt < config.INITIAL_USDT_QTY_SHORT:
             raise Exception(f"Not enough free USDT({free_usdt})")
+
+        self.check_on_going_positions()
