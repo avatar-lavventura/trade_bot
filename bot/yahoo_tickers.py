@@ -17,10 +17,12 @@ async def main():
     time_now = _timestamp()
     total_balance = await fetch_balance()
     silver_gr = config.config["portfolio"]["SILVER"]["gr"]
-    silver_usdt = float(format(get_silver(silver_gr), ".2f"))
-    config.config["portfolio"]["SILVER"]["troy_ounce"] = silver_gr * 0.032151
-    log(f" * Silver => {silver_usdt}")
-    config.config["portfolio"]["SILVER"]["USD"] = silver_usdt
+    if silver_gr > 0.0:
+        silver_usdt = float(format(get_silver(silver_gr), ".2f"))
+        config.config["portfolio"]["SILVER"]["troy_ounce"] = silver_gr * 0.032151
+        log(f" * Silver => {silver_usdt}")
+        config.config["portfolio"]["SILVER"]["USD"] = silver_usdt
+
     # total_balance = total_balance + silver_usdt
     total_balance = format(total_balance, ".2f")
     config.config["portfolio"]["_TOTAL"] = float(total_balance)

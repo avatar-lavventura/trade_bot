@@ -23,15 +23,12 @@ class Discord_Alpy:
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
         except SystemExit:
             pass
-            # handle_exit()
         except KeyboardInterrupt:
-            # handle_exit()
             self.client.loop.close()
             print("Program ended.")
 
     async def task(self):
-        """
-        Add task.
+        """Add task.
 
         - every minute, 10th second: (..., minute="*", second="10")
         - every 30 seconds: (..., second="*/30")

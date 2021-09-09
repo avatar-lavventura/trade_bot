@@ -4,7 +4,7 @@ import asyncio
 import math
 
 import yfinance as yf
-
+from contextlib import suppress
 from bot import helper
 from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
@@ -28,20 +28,14 @@ def get_silver(silver_gr: float) -> float:
 
 async def goal():
     goal_sum = 0.0
-    try:
+    with suppress(TypeError):
         goal_sum += config.goal["goal"]["USDT"]
-    except:
-        pass
 
-    try:
+    with suppress(TypeError):
         goal_sum += config.goal["goal"]["BTC"] * await bot_async.spot_fetch_ticker("BTC/USDT")
-    except:
-        pass
 
-    try:
+    with suppress(TypeError):
         goal_sum += config.goal["goal"]["TRY"] / await bot_async.spot_fetch_ticker("USDT/TRY")
-    except:
-        pass
 
     if math.ceil(goal_sum) > 0.0:
         log(" | ", end="")

@@ -64,9 +64,7 @@ async def startup():
 
 @app.route("/")
 async def notify():  # noqa
-    msg = "OK"
-    print(msg)
-    return msg
+    return "OK"
 
 
 @app.route("/webhook", methods=["POST"])
