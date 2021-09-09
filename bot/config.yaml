@@ -3,12 +3,10 @@ TRBINANCE:
 portfolio:
   BTC: 0.0
   SILVER:
-    USD: 171.98
-    gr: 216.22
-    troy_ounce: 6.95168922
+    gr: 0.0
   TRY: 0.0
-  USDT: 1440
-  _TOTAL: 2049.91
+  USDT: 0.0
+  _TOTAL: 2428.06
 setup:
   IGNORE_BELOW_USDT: 1.25
   IGNORE_LIST_FUTURES:

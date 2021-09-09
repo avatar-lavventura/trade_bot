@@ -50,7 +50,8 @@ class BotHelperAsync:
         https://stackoverflow.com/a/54528397/2402577
         """
         log("Finalazing...")
-        await asyncio.sleep(1)
+        await helper.exchange._close()
+        # await asyncio.sleep(1)
 
     ###########
     # FUTURES #

@@ -4,7 +4,7 @@ import asyncio
 import os
 import time
 from typing import Dict
-
+from contextlib import suppress
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
@@ -185,11 +185,10 @@ async def _main():  # noqa
         try:
             await process_main()
             await _sleep(22)
+        except KeyboardInterrupt:
+            pass
         except Exception as e:
             _colorize_traceback(e)
-        finally:
-            await helper.exchange.future.close()
-            await helper.exchange.spot.close()
 
 
 if __name__ == "__main__":
@@ -197,7 +196,8 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(_main())
     except KeyboardInterrupt:
-        loop.run_until_complete(bot_async.close())
+        with suppress(KeyboardInterrupt):
+            loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
         time.sleep(120)
