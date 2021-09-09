@@ -6,16 +6,17 @@ from time import sleep
 
 import ccxt
 from _mongodb import Mongo
-from bot_helper_async import TP, BotHelperAsync
+from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from pymongo import MongoClient
 
 from bot import helper
-from bot.binance_balance import _create_limit_order
+from bot.binance_balance import _create_limit_order, _create_market_order
 from bot.client_helper import DiscordClient
 from bot.config import config
 from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 
 is_trade = True
+# TODO: convert self.client.* into async calls
 
 
 class Strategy:
@@ -104,27 +105,28 @@ class BotHelper:
         else:  # self.strategy.side == "SELL":
             return "BUY"
 
-    def _futures_cancel_order(self):
-        """Cancel if already opened orders."""
-        orders = self.client.futures_get_all_orders(symbol=self.strategy.symbol.replace("/", ""), type="LIMIT")
-        if not orders:
+    async def _futures_cancel_order(self):
+        """Cancel if already an order is open corresponding to the given symbol."""
+        open_orders = await helper.exchange.future.fetch_open_orders(self.strategy.symbol)
+        if len(open_orders) > 0:
+            for order in open_orders:
+                if (
+                    order["status"] == "open"
+                    and order["type"] == "limit"
+                    and order["side"] == self.opposite_side().lower()
+                ):
+                    log(f"==> Attempt to cancel order: {order}")
+                    await helper.exchange.future.cancel_order(order["id"], self.strategy.symbol)
+        else:
             return
 
-        for order in orders:
-            if order["status"] == "NEW" and order["side"].lower() == self.opposite_side().lower():
-                log(f"==> Attempt to cancel order: {order}")
-                self.client.futures_cancel_order(symbol=self.strategy.symbol.replace("/", ""), orderId=order["orderId"])
-
     def get_btc_open_positions(self):
-        flag = False
         btc_open_position_size = 0
         balances = self.client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] not in ["BTC", "BNB", "USDT"]:
                 if float(balance["locked"]) > 0.0 or float(balance["free"]) > 0.0:
                     btc_open_position_size += 1
-                    if not flag:
-                        flag = True
 
         return btc_open_position_size
 
@@ -146,7 +148,6 @@ class BotHelper:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
                 if symbol and symbol.replace("/", "") == position["symbol"].replace("/", ""):
-                    # TODO: check position["timestamp"] is it on next bar index && positionInitialMargin < 20 USD
                     return True
         return False
 
@@ -169,31 +170,22 @@ class BotHelper:
 
         return count
 
-    async def _limit(self, _amount, entry_price, decimal_count):
+    async def _limit(self, amount, entry_price, isolated_wallet, decimal_count):
         try:
-            order_flag = False
-            _price = None
             if self.opposite_side() == "SELL":
-                _price = f"{float(entry_price) * TP.get_profit_amount('long', _amount):.{decimal_count}f}"
-                if _price > entry_price:
-                    order_flag = True
-                else:
-                    log(f"E: limit={_price}, decimal={decimal_count} calculated wrong.")
-            elif self.opposite_side() == "BUY":
-                _price = f"{float(entry_price) * TP.get_profit_amount('short', _amount):.{decimal_count}f}"
-                if _price < entry_price:
-                    order_flag = True
-                else:
-                    log(f"E: limit={_price}, decimal={decimal_count} calculated wrong.")
+                limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal_count)
+            else:  # opposite_side() == "BUY":
+                limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal_count)
 
-            if order_flag:
-                quantity = abs(float(_amount))
-                log(f"==> quantity={quantity}")
-                await _create_limit_order(self.strategy.symbol, quantity, _price, self.strategy.side)
+            quantity = abs(float(amount))
+            log(f"==> quantity={quantity} | limit_price={limit_price}")
+            await _create_limit_order(self.strategy.symbol, quantity, limit_price, self.strategy.side)
+        except TP_calculate as e:
+            _colorize_traceback(e)
         except Exception as e:
             _colorize_traceback(e)
             if decimal_count > 0:
-                await self._limit(_amount, entry_price, decimal_count - 1)
+                await self._limit(amount, entry_price, isolated_wallet, decimal_count - 1)
 
     def asset_balance(self, asset=None) -> float:
         if not asset:
@@ -219,7 +211,7 @@ class BotHelper:
         #     pass
 
         log("\ntrade_price=", end="")
-        for idx, trade in enumerate(reversed(self.client.get_my_trades(symbol=self.strategy.symbol.replace("/", "")))):
+        for trade in enumerate(reversed(self.client.get_my_trades(symbol=self.strategy.symbol.replace("/", "")))):
             _decimal_count = get_decimal_count(trade["price"])
             if _decimal_count > decimal_count:
                 decimal_count = _decimal_count
@@ -235,17 +227,17 @@ class BotHelper:
                 contracts += float(trade["qty"])
 
         entry_price = _sum / contracts
-        _price = f"{entry_price:.{decimal_count}f}"
-        limit_price = f"{float(_price) * TP.get_profit_amount('long'):.{decimal_count}f}"
+        _entry_price = f"{entry_price:.{decimal_count}f}"
+        limit_price = f"{float(_entry_price) * TP.get_profit_amount('long'):.{decimal_count}f}"
         log(f"quantity={asset_balance} | ", end="")
-        log(f"entry={_price} | ", end="")
+        log(f"entry={_entry_price} | ", end="")
         log(f"limit={limit_price}")
-        return limit_price, _price
+        return limit_price, _entry_price
 
     def spot_order_limit(self):
         log("attempting limit order for spot")
         try:
-            limit_price, entry_price = self.get_spot_entry()
+            limit_price, *_ = self.get_spot_entry()
             orders = self.client.get_open_orders(symbol=self.strategy.symbol.replace("/", ""))
             for order in orders:
                 self.client.cancel_order(symbol=self.strategy.symbol.replace("/", ""), orderId=order["orderId"])
@@ -258,16 +250,10 @@ class BotHelper:
             _colorize_traceback(e, is_print_exc=False)
 
     async def _order(self, quantity, _type="MARKET"):
-        """Opens futures orders in given direction."""
+        """Open futures orders in given direction."""
         try:
-            #: consumes time
-            # await self.bot_async.set_leverage(self.strategy.symbol, config.INITIAL_LEVERAGE)
-            return self.client.futures_create_order(
-                symbol=self.strategy.symbol.replace("/USDT", "USDT"),
-                side=self.strategy.side,
-                type=_type,
-                quantity=quantity,
-            )
+            # await self.bot_async.set_leverage(self.strategy.symbol, config.INITIAL_LEVERAGE)  # consumes time
+            await _create_market_order(self.strategy.symbol, quantity, self.strategy.side)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
                 log(f"E: {e} quantity={quantity}", "red")
@@ -281,17 +267,21 @@ class BotHelper:
             else:
                 raise e
 
-    def get_future_position(self, futures):
-        for future in futures:
-            amount = future["positionAmt"]
-            if amount != "0" and float(future["unRealizedProfit"]) != 0.00000000:
-                return future["entryPrice"], future["positionAmt"]
+    def get_future_position(self, future_positions):
+        for position in future_positions:
+            isolated_wallet = abs(float(position["info"]["isolatedWallet"]))
+            if isolated_wallet > 0.0:
+                return (
+                    float(position["entryPrice"]),
+                    float(position["info"]["positionAmt"]),
+                    abs(float(position["info"]["isolatedWallet"])),
+                )
 
         raise Exception("E: Order related to the symbol couldn't be found.")
 
     async def futures_limit_order(self):
         try:
-            self._futures_cancel_order()
+            await self._futures_cancel_order()
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
@@ -301,9 +291,8 @@ class BotHelper:
         for idx in range(50):
             try:
                 log(f"attempt={idx} ", "cyan", end="")
-                _symbol = self.strategy.symbol.replace("/USDT", "USDT")
-                futures = self.client.futures_position_information(symbol=_symbol)
-                entry_price, _amount = self.get_future_position(futures)
+                future_positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
+                entry_price, _amount, isolated_wallet = self.get_future_position(future_positions)
                 break
             except Exception as e:
                 _colorize_traceback(e, is_print_exc=False)
@@ -311,10 +300,9 @@ class BotHelper:
 
         log("")
         try:
-            entry_price = entry_price.rstrip("0").rstrip(".") if "." in entry_price else entry_price
-            log(f"entry={entry_price} ", end="")
+            log(f"entry_price={entry_price} ", end="")
             decimal_count = get_decimal_count(entry_price)
-            await self._limit(_amount, entry_price, decimal_count)
+            await self._limit(_amount, entry_price, isolated_wallet, decimal_count)
         except Exception as e:
             _colorize_traceback(e)
 
@@ -324,17 +312,14 @@ class BotHelper:
         if await self.is_usdt_open(_symbol, all_positions_log=True):
             raise Exception(f"E: Already open position for {_symbol}")
 
-        order = None
         try:
             if self.strategy.position_size == 0:
                 raise Exception("E: Quantity less than zero.")
 
-            order = await self._order(quantity=self.strategy.position_size)
-            log(order)
+            await self._order(quantity=self.strategy.position_size)
         except Exception as e:
             _colorize_traceback(e)
             raise e
-        return order
 
     def spot_order(self, quantity: float, symbol=None, side=None):
         if symbol:
@@ -351,7 +336,6 @@ class BotHelper:
                 side = self.strategy.side
 
             log(f"==> order_quantity={quantity}")
-            return self.client.order_market(symbol=symbol.replace("/", ""), side=side, quantity=quantity)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
                 log(f"E: {e} quantity={quantity}")
@@ -370,6 +354,8 @@ class BotHelper:
             else:
                 _colorize_traceback(e)
                 raise e
+
+        return self.client.order_market(symbol=symbol.replace("/", ""), side=side, quantity=quantity)
 
     def get_initial_amount(self, initial_amount, _type):
         if initial_amount > 1.0:
@@ -405,9 +391,8 @@ class BotHelper:
 
         self.strategy.position_size = float(self.get_initial_amount(initial_amount, "USDT"))
         self.update_position_size(current_price)
-        # TODO: re-check `self.strategy.position_size * order` > INITIAL_ENTER_PRICE
 
-    async def buy(self) -> bool:
+    async def buy(self):
         if self.strategy.market == "USDTPERP":
             await self.both_side_order()
             await self.futures_limit_order()
@@ -431,7 +416,7 @@ class BotHelper:
                 _colorize_traceback(e)
                 raise e
 
-    async def sell(self) -> bool:
+    async def sell(self):
         await self.both_side_order()
         sleep(1)
         if self.strategy.market == "USDTPERP":
@@ -440,7 +425,7 @@ class BotHelper:
             except Exception as e:
                 _colorize_traceback(e)
 
-    def get_open_position_side(self, _symbol) -> str:
+    def get_open_position_side(self, _symbol) -> str:  # noqa
         futures = self.client.futures_position_information(symbol=_symbol)
         for future in futures:
             amount = future["positionAmt"]
@@ -517,11 +502,11 @@ class BotHelper:
     async def trade_main(self, data_msg):
         if "alert_" in data_msg:
             log(f"[{_time()}] ", "cyan", end="")
-            tv_position_size = re.search("@ (.*)filled", data_msg).group(1)
+            tv_position_size = re.search("@ (.*)filled", data_msg).group(1)  # noqa
             trimmed_msg = f"{data_msg.split(', (', 1)[0]},{tv_position_size}"
             log(trimmed_msg, is_bold=True)
             await self.discord_client.send_msg(trimmed_msg)
-            return True
+            return
 
         self.strategy = Strategy(data_msg, is_print=True)
         try:
@@ -531,7 +516,7 @@ class BotHelper:
             if "enter" in data_msg:
                 log(e)
 
-            return True
+            return
 
         if "enter" not in self.strategy.position_alert_msg or self.strategy.symbol == "TEST":
             pass
@@ -540,7 +525,7 @@ class BotHelper:
         elif is_trade:
             await self._trade(self.strategy)
 
-        return True
+        return
 
     def pre_check(self):
         """Fast to read from usdt.yaml.

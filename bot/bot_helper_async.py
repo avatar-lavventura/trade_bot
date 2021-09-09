@@ -4,6 +4,10 @@ from bot.config import config
 from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
 
 
+class TP_calculate(Exception):  # noqa
+    pass
+
+
 class TakeProfit:
     def __init__(self):
         self.TAKE_PROFIT_LONG = []
@@ -32,6 +36,22 @@ class TakeProfit:
             return self.TAKE_PROFIT_LONG[index]
         else:  # side == "short":
             return self.TAKE_PROFIT_SHORT[index]
+
+    def get_long_tp(self, entry_price, isolated_wallet, decimal_count):
+        price = f"{float(entry_price) * self.get_profit_amount('long', isolated_wallet):.{decimal_count}f}"
+        price = float(price)
+        if price <= entry_price:
+            raise TP_calculate(f"E: limit_price={price}, decimal={decimal_count} calculated wrong.")
+
+        return price
+
+    def get_short_tp(self, entry_price, isolated_wallet, decimal_count):
+        price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{decimal_count}f}"
+        price = float(price)
+        if price >= entry_price:
+            raise TP_calculate(f"E: limit_price={price}, decimal={decimal_count} calculated wrong.")
+
+        return price
 
 
 TP = TakeProfit()
