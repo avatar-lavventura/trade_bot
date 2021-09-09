@@ -3,7 +3,7 @@
 import asyncio
 import time
 from pathlib import Path
-
+from contextlib import suppress
 from user_setup import check_binance_obj
 
 from bot.bot_helper_async import BotHelperAsync
@@ -29,10 +29,12 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(main())
     except KeyboardInterrupt:
-        loop.run_until_complete(bot_async.close())
+        with suppress(KeyboardInterrupt):
+            loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
         log("Program finished.", "green")
+        loop.run_until_complete(bot_async.close())

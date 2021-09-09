@@ -30,6 +30,10 @@ class Exchange:
         unix_timestamp_ms = int(float(unix_time_millis(dt)) / 1000)
         return unix_timestamp_ms
 
+    async def _close(self):
+        await self.future.close()
+        await self.spot.close()
+
 
 exchange = Exchange()
 is_start = True
