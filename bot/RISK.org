@@ -1,4 +1,5 @@
-* [BASIC RISK AND MONEY MANAGEMENT](https://pastebin.com/sqJUcbjp)
+* BASIC RISK AND MONEY MANAGEMENT
+
 **The most important rule in investing/trading is to protect your capital at all
 cost.**
 
@@ -46,3 +47,5 @@ stock drops 50%, your stop will be triggered at the first available bid price at
 
 Trading is hard. Don't trade if you don't have an edge. Deciding when to enter a
 trade, where to put a stop loss and when to exit requires skills.
+
+[[https://pastebin.com/sqJUcbjp][link]]

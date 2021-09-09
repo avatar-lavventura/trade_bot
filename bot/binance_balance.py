@@ -3,13 +3,15 @@
 import asyncio
 import os
 import time
+from contextlib import suppress
 from typing import Dict
+
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
 bot_async = BotHelperAsync()
@@ -185,11 +187,10 @@ async def _main():  # noqa
         try:
             await process_main()
             await _sleep(22)
+        except KeyboardInterrupt:
+            pass
         except Exception as e:
             _colorize_traceback(e)
-        finally:
-            await helper.exchange.future.close()
-            await helper.exchange.spot.close()
 
 
 if __name__ == "__main__":
@@ -197,7 +198,8 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(_main())
     except KeyboardInterrupt:
-        loop.run_until_complete(bot_async.close())
+        with suppress(KeyboardInterrupt):
+            loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
         time.sleep(120)

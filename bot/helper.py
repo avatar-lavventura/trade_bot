@@ -5,7 +5,6 @@ from email.utils import parsedate
 from pathlib import Path
 
 import ccxt.async_support as ccxt
-
 from ebloc_broker.broker._utils.tools import unix_time_millis
 from ebloc_broker.broker._utils.yaml import Yaml
 
@@ -29,6 +28,10 @@ class Exchange:
         dt = datetime(*parsed_date[:6])
         unix_timestamp_ms = int(float(unix_time_millis(dt)) / 1000)
         return unix_timestamp_ms
+
+    async def _close(self):
+        await self.future.close()
+        await self.spot.close()
 
 
 exchange = Exchange()
