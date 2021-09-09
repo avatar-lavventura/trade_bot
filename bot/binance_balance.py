@@ -6,12 +6,11 @@ import time
 from contextlib import suppress
 from typing import Dict
 
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
-
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
 bot_async = BotHelperAsync()

@@ -4,9 +4,10 @@ import asyncio
 import logging
 
 import quart.flask_patch  # noqa
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit
 from flask import abort, request  # noqa
 from quart import Quart
+
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 

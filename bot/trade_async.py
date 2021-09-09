@@ -7,12 +7,12 @@ from time import sleep
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 from pymongo import MongoClient
 
 from bot import helper
 from bot.client_helper import DiscordClient
 from bot.config import config
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 
 is_trade = True
 
@@ -272,7 +272,8 @@ class BotHelper:
     async def _order(self, quantity, _type="MARKET"):
         """Opens futures orders in given direction."""
         try:
-            await self.bot_async.set_leverage(self.strategy.symbol, config.INITIAL_LEVERAGE)
+            #: consumes time
+            # await self.bot_async.set_leverage(self.strategy.symbol, config.INITIAL_LEVERAGE)
             return self.client.futures_create_order(
                 symbol=self.strategy.symbol.replace("/USDT", "USDT"),
                 side=self.strategy.side,

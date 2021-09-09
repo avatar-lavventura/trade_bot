@@ -2,12 +2,13 @@
 
 import asyncio
 import time
+from contextlib import suppress
 from pathlib import Path
 
-from ebloc_broker.broker._utils.tools import _colorize_traceback, log
 from user_setup import check_binance_obj
 
 from bot.bot_helper_async import BotHelperAsync
+from ebloc_broker.broker._utils.tools import log
 
 HOME = str(Path.home())
 bot_async = BotHelperAsync()
@@ -29,10 +30,12 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(main())
     except KeyboardInterrupt:
-        loop.run_until_complete(bot_async.close())
+        with suppress(KeyboardInterrupt):
+            loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
         log("Program finished.", "green")
+        loop.run_until_complete(bot_async.close())

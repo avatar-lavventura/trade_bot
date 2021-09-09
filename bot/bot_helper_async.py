@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
-
-import asyncio
-
-from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
-
 from bot import helper
 from bot.config import config
+from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
 
 
 class TakeProfit:
@@ -50,9 +46,7 @@ class BotHelperAsync:
 
         https://stackoverflow.com/a/54528397/2402577
         """
-        log("Finalazing...")
         await helper.exchange._close()
-        # await asyncio.sleep(1)
 
     ###########
     # FUTURES #
