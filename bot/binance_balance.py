@@ -22,6 +22,17 @@ def future_stats(usdt_balance, unix_timestamp_ms):
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
 
+async def _create_market_order(symbol: str, amount, side):
+    """Create market order for futures."""
+    if side == "BUY":
+        order = await helper.exchange.future.create_market_buy_order(symbol, amount)
+    elif side == "SELL":
+        order = await helper.exchange.future.create_market_sell_order(symbol, amount)
+
+    with suppress(Exception):
+        log(f"market_order={order['info']}")
+
+
 async def _create_limit_order(symbol, position_amt, limit_price, side):
     """Create limit order.
 
@@ -47,12 +58,10 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
     if len(open_orders) > 0:
         cancel_flag = False
         for order in open_orders:
-            try:
+            with suppress(Exception):
                 if cancel_count[order["symbol"]]:
                     # in case multipe same orders are open should be closed
                     await helper.exchange.future.cancel_order(order["id"], symbol)
-            except:
-                pass
 
             cancel_count[order["symbol"]] = True
             order_p = float(order["info"]["price"])
@@ -62,7 +71,7 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
                 order_p = float(order["info"]["price"])
                 if (side == "BUY" and (limit_price < order_p or order_p < entry_price)) or (
                     side == "SELL" and (limit_price > order_p or order_p > entry_price)
-                ):
+                ):  # noqa
                     await helper.exchange.future.cancel_order(order["id"], symbol)
                     cancel_flag = True
 
@@ -124,12 +133,7 @@ async def process_future_positions(future_positions, usdt_balance, unix_timestam
                 per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_balance
                 _per = format(per, ".2f")
                 if float(_per) <= config.LOCKED_PERCENT_LIMIT_USDT:
-                    if _side == "BUY":
-                        order = await helper.exchange.future.create_market_buy_order(symbol, new_amount)
-                    elif _side == "SELL":
-                        order = await helper.exchange.future.create_market_sell_order(symbol, new_amount)
-
-                    log(order["info"])
+                    await _create_market_order(symbol, new_amount, _side)
                 else:
                     if float(_per) < 100:
                         log("\n    ", end="")
