@@ -19,7 +19,7 @@ finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
 // VMMA
 lower_band_value = input(3.0, title = "Long Offset")
-upper_band_value = input(3.0, title = "Short Offset")
+upper_band_value = input(3.0, title = "Short Offset")  // 3.6 safe
 src = hlc3
 ma = vwma(src, 24)
 long_VWMA  = close <= ma * (1 - lower_band_value / 100)

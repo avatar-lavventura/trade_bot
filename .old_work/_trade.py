@@ -123,7 +123,7 @@ class BotHelper:
     def opposite_side(self) -> str:
         if self.strategy.side == "BUY":
             return "SELL"
-        elif self.strategy.side == "SELL":
+        else:  # self.strategy.side == "SELL":
             return "BUY"
 
     def _futures_cancel_order(self):

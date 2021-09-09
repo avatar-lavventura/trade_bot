@@ -22,13 +22,17 @@ def future_stats(usdt_balance, unix_timestamp_ms):
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
 
-async def _create_limit__order(symbol, position_amt, limit_price, side):
+async def _create_limit_order(symbol, position_amt, limit_price, side):
+    """Create limit order.
+
+    :param side: is the original side of the strategy
+    """
     if side == "BUY":
         order = await helper.exchange.future.create_limit_sell_order(symbol, position_amt, limit_price)
     elif side == "SELL":
         order = await helper.exchange.future.create_limit_buy_order(symbol, position_amt, limit_price)
 
-    log(f"\n{order['info']}")
+    log(f"limit_order={order['info']}")
 
 
 async def cancel_check_orders(symbol, limit_price, side, entry_price, position_amt) -> None:
@@ -63,10 +67,10 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
                     cancel_flag = True
 
         if cancel_flag:
-            await _create_limit__order(symbol, position_amt, limit_price, side)
+            await _create_limit_order(symbol, position_amt, limit_price, side)
     else:
         if await bot_async.is_future_position_open(symbol):
-            await _create_limit__order(symbol, position_amt, limit_price, side)
+            await _create_limit_order(symbol, position_amt, limit_price, side)
 
 
 async def process_future_positions(future_positions, usdt_balance, unix_timestamp_ms):
@@ -114,7 +118,7 @@ async def process_future_positions(future_positions, usdt_balance, unix_timestam
             log("| ", "white", end="")
             log(f"{format(isolated_wallet, '.2f')}", "magenta", is_bold=True, end="")
             log(f"({_per}%) ", "magenta", is_bold=True, end="")
-            if asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_USDT:
+            if asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_USDT + 0.01:
                 new_amount = abs(position_amt) * config.USDT_MULTIPLY_RATIO
                 new_amount_margin = isolated_wallet * config.USDT_MULTIPLY_RATIO
                 per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_balance

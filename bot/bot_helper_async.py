@@ -294,7 +294,7 @@ class BotHelperAsync:
         if not is_limit or asset in config.IGNORE_LIST_SPOT:
             return
 
-        if asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_SPOT and _per < 50.0:
+        if asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_SPOT + 0.01 and _per < 50.0:
             new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
             log(f"new_order_size={new_order_size} | ", "blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
