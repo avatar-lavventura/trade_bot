@@ -6,7 +6,7 @@ from time import sleep
 
 import ccxt
 from _mongodb import Mongo
-from bot_helper_async import TP, BotHelperAsync
+from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from pymongo import MongoClient
 
 from bot import helper
@@ -172,27 +172,16 @@ class BotHelper:
 
     async def _limit(self, amount, entry_price, isolated_wallet, decimal_count):
         try:
-            order_flag = False
-            _price = None
             if self.opposite_side() == "SELL":
-                _price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{decimal_count}f}"
-                _price = float(_price)
-                if _price > entry_price:
-                    order_flag = True
-                else:
-                    log(f"E: limit_price={_price}, decimal={decimal_count} calculated wrong.")
-            elif self.opposite_side() == "BUY":
-                _price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{decimal_count}f}"
-                _price = float(_price)
-                if _price < entry_price:
-                    order_flag = True
-                else:
-                    log(f"E: limit_price={_price}, decimal={decimal_count} calculated wrong.")
+                limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal_count)
+            else:  # opposite_side() == "BUY":
+                limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal_count)
 
-            if order_flag:
-                quantity = abs(float(amount))
-                log(f"==> quantity={quantity} | limit_price={_price}")
-                await _create_limit_order(self.strategy.symbol, quantity, _price, self.strategy.side)
+            quantity = abs(float(amount))
+            log(f"==> quantity={quantity} | limit_price={limit_price}")
+            await _create_limit_order(self.strategy.symbol, quantity, limit_price, self.strategy.side)
+        except TP_calculate as e:
+            _colorize_traceback(e)
         except Exception as e:
             _colorize_traceback(e)
             if decimal_count > 0:
