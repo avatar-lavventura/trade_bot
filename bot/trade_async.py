@@ -285,12 +285,13 @@ class BotHelper:
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
-        log("==> Opening a limit order: ", end="")
-        entry_price = None
         _amount = None
-        for idx in range(50):
+        entry_price = None
+        for idx in range(10):
             try:
-                log(f"attempt={idx} ", "cyan", end="")
+                if idx > 0:
+                    log(f"Fetch future positions [attempt={idx + 1}]", "cyan")
+
                 future_positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
                 entry_price, _amount, isolated_wallet = self.get_future_position(future_positions)
                 break
@@ -298,7 +299,7 @@ class BotHelper:
                 _colorize_traceback(e, is_print_exc=False)
                 sleep(1)
 
-        log("")
+        log("==> Opening a limit order: ", end="")
         try:
             log(f"entry_price={entry_price} ", end="")
             decimal_count = get_decimal_count(entry_price)
@@ -425,31 +426,19 @@ class BotHelper:
             except Exception as e:
                 _colorize_traceback(e)
 
-    def get_open_position_side(self, _symbol) -> str:  # noqa
-        futures = self.client.futures_position_information(symbol=_symbol)
-        for future in futures:
-            amount = future["positionAmt"]
-            if amount != "0":  # if there is position
-                if future["entryPrice"] > future["liquidationPrice"]:
-                    return "long"
-                else:
-                    return "short"
-
     async def trade_async(self):
         try:
-            if self.strategy.market_position != "flat":
-                if self.strategy.market == "USDTPERP":
-                    await self.calculate_futures_position_size()
+            if self.strategy.market == "USDTPERP":
+                await self.calculate_futures_position_size()
 
-                log("==> Attempt for trading", "cyan")
-                log(
-                    f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
-                    f" {self.strategy.asset} {self.strategy.symbol} size={self.strategy.position_size}"
-                )
-                if self.strategy.is_buy():
-                    await self.buy()
-                elif self.strategy.is_sell():
-                    await self.sell()
+            log(
+                f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
+                f" {self.strategy.asset} {self.strategy.symbol} size={self.strategy.position_size}"
+            )
+            if self.strategy.is_buy():
+                await self.buy()
+            elif self.strategy.is_sell():
+                await self.sell()
         except Exception as e:
             log(str(e), "yellow")
 
@@ -464,31 +453,25 @@ class BotHelper:
                 raise Exception("")
 
     async def _trade(self, strategy):
-        if strategy.market_position == "flat":
-            live_pos_side = self.get_open_position_side(strategy.symbol)
-            log(f"==> live_pos_side={live_pos_side}")
-            # if strategy.prev_market_position == live_pos_side:
-            #     self.strategy_exit(strategy)
-        else:
-            is_open = False
-            if strategy.market == "USDTPERP":
-                is_open = await self.is_usdt_open(strategy.symbol)
-            elif strategy.market == "BTC":
-                balances = self.client.get_account()
-                for balance in balances["balances"]:
-                    if balance["asset"] == strategy.asset and float(balance["locked"]) > 0.0:
-                        is_open = True
-                        break
+        is_open = False
+        if strategy.market == "USDTPERP":
+            is_open = await self.is_usdt_open(strategy.symbol)
+        elif strategy.market == "BTC":
+            balances = self.client.get_account()
+            for balance in balances["balances"]:
+                if balance["asset"] == strategy.asset and float(balance["locked"]) > 0.0:
+                    is_open = True
+                    break
 
-            if not is_open:
-                try:
-                    self.strategy = strategy
-                    await self.trade_async()
-                    log("END")
-                except Exception as e:
-                    _colorize_traceback(e)
-            else:
-                log(f"   already open position {self.unix_timestamp_ms}")
+        if not is_open:
+            try:
+                self.strategy = strategy
+                await self.trade_async()
+                log("END")
+            except Exception as e:
+                _colorize_traceback(e)
+        else:
+            log("   PASS")  # already open position
 
     async def trade(self):
         try:

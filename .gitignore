@@ -25,3 +25,4 @@ bot/.env_secret
 InsufficientFunds
 InvalidOrder
 status.yaml
+progress.log

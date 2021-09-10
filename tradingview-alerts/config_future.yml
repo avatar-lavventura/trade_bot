@@ -13,3 +13,12 @@ alert:
     webhook:
       enabled: true
       url: "https://alpyr-bot.duckdns.org/webhook"
+message: >
+  {   {{ticker}},
+      {{strategy.order.action}},
+      {{strategy.order.alert_message}},
+      {{close}},
+      {{strategy.position_size}},
+      {{strategy.prev_market_position}},
+      {{strategy.prev_market_position_size}},
+  }

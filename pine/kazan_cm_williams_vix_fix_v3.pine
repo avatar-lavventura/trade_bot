@@ -52,22 +52,23 @@ if strategy.position_size[0] != 0
     if bar_index > abs(strategy.position_size) or (col[1] == color.gray and col == color.gray)
         strategy.close_all(when=window())
 
+msg = "enter_1m"
 if buy_signal
     if strategy.opentrades[0] == 0 or strategy.position_size < 0
-        strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message="enter_1m")
+        strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
     else
         if bar_index > abs(strategy.position_size)
             if strategy.position_size[0] != 0
                 strategy.close_all(when=window())
             else
-                strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message="enter_1m")
+                strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
 
 if sell_signal
     if strategy.opentrades[0] == 0 or strategy.position_size > 0
-        strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message="enter_1m")
+        strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message=msg)
     else
         if bar_index > abs(strategy.position_size)
             if strategy.position_size[0] != 0
                 strategy.close_all(when=window())
             else
-                strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message="enter_1m")
+                strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message=msg)

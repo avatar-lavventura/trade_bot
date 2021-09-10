@@ -1,6 +1,7 @@
+#    -*- mode: org -*-
+
 * alpy
 ** TODO Spot tarafinda 4h cross sinyal 3AM oncesi gelirse al
-** TODO PULL already open positions from yaml that is written by binance_balance.py
 ** TODO  `bar_index` on pine strategy
 ** TODO save timestamp for orders to record its bar_index
 or compare current bar_index value with latest position's bar index.
@@ -8,3 +9,7 @@ or compare current bar_index value with latest position's bar index.
 ** TODO Give alert if 10% is locked and alert came for that pair
 ** TODO Futuresda olmayip spotta olan usdt pairlerini cikar
 ** TODO run_app log disable writing into a file?
+** TODO 30 dakika icinde ters yone poz acma
+ex: 3:50 SHORT ... 4:12 LONG gelirse, 30 dakika icinde ters yone sinyal geldigi
+icin ignore yap// prev position side
+** TODO carry _sleep into public async lib
