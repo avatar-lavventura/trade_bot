@@ -441,7 +441,6 @@ class BotHelper:
                 if self.strategy.market == "USDTPERP":
                     await self.calculate_futures_position_size()
 
-                log("==> Attempt for trading", "cyan")
                 log(
                     f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
                     f" {self.strategy.asset} {self.strategy.symbol} size={self.strategy.position_size}"
