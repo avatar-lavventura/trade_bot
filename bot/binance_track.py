@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#
 # TODO: add 1 price change affect on percent
 #       0.32 to 0.33 (its percent change affect on usdt price)
 # TODO: shown BTCUSDT price, grieen on rise red on drop  percent change maybe
@@ -31,6 +32,7 @@
 #
 # Funding fee den sonra dusucek diye akillilip edip shortlama seni ters kosede
 # birakabilir. Hele grafige bakmadan yaparsan husran ile sonuclanabilir
+# https://python-binance.readthedocs.io/en/latest/account.html
 
 import argparse
 import math
@@ -49,20 +51,11 @@ from bs4 import BeautifulSoup
 
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils.tools import log, run
+import ebloc_broker.broker._utils.tools as tools
 
 HOME = str(Path.home())
-
-"""
-https://python-binance.readthedocs.io/en/latest/account.html
-
-At the current time Binance rate limits are:
-
-1200 requests per minute
-10 orders per second
-100,000 orders per 24hrs
-
-To run: nohup python -u ./binance_track.py > cmd.log &
-"""
+tools.ll.LOG_FILENAME = "progress.log"
+tools.ll.IS_PRINT = False
 
 SEP = "====================================================================================="
 headers = {
