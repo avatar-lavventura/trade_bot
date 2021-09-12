@@ -10,6 +10,7 @@ from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
@@ -173,18 +174,9 @@ async def process_main(channel=None):
             helper.is_start = False
     except KeyError:
         _exit("E: KeyError")
-        os._exit(0)  # kill the process
     except Exception as e:
         _colorize_traceback(e)
-        await asyncio.sleep(30)
-
-
-async def _sleep(sleep_time: int = 1):
-    """Sleep async.
-
-    __ https://stackoverflow.com/a/61764275/2402577
-    """
-    await asyncio.sleep(sleep_time)
+        await bot_async._sleep(30)
 
 
 async def _main():  # noqa

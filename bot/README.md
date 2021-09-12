@@ -1,8 +1,6 @@
 # Guide
 
-- https://github.com/Robswc/tradingview-webhooks-bot
 - https://github.com/ccxt/ccxt/tree/master/examples/py
-- https://github.com/alleyway/add-tradingview-alerts-tool
 - https://sandwich.finance/
 - https://discord.com/developers/applications
 - [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)

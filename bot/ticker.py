@@ -4,6 +4,8 @@ import asyncio
 
 import ccxt.async_support as ccxt  # noqa: E402
 
+from ebloc_broker.broker._utils._async import _sleep
+
 # https://github.com/ccxt/ccxt/tree/master/examples/py
 INITIAL_BTC_QTY = 0.0002
 
@@ -27,7 +29,7 @@ async def main(symbol):
                 flag = True
             print(ticker["last"])
             print(INITIAL_BTC_QTY / float(ticker["last"]))
-            await asyncio.sleep(1.0)  # https://stackoverflow.com/a/61764275/2402577
+            await _sleep()
         except ccxt.RequestTimeout as e:
             print("[" + type(e).__name__ + "]")
             print(str(e)[0:200])

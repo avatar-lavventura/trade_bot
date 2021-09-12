@@ -53,6 +53,7 @@ class Discord_Alpy:
 
 _discord = Discord_Alpy()
 
+# from ebloc_broker.broker._utils._async import _sleep
 # global MESSAGE
 # await self.client.wait_until_ready()
 # while True:
@@ -64,7 +65,7 @@ _discord = Discord_Alpy()
 #     MESSAGE = await channel.send(current_time)
 #     # this also works
 #     # await message.channel.send('Goodbye in 3 seconds...', delete_after=3.0)
-#     await asyncio.sleep(10)
+#     await _sleep(10)
 
 # @client.event
 # async def on_message(message):

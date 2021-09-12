@@ -11,6 +11,7 @@ from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, log
 
 client, _ = check_binance_obj()
@@ -88,7 +89,7 @@ async def main():
     while True:
         await fetch_balance()
         log("# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", "cyan")
-        await asyncio.sleep(1)
+        await _sleep()
 
 
 if __name__ == "__main__":

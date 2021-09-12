@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import re
 import time
 from time import sleep
 
@@ -13,6 +12,7 @@ from bot import helper
 from bot.binance_balance import _create_limit_order, _create_market_order
 from bot.client_helper import DiscordClient
 from bot.config import config
+from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
 
 is_trade = True
@@ -25,37 +25,23 @@ class Strategy:
         if "enter" in data_msg:
             if is_print:
                 log(f" * {_time()} ", end="")
-                join = data_msg.split(", (", 1)[0].split(",")[0:4]
-                try:
-                    self.current_bar_index = re.search("@ (.*)filled", data_msg).group(1)
-                except:
-                    self.current_bar_index = 0
-
-                log(f"{','.join(join)},{self.current_bar_index}", "green")
+                log(data_msg, "green")
 
         try:
+            self.position_size = 0
             self.chunks = data_msg.split(",")
-            if self.chunks[0] == "ALERT":
-                self.symbol = self.chunks[1]
-                self.side = self.chunks[2].upper()
-                self.position_alert_msg = "enter"
-                self.market_position = ""
-            else:
-                self.symbol = self.chunks[0]
-                self.side = self.chunks[1].upper()
-                self.position_alert_msg = self.chunks[2]
-                self.market_position = ""
-                self.prev_market_position = ""
-                self.timenow = ""
-                self.position_size = 0
-
+            self.symbol = self.chunks[0]
+            self.side = self.chunks[1].upper()
+            self.position_alert_msg = self.chunks[2]
+            self.current_bar_index = self.chunks[3]
+            # self.timenow = self.chunks[4]
             if "BTC" in self.symbol:
                 self.market = "BTC"
                 self.asset = self.symbol[:-3]  # removes BTC at the end
                 self.symbol = self.symbol.replace("BTC", "/BTC")
-            elif "USDT" in self.symbol:
+            elif "USDTPERP" in self.symbol:
                 self.market = "USDTPERP"
-                self.asset = self.symbol[:-8]  # removes USDTPERP at the end
+                self.asset = self.symbol.replace("USDTPERP", "")
                 self.symbol = self.symbol.replace("USDTPERP", "/USDT")
         except:
             pass
@@ -71,6 +57,8 @@ class BotHelper:
     def __init__(self, client, discord_client=None):
         mc = MongoClient()
         self.mongoDB = Mongo(mc, mc["trader_bot"]["order"])
+        self.unix_timestamp_ms: int = 0
+        self.current_bar_index_local: int = 0
         self.client = client
         self.strategy = Strategy("")
         self.bot_async = BotHelperAsync()
@@ -85,19 +73,18 @@ class BotHelper:
                 return await helper.exchange.spot.fetch_ticker(symbol)
         except ccxt.RequestTimeout as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            sleep(0.25)
+            _sleep(0.25)
             return await self.symbol_price(symbol, default_type)
         except ccxt.DDoSProtection as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            sleep(0.25)
+            _sleep(0.25)
             return await self.symbol_price(symbol, default_type)
         except ccxt.ExchangeNotAvailable as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            sleep(0.25)
+            _sleep(0.25)
             return await self.symbol_price(symbol, default_type)
         except ccxt.ExchangeError as e:
-            log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            return False
+            raise e
 
     def opposite_side(self) -> str:
         if self.strategy.side == "BUY":
@@ -134,16 +121,9 @@ class BotHelper:
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
         self.current_bar_index_local = int(int((self.unix_timestamp_ms - 1) / 900))
 
-    async def is_usdt_open(self, symbol, all_positions_log=False) -> bool:
+    async def is_usdt_open(self, symbol) -> bool:
         future_positions = await helper.exchange.future.fetch_positions()
         self.get_exchange_future_timestamp()
-        # log(self.current_bar_index, "yellow")
-        if all_positions_log:
-            for position in future_positions:
-                initial_margin = abs(float(position["info"]["isolatedWallet"]))
-                if initial_margin > 0.0:
-                    log(f"{position['symbol']} | ", "blue", end="")
-
         for position in future_positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
@@ -285,12 +265,13 @@ class BotHelper:
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
-        log("==> Opening a limit order: ", end="")
-        entry_price = None
         _amount = None
-        for idx in range(50):
+        entry_price = None
+        for idx in range(10):
             try:
-                log(f"attempt={idx} ", "cyan", end="")
+                if idx > 0:
+                    log(f"Fetch future positions [attempt={idx + 1}]", "cyan")
+
                 future_positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
                 entry_price, _amount, isolated_wallet = self.get_future_position(future_positions)
                 break
@@ -298,7 +279,7 @@ class BotHelper:
                 _colorize_traceback(e, is_print_exc=False)
                 sleep(1)
 
-        log("")
+        log("==> Opening a limit order: ", end="")
         try:
             log(f"entry_price={entry_price} ", end="")
             decimal_count = get_decimal_count(entry_price)
@@ -309,7 +290,7 @@ class BotHelper:
     async def both_side_order(self) -> None:
         """Both side order for futures."""
         _symbol = self.strategy.symbol.replace("/USDT", "USDT")
-        if await self.is_usdt_open(_symbol, all_positions_log=True):
+        if await self.is_usdt_open(_symbol):
             raise Exception(f"E: Already open position for {_symbol}")
 
         try:
@@ -425,30 +406,19 @@ class BotHelper:
             except Exception as e:
                 _colorize_traceback(e)
 
-    def get_open_position_side(self, _symbol) -> str:  # noqa
-        futures = self.client.futures_position_information(symbol=_symbol)
-        for future in futures:
-            amount = future["positionAmt"]
-            if amount != "0":  # if there is position
-                if future["entryPrice"] > future["liquidationPrice"]:
-                    return "long"
-                else:
-                    return "short"
-
     async def trade_async(self):
         try:
-            if self.strategy.market_position != "flat":
-                if self.strategy.market == "USDTPERP":
-                    await self.calculate_futures_position_size()
+            if self.strategy.market == "USDTPERP":
+                await self.calculate_futures_position_size()
 
-                log(
-                    f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
-                    f" {self.strategy.asset} {self.strategy.symbol} size={self.strategy.position_size}"
-                )
-                if self.strategy.is_buy():
-                    await self.buy()
-                elif self.strategy.is_sell():
-                    await self.sell()
+            log(
+                f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
+                f" {self.strategy.asset} {self.strategy.symbol} size={self.strategy.position_size}"
+            )
+            if self.strategy.is_buy():
+                await self.buy()
+            elif self.strategy.is_sell():
+                await self.sell()
         except Exception as e:
             log(str(e), "yellow")
 
@@ -463,31 +433,25 @@ class BotHelper:
                 raise Exception("")
 
     async def _trade(self, strategy):
-        if strategy.market_position == "flat":
-            live_pos_side = self.get_open_position_side(strategy.symbol)
-            log(f"==> live_pos_side={live_pos_side}")
-            # if strategy.prev_market_position == live_pos_side:
-            #     self.strategy_exit(strategy)
-        else:
-            is_open = False
-            if strategy.market == "USDTPERP":
-                is_open = await self.is_usdt_open(strategy.symbol)
-            elif strategy.market == "BTC":
-                balances = self.client.get_account()
-                for balance in balances["balances"]:
-                    if balance["asset"] == strategy.asset and float(balance["locked"]) > 0.0:
-                        is_open = True
-                        break
+        is_open = False
+        if strategy.market == "USDTPERP":
+            is_open = await self.is_usdt_open(strategy.symbol)
+        elif strategy.market == "BTC":
+            balances = self.client.get_account()
+            for balance in balances["balances"]:
+                if balance["asset"] == strategy.asset and float(balance["locked"]) > 0.0:
+                    is_open = True
+                    break
 
-            if not is_open:
-                try:
-                    self.strategy = strategy
-                    await self.trade_async()
-                    log("END")
-                except Exception as e:
-                    _colorize_traceback(e)
-            else:
-                log(f"   already open position {self.unix_timestamp_ms}")
+        if not is_open:
+            try:
+                self.strategy = strategy
+                await self.trade_async()
+                log("END")
+            except Exception as e:
+                _colorize_traceback(e)
+        else:
+            log("   PASS")  # already open position
 
     async def trade(self):
         try:
@@ -499,12 +463,10 @@ class BotHelper:
             await helper.exchange.spot.close()
 
     async def trade_main(self, data_msg):
-        if "alert_" in data_msg:
+        if "alert" in data_msg:
             log(f"[{_time()}] ", "cyan", end="")
-            tv_position_size = re.search("@ (.*)filled", data_msg).group(1)  # noqa
-            trimmed_msg = f"{data_msg.split(', (', 1)[0]},{tv_position_size}"
-            log(trimmed_msg, is_bold=True)
-            await self.discord_client.send_msg(trimmed_msg)
+            log(data_msg, is_bold=True)
+            await self.discord_client.send_msg(data_msg)
             return
 
         self.strategy = Strategy(data_msg, is_print=True)
