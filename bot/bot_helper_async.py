@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+import asyncio
+
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float

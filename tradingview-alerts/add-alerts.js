@@ -11,6 +11,25 @@ import log, { logLogInfo } from "./service/log.js";
 import kleur from "kleur";
 import { logBaseDelay } from "./service/common-service.js";
 import stripBomStream from "strip-bom-stream";
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function askQuestion(query) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    return new Promise(resolve => rl.question(query, ans => {
+        rl.close();
+        resolve(ans);
+    }))
+}
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 const readFilePromise = (filename) => {
     return new Promise((resolve, reject) => {
         const results = [];
@@ -34,24 +53,7 @@ const readFilePromise = (filename) => {
         }
     });
 };
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-function askQuestion(query) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
 
-    return new Promise(resolve => rl.question(query, ans => {
-        rl.close();
-        resolve(ans);
-    }))
-}
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 const addAlertsMain = async (configFileName) => {
     const headless = false;
     logLogInfo();
@@ -64,10 +66,6 @@ const addAlertsMain = async (configFileName) => {
     log.info("[alper] Press Ctrl-C to stop this script");
     const configString = await fs.readFileSync(configFileName, { encoding: "utf-8" });
     const config = YAML.parse(configString);
-    if (config.tradingview.chartUrl === "https://www.tradingview.com/chart/XXXXXXXX/") {
-        log.fatal("oops! Looks like you need to set your chartUrl in the config file!");
-        process.exit(1);
-    }
     let blackListRows = [];
     if (config.files.exclude) {
         try {

@@ -1,0 +1,25 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/alper/trade_bot/bot/TODO.org
+
+
+* DONE PULL already open positions from yaml that is written by binance_balance.py
+CLOSED: [2021-09-12 Sun 03:20]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-12 Sun 03:20
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE carry _sleep into public async lib
+CLOSED: [2021-09-12 Sun 14:35]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-12 Sun 14:35
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

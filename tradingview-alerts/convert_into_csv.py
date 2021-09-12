@@ -2,14 +2,11 @@
 
 is_futures = True
 if is_futures:
-    filename = "binancefutures_perpetual_main.txt"
+    filename = "tv_lists/binance_usdt_futures.txt"
     with open(filename) as f:
         for line in f:
             _line = line.rstrip()
-
-    lines = [x.strip() for x in _line.split(",")]
-    for line in lines:
-        print(f"{line},{line.replace('USDTPERP', '').replace('BINANCE:', '')},USDTPERP,")
+            print(f"{_line},{_line.replace('USDTPERP', '').replace('BINANCE:', '')},USDTPERP,")
 else:
     filename = "tv_list/binance_spot.txt"
     with open(filename) as f:
