@@ -7,7 +7,7 @@ import quart.flask_patch  # noqa
 from flask import abort, request  # noqa
 from quart import Quart
 
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit
+from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _exit
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
@@ -80,6 +80,8 @@ async def webhook():
                 await do_trade(data_msg.rstrip())
 
             return "OK"
+        except QuietExit:
+            pass
         except KeyError:
             _exit("==========================EXCEPTION catched==========================")
         except Exception as e:

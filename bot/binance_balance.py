@@ -174,7 +174,6 @@ async def process_main(channel=None):
             helper.is_start = False
     except KeyError:
         _exit("E: KeyError")
-        os._exit(0)  # kill the process
     except Exception as e:
         _colorize_traceback(e)
         await bot_async._sleep(30)
