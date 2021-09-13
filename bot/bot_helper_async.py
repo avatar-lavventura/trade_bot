@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import asyncio
-
+from contextlib import suppress
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
@@ -139,12 +138,10 @@ class BotHelperAsync:
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
-                try:
+                with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
                         await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
-                except:
-                    pass
 
         config.status["spot"]["pos_count"] = count
         return own_usd, float(usdt_amount)

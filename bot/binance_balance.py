@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import asyncio
-import os
 import time
 from contextlib import suppress
 from typing import Dict
-
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
@@ -149,10 +147,10 @@ async def process_main(channel=None):
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
+    config.reload()
     if channel:
         bot_async.channel = channel
 
-    config.reload()
     bot_async.futures_balance = await helper.exchange.future.fetch_balance()
     unix_timestamp_ms = helper.exchange.get_future_timestamp()
     try:
@@ -174,10 +172,9 @@ async def process_main(channel=None):
             helper.is_start = False
     except KeyError:
         _exit("E: KeyError")
-        os._exit(0)  # kill the process
     except Exception as e:
         _colorize_traceback(e)
-        await bot_async._sleep(30)
+        await _sleep(30)
 
 
 async def _main():  # noqa
@@ -186,7 +183,7 @@ async def _main():  # noqa
             await process_main()
             await _sleep(22)
         except KeyboardInterrupt:
-            pass
+            break
         except Exception as e:
             _colorize_traceback(e)
 

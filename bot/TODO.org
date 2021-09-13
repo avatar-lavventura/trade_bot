@@ -13,3 +13,7 @@ CLOSED: [2021-09-12 Sun 14:35]
 ** TODO 30 dakika icinde ters yone poz acma
 ex: 3:50 SHORT ... 4:12 LONG gelirse, 30 dakika icinde ters yone sinyal geldigi
 icin ignore yap// prev position side
+** TODO trade_main() call using flask-apscheduler
+https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
+https://github.com/viniciuschiele/flask-apscheduler
+** TODO 45 min signal should come too or 15 min with 3.5 band

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# TODO: apply blacklist
+
 is_futures = True
 if is_futures:
     filename = "tv_lists/binance_usdt_futures.txt"

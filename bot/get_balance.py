@@ -25,7 +25,7 @@ if __name__ == "__main__":
     client_helper = ClientHelper(client)
     get_balance(client_helper)
     bot = BotHelper(client_helper.client)
-    bot.strategy = Strategy("")
+    bot.strategy = Strategy()
     balances = client.get_account()
     balances = client_helper.client.get_account()
 
