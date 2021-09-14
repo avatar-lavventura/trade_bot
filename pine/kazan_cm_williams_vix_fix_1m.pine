@@ -19,7 +19,7 @@ window() => time >= start and time <= finish ? true : false
 msg = "enter_1m"
 // VMMA
 lower_band_value = input(3.0, title = "Long Offset")
-upper_band_value = input(3.0, title = "Short Offset")  // 3.6 safe
+upper_band_value = input(3.0, title = "Short Offset")  // 3.6 safer
 src = hlc3
 ma = vwma(src, 24)
 long_VWMA  = close <= ma * (1 - lower_band_value / 100)
@@ -36,17 +36,17 @@ sd = input(false, title="Show Standard Deviation Line")
 wvf = ((highest(close, pd) - low) / (highest(close, pd))) * 100
 sDev = mult * stdev(wvf, bbl)
 midLine = sma(wvf, bbl)
-_upperBand = midLine + sDev
+_upper_band = midLine + sDev
 rangeHigh = (highest(wvf, lb)) * ph
 rangeLow = (lowest(wvf, lb)) * pl
-col = wvf >= _upperBand or wvf >= rangeHigh ? color.lime : color.gray
+col = wvf >= _upper_band or wvf >= rangeHigh ? color.lime : color.gray
 plot(hp and rangeHigh ? rangeHigh : na, title="Range High Percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
 plot(hp and rangeLow ? rangeLow : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
-plot(sd and _upperBand ? _upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
+plot(sd and _upper_band ? _upper_band : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
 plot(wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=col)
 //
 buy_signal  = (col[1] == color.lime and col == color.gray) and long_VWMA
-sell_signal = (col[1] == color.lime and col == color.gray) and short_VWMA and close > 1.0
+sell_signal = (col[1] == color.lime and col == color.gray) and short_VWMA and close > 0.1
 if strategy.position_size[0] != 0  // close position for alpy-bot new incoming alerts
     if bar_index > abs(strategy.position_size) or (col[1] == color.gray and col == color.gray)
         strategy.close_all(when=window())

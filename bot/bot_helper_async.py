@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import asyncio
+from contextlib import suppress
 
 from bot import helper
 from bot.config import config
-from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
+from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, log, percent_change, round_float
 
 
 class TP_calculate(Exception):  # noqa
@@ -139,12 +139,10 @@ class BotHelperAsync:
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
-                try:
+                with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
                         await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
-                except:
-                    pass
 
         config.status["spot"]["pos_count"] = count
         return own_usd, float(usdt_amount)
@@ -156,7 +154,7 @@ class BotHelperAsync:
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
                 log(f"E: {e} quantity={quantity}")
-                decimal_count = get_decimal_count(quantity)
+                decimal_count = decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal_count - 1}f}"
                 log(f"==> re-opening {side} order, quantity={_quantity}")
                 if float(_quantity) > 0.0:
@@ -184,7 +182,7 @@ class BotHelperAsync:
         ]
         _decimal_count = 0
         for p in price_list:
-            _decimal_c = get_decimal_count(p)
+            _decimal_c = decimal_count(p)
             if _decimal_c > _decimal_count:
                 _decimal_count = _decimal_c
         return _decimal_count
@@ -197,7 +195,7 @@ class BotHelperAsync:
         return float(price["last"])
 
     async def new_limit_order(self, asset, limit_price):
-        """New limit order with the added quantity."""
+        """Create new limit order with the added quantity."""
         symbol = f"{asset}/BTC"
         open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
@@ -252,7 +250,6 @@ class BotHelperAsync:
         for idx, trade in enumerate(all_trades):
             try:
                 # In case orders occur in the same timestamp
-                ordering[trade["timestamp"]]
                 ordering[trade["timestamp"]].append(idx)
             except:
                 ordering[trade["timestamp"]] = [idx]
@@ -262,7 +259,7 @@ class BotHelperAsync:
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
                 trade = all_trades[inner_index]
-                _decimal_count = get_decimal_count(trade["price"])
+                _decimal_count = decimal_count(trade["price"])
                 if _decimal_count > decimal_count:
                     decimal_count = _decimal_count
 

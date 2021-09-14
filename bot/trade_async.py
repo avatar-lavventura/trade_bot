@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
@@ -10,28 +12,23 @@ from bot.binance_balance import _create_limit_order, _create_market_order
 from bot.client_helper import DiscordClient
 from bot.config import config
 from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, get_decimal_count, log
+from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, decimal_count, log
 
 is_trade = True
 # TODO: convert self.client.* into async calls
 
 
 class Strategy:
-    def __init__(self, data_msg, is_print=True):
+    def __init__(self, data_msg=""):
         self.unix_timestamp_ms: "int" = 0
         if "enter" in data_msg:
-            if is_print:
-                log(f" * {_time()} ", end="")
-                log(data_msg, "green", end="")
+            log(f" * {_time()} ", end="")
+            log(data_msg, "green", end="")
 
-        try:
+        with suppress(Exception):
             self.position_size = 0
             self.chunks = data_msg.split(",")
             self.symbol = self.chunks[0]
-            self.side = self.chunks[1].upper()
-            self.position_alert_msg = self.chunks[2]
-            self.current_bar_index = self.chunks[3]
-            # self.timenow = self.chunks[4]
             if "BTC" in self.symbol:
                 self.market = "BTC"
                 self.asset = self.symbol[:-3]  # removes BTC at the end
@@ -40,8 +37,11 @@ class Strategy:
                 self.market = "USDTPERP"
                 self.asset = self.symbol.replace("USDTPERP", "")
                 self.symbol = self.symbol.replace("USDTPERP", "/USDT")
-        except:
-            pass
+
+            self.side = self.chunks[1].upper()
+            self.position_alert_msg = self.chunks[2]
+            self.current_bar_index = self.chunks[3]
+            self.time = self.chunks[4]
 
     def is_buy(self):
         return self.side == "BUY"
@@ -53,33 +53,34 @@ class Strategy:
 class BotHelper:
     def __init__(self, client, discord_client=None):
         mc = MongoClient()
+        self.markets = None
         self.mongoDB = Mongo(mc, mc["trader_bot"]["order"])
         self.unix_timestamp_ms: int = 0
         self.current_bar_index_local: int = 0
         self.client = client
-        self.strategy = Strategy("")
+        self.strategy = Strategy()
         self.bot_async = BotHelperAsync()
         if discord_client:
             self.discord_client: "DiscordClient" = discord_client
 
-    async def symbol_price(self, symbol, default_type):
+    async def symbol_price(self, symbol, _type):
         try:
-            if default_type == "future:":
+            if _type == "future:":
                 return await helper.exchange.future.fetch_ticker(symbol)
             else:
                 return await helper.exchange.spot.fetch_ticker(symbol)
         except ccxt.RequestTimeout as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
             _sleep(0.25)
-            return await self.symbol_price(symbol, default_type)
+            return await self.symbol_price(symbol, _type)
         except ccxt.DDoSProtection as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
             _sleep(0.25)
-            return await self.symbol_price(symbol, default_type)
+            return await self.symbol_price(symbol, _type)
         except ccxt.ExchangeNotAvailable as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
             _sleep(0.25)
-            return await self.symbol_price(symbol, default_type)
+            return await self.symbol_price(symbol, _type)
         except ccxt.ExchangeError as e:
             raise e
 
@@ -190,7 +191,7 @@ class BotHelper:
 
         log("\ntrade_price=", end="")
         for trade in enumerate(reversed(self.client.get_my_trades(symbol=self.strategy.symbol.replace("/", "")))):
-            _decimal_count = get_decimal_count(trade["price"])
+            _decimal_count = self.get_decimal_count(trade["price"])
             if _decimal_count > decimal_count:
                 decimal_count = _decimal_count
 
@@ -235,7 +236,7 @@ class BotHelper:
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
                 log(f"E: {e} quantity={quantity}", "red")
-                decimal_count = get_decimal_count(quantity)
+                decimal_count = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal_count - 1}f}"
                 log(f"==> re-opening sell order with new quantity={_quantity}")
                 if float(_quantity) > 0.0:
@@ -280,7 +281,7 @@ class BotHelper:
         log("==> Opening a limit order: ", end="")
         try:
             log(f"entry_price={entry_price} ", end="")
-            decimal_count = get_decimal_count(entry_price)
+            decimal_count = self.get_decimal_count(entry_price)
             await self._limit(_amount, entry_price, isolated_wallet, decimal_count)
         except Exception as e:
             _colorize_traceback(e)
@@ -318,7 +319,7 @@ class BotHelper:
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
                 log(f"E: {e} quantity={quantity}")
-                decimal_count = get_decimal_count(quantity)
+                decimal_count = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal_count - 1}f}"
                 log(f"==> re-opening {side} order, quantity={_quantity}")
                 if float(_quantity) > 0.0:
@@ -410,7 +411,7 @@ class BotHelper:
 
             log(
                 f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
-                f" {self.strategy.asset} {self.strategy.symbol} size={self.strategy.position_size}"
+                f" {self.strategy.asset} {self.strategy.symbol} | size={self.strategy.position_size}"
             )
             if self.strategy.is_buy():
                 await self.buy()
@@ -458,6 +459,13 @@ class BotHelper:
             await helper.exchange.future.close()
             await helper.exchange.spot.close()
 
+    def get_decimal_count(self, value) -> int:
+        try:
+            return self.markets[self.strategy.symbol]["precision"]["price"]
+        except:
+            return decimal_count(value)
+
+
     async def trade_main(self, data_msg):
         if "alert" in data_msg:
             log(f"[{_time()}] ", "cyan", end="")
@@ -465,11 +473,9 @@ class BotHelper:
             await self.discord_client.send_msg(data_msg)
             return
 
-        self.strategy = Strategy(data_msg, is_print=True)
-        try:
-            self.strategy.position_alert_msg  # noqa
-        except Exception as e:
-            raise e
+        self.strategy = Strategy(data_msg)
+        if not hasattr(self.strategy, "position_alert_msg"):
+            raise
 
         self.pre_check()
         if "enter" not in self.strategy.position_alert_msg or self.strategy.symbol == "TEST":

@@ -47,7 +47,6 @@ async def startup():
     from bot import helper
     import bot.trade_async as bot_trade
     from user_setup import check_binance_obj
-
     loop = asyncio.get_event_loop()
     app.discord_client = DiscordClient()
     await app.discord_client.bot.login(app.discord_client.TOKEN)
@@ -58,7 +57,7 @@ async def startup():
     app.bot_trade = bot_trade.BotHelper(client, app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
-    await app.exchange.future.load_markets()
+    app.bot_trade.markets = await app.exchange.future.load_markets()
     await start()
 
 
