@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+from ebloc_broker.broker._utils.tools import log
 from user_setup import check_binance_obj
 
 from bot.client_helper import ClientHelper
 from bot.trade import BotHelper, Strategy
-from ebloc_broker.broker._utils.tools import log
 
 
 def get_balance(client_helper):
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     client_helper = ClientHelper(client)
     get_balance(client_helper)
     bot = BotHelper(client_helper.client)
-    bot.strategy = Strategy("")
+    bot.strategy = Strategy()
     balances = client.get_account()
     balances = client_helper.client.get_account()
 

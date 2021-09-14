@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 import asyncio
-import os
 import time
 from contextlib import suppress
 from typing import Dict
+
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
 bot_async = BotHelperAsync()
@@ -72,7 +72,7 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
                 order_p = float(order["info"]["price"])
                 if (side == "BUY" and (limit_price < order_p or order_p < entry_price)) or (
                     side == "SELL" and (limit_price > order_p or order_p > entry_price)
-                ):  # noqa
+                ):
                     await helper.exchange.future.cancel_order(order["id"], symbol)
                     cancel_flag = True
 
@@ -144,15 +144,19 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
     return print_flag
 
 
+def _futures_bal(info, asset):
+    return float(bot_async.futures_balance[info][asset])
+
+
 async def process_main(channel=None):
     """Process binance check operations.
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
+    config.reload()
     if channel:
         bot_async.channel = channel
 
-    config.reload()
     bot_async.futures_balance = await helper.exchange.future.fetch_balance()
     unix_timestamp_ms = helper.exchange.get_future_timestamp()
     try:
@@ -160,9 +164,9 @@ async def process_main(channel=None):
         if usdt_bal > 0.0 and not helper.is_start:
             log("")
 
-        config.status["futures"]["free"] = float(bot_async.futures_balance["free"]["USDT"]) + usdt_bal
-        usdt_bal += float(bot_async.futures_balance["total"]["USDT"])
-        usdt_bal += float(bot_async.futures_balance["total"]["BUSD"])
+        config.status["futures"]["free"] = _futures_bal("free", "USDT") + usdt_bal
+        usdt_bal += _futures_bal("total", "USDT")
+        usdt_bal += _futures_bal("total", "BUSD")
         # TODO: pozisyonlarin o anki son fiyati olmali?
         future_positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(future_positions, usdt_bal, unix_timestamp_ms)
@@ -176,7 +180,7 @@ async def process_main(channel=None):
         _exit("E: KeyError")
     except Exception as e:
         _colorize_traceback(e)
-        await bot_async._sleep(30)
+        await _sleep(30)
 
 
 async def _main():  # noqa
@@ -185,7 +189,7 @@ async def _main():  # noqa
             await process_main()
             await _sleep(22)
         except KeyboardInterrupt:
-            pass
+            break
         except Exception as e:
             _colorize_traceback(e)
 

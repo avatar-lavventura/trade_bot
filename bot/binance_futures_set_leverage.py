@@ -4,11 +4,11 @@ import asyncio
 from contextlib import suppress
 from pathlib import Path
 
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils.tools import _colorize_traceback, log
 from user_setup import check_binance_obj
 
 from bot.bot_helper_async import BotHelperAsync
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import _colorize_traceback, log
 
 HOME = str(Path.home())
 bot_async = BotHelperAsync()

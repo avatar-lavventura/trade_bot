@@ -2,7 +2,7 @@ files:
   input: pairs.csv
 tradingview:
   chartUrl: https://www.tradingview.com/chart/wWjs7nTb/?symbol=BITSTAMP%3ABTCUSD
-  interval: 1m  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  interval: 21m  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
 alert:
   condition:
     primaryLeft: alpy_vix
