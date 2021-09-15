@@ -10,12 +10,12 @@ portfolio:
 position:
   long:
     1m: 100.0
-    base: 30.0
+    base: 29.0
   short:
     1m: 100.0
-    base: 30.0
+    base: 29.0
 setup:
-  IGNORE_BELOW_USDT: 0.1
+  IGNORE_BELOW_USDT: 0.01
   IGNORE_LIST_FUTURES:
   - PAIR
   IGNORE_LIST_SPOT:
@@ -28,8 +28,8 @@ setup:
   PERCENT_CHANGE_TO_ADD_USDT: -5.0
   SPOT_MAX_POSITION_NUMBER: 2
   SPOT_MULTIPLY_RATIO: 1.0
-  TP: 0.005
-  TP_SPOT: 0.005
+  TP: 0.0051
+  TP_SPOT: 0.0051
   USDT_MAX_POSITION_NUMBER: 10
   USDT_MULTIPLY_RATIO: 1.5
 z:

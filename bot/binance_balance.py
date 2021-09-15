@@ -17,9 +17,19 @@ bot_async = BotHelperAsync()
 
 
 def future_stats(usdt_bal, unix_timestamp_ms):
-    log(f" * Futures={format(usdt_bal, '.2f')}", end="")
-    log("___________________________________________", "blue", end="")
+    locked = usdt_bal - config.status["futures"]["free"]
+    if locked > config.status["log"]["futures"]["max_locked"]:
+        config.status["log"]["futures"]["max_locked"] = locked
+
+    config.status["futures"]["total"] = usdt_bal
+    config.status["futures"]["locked"] = locked
+    log(f" * Futures={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}", end="")
+    log("_________________________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
+
+
+def _futures_bal(info, asset) -> float:
+    return float(bot_async.futures_balance[info][asset])
 
 
 async def _create_market_order(symbol: str, amount, side):
@@ -141,10 +151,6 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
     return print_flag
 
 
-def _futures_bal(info, asset):
-    return float(bot_async.futures_balance[info][asset])
-
-
 async def process_main():
     """Process binance check operations.
 
@@ -162,8 +168,8 @@ async def process_main():
         usdt_bal += _futures_bal("total", "USDT")
         usdt_bal += _futures_bal("total", "BUSD")
         # TODO: pozisyonlarin o anki son fiyati olmali?
-        future_positions = await helper.exchange.future.fetch_positions()
-        is_printed = await process_future_positions(future_positions, usdt_bal, unix_timestamp_ms)
+        positions = await helper.exchange.future.fetch_positions()
+        is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms)
         if not is_printed and not helper.is_start:
             delete_last_line()
 
@@ -177,7 +183,7 @@ async def process_main():
         await _sleep(30)
 
 
-async def _main():  # noqa
+async def main():
     await helper.exchange.set_markets()
     while True:
         try:
@@ -192,13 +198,13 @@ async def _main():  # noqa
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(_main())
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         with suppress(KeyboardInterrupt):
             loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
         time.sleep(120)
-        loop.run_until_complete(_main())
+        loop.run_until_complete(main())
     finally:
         log("Program finished.", "green")

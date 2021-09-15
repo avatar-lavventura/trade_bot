@@ -73,15 +73,15 @@ class BotHelper:
                 return await helper.exchange.spot.fetch_ticker(symbol)
         except ccxt.RequestTimeout as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            _sleep(0.25)
+            await _sleep(0.25)
             return await self.symbol_price(symbol, _type)
         except ccxt.DDoSProtection as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            _sleep(0.25)
+            await _sleep(0.25)
             return await self.symbol_price(symbol, _type)
         except ccxt.ExchangeNotAvailable as e:
             log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            _sleep(0.25)
+            await _sleep(0.25)
             return await self.symbol_price(symbol, _type)
         except ccxt.ExchangeError as e:
             raise e
@@ -139,7 +139,7 @@ class BotHelper:
             future_positions = await helper.exchange.future.fetch_positions()
         except Exception as e:
             _colorize_traceback(e)
-            _sleep(60)
+            await _sleep(60)
             raise e
 
         for position in future_positions:
@@ -277,7 +277,7 @@ class BotHelper:
                 break
             except Exception as e:
                 _colorize_traceback(e, is_print_exc=False)
-                _sleep()
+                await _sleep()
 
         log("==> Opening a limit order: ", end="")
         try:
@@ -398,7 +398,6 @@ class BotHelper:
 
     async def sell(self):
         await self.both_side_order()
-        # _sleep()
         if self.strategy.market == "USDTPERP":
             try:
                 await self.futures_limit_order()
