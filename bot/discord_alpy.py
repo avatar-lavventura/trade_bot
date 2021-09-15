@@ -28,7 +28,7 @@ class Discord_Alpy:
             print("Program ended.")
 
     async def task(self):
-        """Add task.
+        """Add task in order to schedule discord to send messages.
 
         - every minute, 10th second: (..., minute="*", second="10")
         - every 30 seconds: (..., second="*/30")
