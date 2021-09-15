@@ -4,9 +4,10 @@ import asyncio
 import logging
 
 import quart.flask_patch  # noqa
-from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _exit
 from flask import abort, request  # noqa
 from quart import Quart
+
+from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _exit
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
@@ -53,11 +54,10 @@ async def startup():
     loop.create_task(app.discord_client.bot.connect())
     client, app.balances = check_binance_obj()
     app.client_helper = ClientHelper(client)
-    app.exchange = helper.exchange
+    await helper.exchange.set_markets()
     app.bot_trade = bot_trade.BotHelper(client, app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
-    await app.exchange.future.load_markets()
     await start()
 
 

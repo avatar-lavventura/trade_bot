@@ -3,6 +3,7 @@
 import asyncio
 
 import ccxt.async_support as ccxt  # noqa: E402
+
 from ebloc_broker.broker._utils._async import _sleep
 
 # https://github.com/ccxt/ccxt/tree/master/examples/py

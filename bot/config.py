@@ -22,7 +22,6 @@ class Config:
         self.status = Yaml("status.yaml")
         #
         self.TRBINANCE_USDT = self.config["TRBINANCE"]["USDT"]
-        #
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
         self.TP = self.config["setup"]["TP"]
         self.LOCKED_PERCENT_LIMIT_USDT = self.config["setup"]["LOCKED_PERCENT_LIMIT_USDT"]

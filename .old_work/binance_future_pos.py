@@ -5,11 +5,11 @@ import os
 from pathlib import Path
 
 import ccxt.async_support as ccxt
-from ebloc_broker.broker._utils.tools import log
 
 from bot.binance_balances import BotHelperAsync
 from bot.trade import BotHelper
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils.tools import log
 
 HOME = str(Path.home())
 

@@ -5,13 +5,12 @@ import time
 from contextlib import suppress
 from typing import Dict
 
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
-
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _exit, _time, delete_last_line, log, percent_change
 
 client, _ = check_binance_obj()
 bot_async = BotHelperAsync()
@@ -102,23 +101,22 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
             entry_price = float(position["entryPrice"])
             position_amt = float(position["info"]["positionAmt"])
             price_dict = await helper.exchange.future.fetch_ticker(symbol)
-            _decimal_count = bot_async.get_precision(price_dict)
             price = price_dict["last"]
+            # precision = bot_async.get_precision(price_dict) # delete_me
+            precision = helper.exchange.future_markets[symbol]["precision"]["price"]
             if position_amt < 0.0:
                 log("==> ", "red", end="")
                 side = "SELL"
                 change = entry_price - price
-                limit_price = (
-                    f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{_decimal_count}f}"
-                )
+                limit_price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{precision}f}"
             else:
                 log("==> ", "green", end="")
                 side = "BUY"
                 change = price - entry_price
-                limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{_decimal_count}f}"
+                limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
 
-            _str = "{0: <5}".format(symbol.replace("/USDT", ""))
-            log(f"{_str} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", end="")
+            _asset = "{0: <5}".format(symbol.replace("/USDT", ""))
+            log(f"{_asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", end="")
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
             asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
@@ -148,15 +146,12 @@ def _futures_bal(info, asset):
     return float(bot_async.futures_balance[info][asset])
 
 
-async def process_main(channel=None):
+async def process_main():
     """Process binance check operations.
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
     config.reload()
-    if channel:
-        bot_async.channel = channel
-
     bot_async.futures_balance = await helper.exchange.future.fetch_balance()
     unix_timestamp_ms = helper.exchange.get_future_timestamp()
     try:
@@ -184,6 +179,7 @@ async def process_main(channel=None):
 
 
 async def _main():  # noqa
+    await helper.exchange.set_markets()
     while True:
         try:
             await process_main()

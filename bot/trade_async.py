@@ -5,14 +5,14 @@ from contextlib import suppress
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, get_decimal_count, log
 from pymongo import MongoClient
 
 from bot import helper
 from bot.binance_balance import _create_limit_order, _create_market_order
 from bot.client_helper import DiscordClient
 from bot.config import config
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, decimal_count, log
 
 is_trade = True
 # TODO: convert self.client.* into async calls
@@ -40,6 +40,9 @@ class Strategy:
 
             self.side = self.chunks[1].upper()
             self.position_alert_msg = self.chunks[2]
+            with suppress(Exception):
+                self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
+
             self.current_bar_index = self.chunks[3]
             self.time = self.chunks[4]
 
@@ -148,12 +151,12 @@ class BotHelper:
 
         return count
 
-    async def _limit(self, amount, entry_price, isolated_wallet, decimal_count):
+    async def _limit(self, amount, entry_price, isolated_wallet, decimal):
         try:
             if self.opposite_side() == "SELL":
-                limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal_count)
+                limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal)
             else:  # opposite_side() == "BUY":
-                limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal_count)
+                limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal)
 
             quantity = abs(float(amount))
             log(f"| quantity={quantity} | limit_price={limit_price}")
@@ -162,8 +165,8 @@ class BotHelper:
             _colorize_traceback(e)
         except Exception as e:
             _colorize_traceback(e)
-            if decimal_count > 0:
-                await self._limit(amount, entry_price, isolated_wallet, decimal_count - 1)
+            if decimal > 0:
+                await self._limit(amount, entry_price, isolated_wallet, decimal - 1)
 
     def asset_balance(self, asset=None) -> float:
         if not asset:
@@ -180,19 +183,18 @@ class BotHelper:
         contracts = 0.0
         _sum = 0.0
         quantity = 0.0
-        decimal_count = 0
+        decimal = 0
         # try:
         #     output = self.mongoDB.find_key("asset", self.strategy.asset)
         #     timestamp = output["timestamp"]
         #     log(f"timestamp={timestamp} | ", end="")
         # except:
         #     pass
-
         log("\ntrade_price=", end="")
         for trade in enumerate(reversed(self.client.get_my_trades(symbol=self.strategy.symbol.replace("/", "")))):
-            _decimal_count = get_decimal_count(trade["price"])
-            if _decimal_count > decimal_count:
-                decimal_count = _decimal_count
+            _decimal = self.get_decimal_count(trade["price"])
+            if _decimal > decimal:
+                decimal = _decimal
 
             # TODO: trade["time"] >= timestamp gerek olmayabilir
             if trade["isBuyer"]:  # and trade["time"] >= timestamp:
@@ -205,8 +207,8 @@ class BotHelper:
                 contracts += float(trade["qty"])
 
         entry_price = _sum / contracts
-        _entry_price = f"{entry_price:.{decimal_count}f}"
-        limit_price = f"{float(_entry_price) * TP.get_profit_amount('long'):.{decimal_count}f}"
+        _entry_price = f"{entry_price:.{decimal}f}"
+        limit_price = f"{float(_entry_price) * TP.get_profit_amount('long'):.{decimal}f}"
         log(f"quantity={asset_balance} | ", end="")
         log(f"entry={_entry_price} | ", end="")
         log(f"limit={limit_price}")
@@ -235,8 +237,8 @@ class BotHelper:
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
                 log(f"E: {e} quantity={quantity}", "red")
-                decimal_count = get_decimal_count(quantity)
-                _quantity = f"{float(quantity):.{decimal_count - 1}f}"
+                decimal = self.get_decimal_count(quantity)
+                _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening sell order with new quantity={_quantity}")
                 if float(_quantity) > 0.0:
                     return await self._order(_quantity)
@@ -280,8 +282,8 @@ class BotHelper:
         log("==> Opening a limit order: ", end="")
         try:
             log(f"entry_price={entry_price} ", end="")
-            decimal_count = get_decimal_count(entry_price)
-            await self._limit(_amount, entry_price, isolated_wallet, decimal_count)
+            decimal = self.get_decimal_count(entry_price)
+            await self._limit(_amount, entry_price, isolated_wallet, decimal)
         except Exception as e:
             _colorize_traceback(e)
 
@@ -318,8 +320,8 @@ class BotHelper:
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
                 log(f"E: {e} quantity={quantity}")
-                decimal_count = get_decimal_count(quantity)
-                _quantity = f"{float(quantity):.{decimal_count - 1}f}"
+                decimal = self.get_decimal_count(quantity)
+                _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening {side} order, quantity={_quantity}")
                 if float(_quantity) > 0.0:
                     return self.spot_order(float(_quantity))
@@ -457,6 +459,12 @@ class BotHelper:
         finally:
             await helper.exchange.future.close()
             await helper.exchange.spot.close()
+
+    def get_decimal_count(self, value) -> int:
+        try:
+            return helper.exchange.future_markets[self.strategy.symbol]["precision"]["price"]
+        except:
+            return decimal_count(value)
 
     async def trade_main(self, data_msg):
         if "alert" in data_msg:

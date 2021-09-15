@@ -45,13 +45,13 @@ from datetime import date, datetime
 from pathlib import Path
 
 import binance_lib
-import ebloc_broker.broker._utils.tools as tools
 import requests
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
-from ebloc_broker.broker._utils.tools import log, run
 
+import ebloc_broker.broker._utils.tools as tools
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils.tools import log, run
 
 HOME = str(Path.home())
 tools.ll.LOG_FILENAME = "progress.log"
@@ -77,7 +77,7 @@ client = None
 client_helper = None
 found_ones = []  # noqa
 msg = []
-
+org_symbols = {}
 parser = argparse.ArgumentParser(
     description="""Binance Alper's trading bot helper""",
     epilog="""To run: nohup python3 -u ./binance_track.py > cmd.log &!""",
