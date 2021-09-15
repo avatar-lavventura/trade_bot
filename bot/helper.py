@@ -33,7 +33,6 @@ class Exchange:
         return unix_timestamp_ms
 
     async def set_markets(self):
-        print("SET MARKETS ... ...")  # delete_me
         self.future_markets = await self.future.load_markets()
         self.spot_markets = await self.spot.load_markets()
 
