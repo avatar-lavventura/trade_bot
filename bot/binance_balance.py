@@ -102,7 +102,6 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
             position_amt = float(position["info"]["positionAmt"])
             price_dict = await helper.exchange.future.fetch_ticker(symbol)
             price = price_dict["last"]
-            # precision = bot_async.get_precision(price_dict) # delete_me
             precision = helper.exchange.future_markets[symbol]["precision"]["price"]
             if position_amt < 0.0:
                 log("==> ", "red", end="")

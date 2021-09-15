@@ -170,23 +170,6 @@ class BotHelperAsync:
                 _colorize_traceback(e)
                 raise e
 
-    # def get_precision(self, price_dict):
-    #     price_list = [
-    #         price_dict["change"],
-    #         price_dict["close"],
-    #         price_dict["info"]["weightedAvgPrice"],
-    #         price_dict["info"]["lastPrice"],
-    #         price_dict["info"]["openPrice"],
-    #         price_dict["info"]["highPrice"],
-    #         price_dict["info"]["lowPrice"],
-    #     ]
-    #     decimal = 0
-    #     for p in price_list:
-    #         _decimal = decimal_count(p)
-    #         if _decimal > decimal:
-    #             decimal = _decimal
-    #     return decimal
-
     async def spot_fetch_ticker(self, asset) -> float:
         if "USDT" not in asset and "BTC" not in asset:
             asset = asset + "/BTC"
