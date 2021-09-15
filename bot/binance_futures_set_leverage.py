@@ -7,7 +7,6 @@ from pathlib import Path
 from user_setup import check_binance_obj
 
 from bot.bot_helper_async import BotHelperAsync
-from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils.tools import _colorize_traceback, log
 
 HOME = str(Path.home())
@@ -34,7 +33,6 @@ if __name__ == "__main__":
             loop.run_until_complete(bot_async.close())
     except Exception as e:
         _colorize_traceback(e)
-        _sleep(120)
         loop.run_until_complete(main())
     finally:
         log("Program finished.", "green")

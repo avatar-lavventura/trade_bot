@@ -18,10 +18,9 @@ finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
 msg = "enter_1m"
 // VMMA
-lower_band_value = input(3.0, title = "Long Offset")
-upper_band_value = input(3.0, title = "Short Offset")  // 3.6 safer
-src = hlc3
-ma = vwma(src, 24)
+lower_band_value = input(3.0, title = "long_offset")
+upper_band_value = input(3.0, title = "short_offset")  // 3.6 safer
+ma = vwma(hlc3, 24)
 long_VWMA  = close <= ma * (1 - lower_band_value / 100)
 short_VWMA = close >= ma * (1 + lower_band_value / 100)
 // CM_Williams_Vix_Fix
@@ -40,10 +39,10 @@ _upper_band = midLine + sDev
 rangeHigh = (highest(wvf, lb)) * ph
 rangeLow = (lowest(wvf, lb)) * pl
 col = wvf >= _upper_band or wvf >= rangeHigh ? color.lime : color.gray
-plot(hp and rangeHigh ? rangeHigh : na, title="Range High Percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
-plot(hp and rangeLow ? rangeLow : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
-plot(sd and _upper_band ? _upper_band : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
-plot(wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=col)
+plot(hp and rangeHigh ? rangeHigh : na, title="range high percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
+plot(hp and rangeLow ? rangeLow : na, title="range high percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(sd and _upper_band ? _upper_band : na, title="upper band", style=plot.style_line, linewidth=3, color=color.aqua)
+plot(wvf, title="williams_vix_fix", style=plot.style_histogram, linewidth=4, color=col)
 //
 buy_signal  = (col[1] == color.lime and col == color.gray) and long_VWMA
 sell_signal = (col[1] == color.lime and col == color.gray) and short_VWMA and close > 0.1
