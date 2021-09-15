@@ -7,8 +7,6 @@
 or compare current bar_index value with latest position's bar index.
 ** TODO Carry usdt from spot if there not enough in futures
 ** TODO Give alert if 10% is locked and alert came for that pair
-** DONE Futuresda olmayip spotta olan usdt pairlerini cikar
-CLOSED: [2021-09-12 Sun 14:35]
 ** TODO run_app log disable writing into a file?
 ** TODO 30 dakika icinde ters yone poz acma
 ex: 3:50 SHORT ... 4:12 LONG gelirse, 30 dakika icinde ters yone sinyal geldigi
@@ -16,4 +14,5 @@ icin ignore yap// prev position side
 ** TODO trade_main() call using flask-apscheduler
 https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
 https://github.com/viniciuschiele/flask-apscheduler
-** TODO 45 min signal should come too or 15 min with 3.5 band
+** TODO 1m position open USDT amount could be 50 more than default position open amount
+pull from `self.time_duration` if its 1m get different value

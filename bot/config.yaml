@@ -9,11 +9,11 @@ portfolio:
   _TOTAL: 2428.06
 position:
   long:
-    enter: 25.0
-    first: 100.0
+    1m: 100.0
+    base: 26.0
   short:
-    enter: 25.0
-    first: 100.0
+    1m: 100.0
+    base: 26.0
 setup:
   IGNORE_BELOW_USDT: 0.1
   IGNORE_LIST_FUTURES:
@@ -22,8 +22,6 @@ setup:
   - PAIR
   INITIAL_BTC_QTY: 0.00015
   INITIAL_LEVERAGE: 1
-  INITIAL_USDT_QTY_LONG: 25.0
-  INITIAL_USDT_QTY_SHORT: 25.0
   LOCKED_PERCENT_LIMIT_SPOT: 10
   LOCKED_PERCENT_LIMIT_USDT: 10
   PERCENT_CHANGE_TO_ADD_SPOT: -5.0

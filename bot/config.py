@@ -22,7 +22,6 @@ class Config:
         self.status = Yaml("status.yaml")
         #
         self.TRBINANCE_USDT = self.config["TRBINANCE"]["USDT"]
-        #
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
         self.TP = self.config["setup"]["TP"]
         self.LOCKED_PERCENT_LIMIT_USDT = self.config["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
@@ -32,8 +31,8 @@ class Config:
         self.SPOT_MULTIPLY_RATIO = self.config["setup"]["SPOT_MULTIPLY_RATIO"]
         self.USDT_MULTIPLY_RATIO = self.config["setup"]["USDT_MULTIPLY_RATIO"]
         self.IGNORE_LIST_SPOT = self.config["setup"]["IGNORE_LIST_SPOT"]
-        self.INITIAL_USDT_QTY_SHORT = self.config["setup"]["INITIAL_USDT_QTY_SHORT"]
-        self.INITIAL_USDT_QTY_LONG = self.config["setup"]["INITIAL_USDT_QTY_LONG"]
+        self.INITIAL_USDT_QTY_SHORT = self.config["position"]["short"]["base"]
+        self.INITIAL_USDT_QTY_LONG = self.config["position"]["long"]["base"]
         self.INITIAL_BTC_QTY = self.config["setup"]["INITIAL_BTC_QTY"]
         self.INITIAL_LEVERAGE = self.config["setup"]["INITIAL_LEVERAGE"]
         self.SPOT_MAX_POSITION_NUMBER = self.config["setup"]["SPOT_MAX_POSITION_NUMBER"]

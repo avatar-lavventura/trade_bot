@@ -2,10 +2,9 @@
 
 from contextlib import suppress
 
-from ebloc_broker.broker._utils.tools import _colorize_traceback, get_decimal_count, log, percent_change, round_float
-
 from bot import helper
 from bot.config import config
+from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, log, percent_change, round_float
 
 
 class TP_calculate(Exception):  # noqa
@@ -41,19 +40,19 @@ class TakeProfit:
         else:  # side == "short":
             return self.TAKE_PROFIT_SHORT[index]
 
-    def get_long_tp(self, entry_price, isolated_wallet, decimal_count):
-        price = f"{float(entry_price) * self.get_profit_amount('long', isolated_wallet):.{decimal_count}f}"
+    def get_long_tp(self, entry_price, isolated_wallet, decimal):
+        price = f"{float(entry_price) * self.get_profit_amount('long', isolated_wallet):.{decimal}f}"
         price = float(price)
         if price <= entry_price:
-            raise TP_calculate(f"E: limit_price={price}, decimal={decimal_count} calculated wrong.")
+            raise TP_calculate(f"E: limit_price={price}, decimal={decimal} calculated wrong.")
 
         return price
 
-    def get_short_tp(self, entry_price, isolated_wallet, decimal_count):
-        price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{decimal_count}f}"
+    def get_short_tp(self, entry_price, isolated_wallet, decimal):
+        price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{decimal}f}"
         price = float(price)
         if price >= entry_price:
-            raise TP_calculate(f"E: limit_price={price}, decimal={decimal_count} calculated wrong.")
+            raise TP_calculate(f"E: limit_price={price}, decimal={decimal} calculated wrong.")
 
         return price
 
@@ -155,8 +154,8 @@ class BotHelperAsync:
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
                 log(f"E: {e} quantity={quantity}")
-                decimal_count = get_decimal_count(quantity)
-                _quantity = f"{float(quantity):.{decimal_count - 1}f}"
+                decimal = decimal_count(quantity)
+                _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening {side} order, quantity={_quantity}")
                 if float(_quantity) > 0.0:
                     return await self.spot_order(_quantity, symbol, side)
@@ -171,23 +170,6 @@ class BotHelperAsync:
                 _colorize_traceback(e)
                 raise e
 
-    def get_precision(self, price_dict):
-        price_list = [
-            price_dict["change"],
-            price_dict["close"],
-            price_dict["info"]["weightedAvgPrice"],
-            price_dict["info"]["lastPrice"],
-            price_dict["info"]["openPrice"],
-            price_dict["info"]["highPrice"],
-            price_dict["info"]["lowPrice"],
-        ]
-        _decimal_count = 0
-        for p in price_list:
-            _decimal_c = get_decimal_count(p)
-            if _decimal_c > _decimal_count:
-                _decimal_count = _decimal_c
-        return _decimal_count
-
     async def spot_fetch_ticker(self, asset) -> float:
         if "USDT" not in asset and "BTC" not in asset:
             asset = asset + "/BTC"
@@ -196,7 +178,7 @@ class BotHelperAsync:
         return float(price["last"])
 
     async def new_limit_order(self, asset, limit_price):
-        """New limit order with the added quantity."""
+        """Create new limit order with the added quantity."""
         symbol = f"{asset}/BTC"
         open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
@@ -212,6 +194,10 @@ class BotHelperAsync:
             log(respone, "cyan")
         except Exception as e:
             log("Failed to create order with", helper.exchange.spot.id, type(e).__name__, str(e), "red")
+
+    async def fetch_balance(self, code) -> float:
+        balance = await helper.exchange.spot.fetch_balance()
+        return balance[code]["total"]
 
     async def spot_limit(self, asset, asset_balance, sum_btc, is_limit=True):
         """Spot limit.
@@ -235,7 +221,7 @@ class BotHelperAsync:
         _symbol = f"{asset}/BTC"
         _sum = 0.0
         quantity = 0.0
-        decimal_count = 0
+        decimal = 0
         try:
             _since = config.get_spot_timestamp(asset)
             if not _since:
@@ -251,7 +237,6 @@ class BotHelperAsync:
         for idx, trade in enumerate(all_trades):
             try:
                 # In case orders occur in the same timestamp
-                ordering[trade["timestamp"]]
                 ordering[trade["timestamp"]].append(idx)
             except:
                 ordering[trade["timestamp"]] = [idx]
@@ -261,9 +246,9 @@ class BotHelperAsync:
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
                 trade = all_trades[inner_index]
-                _decimal_count = get_decimal_count(trade["price"])
-                if _decimal_count > decimal_count:
-                    decimal_count = _decimal_count
+                decimal = decimal_count(trade["price"])
+                if decimal > decimal:
+                    decimal = decimal
 
                 qty = float(trade["info"]["qty"])
                 # botrade_cost = qty * float(trade["info"]["price"])
@@ -297,9 +282,9 @@ class BotHelperAsync:
             #     trade = all_trades[ordering[index[1]]]
             #     print(f"{trade['timestamp']} {trade['info']['qty']}")
         else:
-            entry_price = float(f"{entry_price:.{decimal_count}f}")
+            entry_price = float(f"{entry_price:.{decimal}f}")
 
-        limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal_count}f}"
+        limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
         log(f"==> {asset} quantity={asset_balance} | ", end="")
         log(f"entry_price={entry_price} | ", end="")
         if is_limit and asset not in config.IGNORE_LIST_SPOT:
@@ -331,7 +316,7 @@ class BotHelperAsync:
                 per_to_buy = config.LOCKED_PERCENT_LIMIT_SPOT - abs(new_per)
                 btc_amount_to_buy = per_to_buy * sum_btc / 100.0
                 _new_order_size = btc_amount_to_buy / asset_price
-                _new_order_size = f"{_new_order_size:.{decimal_count}f}"
+                _new_order_size = f"{_new_order_size:.{decimal}f}"
                 order = await self.spot_order(_new_order_size, _symbol, "BUY")
                 log(order["info"])
                 await self.new_limit_order(asset, limit_price)
@@ -344,7 +329,3 @@ class BotHelperAsync:
                 if order["info"]["side"] == "SELL":
                     if float(limit_price) < float(order["price"]):
                         await self.new_limit_order(asset, limit_price)
-
-    async def fetch_balance(self, code) -> float:
-        balance = await helper.exchange.spot.fetch_balance()
-        return balance[code]["total"]

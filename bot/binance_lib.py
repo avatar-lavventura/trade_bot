@@ -15,6 +15,8 @@ import sys
 import time
 
 from dateutil.parser import parse
+from forex_python.converter import CurrencyRates
+
 from ebloc_broker.broker._utils.tools import (
     _colorize_traceback,
     _percent_change,
@@ -23,7 +25,6 @@ from ebloc_broker.broker._utils.tools import (
     timestamp_to_local,
     utc_to_local,
 )
-from forex_python.converter import CurrencyRates
 
 c = CurrencyRates()
 START_POSITION = False

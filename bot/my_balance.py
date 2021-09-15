@@ -5,14 +5,14 @@ import math
 from contextlib import suppress
 
 import yfinance as yf
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, log
 
 from bot import helper
 from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, log
 
 client, _ = check_binance_obj()
 bot = BotHelper(client)
