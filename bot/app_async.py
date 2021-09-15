@@ -82,7 +82,7 @@ async def webhook():
         except QuietExit:
             pass
         except KeyError:
-            _exit("==========================EXCEPTION catched==========================")
+            _exit("=============exception_catched=============")
         except Exception as e:
             _colorize_traceback(e)
 
