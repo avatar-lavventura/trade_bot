@@ -107,15 +107,15 @@ class BotHelper:
         else:
             return
 
-    def get_btc_open_positions(self):
-        btc_open_position_size = 0
+    def get_btc_open_positions(self) -> int:
+        btc_open_position_count = 0
         balances = self.client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] not in ["BTC", "BNB", "USDT"]:
                 if float(balance["locked"]) > 0.0 or float(balance["free"]) > 0.0:
-                    btc_open_position_size += 1
+                    btc_open_position_count += 1
 
-        return btc_open_position_size
+        return btc_open_position_count
 
     def get_exchange_future_timestamp(self):
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
@@ -151,7 +151,7 @@ class BotHelper:
 
         return count
 
-    async def _limit(self, amount, entry_price, isolated_wallet, decimal):
+    async def _limit(self, amount, entry_price, isolated_wallet, decimal) -> None:
         try:
             if self.opposite_side() == "SELL":
                 limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal)
@@ -249,8 +249,7 @@ class BotHelper:
 
     def get_future_position(self, future_positions):
         for position in future_positions:
-            isolated_wallet = abs(float(position["info"]["isolatedWallet"]))
-            if isolated_wallet > 0.0:
+            if abs(float(position["info"]["isolatedWallet"])) > 0.0:
                 return (
                     float(position["entryPrice"]),
                     float(position["info"]["positionAmt"]),
@@ -423,11 +422,11 @@ class BotHelper:
     def check_on_going_positions(self):
         if self.strategy.market == "USDTPERP":
             if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_NUMBER:
-                log(f"Warning: There is already ongoing {config.USDT_MAX_POSITION_NUMBER} positions.", "yellow")
+                log(f"Warning: {config.USDT_MAX_POSITION_NUMBER} pos", "yellow")
                 raise QuietExit
         elif self.strategy.market == "BTC":
             if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION_NUMBER:
-                log(f"Warning: There is already ongoing {config.SPOT_MAX_POSITION_NUMBER} positions", "yellow")
+                log(f"Warning: {config.SPOT_MAX_POSITION_NUMBER} pos", "yellow")
                 raise QuietExit
 
     async def _trade(self, strategy):
@@ -445,6 +444,9 @@ class BotHelper:
             try:
                 self.strategy = strategy
                 await self.trade_async()
+                # in case many alerts come in same minute
+                # TODO: Find alternative solution, race condition may emerge
+                config.status["futures"]["pos_count"] += 1
             except Exception as e:
                 _colorize_traceback(e)
         else:
@@ -486,11 +488,12 @@ class BotHelper:
 
         return
 
-    def pre_check(self):
+    def pre_check(self) -> None:
         """Fast to read from usdt.yaml.
 
         It is read from the file that is updated from binance_balance.py
         """
+        config.reload()
         free_usdt = config.status["futures"]["free"]
         if free_usdt < config.INITIAL_USDT_QTY_LONG or free_usdt < config.INITIAL_USDT_QTY_SHORT:
             raise Exception(f"Not enough free USDT({free_usdt})")

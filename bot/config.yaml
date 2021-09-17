@@ -9,11 +9,11 @@ portfolio:
   _TOTAL: 2428.06
 position:
   long:
-    1m: 100.0
-    base: 29.0
+    1m: 50.0
+    base: 25.0
   short:
-    1m: 100.0
-    base: 29.0
+    1m: 50.0
+    base: 25.0
 setup:
   IGNORE_BELOW_USDT: 0.01
   IGNORE_LIST_FUTURES:
@@ -30,7 +30,7 @@ setup:
   SPOT_MULTIPLY_RATIO: 1.0
   TP: 0.0051
   TP_SPOT: 0.0051
-  USDT_MAX_POSITION_NUMBER: 10
-  USDT_MULTIPLY_RATIO: 1.5
+  USDT_MAX_POSITION_NUMBER: 12
+  USDT_MULTIPLY_RATIO: 1.6
 z:
   ip: https://alpyr-bot.duckdns.org/webhook

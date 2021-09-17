@@ -27,7 +27,6 @@ from ebloc_broker.broker._utils.tools import (
 )
 
 c = CurrencyRates()
-START_POSITION = False
 TOTAL_BALANCE = 1000
 _arrow = "=============="
 arrow_in = _arrow + ">"
@@ -119,6 +118,7 @@ def futures_history(client, _symbol=None):
                     else:
                         log(f" | COMM={format(sum(commission), '.4f')} ", end="")
                         log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", "red", end="")
+
                     log(f" {latest_time} ", "yellow")
 
                 _name = "{:<9}".format(name_temp)
@@ -128,10 +128,6 @@ def futures_history(client, _symbol=None):
                 commission = []
                 _list = []
                 _sum = 0.0
-                # if future["symbol"] == _symbol:
-                #     _name = "{:<9}".format(name_temp)
-                #     log(f"==> {_name} ", end="")
-                #     commission_flag = True
 
         if future["symbol"] != "" and future["incomeType"] != "TRANSFER":
             _sum += float(future["income"])
@@ -202,7 +198,7 @@ def futures_history(client, _symbol=None):
 
 
 def positions(client, latest_symbol_income, daily_progress, _symbol=None):
-    global START_POSITION
+    START_POSITION = false
     if _symbol:
         obj = client.futures_position_information(symbol=_symbol)
     else:
@@ -217,7 +213,7 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
             # _asks = client.futures_order_book(symbol=future["symbol"])["asks"][0][0]
             # _bids = client.futures_order_book(symbol=future["symbol"])["bids"][0][0]  # TODO: add
             price_to_consider = client.futures_symbol_ticker(symbol=future["symbol"])["price"]
-            if not float(future["isolatedMargin"]) == 0.0:
+            if float(future["isolatedMargin"]) != 0.0:
                 _margin = float(future["isolatedMargin"]) + float(future["unRealizedProfit"]) * -1
             else:
                 _margin = float(future["positionAmt"]) * float(future["entryPrice"]) / float(future["leverage"])

@@ -24,7 +24,7 @@ def future_stats(usdt_bal, unix_timestamp_ms):
     config.status["futures"]["total"] = usdt_bal
     config.status["futures"]["locked"] = locked
     log(f" * Futures={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}", end="")
-    log("_________________________", "blue", end="")
+    log("______________________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
 
@@ -94,7 +94,7 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
 
 async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms):
     print_flag = False
-    usdt_bal += config.TRBINANCE_USDT  # USDT on trbinance is added
+    usdt_bal += config.TRBINANCE_USDT
     count = 0
     for position in future_positions:
         #: Indicates total locked amount without applying any gain or loss
@@ -148,6 +148,9 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
     config.status["futures"]["pos_count"] = count
+    if count > config.status["log"]["futures"]["max_position_count"]:
+        config.status["log"]["futures"]["max_position_count"] = count
+
     return print_flag
 
 

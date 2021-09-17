@@ -75,7 +75,7 @@ async def webhook():
     data_msg = request.get_data(as_text=True)
     if data_msg:
         try:
-            if "enter" in data_msg or "alert" in data_msg:
+            if any(n in data_msg for n in ["enter", "alert"]):
                 await do_trade(data_msg.rstrip())
 
             return "OK"

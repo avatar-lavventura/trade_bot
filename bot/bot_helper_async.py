@@ -216,7 +216,7 @@ class BotHelperAsync:
         1104.0
         1027.0
 
-        https://stackoverflow.com/a/18016874/2402577
+        __ https://stackoverflow.com/a/18016874/2402577
         """
         _symbol = f"{asset}/BTC"
         _sum = 0.0
