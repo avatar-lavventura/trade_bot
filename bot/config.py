@@ -31,13 +31,16 @@ class Config:
         self.SPOT_MULTIPLY_RATIO = self.config["setup"]["SPOT_MULTIPLY_RATIO"]
         self.USDT_MULTIPLY_RATIO = self.config["setup"]["USDT_MULTIPLY_RATIO"]
         self.IGNORE_LIST_SPOT = self.config["setup"]["IGNORE_LIST_SPOT"]
-        self.INITIAL_USDT_QTY_SHORT = self.config["position"]["short"]["base"]
-        self.INITIAL_USDT_QTY_LONG = self.config["position"]["long"]["base"]
         self.INITIAL_BTC_QTY = self.config["setup"]["INITIAL_BTC_QTY"]
         self.INITIAL_LEVERAGE = self.config["setup"]["INITIAL_LEVERAGE"]
         self.SPOT_MAX_POSITION_NUMBER = self.config["setup"]["SPOT_MAX_POSITION_NUMBER"]
         self.USDT_MAX_POSITION_NUMBER = self.config["setup"]["USDT_MAX_POSITION_NUMBER"]
         self.IGNORE_BELOW_USDT = self.config["setup"]["IGNORE_BELOW_USDT"]
+        #
+        self.INITIAL_USDT_QTY_SHORT_1m = self.config["position"]["short"]["1m"]
+        self.INITIAL_USDT_QTY_LONG_1m = self.config["position"]["long"]["1m"]
+        self.INITIAL_USDT_QTY_SHORT = self.config["position"]["short"]["base"]
+        self.INITIAL_USDT_QTY_LONG = self.config["position"]["long"]["base"]
 
 
 config: Config = Config()

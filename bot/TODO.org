@@ -16,3 +16,6 @@ https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
 https://github.com/viniciuschiele/flask-apscheduler
 ** TODO 1m position open USDT amount could be 50 more than default position open amount
 pull from `self.time_duration` if its 1m get different value
+** TODO binance does not have market symbol DEFI/USDT // for price
+** TODO Change color for " * 2021-09-18 21:54:03 FTMUSDTPERP,..."
+** TODO yaml: lock/re-load/modify/write and make sure you catch any setting of something already set by another process.

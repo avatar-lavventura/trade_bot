@@ -23,7 +23,7 @@ class Strategy:
         self.unix_timestamp_ms: "int" = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
-            log(data_msg, "green", end="")
+            log(data_msg, "magenta", is_bold=True, end="")
 
         with suppress(Exception):
             self.position_size = 0
@@ -40,6 +40,7 @@ class Strategy:
 
             self.side = self.chunks[1].upper()
             self.position_alert_msg = self.chunks[2]
+            self.time_duration = ""
             with suppress(Exception):
                 self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
 
@@ -54,7 +55,7 @@ class Strategy:
 
 
 class BotHelper:
-    def __init__(self, client, discord_client=None):
+    def __init__(self, client, discord_client=None) -> None:
         mc = MongoClient()
         self.mongoDB = Mongo(mc, mc["trader_bot"]["order"])
         self.unix_timestamp_ms: int = 0
@@ -107,15 +108,15 @@ class BotHelper:
         else:
             return
 
-    def get_btc_open_positions(self):
-        btc_open_position_size = 0
+    def get_btc_open_positions(self) -> int:
+        btc_open_position_count = 0
         balances = self.client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] not in ["BTC", "BNB", "USDT"]:
                 if float(balance["locked"]) > 0.0 or float(balance["free"]) > 0.0:
-                    btc_open_position_size += 1
+                    btc_open_position_count += 1
 
-        return btc_open_position_size
+        return btc_open_position_count
 
     def get_exchange_future_timestamp(self):
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
@@ -151,7 +152,7 @@ class BotHelper:
 
         return count
 
-    async def _limit(self, amount, entry_price, isolated_wallet, decimal):
+    async def _limit(self, amount, entry_price, isolated_wallet, decimal) -> None:
         try:
             if self.opposite_side() == "SELL":
                 limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal)
@@ -249,8 +250,7 @@ class BotHelper:
 
     def get_future_position(self, future_positions):
         for position in future_positions:
-            isolated_wallet = abs(float(position["info"]["isolatedWallet"]))
-            if isolated_wallet > 0.0:
+            if abs(float(position["info"]["isolatedWallet"])) > 0.0:
                 return (
                     float(position["entryPrice"]),
                     float(position["info"]["positionAmt"]),
@@ -349,7 +349,7 @@ class BotHelper:
 
     def position_size_check(self, current_price):
         """Handle order's notional must be no smaller than 5.0."""
-        log(f"current_price={current_price}")
+        log(f"current_price={current_price}", is_bold=True)
         if self.strategy.position_size >= 1.0 and self.strategy.position_size * current_price < 5.0:
             self.strategy.position_size += 1
             log(f"==> position_size_check: current_price={current_price} position_size={self.strategy.position_size}")
@@ -358,6 +358,9 @@ class BotHelper:
         self.strategy.position_size = 0
         output = await self.symbol_price(self.strategy.symbol, "future")
         current_price = output["last"]
+        if current_price == 0:
+            raise Exception(f"current_price={current_price} is zero")
+
         if current_price < config.IGNORE_BELOW_USDT:
             raise Exception(
                 f"Price of {self.strategy.symbol} is below {config.IGNORE_BELOW_USDT}$. current_price={current_price}."
@@ -365,9 +368,15 @@ class BotHelper:
             )
 
         if self.strategy.is_buy():
-            initial_amount = config.INITIAL_USDT_QTY_LONG / current_price
+            if self.strategy.time_duration == "1m":
+                initial_amount = config.INITIAL_USDT_QTY_LONG_1m / current_price
+            else:
+                initial_amount = config.INITIAL_USDT_QTY_LONG / current_price
         else:  # short
-            initial_amount = config.INITIAL_USDT_QTY_SHORT / current_price
+            if self.strategy.time_duration == "1m":
+                initial_amount = config.INITIAL_USDT_QTY_SHORT_1m / current_price
+            else:
+                initial_amount = config.INITIAL_USDT_QTY_SHORT / current_price
 
         self.strategy.position_size = float(self.get_initial_amount(initial_amount, "USDT"))
         self.position_size_check(current_price)
@@ -402,6 +411,8 @@ class BotHelper:
             try:
                 await self.futures_limit_order()
             except Exception as e:
+                # E: An exception of type Exception occurred. Arguments: ("E:
+                # Order related to the symbol couldn't be found.",) at 3:00 AM
                 _colorize_traceback(e)
 
     async def trade_async(self):
@@ -423,11 +434,11 @@ class BotHelper:
     def check_on_going_positions(self):
         if self.strategy.market == "USDTPERP":
             if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_NUMBER:
-                log(f"Warning: There is already ongoing {config.USDT_MAX_POSITION_NUMBER} positions.", "yellow")
+                log(f"Warning: {config.USDT_MAX_POSITION_NUMBER} pos", "yellow")
                 raise QuietExit
         elif self.strategy.market == "BTC":
             if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION_NUMBER:
-                log(f"Warning: There is already ongoing {config.SPOT_MAX_POSITION_NUMBER} positions", "yellow")
+                log(f"Warning: {config.SPOT_MAX_POSITION_NUMBER} pos", "yellow")
                 raise QuietExit
 
     async def _trade(self, strategy):
@@ -445,6 +456,9 @@ class BotHelper:
             try:
                 self.strategy = strategy
                 await self.trade_async()
+                # in case many alerts come in same minute
+                # TODO: Find alternative solution, race condition may emerge
+                config.status["futures"]["pos_count"] += 1
             except Exception as e:
                 _colorize_traceback(e)
         else:
@@ -465,10 +479,10 @@ class BotHelper:
         except:
             return decimal_count(value)
 
-    async def trade_main(self, data_msg):
+    async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:
-            log(f"[{_time()}] ", "cyan", end="")
-            log(data_msg, is_bold=True)
+            log(f"[{_time()}] ", end="")
+            log(data_msg, "magenta", is_bold=True)
             await self.discord_client.send_msg(data_msg)
             return
 
@@ -486,13 +500,22 @@ class BotHelper:
 
         return
 
-    def pre_check(self):
+    def pre_check(self) -> None:
         """Fast to read from usdt.yaml.
 
         It is read from the file that is updated from binance_balance.py
         """
+        config.reload()
         free_usdt = config.status["futures"]["free"]
-        if free_usdt < config.INITIAL_USDT_QTY_LONG or free_usdt < config.INITIAL_USDT_QTY_SHORT:
-            raise Exception(f"Not enough free USDT({free_usdt})")
+        if self.strategy.side == "BUY":
+            if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_LONG_1m:
+                raise Exception(f"Not enough free USDT({free_usdt}), side=BUY")
+
+            if self.strategy.time_duration == "21m" and free_usdt < config.INITIAL_USDT_QTY_LONG:
+                raise Exception(f"Not enough free USDT({free_usdt}), side=BUY")
+
+        if self.strategy.side == "SELL" and free_usdt < config.INITIAL_USDT_QTY_SHORT:
+            if (self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_SHORT_1m) or (self.strategy.time_duration == "21m" and free_usdt < config.INITIAL_USDT_QTY_SHORT):
+                raise Exception(f"Not enough free USDT({free_usdt}), side=SELL")
 
         self.check_on_going_positions()

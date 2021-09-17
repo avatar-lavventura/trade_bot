@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-
+from filelock import FileLock
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, log, percent_change, round_float
@@ -144,7 +144,9 @@ class BotHelperAsync:
                     if asset not in ["BTC", "BNB", "USDT"]:
                         await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
-        config.status["spot"]["pos_count"] = count
+        with FileLock(config.status.fp_lock, timeout=1):
+            config.status["spot"]["pos_count"] = count
+
         return own_usd, float(usdt_amount)
 
     async def spot_order(self, quantity, symbol, side):
@@ -216,7 +218,7 @@ class BotHelperAsync:
         1104.0
         1027.0
 
-        https://stackoverflow.com/a/18016874/2402577
+        __ https://stackoverflow.com/a/18016874/2402577
         """
         _symbol = f"{asset}/BTC"
         _sum = 0.0
