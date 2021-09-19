@@ -9,10 +9,10 @@ portfolio:
   _TOTAL: 2428.06
 position:
   long:
-    1m: 50.0
+    1m: 45.0
     base: 25.0
   short:
-    1m: 50.0
+    1m: 45.0
     base: 25.0
 setup:
   IGNORE_BELOW_USDT: 0.01

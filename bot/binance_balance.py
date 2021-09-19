@@ -5,6 +5,8 @@ import time
 from contextlib import suppress
 from typing import Dict
 
+from filelock import FileLock
+
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
@@ -40,7 +42,7 @@ async def _create_market_order(symbol: str, amount, side):
         order = await helper.exchange.future.create_market_sell_order(symbol, amount)
 
     with suppress(Exception):
-        log(f"market_order={order['info']}")
+        log(f"market_order=[white]{order['info']}")
 
 
 async def _create_limit_order(symbol, position_amt, limit_price, side):
@@ -53,7 +55,7 @@ async def _create_limit_order(symbol, position_amt, limit_price, side):
     elif side == "SELL":
         order = await helper.exchange.future.create_limit_buy_order(symbol, position_amt, limit_price)
 
-    log(f"limit_order={order['info']}")
+    log(f"limit_order=[white]{order['info']}")
 
 
 async def cancel_check_orders(symbol, limit_price, side, entry_price, position_amt) -> None:
@@ -125,7 +127,7 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
                 limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
 
             _asset = "{0: <5}".format(symbol.replace("/USDT", ""))
-            log(f"{_asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", end="")
+            log(f"{_asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", end="", is_bold=True)
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
             asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
@@ -147,7 +149,9 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
-    config.status["futures"]["pos_count"] = count
+    with FileLock(config.status.fp_lock, timeout=1):
+        config.status["futures"]["pos_count"] = count
+
     if count > config.status["log"]["futures"]["max_position_count"]:
         config.status["log"]["futures"]["max_position_count"] = count
 

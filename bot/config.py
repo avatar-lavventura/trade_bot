@@ -18,11 +18,10 @@ class Config:
         return self.timestamp["spot_timestamp"][asset]
 
     def initialize(self):
-        home = str(Path.home())
         self.config = Yaml("config.yaml")
         self.timestamp = Yaml("timestamp.yaml")
         self.goal = Yaml("goal.yaml")
-        self.status = Yaml(f"{home}/.log/status.yaml")
+        self.status = Yaml("status.yaml")
         #
         self.TRBINANCE_USDT = self.config["TRBINANCE"]["USDT"]
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]

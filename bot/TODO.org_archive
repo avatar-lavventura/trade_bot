@@ -43,3 +43,34 @@ CLOSED: [2021-09-15 Wed 15:33]
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE Change color for " * 2021-09-18 21:54:03 FTMUSDTPERP,..."
+CLOSED: [2021-09-19 Sun 16:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-19 Sun 16:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE binance does not have market symbol DEFI/USDT // for price
+CLOSED: [2021-09-19 Sun 16:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-19 Sun 16:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 1m position open USDT amount could be 50 more than default position open amount
+CLOSED: [2021-09-19 Sun 16:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-19 Sun 16:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+pull from `self.time_duration` if its 1m get different value
