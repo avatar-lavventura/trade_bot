@@ -18,11 +18,10 @@ class Config:
         return self.timestamp["spot_timestamp"][asset]
 
     def initialize(self):
-        home = str(Path.home())
         self.config = Yaml("config.yaml")
         self.timestamp = Yaml("timestamp.yaml")
         self.goal = Yaml("goal.yaml")
-        self.status = Yaml(f"{home}/.log/status.yaml")
+        self.status = Yaml("status.yaml")
         #
         self.TRBINANCE_USDT = self.config["TRBINANCE"]["USDT"]
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
@@ -36,8 +35,8 @@ class Config:
         self.IGNORE_LIST_SPOT = self.config["setup"]["IGNORE_LIST_SPOT"]
         self.INITIAL_BTC_QTY = self.config["setup"]["INITIAL_BTC_QTY"]
         self.INITIAL_LEVERAGE = self.config["setup"]["INITIAL_LEVERAGE"]
-        self.SPOT_MAX_POSITION_NUMBER = self.config["setup"]["SPOT_MAX_POSITION_NUMBER"]
-        self.USDT_MAX_POSITION_NUMBER = self.config["setup"]["USDT_MAX_POSITION_NUMBER"]
+        self.SPOT_MAX_POSITION = self.config["setup"]["SPOT_MAX_POSITION"]
+        self.USDT_MAX_POSITION = self.config["setup"]["USDT_MAX_POSITION"]
         self.IGNORE_BELOW_USDT = self.config["setup"]["IGNORE_BELOW_USDT"]
         #
         self.INITIAL_USDT_QTY_SHORT_1m = self.config["position"]["short"]["1m"]
