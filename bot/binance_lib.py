@@ -198,7 +198,7 @@ def futures_history(client, _symbol=None):
 
 
 def positions(client, latest_symbol_income, daily_progress, _symbol=None):
-    START_POSITION = false
+    START_POSITION = False
     if _symbol:
         obj = client.futures_position_information(symbol=_symbol)
     else:

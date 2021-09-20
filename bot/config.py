@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-
 from ebloc_broker.broker._utils.yaml import Yaml
 
 
@@ -18,31 +16,34 @@ class Config:
         return self.timestamp["spot_timestamp"][asset]
 
     def initialize(self):
-        self.config = Yaml("config.yaml")
+        self.cfg = Yaml("config.yaml")
         self.timestamp = Yaml("timestamp.yaml")
         self.goal = Yaml("goal.yaml")
         self.status = Yaml("status.yaml")
-        #
-        self.TRBINANCE_USDT = self.config["TRBINANCE"]["USDT"]
+        # spot
+        self.SPOT_LOCKED_PERCENT_LIMIT = self.cfg["setup"]["spot"]["LOCKED_PERCENT_LIMIT"]
+        self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["MULTIPLY_RATIO"]
+        self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["MAX_POSITION_1m"]
+        self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["MAX_POSITION"]
+        self.SPOT_IGNORE_LIST = self.cfg["setup"]["spot"]["IGNORE_LIST"]
+        self.SPOT_PERCENT_CHANGE_TO_ADD = self.cfg["setup"]["spot"]["PERCENT_CHANGE_TO_ADD"]
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
-        self.TP = self.config["setup"]["TP"]
-        self.LOCKED_PERCENT_LIMIT_USDT = self.config["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
-        self.LOCKED_PERCENT_LIMIT_SPOT = self.config["setup"]["LOCKED_PERCENT_LIMIT_SPOT"]
-        self.PERCENT_CHANGE_TO_ADD_USDT = self.config["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]
-        self.PERCENT_CHANGE_TO_ADD_SPOT = self.config["setup"]["PERCENT_CHANGE_TO_ADD_SPOT"]
-        self.SPOT_MULTIPLY_RATIO = self.config["setup"]["SPOT_MULTIPLY_RATIO"]
-        self.USDT_MULTIPLY_RATIO = self.config["setup"]["USDT_MULTIPLY_RATIO"]
-        self.IGNORE_LIST_SPOT = self.config["setup"]["IGNORE_LIST_SPOT"]
-        self.INITIAL_BTC_QTY = self.config["setup"]["INITIAL_BTC_QTY"]
-        self.INITIAL_LEVERAGE = self.config["setup"]["INITIAL_LEVERAGE"]
-        self.SPOT_MAX_POSITION_NUMBER = self.config["setup"]["SPOT_MAX_POSITION_NUMBER"]
-        self.USDT_MAX_POSITION_NUMBER = self.config["setup"]["USDT_MAX_POSITION_NUMBER"]
-        self.IGNORE_BELOW_USDT = self.config["setup"]["IGNORE_BELOW_USDT"]
+        self.INITIAL_BTC_QTY = self.cfg["setup"]["spot"]["INITIAL_BTC_QTY"]
         #
-        self.INITIAL_USDT_QTY_SHORT_1m = self.config["position"]["short"]["1m"]
-        self.INITIAL_USDT_QTY_LONG_1m = self.config["position"]["long"]["1m"]
-        self.INITIAL_USDT_QTY_SHORT = self.config["position"]["short"]["base"]
-        self.INITIAL_USDT_QTY_LONG = self.config["position"]["long"]["base"]
+        self.TRBINANCE_USDT = self.cfg["TRBINANCE"]["USDT"]
+        self.TP = self.cfg["setup"]["TP"]
+        self.LOCKED_PERCENT_LIMIT_USDT = self.cfg["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
+        self.PERCENT_CHANGE_TO_ADD_USDT = self.cfg["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]
+        self.USDT_MULTIPLY_RATIO = self.cfg["setup"]["USDT_MULTIPLY_RATIO"]
+        self.INITIAL_LEVERAGE = self.cfg["setup"]["INITIAL_LEVERAGE"]
+        self.USDT_MAX_POSITION_1m = self.cfg["setup"]["USDT_MAX_POSITION_1m"]
+        self.USDT_MAX_POSITION = self.cfg["setup"]["USDT_MAX_POSITION"]
+        self.IGNORE_BELOW_USDT = self.cfg["setup"]["IGNORE_BELOW_USDT"]
+        #
+        self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["position"]["short"]["1m"]
+        self.INITIAL_USDT_QTY_LONG_1m = self.cfg["position"]["long"]["1m"]
+        self.INITIAL_USDT_QTY_SHORT = self.cfg["position"]["short"]["base"]
+        self.INITIAL_USDT_QTY_LONG = self.cfg["position"]["long"]["base"]
 
 
 config: Config = Config()
