@@ -35,5 +35,5 @@ if __name__ == "__main__":
         _colorize_traceback(e)
         loop.run_until_complete(main())
     finally:
-        log("Program finished.", "green")
+        log("Program finished.", "bold green")
         loop.run_until_complete(bot_async.close())

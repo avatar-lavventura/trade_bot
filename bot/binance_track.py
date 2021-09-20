@@ -479,8 +479,8 @@ def _run():
 def trade_cont(client, balances):
     global msg
     print(client.get_asset_balance(asset=MAIN_ASSET))
-    info = client.get_account()
-    free_asset = get_free_balance()
+    # free_asset = get_free_balance()
+    # info = client.get_account()
     # margin ===============================================
     # print(client.get_open_margin_orders(symbol='ETHBTC'))
     # for d in client.get_margin_account()['userAssets']:
@@ -504,24 +504,24 @@ def trade_cont(client, balances):
                 pass
 
     current_btc_price_USD = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
-    current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
+    # current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
     # current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
     futures_usd = client_helper.get_futures_usdt()
     log(f"==> Futures={futures_usd} USD")
     own_usd = 0.0
     own_usd = sum_btc * float(current_btc_price_USD)
-    own_try = sum_btc * float(current_btc_price_TRY)
+    # own_try = sum_btc * float(current_btc_price_TRY)
     print("Spot => %.8f BTC == " % sum_btc, end="")
     print("%.8f USD == " % own_usd)
     print("overview => %.2f USD" % (float(own_usd) + float(futures_usd)))
-    for asset in client.futures_account_balance():
-        name = asset["asset"]
-        balance = asset["balance"]
-
+    # for asset in client.futures_account_balance():
+    #     name = asset["asset"]
+    #     balance = asset["balance"]
+    #
     # save_obj("symbols")
     # sys.exit()
-
     try:
+        global org_symbols
         org_symbols = load_obj("symbols")
     except:
         save_obj("symbols")
