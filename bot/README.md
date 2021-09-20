@@ -37,7 +37,7 @@ To                         Action      From
 
 # Nginx Full Setup Instructions
 
-cp docker ~/docker
+```cp docker ~/docker```
 
 ```
 sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -89,6 +89,7 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 
 
 # Git Push:
+
 ```
 # https://github.com/newren/git-filter-repo#how-do-i-install-it
 git filter-repo --invert-paths --path '.DS_Store' --use-base-name

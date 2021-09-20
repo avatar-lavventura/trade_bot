@@ -95,7 +95,7 @@ class BotHelperAsync:
             response = await helper.exchange.future.fapiPrivate_post_leverage(
                 {"symbol": market["id"], "leverage": leverage}
             )
-            log(response, "cyan")
+            log(response, "cyan", is_bold=True)
 
             response = await helper.exchange.future.fapiPrivate_post_margintype(
                 {"symbol": market["id"], "marginType": "ISOLATED"}
@@ -291,7 +291,7 @@ class BotHelperAsync:
         limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
         log(f"==> {asset} quantity={asset_balance} | ", end="")
         log(f"entry_price={entry_price} | ", end="")
-        if is_limit and asset not in config.IGNORE_LIST_SPOT:
+        if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"limit_price={limit_price} ", end="")
 
         asset_price = await self.spot_fetch_ticker(asset)
@@ -302,22 +302,22 @@ class BotHelperAsync:
             initial=entry_price, change=asset_price - entry_price, is_arrow_print=False
         )
 
-        if not is_limit or asset in config.IGNORE_LIST_SPOT:
+        if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
-        if asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_SPOT + 0.01 and _per < 50.0:
+        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD + 0.01 and _per < 50.0:
             new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
             log(f"new_order_size={new_order_size} | ", "blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
             _per = format(per, ".2f")
             log(f"==> {_per} of the total asset value")
-            if float(_per) <= config.LOCKED_PERCENT_LIMIT_SPOT:
+            if float(_per) <= config.SPOT_LOCKED_PERCENT_LIMIT:
                 order = await self.spot_order(new_order_size, _symbol, "BUY")
                 log(order["info"])
                 await self.new_limit_order(asset, limit_price)
             else:
                 new_per = (100.0 * asset_balance * asset_price) / sum_btc
-                per_to_buy = config.LOCKED_PERCENT_LIMIT_SPOT - abs(new_per)
+                per_to_buy = config.SPOT_LOCKED_PERCENT_LIMIT - abs(new_per)
                 btc_amount_to_buy = per_to_buy * sum_btc / 100.0
                 _new_order_size = btc_amount_to_buy / asset_price
                 _new_order_size = f"{_new_order_size:.{decimal}f}"

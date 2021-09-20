@@ -15,3 +15,5 @@ icin ignore yap// prev position side
 https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
 https://github.com/viniciuschiele/flask-apscheduler
 ** TODO yaml: lock/re-load/modify/write and make sure you catch any setting of something already set by another process.
+** TODO 3. ekleme 9% gorurse 2 kat ekleme yap
+** TODO binance_balance add overall lost to left end

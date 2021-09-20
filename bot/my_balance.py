@@ -41,15 +41,16 @@ async def goal():
 
     if math.ceil(goal_sum) > 0.0:
         log(" | ", end="")
-        log(f"Goal={math.ceil(goal_sum)} USDT", "green")
+        log(f"goal={math.ceil(goal_sum)} USDT", "bold green")
 
 
 async def fetch_balance() -> float:
+    total_lost = 0.0
     total_balance = 0.0
+    print_flag = False
     try:
         own_usd, future_balance = await bot_async.spot_balance(is_limit=False)
         total_balance = float(own_usd)
-        #
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         future_balance += float(bot_async.futures_balance["total"]["USDT"])
         total_balance += future_balance
@@ -60,22 +61,29 @@ async def fetch_balance() -> float:
         for position in future_positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
-                _symbol = position["symbol"]
+                if print_flag:
+                    log("")
+                else:
+                    print_flag = True
+
+                symbol = position["symbol"]
                 entry_price = float(position["entryPrice"])
-                symbol_temp = _symbol.replace("/USDT", "")
+                symbol_temp = symbol.replace("/USDT", "")
                 log(f"==> {symbol_temp} entry={entry_price}", end="")
                 unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
                 if unrealized_profit < 0.0:
                     log(f" {unrealized_profit}", "red", end="")
+                    total_lost -= unrealized_profit
                 else:
                     log(f" {unrealized_profit}", "green", end="")
+                    total_lost += unrealized_profit
 
                 usdt_balance = float(bot_async.futures_balance["total"]["USDT"])
                 per = (100.0 * initial_margin) / usdt_balance
-                _per = format(per, ".2f")
-                log(f" {_per}% ", "blue", end="")
-                log(f"{format(initial_margin, '.2f')} ", "blue")
+                log(f" {format(per, '.2f')}% ", "blue", end="")
+                log(f"{format(initial_margin, '.2f')} ", "blue", end="")
 
+        log(f"total_lost={int(total_lost)}", "bold red")
         return total_balance
     except Exception as e:
         _colorize_traceback(e)
@@ -89,7 +97,7 @@ async def main():
     while True:
         await fetch_balance()
         log("# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", "cyan")
-        await _sleep()
+        await _sleep(30)
 
 
 if __name__ == "__main__":
@@ -101,4 +109,4 @@ if __name__ == "__main__":
     except Exception as e:
         _colorize_traceback(e)
     finally:
-        log("Program finished.", "green")
+        log("Program finished.", "bold green")

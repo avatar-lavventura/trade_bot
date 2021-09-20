@@ -74,3 +74,13 @@ CLOSED: [2021-09-19 Sun 16:11]
 :ARCHIVE_TODO: DONE
 :END:
 pull from `self.time_duration` if its 1m get different value
+
+* DONE >80% locked due nothing
+CLOSED: [2021-09-20 Mon 14:26]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-20 Mon 14:26
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

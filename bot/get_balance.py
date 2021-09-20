@@ -3,7 +3,7 @@
 from user_setup import check_binance_obj
 
 from bot.client_helper import ClientHelper
-from bot.trade import BotHelper, Strategy
+from bot.trade_async import BotHelper, Strategy
 from ebloc_broker.broker._utils.tools import log
 
 
@@ -28,7 +28,6 @@ if __name__ == "__main__":
     bot.strategy = Strategy()
     balances = client.get_account()
     balances = client_helper.client.get_account()
-
     for _balance in balances["balances"]:
         asset = _balance["asset"]
         if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in ["BTC", "BNB", "USDT"]:
