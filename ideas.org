@@ -7,7 +7,7 @@
    opened a reverse position may put you in reverse case and bring loss; if you
    have large money the lost will be much more
 3. If you are scared of the position just put close on top of the entry price
-   before, do not think any gain.
+   before, do not think any gain
 4. Stop at 5% doing cut-loss
 5. When you put extra money like 500$ just be careful do not lose control
 6. Close position if BTC is dropping and you are long (if you are in gain), do
@@ -25,7 +25,7 @@
 14. BTC USDT’e cevirince bir anda gomme parca parca gom. Ucuz fiyattan
     mermilerini feda edersin acele etme cikacagi kadar ciksin durulsun, tepede
     gomersin. Erkenden fazla para gomersen onu da maliyeti yukari cekip
-    kurtarmak bi o kadar zor olur.
+    kurtarmak bi o kadar zor olur
 15. Short/Long sinyali gelince BTC leri kullan kadana gore pump olurken harcama,
     yuksek fiyata koy. Mesela shorttayken yesilde al olursa ucuza gidebilir.
 16. 5 dakikalikta pozisyon ne ise tersini yapma, tehlikeli

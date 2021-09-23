@@ -10,11 +10,11 @@ autopep8==1.5.7
 backcall==0.2.0
 backports.entry-points-selectable==1.1.0
 beautifulsoup4==4.9.3
-black==21.8b0
+black==21.9b0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==1.56.33
+ccxt==1.56.53
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -93,7 +93,7 @@ Quart==0.15.1
 regex==2021.8.21
 requests==2.26.0
 rich==10.7.0
-rope==0.19.0
+rope==0.20.0
 ruamel.yaml==0.17.13
 ruamel.yaml.clib==0.2.6
 selenium==3.141.0
@@ -105,8 +105,11 @@ termcolor==1.1.0
 toml==0.10.2
 tomli==1.2.1
 traitlets==5.1.0
+types-filelock==0.1.5
 types-python-dateutil==0.1.6
+types-pytz==2021.1.2
 types-requests==2.25.6
+types-termcolor==1.1.1
 typing-extensions==3.10.0.0
 tzlocal==2.1
 ujson==4.1.0
