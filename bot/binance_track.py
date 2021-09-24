@@ -48,14 +48,13 @@ import binance_lib
 import requests
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
-
-import ebloc_broker.broker._utils.tools as tools
+import ebloc_broker.broker._utils._log as _log
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils.tools import log, run
 
 HOME = str(Path.home())
-tools.ll.LOG_FILENAME = "progress.log"
-tools.ll.IS_PRINT = False
+_log.ll.LOG_FILENAME = "progress.log"
+_log.ll.IS_PRINT = False
 
 SEP = "====================================================================================="
 headers = {

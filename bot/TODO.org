@@ -19,3 +19,5 @@ https://github.com/viniciuschiele/flask-apscheduler
 ** TODO binance_balance add overall lost to left end
 ** TODO calculate leverage
 ** TODO yaml default {} instead assign 0
+
+** TODO REP USDT check instead of BTC
