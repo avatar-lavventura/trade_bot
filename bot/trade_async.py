@@ -13,32 +13,41 @@ from bot.binance_balance import _create_limit_order, _create_market_order
 from bot.client_helper import DiscordClient
 from bot.config import config
 from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, decimal_count, log
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, decimal_count
 
 is_trade = True
 
 
 class Strategy:
     def __init__(self, data_msg=""):
-        self.unix_timestamp_ms: "int" = 0
+        self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
-            log(f"{data_msg} ", "bold magenta", end="")
+            log(f"{data_msg}", "bold magenta", end="")
 
         with suppress(Exception):
             self.position_size = 0
             self.chunks = data_msg.split(",")
+            self.side = self.chunks[1].upper()
             self.symbol = self.chunks[0]
             if "BTC" in self.symbol:
                 self.market = "BTC"
                 self.asset = self.symbol[:-3]  # removes BTC at the end
                 self.symbol = self.symbol.replace("BTC", "/BTC")
+                if self.side == "SELL":
+                    raise Exception("Only BUY for BTC sport market")
             elif "USDTPERP" in self.symbol:
                 self.market = "USDTPERP"
                 self.asset = self.symbol.replace("USDTPERP", "")
                 self.symbol = self.symbol.replace("USDTPERP", "/USDT")
+            elif "USDT" in self.symbol:
+                self.market = "USDT"  # spot
+                self.asset = self.symbol.replace("USDT", "")
+                self.symbol = self.symbol.replace("USDT", "/USDT")
+                if self.side == "SELL":
+                    raise Exception("Only BUY for USDT sport market")
 
-            self.side = self.chunks[1].upper()
             self.position_alert_msg = self.chunks[2]
             self.time_duration = ""
             with suppress(Exception):
@@ -160,7 +169,7 @@ class BotHelper:
                 limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal)
 
             quantity = abs(float(amount))
-            log(f"| quantity={quantity} | limit_price={limit_price}", is_bold=True)
+            log(f"| quantity={quantity} | limit_price={limit_price}", "bold")
             await _create_limit_order(self.strategy.symbol, quantity, limit_price, self.strategy.side)
         except TP_calculate as e:
             _colorize_traceback(e)
@@ -281,7 +290,7 @@ class BotHelper:
 
         log("==> Opening a limit order: ", end="")
         try:
-            log(f"entry_price={entry_price} ", is_bold=True, end="")
+            log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
             await self._limit(_amount, entry_price, isolated_wallet, decimal)
         except Exception as e:
@@ -349,7 +358,7 @@ class BotHelper:
 
     def position_size_check(self, current_price):
         """Handle order's notional must be no smaller than 5.0."""
-        log(f"current_price={current_price}", is_bold=True)
+        log(f"current_price={current_price}", "bold")
         if self.strategy.position_size >= 1.0 and self.strategy.position_size * current_price < 5.0:
             self.strategy.position_size += 1
             log(f"==> position_size_check: current_price={current_price} position_size={self.strategy.position_size}")
@@ -406,9 +415,9 @@ class BotHelper:
                 raise e
 
     async def sell(self):
-        await self.both_side_order()
         if self.strategy.market == "USDTPERP":
             try:
+                await self.both_side_order()
                 await self.futures_limit_order()
             except Exception as e:
                 # E: An exception of type Exception occurred. Arguments: ("E:

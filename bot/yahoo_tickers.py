@@ -7,7 +7,8 @@ from pymongo import MongoClient
 
 from bot.config import config
 from bot.my_balance import fetch_balance, get_silver
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _timestamp, log
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import _colorize_traceback, _timestamp
 
 mc = MongoClient()
 mongoDB = Mongo(mc, mc["trader_bot"]["timestamp"])
@@ -16,18 +17,18 @@ mongoDB = Mongo(mc, mc["trader_bot"]["timestamp"])
 async def main():
     time_now = _timestamp()
     total_balance = await fetch_balance()
-    silver_gr = config.config["portfolio"]["SILVER"]["gr"]
+    silver_gr = config.cfg["portfolio"]["SILVER"]["gr"]
     if silver_gr > 0.0:
         silver_usdt = float(format(get_silver(silver_gr), ".2f"))
-        config.config["portfolio"]["SILVER"]["troy_ounce"] = silver_gr * 0.032151
+        config.cfg["portfolio"]["SILVER"]["troy_ounce"] = silver_gr * 0.032151
         log(f" * Silver => {silver_usdt}")
-        config.config["portfolio"]["SILVER"]["USD"] = silver_usdt
+        config.cfg["portfolio"]["SILVER"]["USD"] = silver_usdt
 
     # total_balance = total_balance + silver_usdt
     total_balance = format(total_balance, ".2f")
-    config.config["portfolio"]["_TOTAL"] = float(total_balance)
+    config.cfg["portfolio"]["_TOTAL"] = float(total_balance)
     log(f"total_balance={total_balance}")
-    mongoDB.add_item(time_now, config.config["portfolio"])
+    mongoDB.add_item(time_now, config.cfg["portfolio"])
     log("SUCCESS")
 
 

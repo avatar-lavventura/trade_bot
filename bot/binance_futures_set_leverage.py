@@ -7,7 +7,8 @@ from pathlib import Path
 from user_setup import check_binance_obj
 
 from bot.bot_helper_async import BotHelperAsync
-from ebloc_broker.broker._utils.tools import _colorize_traceback, log
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import _colorize_traceback
 
 HOME = str(Path.home())
 bot_async = BotHelperAsync()

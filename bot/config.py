@@ -26,19 +26,20 @@ class Config:
         self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["MAX_POSITION_1m"]
         self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["MAX_POSITION"]
         self.SPOT_IGNORE_LIST = self.cfg["setup"]["spot"]["IGNORE_LIST"]
-        self.SPOT_PERCENT_CHANGE_TO_ADD = self.cfg["setup"]["spot"]["PERCENT_CHANGE_TO_ADD"]
+        self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot"]["PERCENT_CHANGE_TO_ADD"]) + 0.01
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
         self.INITIAL_BTC_QTY = self.cfg["setup"]["spot"]["INITIAL_BTC_QTY"]
-        #
+        # futures
         self.TRBINANCE_USDT = self.cfg["TRBINANCE"]["USDT"]
         self.TP = self.cfg["setup"]["TP"]
         self.LOCKED_PERCENT_LIMIT_USDT = self.cfg["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
-        self.PERCENT_CHANGE_TO_ADD_USDT = self.cfg["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]
+        self.PERCENT_CHANGE_TO_ADD_USDT = -abs(self.cfg["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]) + 0.01
         self.USDT_MULTIPLY_RATIO = self.cfg["setup"]["USDT_MULTIPLY_RATIO"]
         self.INITIAL_LEVERAGE = self.cfg["setup"]["INITIAL_LEVERAGE"]
         self.USDT_MAX_POSITION_1m = self.cfg["setup"]["USDT_MAX_POSITION_1m"]
         self.USDT_MAX_POSITION = self.cfg["setup"]["USDT_MAX_POSITION"]
         self.IGNORE_BELOW_USDT = self.cfg["setup"]["IGNORE_BELOW_USDT"]
+        self.ISOLATED_WALLET_LIMIT = self.cfg["setup"]["ISOLATED_WALLET_LIMIT"]
         #
         self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["position"]["short"]["1m"]
         self.INITIAL_USDT_QTY_LONG_1m = self.cfg["position"]["long"]["1m"]

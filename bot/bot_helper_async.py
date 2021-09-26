@@ -6,7 +6,8 @@ from filelock import FileLock
 
 from bot import helper
 from bot.config import config
-from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, log, percent_change, round_float
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, percent_change, round_float
 
 
 class TP_calculate(Exception):
@@ -96,12 +97,11 @@ class BotHelperAsync:
             response = await helper.exchange.future.fapiPrivate_post_leverage(
                 {"symbol": market["id"], "leverage": leverage}
             )
-            log(response, "cyan", is_bold=True)
-
+            log(response, "bold cyan")
             response = await helper.exchange.future.fapiPrivate_post_margintype(
                 {"symbol": market["id"], "marginType": "ISOLATED"}
             )
-            log(response, "cyan")
+            log(response, "bold cyan")
         except Exception as e:
             if "No need to change margin type." not in str(e):
                 _colorize_traceback(e)
@@ -145,7 +145,8 @@ class BotHelperAsync:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
-                        await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
+                        await self.spot_limit_usdt(asset, btc_quantity, sum_btc, is_limit)
+                        # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["spot"]["pos_count"] = count
@@ -306,7 +307,7 @@ class BotHelperAsync:
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
-        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD + 0.01 and _per < 50.0:
+        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and _per < 50.0:
             new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
             log(f"new_order_size={new_order_size} | ", "blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
