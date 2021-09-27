@@ -153,8 +153,10 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
             log("| ", end="")
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
             log(f"({_per}%) ", "bold magenta", end="")
-            if (isolated_wallet < config.ISOLATED_WALLET_LIMIT
-                    and asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_USDT):
+            if (
+                isolated_wallet < config.ISOLATED_WALLET_LIMIT
+                and asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_USDT
+            ):
                 # Add more money only if the position is less than given amount(ex: 50$)
                 # TODO: if unrealized > 5% close the position, improve
                 new_amount = abs(position_amt) * config.USDT_MULTIPLY_RATIO

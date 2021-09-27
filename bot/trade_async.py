@@ -288,8 +288,8 @@ class BotHelper:
                 _colorize_traceback(e, is_print_exc=False)
                 await _sleep()
 
-        log("==> Opening a limit order: ", end="")
         try:
+            log("==> Opening a limit order: ", end="")
             log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
             await self._limit(_amount, entry_price, isolated_wallet, decimal)
