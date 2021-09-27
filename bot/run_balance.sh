@@ -1,4 +1,5 @@
 #!/bin/bash
+
 countdown () {  # https://superuser.com/a/611582/723632
    date1=$((`date +%s` + $(expr $1 - 1)))
    while [ "$date1" -ge `date +%s` ]; do
@@ -6,10 +7,11 @@ countdown () {  # https://superuser.com/a/611582/723632
      sleep 0.1
    done
 }
+
 while true
 do
     python3 binance_balance.py
-    echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+    echo "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
     countdown 60
 done
 # LOG_FILE=_binance_balance.log

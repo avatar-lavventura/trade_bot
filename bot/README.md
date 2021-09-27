@@ -85,7 +85,7 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 - [Binance Minimum Trading Rules](https://liquidation.atsutane.net/calc)
 - [puppeteer google browser](https://github.com/puppeteer/puppeteer)
 - [fake gmail address generator and inbox](https://maildim.com/)
-- TV_username_last_used => `roxanroxanroxan_4`
+- TV_username_last_used => `roxanroxanroxan_5` // ends at Oct 28, 2021
 
 
 # Git Push:
@@ -96,3 +96,21 @@ git filter-repo --invert-paths --path '.DS_Store' --use-base-name
 git remote add origin https://github.com/avatar-lavventura/trade_bot.git
 git push --set-upstream origin dev -f
 ```
+
+# Timestamp for this request is outside of the recvWindow
+
+https://github.com/ccxt/ccxt/issues/761#issuecomment-355839537
+
+If your server is running on Linux, just execute this script - it will update system time
+
+```
+sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+```
+
+Note, however, that system clock can actually go out of synch pretty quickly, in
+less than 15 minutes. So this command has to be run frequently enough, or,
+alternatively, it can be substituted for a time-synchronizing daemon like ntpd
+that will do it for you.
+
+- https://currentmillis.com
+- https://askubuntu.com/a/254846/660555

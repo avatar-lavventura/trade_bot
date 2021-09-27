@@ -6,6 +6,7 @@ import logging
 import quart.flask_patch  # noqa
 from flask import abort, request  # noqa
 from quart import Quart
+
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _exit
 
@@ -46,6 +47,7 @@ async def startup():
     from bot import helper
     import bot.trade_async as bot_trade
     from user_setup import check_binance_obj
+
     loop = asyncio.get_event_loop()
     app.discord_client = DiscordClient()
     await app.discord_client.bot.login(app.discord_client.TOKEN)
@@ -79,7 +81,7 @@ async def webhook():
             return "OK"
         except QuietExit as e:
             if e:
-                log(str(e), "bold red")
+                log(str(e))
         except KeyError:
             _exit("E: KeyError")
         except Exception as e:
