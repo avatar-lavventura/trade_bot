@@ -11,7 +11,7 @@ countdown () {  # https://superuser.com/a/611582/723632
 while true
 do
     python3 binance_balance.py
-    echo "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+    echo -e "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
     countdown 60
 done
 # LOG_FILE=_binance_balance.log

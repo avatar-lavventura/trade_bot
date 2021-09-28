@@ -6,7 +6,7 @@ from pathlib import Path
 
 import ccxt.async_support as ccxt
 
-from ebloc_broker.broker._utils.tools import unix_time_millis
+from ebloc_broker.broker._utils.tools import unix_time_millis, _exit
 from ebloc_broker.broker._utils.yaml import Yaml
 
 
@@ -14,11 +14,15 @@ class Exchange:
     def __init__(self):
         helper_cfg = Yaml(Path(f"{Path.home()}/.binance.yaml"))
         ops = {
-            "apiKey": helper_cfg["b"]["key"],
-            "secret": helper_cfg["b"]["secret"],
+            "apiKey": str(helper_cfg["b"]["key"]),
+            "secret": str(helper_cfg["b"]["secret"]),
             "options": {"adustForTimeDifference": True},
             # "verbose": True,
         }
+        if not ops["apiKey"] or not ops["secret"]:
+            print("E: apiKey or secret is {}")
+            breakpoint()  # DEBUG
+
         self.future = ccxt.binanceusdm(ops)
         self.spot = ccxt.binance(ops)
         self.future_markets = {}

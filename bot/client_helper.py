@@ -17,12 +17,15 @@ class DiscordClient:
         _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
         self.bot = discord.Client()
         self.TOKEN = _config["discord"]["TOKEN"]
-        self.channel_id = _config["discord"]["CHANNEL_ALPY"]
+        self.channel_name = _config["discord"]["CHANNEL_NAME"]
+        self.channel = None
 
     async def send_msg(self, msg="OK"):
         await self.bot.wait_until_ready()
-        channel = self.bot.get_channel(self.channel_id)
-        await channel.send(msg)
+        if not self.channel:
+            self.channel = discord.utils.get(self.bot.get_all_channels(), name=self.channel_name)
+
+        await self.channel.send(msg)
 
 
 class ClientHelper:

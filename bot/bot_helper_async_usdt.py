@@ -109,8 +109,9 @@ class BotHelperUsdtAsync(BotHelperAsync):
     #     balance = await helper.exchange.spot.fetch_balance()
     #     return balance[code]["total"]
 
-    async def spot_limit_usdt(self, asset, asset_balance, sum_btc, is_limit=True):
+    async def spot_limit_usdt(self, asset, asset_balance, sum_usdt, is_limit=True):
         """Spot limit for USDT."""
+        print(sum_usdt)  # delete_me
         symbol = f"{asset}/USDT"
         _sum = 0.0
         quantity = 0.0
@@ -162,12 +163,19 @@ class BotHelperUsdtAsync(BotHelperAsync):
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"limit_price={limit_price} ", end="")
 
-        asset_price = await self.spot_fetch_ticker(asset)
-        per = (100.0 * asset_balance * asset_price) / sum_btc
+        asset_usdt_price = await self.spot_fetch_ticker(f"{asset}USDT")
+        per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
         _per = format(per, ".2f")
         log(f"{_per}% ", "blue", end="")
+
+        profit = (asset_usdt_price - entry_price) * quantity
+        if profit > 0:
+            log(format(profit, ".2f"), "bold green", end="")
+        else:
+            log(format(profit, ".2f"), "bold red", end="")
+
         asset_percent_change = percent_change(
-            initial=entry_price, change=asset_price - entry_price, is_arrow_print=False
+            initial=entry_price, change=asset_usdt_price - entry_price, is_arrow_print=False
         )
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
@@ -175,7 +183,7 @@ class BotHelperUsdtAsync(BotHelperAsync):
         # if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and _per < 50.0:
         #     new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
         #     log(f"new_order_size={new_order_size} | ", "blue", end="")
-        #     per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
+        #     per = (100.0 * (asset_balance + new_order_size) * asset_usdt_price) / sum_usdt
         #     _per = format(per, ".2f")
         #     log(f"==> {_per} of the total asset value")
         #     if float(_per) <= config.SPOT_LOCKED_PERCENT_LIMIT:
@@ -183,10 +191,10 @@ class BotHelperUsdtAsync(BotHelperAsync):
         #         log(order["info"])
         #         await self.new_limit_order(asset, limit_price)
         #     else:
-        #         new_per = (100.0 * asset_balance * asset_price) / sum_btc
+        #         new_per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
         #         per_to_buy = config.SPOT_LOCKED_PERCENT_LIMIT - abs(new_per)
-        #         btc_amount_to_buy = per_to_buy * sum_btc / 100.0
-        #         _new_order_size = btc_amount_to_buy / asset_price
+        #         btc_amount_to_buy = per_to_buy * sum_usdt / 100.0
+        #         _new_order_size = btc_amount_to_buy / asset_usdt_price
         #         _new_order_size = f"{_new_order_size:.{decimal}f}"
         #         order = await self.spot_order(_new_order_size, _symbol, "BUY")
         #         log(order["info"])

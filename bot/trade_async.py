@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
 
@@ -7,7 +8,6 @@ from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from filelock import FileLock
 from pymongo import MongoClient
-
 from bot import helper
 from bot.binance_balance import _create_limit_order, _create_market_order
 from bot.client_helper import DiscordClient
@@ -21,40 +21,46 @@ is_trade = True
 
 class Strategy:
     def __init__(self, data_msg=""):
+        self.symbol = ""
         self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
             log(f"{data_msg}", "bold magenta", end="")
 
         with suppress(Exception):
-            self.position_size = 0
-            self.chunks = data_msg.split(",")
-            self.side = self.chunks[1].upper()
-            self.symbol = self.chunks[0]
-            if "BTC" in self.symbol:
-                self.market = "BTC"
-                self.asset = self.symbol[:-3]  # removes BTC at the end
-                self.symbol = self.symbol.replace("BTC", "/BTC")
-                if self.side == "SELL":
-                    raise Exception("Only BUY for BTC sport market")
-            elif "USDTPERP" in self.symbol:
-                self.market = "USDTPERP"
-                self.asset = self.symbol.replace("USDTPERP", "")
-                self.symbol = self.symbol.replace("USDTPERP", "/USDT")
-            elif "USDT" in self.symbol:
-                self.market = "USDT"  # spot
-                self.asset = self.symbol.replace("USDT", "")
-                self.symbol = self.symbol.replace("USDT", "/USDT")
-                if self.side == "SELL":
-                    raise Exception("Only BUY for USDT sport market")
+            self.parse_data_msg(data_msg)
 
-            self.position_alert_msg = self.chunks[2]
-            self.time_duration = ""
-            with suppress(Exception):
-                self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
+        if "BTC" in self.symbol or "USDT" in self.symbol:
+            if self.side == "SELL":
+                raise QuietExit(f"E: Only BUY for {self.market} market")
 
-            self.current_bar_index = self.chunks[3]  # differs for each pair
-            self.time = self.chunks[4]
+    def parse_data_msg(self, data_msg):
+        self.position_size = 0
+        self.chunks = data_msg.split(",")
+        self.side = self.chunks[1].upper()
+        self.symbol = self.chunks[0]
+        if "BTC" in self.symbol:
+            self.market = "BTC"
+            self.asset = self.symbol[:-3]  # removes BTC at the end
+            self.symbol = self.symbol.replace("BTC", "/BTC")
+            if self.side == "SELL":
+                return
+        elif "USDTPERP" in self.symbol:
+            self.market = "USDTPERP"
+            self.asset = self.symbol.replace("USDTPERP", "")
+            self.symbol = self.symbol.replace("USDTPERP", "/USDT")
+        elif "USDT" in self.symbol:
+            self.market = "USDT"  # spot
+            self.asset = self.symbol.replace("USDT", "")
+            self.symbol = self.symbol.replace("USDT", "/USDT")
+            if self.side == "SELL":
+                return
+
+        self.position_alert_msg = self.chunks[2]
+        self.time_duration = ""
+        self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
+        self.current_bar_index = self.chunks[3]  # differs for each pair
+        self.time = self.chunks[4]
 
     def is_buy(self):
         return self.side == "BUY"
@@ -69,6 +75,7 @@ class BotHelper:
         self.mongoDB = Mongo(mc, mc["trader_bot"]["order"])
         self.unix_timestamp_ms: int = 0
         self.current_bar_index_local: int = 0
+        self.strategy.position_size: int = 0
         self.client = client
         self.strategy = Strategy()
         self.bot_async = BotHelperAsync()
@@ -288,8 +295,8 @@ class BotHelper:
                 _colorize_traceback(e, is_print_exc=False)
                 await _sleep()
 
-        log("==> Opening a limit order: ", end="")
         try:
+            log("==> Opening a limit order: ", end="")
             log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
             await self._limit(_amount, entry_price, isolated_wallet, decimal)
@@ -451,7 +458,7 @@ class BotHelper:
             if self.strategy.time_duration == "1m":
                 if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_1m:
                     raise QuietExit(f"Warning: {config.USDT_MAX_POSITION} pos")
-            if self.strategy.time_duration == "21m":
+            if self.strategy.time_duration == "9m":
                 if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION:
                     raise QuietExit(f"Warning: {config.USDT_MAX_POSITION} pos")
         elif self.strategy.market == "BTC":
@@ -499,7 +506,7 @@ class BotHelper:
 
         self.strategy = Strategy(data_msg)
         if not hasattr(self.strategy, "position_alert_msg"):
-            raise
+            raise QuietExit("E: position_alert_msg is empty")
 
         self.pre_check()
         if "enter" not in self.strategy.position_alert_msg or self.strategy.symbol == "TEST":
@@ -523,17 +530,21 @@ class BotHelper:
             if futures_locked_percent > config.cfg["setup"]["STOP_LOCKED_PER"]:
                 raise QuietExit(f"locked_percent={int(futures_locked_percent)}% PASS")
 
+        if self.strategy.time_duration == "1s":
+            log("===========================================", "red")
+            raise QuietExit()
+
         free_usdt = config.status["futures"]["free"]
         if self.strategy.side == "BUY":
             if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_LONG_1m:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
-            if self.strategy.time_duration == "21m" and free_usdt < config.INITIAL_USDT_QTY_LONG:
+            if self.strategy.time_duration == "9m" and free_usdt < config.INITIAL_USDT_QTY_LONG:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
         if self.strategy.side == "SELL":
             if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_SHORT_1m:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
 
-            if self.strategy.time_duration == "21m" and free_usdt < config.INITIAL_USDT_QTY_SHORT:
+            if self.strategy.time_duration == "9m" and free_usdt < config.INITIAL_USDT_QTY_SHORT:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
