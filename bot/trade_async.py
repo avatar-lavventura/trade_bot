@@ -288,8 +288,8 @@ class BotHelper:
                 _colorize_traceback(e, is_print_exc=False)
                 await _sleep()
 
-        log("==> Opening a limit order: ", end="")
         try:
+            log("==> Opening a limit order: ", end="")
             log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
             await self._limit(_amount, entry_price, isolated_wallet, decimal)
@@ -451,7 +451,7 @@ class BotHelper:
             if self.strategy.time_duration == "1m":
                 if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_1m:
                     raise QuietExit(f"Warning: {config.USDT_MAX_POSITION} pos")
-            if self.strategy.time_duration == "21m":
+            if self.strategy.time_duration == "9m":
                 if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION:
                     raise QuietExit(f"Warning: {config.USDT_MAX_POSITION} pos")
         elif self.strategy.market == "BTC":
@@ -523,17 +523,21 @@ class BotHelper:
             if futures_locked_percent > config.cfg["setup"]["STOP_LOCKED_PER"]:
                 raise QuietExit(f"locked_percent={int(futures_locked_percent)}% PASS")
 
+        if self.strategy.time_duration == "1s":
+            log("===========================================", "red")
+            raise QuietExit()
+
         free_usdt = config.status["futures"]["free"]
         if self.strategy.side == "BUY":
             if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_LONG_1m:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
-            if self.strategy.time_duration == "21m" and free_usdt < config.INITIAL_USDT_QTY_LONG:
+            if self.strategy.time_duration == "9m" and free_usdt < config.INITIAL_USDT_QTY_LONG:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
         if self.strategy.side == "SELL":
             if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_SHORT_1m:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
 
-            if self.strategy.time_duration == "21m" and free_usdt < config.INITIAL_USDT_QTY_SHORT:
+            if self.strategy.time_duration == "9m" and free_usdt < config.INITIAL_USDT_QTY_SHORT:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")

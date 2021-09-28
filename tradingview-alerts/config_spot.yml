@@ -1,11 +1,11 @@
 files:
-  input: pairs_spot.csv
+  input: pairs_usdt_spot.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/nJT5Lkp9/?symbol=BITSTAMP%3ABTCUSD
-  interval: 1m  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  chartUrl: https://www.tradingview.com/chart/ZgERyOFj/?symbol=BINANCE%3ASUSHIUSDTPERP
+  interval: 1s  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
 alert:
   condition:
-    primaryLeft: alpy_spot
+    primaryLeft: alpy_vix
   actions:
     notifyOnApp: false
     showPopup: false
