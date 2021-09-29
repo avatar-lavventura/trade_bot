@@ -115,7 +115,7 @@ class BotHelperAsync:
     ########
     async def spot_balance(self, is_limit=True):
         """Calculate USDT balance in spot."""
-        usdt_amount = 0.0
+        sum_usdt = 0.0
         sum_btc = 0.0
         count = 0
         balances = await helper.exchange.spot.fetch_balance()
@@ -129,10 +129,12 @@ class BotHelperAsync:
                     if asset not in ["USDT", "BNB"]:
                         # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
                         count += 1
-                        price = await self.spot_fetch_ticker(asset)
-                        sum_btc += quantity * float(price)
+                        # price = await self.spot_fetch_ticker(asset)
+                        # sum_btc += quantity * float(price)
+                        price = await self.spot_fetch_ticker(f"{asset}USDT")
+                        sum_usdt += quantity * float(price)
                     elif asset == "USDT":
-                        usdt_amount = quantity
+                        sum_usdt += quantity
 
         current_btc_price_USD = await self.spot_fetch_ticker("BTC/USDT")
         own_usd = sum_btc * float(current_btc_price_USD)
@@ -145,13 +147,13 @@ class BotHelperAsync:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
-                        await self.spot_limit_usdt(asset, btc_quantity, sum_btc, is_limit)
+                        await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)
                         # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["spot"]["pos_count"] = count
 
-        return own_usd, float(usdt_amount)
+        return own_usd, float(sum_usdt)
 
     async def spot_order(self, quantity, symbol, side):
         try:

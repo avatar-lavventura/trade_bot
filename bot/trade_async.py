@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
 
@@ -21,40 +22,48 @@ is_trade = True
 
 class Strategy:
     def __init__(self, data_msg=""):
+        self.symbol = ""
+        self.market = ""
         self.unix_timestamp_ms: int = 0
+        self.position_size: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
             log(f"{data_msg}", "bold magenta", end="")
 
         with suppress(Exception):
-            self.position_size = 0
-            self.chunks = data_msg.split(",")
-            self.side = self.chunks[1].upper()
-            self.symbol = self.chunks[0]
-            if "BTC" in self.symbol:
-                self.market = "BTC"
-                self.asset = self.symbol[:-3]  # removes BTC at the end
-                self.symbol = self.symbol.replace("BTC", "/BTC")
-                if self.side == "SELL":
-                    raise Exception("Only BUY for BTC sport market")
-            elif "USDTPERP" in self.symbol:
-                self.market = "USDTPERP"
-                self.asset = self.symbol.replace("USDTPERP", "")
-                self.symbol = self.symbol.replace("USDTPERP", "/USDT")
-            elif "USDT" in self.symbol:
-                self.market = "USDT"  # spot
-                self.asset = self.symbol.replace("USDT", "")
-                self.symbol = self.symbol.replace("USDT", "/USDT")
-                if self.side == "SELL":
-                    raise Exception("Only BUY for USDT sport market")
+            self.parse_data_msg(data_msg)
 
-            self.position_alert_msg = self.chunks[2]
-            self.time_duration = ""
-            with suppress(Exception):
-                self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
+        if self.market in ["BTC", "USDT"]:
+            if self.side == "SELL":
+                raise QuietExit(f"E: Only BUY for {self.market} market")
 
-            self.current_bar_index = self.chunks[3]  # differs for each pair
-            self.time = self.chunks[4]
+    def parse_data_msg(self, data_msg):
+        self.position_size = 0
+        self.chunks = data_msg.split(",")
+        self.side = self.chunks[1].upper()
+        self.symbol = self.chunks[0]
+        if "BTC" in self.symbol:
+            self.market = "BTC"
+            self.asset = self.symbol[:-3]  # removes BTC at the end
+            self.symbol = self.symbol.replace("BTC", "/BTC")
+            if self.side == "SELL":
+                return
+        elif "USDTPERP" in self.symbol:
+            self.market = "USDTPERP"
+            self.asset = self.symbol.replace("USDTPERP", "")
+            self.symbol = self.symbol.replace("USDTPERP", "/USDT")
+        elif "USDT" in self.symbol:
+            self.market = "USDT"  # spot
+            self.asset = self.symbol.replace("USDT", "")
+            self.symbol = self.symbol.replace("USDT", "/USDT")
+            if self.side == "SELL":
+                return
+
+        self.position_alert_msg = self.chunks[2]
+        self.time_duration = ""
+        self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
+        self.current_bar_index = self.chunks[3]  # differs for each pair
+        self.time = self.chunks[4]
 
     def is_buy(self):
         return self.side == "BUY"
@@ -499,7 +508,7 @@ class BotHelper:
 
         self.strategy = Strategy(data_msg)
         if not hasattr(self.strategy, "position_alert_msg"):
-            raise
+            raise QuietExit("E: position_alert_msg is empty")
 
         self.pre_check()
         if "enter" not in self.strategy.position_alert_msg or self.strategy.symbol == "TEST":

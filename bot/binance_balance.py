@@ -174,9 +174,13 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
-    log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
+    if total_lost > 0.00:
+        log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
+
     with FileLock(config.status.fp_lock, timeout=1):
-        config.status["futures"]["pos_count"] = count
+        if config.status["futures"]["pos_count"] != count:
+            config.status["futures"]["pos_count"] = count
+
         if count > config.status["log"]["futures"]["max_position_count"]:
             config.status["log"]["futures"]["max_position_count"] = count
 
@@ -189,9 +193,9 @@ async def process_main():
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
     config.reload()
-    bot_async.futures_balance = await helper.exchange.future.fetch_balance()
-    unix_timestamp_ms = helper.exchange.get_future_timestamp()
     try:
+        bot_async.futures_balance = await helper.exchange.future.fetch_balance()
+        unix_timestamp_ms = helper.exchange.get_future_timestamp()
         *_, usdt_bal = await bot_async.spot_balance()
         if usdt_bal > 0.0 and not helper.is_start:
             log("")
