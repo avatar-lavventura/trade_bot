@@ -115,7 +115,7 @@ class BotHelperAsync:
     ########
     async def spot_balance(self, is_limit=True):
         """Calculate USDT balance in spot."""
-        usdt_amount = 0.0
+        sum_usdt = 0.0
         sum_btc = 0.0
         count = 0
         balances = await helper.exchange.spot.fetch_balance()
@@ -127,12 +127,16 @@ class BotHelperAsync:
                     sum_btc += quantity
                 else:
                     if asset not in ["USDT", "BNB"]:
-                        # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
-                        count += 1
-                        price = await self.spot_fetch_ticker(asset)
-                        sum_btc += quantity * float(price)
+                        # price = await self.spot_fetch_ticker(asset)
+                        # sum_btc += quantity * float(price)
+                        price = await self.spot_fetch_ticker(f"{asset}USDT")
+                        usdt_to_added = quantity * float(price)
+                        if usdt_to_added > 1:  # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
+                            count += 1
+
+                        sum_usdt += usdt_to_added
                     elif asset == "USDT":
-                        usdt_amount = quantity
+                        sum_usdt += quantity
 
         current_btc_price_USD = await self.spot_fetch_ticker("BTC/USDT")
         own_usd = sum_btc * float(current_btc_price_USD)
@@ -145,13 +149,13 @@ class BotHelperAsync:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
-                        await self.spot_limit_usdt(asset, btc_quantity, sum_btc, is_limit)
+                        await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)
                         # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["spot"]["pos_count"] = count
 
-        return own_usd, float(usdt_amount)
+        return own_usd, float(sum_usdt)
 
     async def spot_order(self, quantity, symbol, side):
         try:
@@ -183,9 +187,9 @@ class BotHelperAsync:
         price = await helper.exchange.spot.fetch_ticker(asset)
         return float(price["last"])
 
-    async def new_limit_order(self, asset, limit_price):
+    async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""
-        symbol = f"{asset}/BTC"
+        symbol = f"{asset}/{market}"
         open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
             try:
@@ -197,9 +201,9 @@ class BotHelperAsync:
             balance = await self.fetch_balance(asset)
             respone = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
             log("==> New limit-order is placed:")
-            log(respone, "cyan")
+            log(respone, "bold cyan")
         except Exception as e:
-            log("Failed to create order with", helper.exchange.spot.id, type(e).__name__, str(e), "red")
+            log(f"E: Failed to create order with {helper.exchange.spot.id} {type(e).__name__}\n{e}", "bold red")
 
     async def fetch_balance(self, code) -> float:
         balance = await helper.exchange.spot.fetch_balance()
@@ -307,11 +311,10 @@ class BotHelperAsync:
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
-        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and _per < 50.0:
+        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and float(_per) < 50.0:
             new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
             log(f"new_order_size={new_order_size} | ", "blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
-            _per = format(per, ".2f")
             log(f"==> {_per} of the total asset value")
             if float(_per) <= config.SPOT_LOCKED_PERCENT_LIMIT:
                 order = await self.spot_order(new_order_size, _symbol, "BUY")

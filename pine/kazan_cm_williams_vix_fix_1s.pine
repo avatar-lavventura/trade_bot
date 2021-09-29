@@ -62,10 +62,10 @@ if buy_signal
 
 if sell_signal
     if strategy.opentrades[0] == 0 or strategy.position_size > 0
-        strategy.entry("Long", strategy.short, qty=bar_index, when=window(), alert_message=msg)
+        strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message=msg)
     else
         if bar_index > abs(strategy.position_size)
             if strategy.position_size[0] != 0
                 strategy.close_all(when=window())
             else
-                strategy.entry("Long", strategy.short, qty=bar_index, when=window(), alert_message=msg)
+                strategy.entry("Short", strategy.short, qty=bar_index, when=window(), alert_message=msg)

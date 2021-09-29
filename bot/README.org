@@ -1,11 +1,13 @@
 * Guide
+ip: https://alpyr-bot.duckdns.org/webhook
 
 - https://github.com/ccxt/ccxt/tree/master/examples/py
 - https://sandwich.finance/
 - https://discord.com/developers/applications
 - [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)
 
-# [Nginx setup](http://alpyr.duckdns.org:81/)
+** [Nginx setup](http://alpyr.duckdns.org:81/)
+
 #+begin_src bash
 admin@example.com
 changeme
@@ -118,7 +120,6 @@ that will do it for you.
 
 https://askubuntu.com/a/854880/660555
 
----------------
 
 #+begin_src bash
 sudo apt install systemd-timesyncd
