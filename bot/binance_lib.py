@@ -18,7 +18,7 @@ from dateutil.parser import parse
 from forex_python.converter import CurrencyRates
 
 from ebloc_broker.broker._utils.tools import (
-    _colorize_traceback,
+    print_tb,
     _percent_change,
     log,
     percent_change,
@@ -91,7 +91,7 @@ def futures_history(client, _symbol=None):
             log(f"E: {e}", "red")
             sys.exit(1)
 
-        _colorize_traceback()
+        print_tb()
         log("==> Sleeping for 15 seconds")
         time.sleep(15)
         return

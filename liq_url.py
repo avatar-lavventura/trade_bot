@@ -118,7 +118,7 @@ for idx, url in enumerate(urls):
     try:
         get_url(url)
     except:
-        # _colorize_traceback()
+        # print_tb()
         pass
 
 log("=========================================================================", color="blue")

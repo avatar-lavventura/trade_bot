@@ -20,3 +20,4 @@ https://github.com/viniciuschiele/flask-apscheduler
 ** TODO calculate leverage
 ** TODO yaml default {} instead assign 0
 ** TODO REP USDT check instead of BTC
+** TODO 1 saniyelikte SELL sinyali gelirse ve USDTPREP de varsa kagit usdt-spot ta buy yerine usdtprep de sell yap

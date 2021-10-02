@@ -1,50 +1,39 @@
-TRBINANCE:
-  USDT: 0.0
-portfolio:
-  BTC: 0.0
-  SILVER:
-    gr: 0.0
-  TRY: 0.0
-  USDT: 0.0
-  _TOTAL: 2774.11
-position:
-  long:
-    1m: 25
-    base: 12.0
-  short:
-    1m: 25
-    base: 12.0
-  spot_usdt:
-    1s: 10
 setup:
   IGNORE_BELOW_USDT: 0.01
-  IGNORE_LIST_FUTURES:
-  - PAIR
   INITIAL_LEVERAGE: 1
-  ISOLATED_WALLET_LIMIT: 50
-  LOCKED_PERCENT_LIMIT_USDT: 5
-  PERCENT_CHANGE_TO_ADD_USDT: 5.1
+  ISOLATED_WALLET_LIMIT: 101
+  LOCKED_PERCENT_LIMIT_USDT: 8
+  PERCENT_CHANGE_TO_ADD_USDT: 5.0
   STOP_LOCKED_PER: 50
   TP: 0.0051
-  USDT_MAX_POSITION: 4
-  USDT_MAX_POSITION_1m: 5
+  USDT_MAX_POSITION: 3
+  USDT_MAX_POSITION_1m: 4
   USDT_MULTIPLY_RATIO: 1.7
+  ignore:
+    spot:
+    - PAIR
+    usdtperp:
+    - PAIR
+  position:
+    long:
+      1m: 15.0
+      base: 12.0
+    short:
+      1m: 15.0
+      base: 12.0
+    spot_usdt:
+      1s: 10
   spot:
-    IGNORE_LIST:
-    - RUNE
     INITIAL_BTC_QTY: 0.00015
-    LOCKED_PERCENT_LIMIT: 5
-    MAX_POSITION: 2
-    MAX_POSITION_1m: 3
-    MULTIPLY_RATIO: 1.0
-    PERCENT_CHANGE_TO_ADD: 5.1
-    TP: 0.0051
-  spot_usdt:
-    LOCKED_PERCENT_LIMIT: 20
+    LOCKED_PERCENT_LIMIT: 100
     MAX_POSITION: 1
     MAX_POSITION_1m: 1
     MULTIPLY_RATIO: 1.0
     PERCENT_CHANGE_TO_ADD: 5.0
     TP: 0.0051
-z:
-  ip: https://alpyr-bot.duckdns.org/webhook
+  spot_usdt:
+    LOCKED_PERCENT_LIMIT: 95
+    MAX_POSITION: 1
+    MULTIPLY_RATIO: 1.1
+    PERCENT_CHANGE_TO_ADD: 5.0
+    TP: 0.0051
