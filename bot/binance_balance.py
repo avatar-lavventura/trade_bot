@@ -6,24 +6,23 @@ from contextlib import suppress
 from typing import Dict
 
 from filelock import FileLock
-
+from bot.python_binance import Python_Binance
 from bot import helper
-from bot.bot_helper_async import TP, BotHelperAsync
+from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
-from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import (
     QuietExit,
-    _colorize_traceback,
+    print_tb,
     _exit,
     _time,
     delete_last_line,
     percent_change,
 )
 
-client, _ = check_binance_obj()
+binance = Python_Binance()
 bot_async = BotHelperUsdtAsync()
 
 
@@ -38,10 +37,8 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         config.status["futures"]["locked"] = locked
         config.status["futures"]["locked_per"] = locked_usdt_per
 
-    log(
-        f" * Futures={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_usdt_per, '.2f')}%)",
-        end="",
-    )
+    log(f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}"
+        f"({format(locked_usdt_per, '.2f')}%)", end="")
     log("_______________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
@@ -109,20 +106,20 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
             await create_limit_order(symbol, position_amt, limit_price, side)
 
 
-async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multiply=None, percent_l=None):
+async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multiply=None, _percent=None):
     # Add more money only if the position is less than given amount(ex: 50$)
     # TODO: if unrealized > 5% close the position, improve
-    if not percent_l:
-        percent_l = config.LOCKED_PERCENT_L_USDT
+    if not _percent:
+        _percent = config.LOCKED_PERCENT_LIMIT_USDTPERP
 
     if not multiply:
-        multiply = config.USDT_MULTIPLY
+        multiply = config.USDTPERP_MULTIPLY_RATIO
 
     new_amount = abs(position_amt) * multiply
     new_amount_margin = isolated_wallet * multiply
     per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_bal
     _per = format(per, ".2f")
-    if float(_per) <= percent_l:
+    if float(_per) <= _percent:
         if config.status["futures"]["free"] > new_amount:
             await create_market_order(symbol, new_amount, side)
         else:
@@ -229,9 +226,10 @@ async def process_main():
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
     except KeyError:
+        print_tb()
         _exit("E: KeyError")
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
         await _sleep(30)
 
 
@@ -244,7 +242,7 @@ async def main():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
 
 
 if __name__ == "__main__":
@@ -258,8 +256,8 @@ if __name__ == "__main__":
         if e:
             log(e)
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
-        log("Program finished.", "bold green")
+        log("END", "bold green")

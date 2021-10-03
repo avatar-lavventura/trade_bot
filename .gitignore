@@ -28,4 +28,4 @@ InsufficientFunds
 InvalidOrder
 status.yaml
 progress.log
-tracking.txt
+.tracking.txt

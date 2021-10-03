@@ -33,7 +33,7 @@ class ClientHelper:
         self.client = client
 
     def _format(self, value, decimal=2):
-        return format(float(value), ".2f")
+        return format(float(value), f".{decimal}f")
 
     def transfer_futures_to_spot(self, amount):
         self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")

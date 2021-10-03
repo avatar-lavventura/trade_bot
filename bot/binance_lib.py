@@ -18,7 +18,7 @@ from dateutil.parser import parse
 from forex_python.converter import CurrencyRates
 
 from ebloc_broker.broker._utils.tools import (
-    _colorize_traceback,
+    print_tb,
     _percent_change,
     log,
     percent_change,
@@ -52,7 +52,8 @@ def get_color(color):
         return "red"
 
 
-def futures_history(client, _symbol=None):
+def futures_history(binance, _symbol=None):
+    client = binance.client
     name_temp = "hello_world"
     _COMMISSON = 0
     commission_flag = False
@@ -91,7 +92,7 @@ def futures_history(client, _symbol=None):
             log(f"E: {e}", "red")
             sys.exit(1)
 
-        _colorize_traceback()
+        print_tb()
         log("==> Sleeping for 15 seconds")
         time.sleep(15)
         return
@@ -123,7 +124,7 @@ def futures_history(client, _symbol=None):
 
                 _name = "{:<9}".format(name_temp)
                 if _sum != 0.0:
-                    log(f"==> {_name} ", end="")
+                    log(f"==> {_name.replace('USDT', '')} ", end="")
 
                 commission = []
                 _list = []
@@ -151,7 +152,7 @@ def futures_history(client, _symbol=None):
                     counter = 0
                     _name = "{:<9}".format(name_temp)
                     log("\n" + local_dt.strftime("%d/%m/%Y %A"), "cyan")
-                    log(f"==> {_name} ", end="")
+                    log(f"==> {_name.replace('USDT', '')} ", end="")
 
                 _day = local_dt.strftime("%d")
 

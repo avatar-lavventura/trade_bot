@@ -13,7 +13,7 @@ from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _time
+from ebloc_broker.broker._utils.tools import print_tb, _time
 
 client, _ = check_binance_obj()
 bot = BotHelper(client)
@@ -86,7 +86,7 @@ async def fetch_balance() -> float:
         log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
         return total_balance
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
     finally:
         await helper.exchange.future.close()
         await helper.exchange.spot.close()
@@ -107,6 +107,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         loop.run_until_complete(bot_async.close())
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
     finally:
         log("Program finished.", "bold green")
