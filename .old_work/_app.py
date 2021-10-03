@@ -5,7 +5,7 @@ import sys  # noqa
 import time
 
 from actions import parse_webhook
-from broker._utils.tools import _colorize_traceback, _time, log
+from broker._utils.tools import print_tb, _time, log
 from broker.utils import is_process_on  # noqa
 from dotenv import load_dotenv
 from flask import Flask, abort, request
@@ -45,7 +45,7 @@ def webhook():
                 bot.trade_main(data_msg)
                 return "OK"
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
                 log("EXCEPTION catched", color="red")
                 time.sleep(15)
 
@@ -98,6 +98,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         loop.run_until_complete(close())
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
     finally:
         log("Program finished.", color="green")

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from _mongodb import Mongo
 from pymongo import MongoClient
-from tools import _colorize_traceback
+from tools import print_tb
 from user_setup import check_binance_obj
 
 HOME = str(Path.home())
@@ -54,7 +54,7 @@ if __name__ == "__main__":  # noqa: C901
         limit_price = f"{float(_price) * TAKE_PROFIT_LONG:.{decimal_count}f}"
         print(f"limit_price={limit_price}")
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
 
     # balances = client.get_account()
     # for balance in balances["balances"]:

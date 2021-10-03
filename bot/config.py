@@ -27,8 +27,9 @@ class Config:
         self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["MULTIPLY_RATIO"]
         self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["MAX_POSITION_1m"]
         self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["MAX_POSITION"]
-        self.SPOT_IGNORE_LIST = self.cfg["setup"]["spot"]["IGNORE_LIST"]
+        self.SPOT_IGNORE_LIST = self.cfg["setup"]["ignore"]["spot"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot"]["PERCENT_CHANGE_TO_ADD"]) + 0.01
+
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
         self.INITIAL_BTC_QTY = self.cfg["setup"]["spot"]["INITIAL_BTC_QTY"]
         # futures
@@ -48,6 +49,8 @@ class Config:
         self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["position"]["long"]["1m"]
         self.INITIAL_USDT_QTY_SHORT = self.cfg["setup"]["position"]["short"]["base"]
         self.INITIAL_USDT_QTY_LONG = self.cfg["setup"]["position"]["long"]["base"]
+#
+        self.USDT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot_usdt"]["PERCENT_CHANGE_TO_ADD"]) + 0.01
 
 
 config: Config = Config()

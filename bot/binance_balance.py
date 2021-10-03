@@ -8,7 +8,7 @@ from typing import Dict
 from filelock import FileLock
 
 from bot import helper
-from bot.bot_helper_async import TP, BotHelperAsync
+from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
 from bot.user_setup import check_binance_obj
@@ -16,7 +16,7 @@ from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import (
     QuietExit,
-    _colorize_traceback,
+    print_tb,
     _exit,
     _time,
     delete_last_line,
@@ -38,10 +38,8 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         config.status["futures"]["locked"] = locked
         config.status["futures"]["locked_per"] = locked_usdt_per
 
-    log(
-        f" * Futures={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_usdt_per, '.2f')}%)",
-        end="",
-    )
+    log(f" * Futures={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}"
+        f"({format(locked_usdt_per, '.2f')}%)", end="")
     log("_______________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
@@ -229,9 +227,10 @@ async def process_main():
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
     except KeyError:
+        print_tb()
         _exit("E: KeyError")
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
         await _sleep(30)
 
 
@@ -244,7 +243,7 @@ async def main():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
 
 
 if __name__ == "__main__":
@@ -258,8 +257,8 @@ if __name__ == "__main__":
         if e:
             log(e)
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
-        log("Program finished.", "bold green")
+        log("END", "bold green")

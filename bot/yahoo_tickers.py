@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from bot.config import config
 from bot.my_balance import fetch_balance, get_silver
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _timestamp
+from ebloc_broker.broker._utils.tools import print_tb, _timestamp
 
 mc = MongoClient()
 mongoDB = Mongo(mc, mc["trader_bot"]["timestamp"])
@@ -37,4 +37,4 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(main())
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)

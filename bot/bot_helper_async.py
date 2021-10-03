@@ -7,7 +7,7 @@ from filelock import FileLock
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, percent_change, round_float
+from ebloc_broker.broker._utils.tools import print_tb, decimal_count, percent_change, round_float
 
 
 class TP_calculate(Exception):
@@ -104,7 +104,7 @@ class BotHelperAsync:
             log(response, "bold cyan")
         except Exception as e:
             if "No need to change margin type." not in str(e):
-                _colorize_traceback(e)
+                print_tb(e)
 
     async def futures_fetch_ticker(self, asset) -> float:
         price = await helper.exchange.future.fetch_ticker(asset)
@@ -143,12 +143,17 @@ class BotHelperAsync:
         if sum_btc > 0.0:
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
+        spot_print_flag = True
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
+                        if spot_print_flag:
+                            log(" * [magenta]spot_usdt:")
+
+                        spot_print_flag = False
                         await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)
                         # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
@@ -177,7 +182,7 @@ class BotHelperAsync:
                 log(f"==> re-opening {side} order, quantity={quantity}")
                 return await self.spot_order(quantity, symbol, side)
             else:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
 
     async def spot_fetch_ticker(self, asset) -> float:
@@ -195,7 +200,7 @@ class BotHelperAsync:
             try:
                 await helper.exchange.spot.cancel_order(order["id"], symbol)
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
 
         try:
             balance = await self.fetch_balance(asset)

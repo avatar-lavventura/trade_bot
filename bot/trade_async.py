@@ -15,7 +15,7 @@ from bot.client_helper import DiscordClient
 from bot.config import config
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _colorize_traceback, _time, decimal_count
+from ebloc_broker.broker._utils.tools import QuietExit, print_tb, _time, decimal_count
 
 is_trade = True
 
@@ -156,7 +156,7 @@ class BotHelper:
         try:
             future_positions = await helper.exchange.future.fetch_positions()
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
             await _sleep(60)
             raise e
 
@@ -180,9 +180,9 @@ class BotHelper:
             log(f"| quantity={quantity} | limit_price={limit_price}", "bold")
             await create_limit_order(self.strategy.symbol, quantity, limit_price, self.strategy.side)
         except TP_calculate as e:
-            _colorize_traceback(e)
+            print_tb(e)
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
             if decimal > 0:
                 await self._limit(amount, entry_price, isolated_wallet, decimal - 1)
 
@@ -204,7 +204,6 @@ class BotHelper:
         decimal = 0
         log("trade_price=", "bold", end="")
         for trade in enumerate(reversed(self.client.get_my_trades(symbol=self.strategy.symbol.replace("/", "")))):
-            print(trade)
             if self.strategy.market == "USDT":
                 trade = trade[1]
 
@@ -226,7 +225,7 @@ class BotHelper:
         entry_price = _sum / contracts
         _entry_price = f"{entry_price:.{decimal}f}"
         limit_price = f"{float(_entry_price) * TP.get_profit_amount('long'):.{decimal}f}"
-        log(f"quantity={asset_balance} | entry={_entry_price} | limit={limit_price}", "bold", end="")
+        log(f"quantity={asset_balance} | entry={_entry_price} | limit={limit_price}", "bold")
         return limit_price, _entry_price
 
     def spot_order_limit(self):
@@ -242,7 +241,7 @@ class BotHelper:
             )
             log(f"order={order}", "bold")
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
 
     async def _order(self, quantity, _type="MARKET"):
         """Open futures orders in given direction."""
@@ -290,7 +289,7 @@ class BotHelper:
                 entry_price, _amount, isolated_wallet = self.get_future_position(future_positions)
                 break
             except Exception as e:
-                _colorize_traceback(e, is_print_exc=False)
+                print_tb(e, is_print_exc=False)
                 await _sleep()
 
         try:
@@ -299,7 +298,7 @@ class BotHelper:
             decimal = self.get_decimal_count(entry_price)
             await self._limit(_amount, entry_price, isolated_wallet, decimal)
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
 
     async def both_side_order(self) -> None:
         """Both side order for futures."""
@@ -313,7 +312,7 @@ class BotHelper:
 
             await self._order(quantity=self.strategy.position_size)
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
             raise e
 
     def spot_order(self, quantity: float, symbol=None, side=None):
@@ -347,7 +346,7 @@ class BotHelper:
                 log(f"==> re-opening {side} order, quantity={quantity}")
                 return self.spot_order(float(quantity))
             else:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
 
         return self.client.order_market(symbol=symbol.replace("/", ""), side=side, quantity=quantity)
@@ -417,20 +416,20 @@ class BotHelper:
                 self.spot_order_limit()
                 ###
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
         elif self.strategy.market == "USDT":
             output = await self.symbol_price(self.strategy.symbol, "spot")
             current_price = output["last"]
             try:
-                # TODO: read 15.0 from config file
+                # TODO: read 20.0 from config file
                 initial_amount = 20.0 / current_price
                 self.strategy.position_size = self.get_initial_amount(initial_amount, "USDT")
                 order = self.spot_order(float(self.strategy.position_size))
                 log(order)
                 self.spot_order_limit()
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
 
     async def sell(self):
@@ -441,17 +440,25 @@ class BotHelper:
             except Exception as e:
                 # E: An exception of type Exception occurred. Arguments: ("E:
                 # Order related to the symbol couldn't be found.",) at 3:00 AM
-                _colorize_traceback(e)
+                print_tb(e)
 
     async def trade_async(self):
         try:
             if self.strategy.market == "USDTPERP":
                 await self.calculate_futures_position_size()
+            else:
+                output = await self.symbol_price(self.strategy.symbol, "spot")
+                log(f"current_price={output['last']}")
 
             log(
                 f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
-                f" {self.strategy.asset} {self.strategy.symbol} | size={self.strategy.position_size}"
+                f" {self.strategy.asset} {self.strategy.symbol} ", end=""
             )
+            if self.strategy.position_size != 0:
+                log(f"| size={self.strategy.position_size}")
+            else:
+                log("")
+
             if self.strategy.is_buy():
                 await self.buy()
             elif self.strategy.is_sell():
@@ -502,9 +509,9 @@ class BotHelper:
                     elif strategy.market == "USDT":
                         config.status["spot"]["pos_count"] += 1
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
         else:
-            log("PASS")  # already open position
+            log("PASS", "bold")  # already open position
 
     async def trade(self):
         try:
