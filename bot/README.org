@@ -41,9 +41,9 @@ To                         Action      From
 
 ** Nginx Full Setup Instructions
 
-```cp docker ~/docker```
-
 #+begin_src bash
+cp docker ~/docker
+#
 sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 sudo systemctl start docker.service
@@ -56,8 +56,6 @@ docker-compose up -d
 - [IP_example](http://IP/webhook)
 
 https://askubuntu.com/a/1046217/660555
-
-------------------------------------------------------------------
 
 - http://www.duckdns.org  // login using github
 - https://nginxproxymanager.com/setup/
@@ -84,14 +82,14 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 
 -----------------
 
-# Tradingview alerts some links
+** Tradingview alerts some links
 
 1. [Binance Minimum Trading Rules](https://liquidation.atsutane.net/calc)
 2. [puppeteer google browser](https://github.com/puppeteer/puppeteer)
 3. [fake gmail address generator and inbox](https://maildim.com/)
 4. TV_username_last_used => `roxanroxanroxan_5` // ends at Oct 28, 2021
 
-# Git Push:
+** Git Push:
 
 #+begin_src bash
 # https://github.com/newren/git-filter-repo#how-do-i-install-it

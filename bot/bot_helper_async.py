@@ -75,9 +75,9 @@ class BotHelperAsync:
         """
         await helper.exchange._close()
 
-    ###########
-    # FUTURES #
-    ###########
+    ############
+    # USDTPERP #
+    ############
     async def _load_markets(self):
         await helper.exchange.future.load_markets()
 
