@@ -16,9 +16,7 @@ class Config:
         return self.timestamp["spot_timestamp"][asset]
 
     def initialize(self):
-
         self.cfg = Yaml("config.yaml")
-
         self.timestamp = Yaml("timestamp.yaml")
         self.goal = Yaml("goal.yaml")
         self.status = Yaml("status.yaml")
@@ -36,9 +34,10 @@ class Config:
         self.trbinance_usdt = self.goal["goal"]["trbinance"]["usdt"]
 
         self.TP = self.cfg["setup"]["TP"]
-        self.LOCKED_PERCENT_LIMIT_USDT = self.cfg["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
+        self.LOCKED_PERCENT_LIMIT_USDTPERP = self.cfg["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
         self.PERCENT_CHANGE_TO_ADD_USDT = -abs(self.cfg["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]) + 0.01
-        self.USDT_MULTIPLY_RATIO = self.cfg["setup"]["USDT_MULTIPLY_RATIO"]
+        self.USDTPERP_MULTIPLY_RATIO = self.cfg["setup"]["USDT_MULTIPLY_RATIO"]
+
         self.INITIAL_LEVERAGE = self.cfg["setup"]["INITIAL_LEVERAGE"]
         self.USDT_MAX_POSITION_1m = self.cfg["setup"]["USDT_MAX_POSITION_1m"]
         self.USDT_MAX_POSITION = self.cfg["setup"]["USDT_MAX_POSITION"]

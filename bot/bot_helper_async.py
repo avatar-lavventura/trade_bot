@@ -150,8 +150,8 @@ class BotHelperAsync:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
-                        if spot_print_flag:
-                            log(" * [magenta]spot_usdt:")
+                        if helper.is_start or (spot_print_flag and config.status["futures"]["pos_count"] > 0):
+                            log(f" * spot_usdt={format(sum_usdt, '.2f')}")
 
                         spot_print_flag = False
                         await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)
@@ -164,7 +164,7 @@ class BotHelperAsync:
 
     async def spot_order(self, quantity, symbol, side):
         try:
-            log(f"==> order_quantity={quantity}")
+            log(f"==> order_quantity={quantity}", "bold")
             return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):

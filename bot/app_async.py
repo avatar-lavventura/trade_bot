@@ -52,7 +52,7 @@ async def startup():
     app.discord_client = DiscordClient()
     await app.discord_client.bot.login(app.discord_client.TOKEN)
     loop.create_task(app.discord_client.bot.connect())
-    client, app.balances = check_binance_obj()
+    client, app.balances = check_binance_obj()  # TODO
     app.client_helper = ClientHelper(client)
     await helper.exchange.set_markets()
     app.bot_trade = bot_trade.BotHelper(client, app.discord_client)

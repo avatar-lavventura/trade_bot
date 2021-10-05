@@ -16,13 +16,13 @@ setup:
     - PAIR
   position:
     long:
-      1m: 15.0
+      1m: 20.0
       base: 12.0
     short:
-      1m: 15.0
+      1m: 20.0
       base: 12.0
-    spot_usdt:
-      1s: 10
+    usdt:
+      1s: 100
   spot:
     INITIAL_BTC_QTY: 0.00015
     LOCKED_PERCENT_LIMIT: 100
