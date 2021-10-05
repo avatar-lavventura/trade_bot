@@ -43,13 +43,12 @@ import sys
 import time
 from datetime import date, datetime
 from pathlib import Path
-
+from bot.python_binance import Python_Binance
 import binance_lib
 import requests
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
-
-import ebloc_broker.broker._utils._log as _log
+from ebloc_broker.broker._utils import _log
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils.tools import log, run
 
@@ -229,11 +228,11 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
             time.sleep(0.25)
 
 
-def _trade(client, usdt_balance, is_trade=True):
+def _trade(binance, usdt_balance, is_trade=True):
     if not is_log:
         block_print()
 
-    com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
+    com, latest_symbol_income, daily_progress, funding_dict = futures_history(binance)
     # _trade_cont(funding_dict, daily_progress, latest_symbol_income)
 
 
@@ -537,14 +536,14 @@ def trade_cont(client, balances):
 
 
 if __name__ == "__main__":
-    client, balances = check_binance_obj()
+    binance = Python_Binance()
     # client.futures_account_balance()[1]["withdrawAvailable"]
-    for balance in balances["balances"]:
+    for balance in binance.balances["balances"]:
         if balance["asset"] == "USDT":
             usdt_balance = balance["free"]
             break
 
-    _trade(client, usdt_balance, is_trade)
+    _trade(binance, usdt_balance, is_trade)
     # trade_cont(client, balances)
 
 # try:
