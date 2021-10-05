@@ -2,14 +2,15 @@
 
 from contextlib import suppress
 
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import decimal_count, percent_change, print_tb, round_float
 from filelock import FileLock
 
 from bot import helper
 from bot.config import config
-from ebloc_broker.broker._utils.tools import _colorize_traceback, decimal_count, log, percent_change, round_float
 
 
-class TP_calculate(Exception):  # noqa
+class TP_calculate(Exception):
     pass
 
 
@@ -21,9 +22,10 @@ class TakeProfit:
         # index:0 => 0.5% Profit
         self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent)
         self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent)
-        # index:1 => 0.5 * 2 (1%) Profit
-        self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent * 2)
-        self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent * 2)
+        # index:1 => ex: 0.5 * 2 (1%) Profit
+        multiply_ratio = 1
+        self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent * multiply_ratio)
+        self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent * multiply_ratio)
 
     def get_profit_amount(self, side, amount=0.0) -> float:
         amount = abs(float(amount))
@@ -95,15 +97,14 @@ class BotHelperAsync:
             response = await helper.exchange.future.fapiPrivate_post_leverage(
                 {"symbol": market["id"], "leverage": leverage}
             )
-            log(response, "cyan", is_bold=True)
-
+            log(response, "bold cyan")
             response = await helper.exchange.future.fapiPrivate_post_margintype(
                 {"symbol": market["id"], "marginType": "ISOLATED"}
             )
-            log(response, "cyan")
+            log(response, "bold cyan")
         except Exception as e:
             if "No need to change margin type." not in str(e):
-                _colorize_traceback(e)
+                print_tb(e)
 
     async def futures_fetch_ticker(self, asset) -> float:
         price = await helper.exchange.future.fetch_ticker(asset)
@@ -114,7 +115,7 @@ class BotHelperAsync:
     ########
     async def spot_balance(self, is_limit=True):
         """Calculate USDT balance in spot."""
-        usdt_amount = 0.0
+        sum_usdt = 0.0
         sum_btc = 0.0
         count = 0
         balances = await helper.exchange.spot.fetch_balance()
@@ -126,34 +127,44 @@ class BotHelperAsync:
                     sum_btc += quantity
                 else:
                     if asset not in ["USDT", "BNB"]:
-                        # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
-                        count += 1
-                        price = await self.spot_fetch_ticker(asset)
-                        sum_btc += quantity * float(price)
+                        # price = await self.spot_fetch_ticker(asset)
+                        # sum_btc += quantity * float(price)
+                        price = await self.spot_fetch_ticker(f"{asset}USDT")
+                        usdt_to_added = quantity * float(price)
+                        if usdt_to_added > 1:  # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
+                            count += 1
+
+                        sum_usdt += usdt_to_added
                     elif asset == "USDT":
-                        usdt_amount = quantity
+                        sum_usdt += quantity
 
         current_btc_price_USD = await self.spot_fetch_ticker("BTC/USDT")
         own_usd = sum_btc * float(current_btc_price_USD)
         if sum_btc > 0.0:
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
+        spot_print_flag = True
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
-                        await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
+                        if helper.is_start or (spot_print_flag and config.status["futures"]["pos_count"] > 0):
+                            log(f" * usdt={format(sum_usdt, '.2f')}")
+
+                        spot_print_flag = False
+                        await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)
+                        # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["spot"]["pos_count"] = count
 
-        return own_usd, float(usdt_amount)
+        return own_usd, float(sum_usdt)
 
     async def spot_order(self, quantity, symbol, side):
         try:
-            log(f"==> order_quantity={quantity}")
+            log(f"==> order_quantity={quantity}", "bold")
             return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
@@ -171,7 +182,7 @@ class BotHelperAsync:
                 log(f"==> re-opening {side} order, quantity={quantity}")
                 return await self.spot_order(quantity, symbol, side)
             else:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
 
     async def spot_fetch_ticker(self, asset) -> float:
@@ -181,23 +192,23 @@ class BotHelperAsync:
         price = await helper.exchange.spot.fetch_ticker(asset)
         return float(price["last"])
 
-    async def new_limit_order(self, asset, limit_price):
+    async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""
-        symbol = f"{asset}/BTC"
+        symbol = f"{asset}/{market}"
         open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
             try:
                 await helper.exchange.spot.cancel_order(order["id"], symbol)
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
 
         try:
             balance = await self.fetch_balance(asset)
             respone = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
             log("==> New limit-order is placed:")
-            log(respone, "cyan")
+            log(respone, "bold cyan")
         except Exception as e:
-            log("Failed to create order with", helper.exchange.spot.id, type(e).__name__, str(e), "red")
+            log(f"E: Failed to create order with {helper.exchange.spot.id} {type(e).__name__}\n{e}", "bold red")
 
     async def fetch_balance(self, code) -> float:
         balance = await helper.exchange.spot.fetch_balance()
@@ -305,11 +316,10 @@ class BotHelperAsync:
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
-        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD + 0.01 and _per < 50.0:
+        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and float(_per) < 50.0:
             new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
             log(f"new_order_size={new_order_size} | ", "blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
-            _per = format(per, ".2f")
             log(f"==> {_per} of the total asset value")
             if float(_per) <= config.SPOT_LOCKED_PERCENT_LIMIT:
                 order = await self.spot_order(new_order_size, _symbol, "BUY")

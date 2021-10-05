@@ -7,7 +7,7 @@ from time import sleep
 
 import ccxt
 from _mongodb import Mongo
-from broker._utils.tools import _colorize_traceback, _time, get_decimal_count, log
+from broker._utils.tools import _time, get_decimal_count, log, print_tb
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
@@ -89,7 +89,7 @@ class BotHelper:
             log(response, color="cyan")
         except Exception as e:
             if "No need to change margin type." not in str(e):
-                _colorize_traceback(e)
+                print_tb(e)
 
     def symbol_price(self, symbol, default_type):
         if symbol == "1000SHIB/USDT":
@@ -203,7 +203,7 @@ class BotHelper:
                 )
                 log(order)
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
             if decimal_count > 0:
                 self._limit(_amount, entry_price, decimal_count - 1)
 
@@ -267,7 +267,7 @@ class BotHelper:
             )
             log(order)
         except Exception as e:
-            _colorize_traceback(e, is_print_exc=False)
+            print_tb(e, is_print_exc=False)
             # if "PRICE_FILTER" in str(e):
             #     decimal_count = get_decimal_count(limit_price)
             #     limit_price = f"{float(limit_price):.{decimal_count - 1}f}"
@@ -320,7 +320,7 @@ class BotHelper:
                 entry_price, _amount = self.get_future_position(futures)
                 break
             except Exception as e:
-                _colorize_traceback(e, is_print_exc=False)
+                print_tb(e, is_print_exc=False)
                 sleep(1)
 
         log("")
@@ -330,7 +330,7 @@ class BotHelper:
             decimal_count = get_decimal_count(entry_price)
             self._limit(_amount, entry_price, decimal_count)
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
 
     def both_side_order(self) -> None:
         _symbol = self.strategy.symbol.replace("/USDT", "USDT")
@@ -349,7 +349,7 @@ class BotHelper:
             order = self._order(quantity=self.strategy.position_size)
             log(order)
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
             raise e
         return order
 
@@ -384,7 +384,7 @@ class BotHelper:
                 log(f"==> re-opening {side} order, quantity={quantity}")
                 return self.spot_order(quantity)
             else:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
 
     def get_initial_amount(self, initial_amount, _type):
@@ -428,7 +428,7 @@ class BotHelper:
                 #    log(f"==> {order['transactTime']} added into mongoDB for {self.strategy.asset} in BTC")
                 self.spot_order_limit()
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
                 raise e
 
     def sell(self) -> bool:
@@ -444,7 +444,7 @@ class BotHelper:
             try:
                 self.futures_limit_order()
             except Exception as e:
-                _colorize_traceback(e)
+                print_tb(e)
 
     def get_open_position_side(self, _symbol) -> bool:
         futures = self.client.futures_position_information(symbol=_symbol)
@@ -513,7 +513,7 @@ class BotHelper:
                     self.trade_async()
                     log("SUCCESS")
                 except Exception as e:
-                    _colorize_traceback(e)
+                    print_tb(e)
 
     def trade_main(self, data_msg):
         global data_msg_temp
@@ -564,4 +564,4 @@ if __name__ == "__main__":
         asyncio_loop = asyncio.get_event_loop()
         asyncio_loop.run_until_complete(bot.trade_main(data_msg))
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)

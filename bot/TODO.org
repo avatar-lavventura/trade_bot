@@ -17,3 +17,7 @@ https://github.com/viniciuschiele/flask-apscheduler
 ** TODO yaml: lock/re-load/modify/write and make sure you catch any setting of something already set by another process.
 ** TODO 3. ekleme 9% gorurse 2 kat ekleme yap
 ** TODO binance_balance add overall lost to left end
+** TODO calculate leverage
+** TODO REP USDT check instead of BTC
+** TODO 1 saniyelikte SELL sinyali gelirse ve USDTPREP de varsa kagit usdt-spot ta buy yerine usdtprep de sell yap
+** TODO spot_usdt show balance

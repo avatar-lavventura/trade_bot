@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import discord
-
 from ebloc_broker.broker._utils.tools import log
 from ebloc_broker.broker._utils.yaml import Yaml
 
@@ -17,12 +16,15 @@ class DiscordClient:
         _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
         self.bot = discord.Client()
         self.TOKEN = _config["discord"]["TOKEN"]
-        self.channel_id = _config["discord"]["CHANNEL_ALPY"]
+        self.channel_name = _config["discord"]["CHANNEL_NAME"]
+        self.channel = None
 
     async def send_msg(self, msg="OK"):
         await self.bot.wait_until_ready()
-        channel = self.bot.get_channel(self.channel_id)
-        await channel.send(msg)
+        if not self.channel:
+            self.channel = discord.utils.get(self.bot.get_all_channels(), name=self.channel_name)
+
+        await self.channel.send(msg)
 
 
 class ClientHelper:
@@ -30,7 +32,7 @@ class ClientHelper:
         self.client = client
 
     def _format(self, value, decimal=2):
-        return format(float(value), ".2f")
+        return format(float(value), f".{decimal}f")
 
     def transfer_futures_to_spot(self, amount):
         self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")

@@ -5,49 +5,45 @@ import time
 from contextlib import suppress
 from typing import Dict
 
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 from filelock import FileLock
 
 from bot import helper
-from bot.bot_helper_async import TP, BotHelperAsync
+from bot.bot_helper_async import TP  # , BotHelperAsync
+from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
-from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import (
-    QuietExit,
-    _colorize_traceback,
-    _exit,
-    _time,
-    delete_last_line,
-    log,
-    percent_change,
-)
+from bot.python_binance import Python_Binance
 
-client, _ = check_binance_obj()
-bot_async = BotHelperAsync()
+binance = Python_Binance()
+bot_async = BotHelperUsdtAsync()
 
 
 def future_stats(usdt_bal, unix_timestamp_ms):
-    locked = usdt_bal - config.status["futures"]["free"]
-    if locked > config.status["log"]["futures"]["max_locked"]:
-        config.status["log"]["futures"]["max_locked"] = locked
+    with FileLock(config.status.fp_lock, timeout=1):
+        locked = usdt_bal - config.status["futures"]["free"]
+        if locked > config.status["log"]["futures"]["max_locked"]:
+            config.status["log"]["futures"]["max_locked"] = locked
 
-    locked_usdt_per = (100.0 * locked) / usdt_bal
-    config.status["futures"]["total"] = usdt_bal
-    config.status["futures"]["locked"] = locked
-    config.status["futures"]["locked_per"] = locked_usdt_per
+        locked_usdt_per = (100.0 * locked) / usdt_bal
+        config.status["futures"]["total"] = usdt_bal
+        config.status["futures"]["locked"] = locked
+        config.status["futures"]["locked_per"] = locked_usdt_per
+
     log(
-        f" * Futures={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_usdt_per, '.2f')}%)",
+        f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_usdt_per, '.2f')}%)",
         end="",
     )
-    log("________________", "blue", end="")
+    log("_______________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
 
-def _futures_bal(info, asset) -> float:
+def futures_bal(info, asset) -> float:
     return float(bot_async.futures_balance[info][asset])
 
 
-async def _create_market_order(symbol: str, amount, side):
+async def create_market_order(symbol: str, amount, side):
     """Create market order for futures."""
     if side == "BUY":
         order = await helper.exchange.future.create_market_buy_order(symbol, amount)
@@ -55,10 +51,10 @@ async def _create_market_order(symbol: str, amount, side):
         order = await helper.exchange.future.create_market_sell_order(symbol, amount)
 
     with suppress(Exception):
-        log(f"market_order=[white]{order['info']}")
+        log(f"[bold]market_order=[/bold][white]{order['info']}")
 
 
-async def _create_limit_order(symbol, position_amt, limit_price, side):
+async def create_limit_order(symbol, position_amt, limit_price, side):
     """Create limit order.
 
     :param side: is the original side of the strategy
@@ -68,7 +64,7 @@ async def _create_limit_order(symbol, position_amt, limit_price, side):
     elif side == "SELL":
         order = await helper.exchange.future.create_limit_buy_order(symbol, position_amt, limit_price)
 
-    log(f"limit_order=[white]{order['info']}", is_bold=True)
+    log(f"[bold]limit_order=[/bold][white]{order['info']}")
 
 
 async def cancel_check_orders(symbol, limit_price, side, entry_price, position_amt) -> None:
@@ -94,23 +90,46 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
             log("")
             if delta_change > 0.05:
                 order_p = float(order["info"]["price"])
-                if (side == "BUY" and (limit_price < order_p or order_p < entry_price)) or (
-                    side == "SELL" and (limit_price > order_p or order_p > entry_price)
-                ):
+                is_cancel_buy_side = side == "BUY" and (limit_price < order_p or order_p < entry_price)
+                if is_cancel_buy_side or (side == "SELL" and (limit_price > order_p or order_p > entry_price)):
                     await helper.exchange.future.cancel_order(order["id"], symbol)
                     cancel_flag = True
 
         if cancel_flag:
-            await _create_limit_order(symbol, position_amt, limit_price, side)
+            await create_limit_order(symbol, position_amt, limit_price, side)
     else:
         if await bot_async.is_future_position_open(symbol):
-            await _create_limit_order(symbol, position_amt, limit_price, side)
+            await create_limit_order(symbol, position_amt, limit_price, side)
+
+
+async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multiply=None, _percent=None):
+    # Add more money only if the position is less than given amount(ex: 50$)
+    # TODO: if unrealized > 5% close the position, improve
+    if not _percent:
+        _percent = config.LOCKED_PERCENT_LIMIT_USDTPERP
+
+    if not multiply:
+        multiply = config.USDTPERP_MULTIPLY_RATIO
+
+    new_amount = abs(position_amt) * multiply
+    new_amount_margin = isolated_wallet * multiply
+    per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_bal
+    _per = format(per, ".2f")
+    if float(_per) <= _percent:
+        if config.status["futures"]["free"] > new_amount:
+            await create_market_order(symbol, new_amount, side)
+        else:
+            raise QuietExit("Warning: Not enough free USDT")
+    else:
+        if float(_per) < 100:
+            log(f"Warning: Total locked amount is {_per}% ", end="")
 
 
 async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms):
     print_flag = False
-    usdt_bal += config.TRBINANCE_USDT
+    usdt_bal += config.trbinance_usdt
     count = 0
+    total_lost = 0
     for position in future_positions:
         #: Indicates total locked amount without applying any gain or loss
         isolated_wallet = abs(float(position["info"]["isolatedWallet"]))
@@ -140,38 +159,37 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
                 limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
 
             asset = "{0: <5}".format(symbol.replace("/USDT", ""))
-            log(f"{asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", end="", is_bold=True)
+            log(f"{asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", "bold", end="")
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
+            total_lost -= unrealized_profit
             asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
             per = (100.0 * initial_margin) / usdt_bal
             _per = format(per, ".2f")
             log("| ", end="")
-            log(f"{format(isolated_wallet, '.2f')}", "magenta", is_bold=True, end="")
-            log(f"({_per}%) ", "magenta", is_bold=True, end="")
-            if isolated_wallet < 50.0 and asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_USDT + 0.01:
-                # Add more money only if the position is less than given amount(ex: 50$)
-                # TODO: if unrealized > 5% close the position, improve
-                new_amount = abs(position_amt) * config.USDT_MULTIPLY_RATIO
-                new_amount_margin = isolated_wallet * config.USDT_MULTIPLY_RATIO
-                per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_bal
-                _per = format(per, ".2f")
-                if float(_per) <= config.LOCKED_PERCENT_LIMIT_USDT:
-                    if config.status["futures"]["free"] > new_amount:
-                        await _create_market_order(symbol, new_amount, side)
-                    else:
-                        raise QuietExit("Warning: Not enough free USDT")
-                else:
-                    if float(_per) < 100:
-                        log(f"Warning: Total locked amount is {_per}% ", end="")
+            log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
+            log(f"({_per}%) ", "bold magenta", end="")
+            if isolated_wallet > config.ISOLATED_WALLET_LIMIT:
+                log(f"Warning: Calculated locked amount is {_per}% ", end="")
+
+            if (
+                isolated_wallet < config.ISOLATED_WALLET_LIMIT
+                and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
+            ):
+                await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
+            elif isolated_wallet > config.ISOLATED_WALLET_LIMIT and asset_percent_change <= -5.0 and _per < 30.0:
+                await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, 50.0)
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
-    with FileLock(config.status.fp_lock, timeout=1):
-        config.status["futures"]["pos_count"] = count
+    if total_lost > 0.00:
+        log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
 
-    if count > config.status["log"]["futures"]["max_position_count"]:
-        with FileLock(config.status.fp_lock, timeout=1):
+    with FileLock(config.status.fp_lock, timeout=1):
+        if config.status["futures"]["pos_count"] != count:
+            config.status["futures"]["pos_count"] = count
+
+        if count > config.status["log"]["futures"]["max_position_count"]:
             config.status["log"]["futures"]["max_position_count"] = count
 
     return print_flag
@@ -183,28 +201,31 @@ async def process_main():
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
     config.reload()
-    bot_async.futures_balance = await helper.exchange.future.fetch_balance()
-    unix_timestamp_ms = helper.exchange.get_future_timestamp()
     try:
+        bot_async.futures_balance = await helper.exchange.future.fetch_balance()
+        unix_timestamp_ms = helper.exchange.get_future_timestamp()
         *_, usdt_bal = await bot_async.spot_balance()
         if usdt_bal > 0.0 and not helper.is_start:
             log("")
 
-        config.status["futures"]["free"] = _futures_bal("free", "USDT") + usdt_bal
-        usdt_bal += _futures_bal("total", "USDT") + _futures_bal("total", "BUSD")
+        with FileLock(config.status.fp_lock, timeout=1):
+            config.status["futures"]["free"] = futures_bal("free", "USDT") + usdt_bal
+
+        usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
         # TODO: pozisyonlarin o anki son fiyati olmali?
         positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms)
-        if not is_printed and not helper.is_start:
-            delete_last_line()
+        if not is_printed and not helper.is_start and config.status["spot"]["pos_count"] == 0:
+            delete_last_line(2)
 
         if not is_printed or helper.is_start:
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
     except KeyError:
+        print_tb()
         _exit("E: KeyError")
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
         await _sleep(30)
 
 
@@ -217,7 +238,7 @@ async def main():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            _colorize_traceback(e)
+            print_tb(e)
 
 
 if __name__ == "__main__":
@@ -231,8 +252,8 @@ if __name__ == "__main__":
         if e:
             log(e)
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
-        log("Program finished.", "bold green")
+        log("END", "bold green")

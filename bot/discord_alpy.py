@@ -5,7 +5,6 @@ from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
 from ebloc_broker.broker._utils.tools import get_dt_time
 from ebloc_broker.broker._utils.yaml import Yaml
 
@@ -14,11 +13,11 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self):
-        _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
-        self.client = discord.Client()
-        self.TOKEN = _config["discord"]["TOKEN"]
-        self.channel_id = _config["discord"]["CHANNEL_ALPY"]
         try:
+            _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+            self.client = discord.Client()
+            self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
+            self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
         except SystemExit:
@@ -43,11 +42,14 @@ class Discord_Alpy:
 
     async def send_msg(self, msg=""):
         await self.client.wait_until_ready()
-        channel = self.client.get_channel(self.channel_id)
-        if not msg:
-            msg = f"Tick! The time is: {get_dt_time().strftime('%Y-%m-%d %H:%M:%S')}"
-            print(msg)
-            await channel.send(msg)
+        channel = discord.utils.get(self.client.get_all_channels(), name=self.channel_name)
+        if not channel:
+            print("E: channel is empty")
+        else:
+            if not msg:
+                msg = f"Tick! The time is: {get_dt_time().strftime('%Y-%m-%d %H:%M:%S')}"
+                print(msg)
+                await channel.send(msg)
         # await binance_balance.process_main(channel)
 
 

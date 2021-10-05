@@ -7,8 +7,9 @@ obLevel1 = 60   // Over Bought Level 1
 obLevel2 = 53   // Over Bought Level 2
 osLevel1 = -60  // Over Sold Level 1
 osLevel2 = -53  // Over Sold Level 2
-wave_trend_time = input("60", title = "WaveTrend Time")
-src = security(syminfo.tickerid, wave_trend_time, hlc3)
+// wave_trend_time = input("60", title = "WaveTrend Time")
+// src = security(syminfo.tickerid, wave_trend_time, hlc3)
+src = hlc3
 esa = ema(src, n1)
 d = ema(abs(src - esa), n1)
 ci = (src - esa) / (0.015 * d)

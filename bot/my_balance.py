@@ -5,14 +5,15 @@ import math
 from contextlib import suppress
 
 import yfinance as yf
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import _time, print_tb
 
 from bot import helper
 from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils.tools import _colorize_traceback, _time, log
 
 client, _ = check_binance_obj()
 bot = BotHelper(client)
@@ -73,20 +74,19 @@ async def fetch_balance() -> float:
                 unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
                 if unrealized_profit < 0.0:
                     log(f" {unrealized_profit}", "red", end="")
-                    total_lost -= unrealized_profit
                 else:
                     log(f" {unrealized_profit}", "green", end="")
-                    total_lost += unrealized_profit
 
+                total_lost -= unrealized_profit
                 usdt_balance = float(bot_async.futures_balance["total"]["USDT"])
                 per = (100.0 * initial_margin) / usdt_balance
                 log(f" {format(per, '.2f')}% ", "blue", end="")
                 log(f"{format(initial_margin, '.2f')} ", "blue", end="")
 
-        log(f"total_lost={int(total_lost)}", "bold red")
+        log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
         return total_balance
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
     finally:
         await helper.exchange.future.close()
         await helper.exchange.spot.close()
@@ -107,6 +107,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         loop.run_until_complete(bot_async.close())
     except Exception as e:
-        _colorize_traceback(e)
+        print_tb(e)
     finally:
         log("Program finished.", "bold green")
