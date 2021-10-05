@@ -202,9 +202,9 @@ async def process_main():
     """
     config.reload()
     try:
+        *_, usdt_bal = await bot_async.spot_balance()
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
-        *_, usdt_bal = await bot_async.spot_balance()
         if usdt_bal > 0.0 and not helper.is_start:
             log("")
 

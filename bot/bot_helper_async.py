@@ -75,9 +75,9 @@ class BotHelperAsync:
         """
         await helper.exchange._close()
 
-    ###########
-    # FUTURES #
-    ###########
+    ############
+    # USDTPERP #
+    ############
     async def _load_markets(self):
         await helper.exchange.future.load_markets()
 
@@ -143,17 +143,15 @@ class BotHelperAsync:
         if sum_btc > 0.0:
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
-        spot_print_flag = True
+        if helper.is_start or config.status["futures"]["pos_count"] > 0:
+            log(f" * usdt={format(sum_usdt, '.2f')}")
+
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
                 with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
-                        if helper.is_start or (spot_print_flag and config.status["futures"]["pos_count"] > 0):
-                            log(f" * usdt={format(sum_usdt, '.2f')}")
-
-                        spot_print_flag = False
                         await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)
                         # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
 
