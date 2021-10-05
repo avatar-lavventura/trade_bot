@@ -17,16 +17,14 @@ from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, print_tb
 
-is_trade = True
-
 
 class Strategy:
     def __init__(self, data_msg=""):
-        self.symbol = ""
-        self.market = ""
-        self.time_duration = ""
-        self.unix_timestamp_ms: int = 0
+        self.symbol: str = ""
         self.size: int = 0
+        self.market: str = ""
+        self.time_duration: str = ""
+        self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
             log(f"{data_msg}", "bold magenta", end="")
@@ -39,7 +37,7 @@ class Strategy:
                 if self.time_duration == "1s":
                     self.side = "BUY"  # BUY for 1s
                 else:
-                    raise QuietExit(f"E: side should be BUY for {self.market} market")
+                    raise QuietExit(f"E: side should be `BUY` for the {self.market} market")
 
     def parse_data_msg(self, data_msg):
         self.size: int = 0
@@ -203,11 +201,11 @@ class BotHelper:
         quantity = 0.0
         decimal = 0
         log("trade_price=", "bold", end="")
-        for trade in enumerate(reversed(self.client.get_my_trades(symbol=self.strategy.symbol.replace("/", "")))):
+        _symbol = self.strategy.symbol.replace("/", "")
+        for trade in enumerate(reversed(self.client.get_my_trades(symbol=_symbol))):
             if self.strategy.market == "USDT":
-                trade = trade[1]
+                trade = trade[1]  # spot returns trade as a tuple
 
-            #: spot returns trade as tuple
             _decimal = self.get_decimal_count(trade["price"])
             if _decimal > decimal:
                 decimal = _decimal
@@ -542,8 +540,8 @@ class BotHelper:
             return
         elif self.strategy.market == "BTC" and self.strategy.is_sell():
             log("Warning: Ignore BTC pair, no need to sell.")
-        elif is_trade:
-            await self._trade(self.strategy)
+
+        await self._trade(self.strategy)
 
     def pre_check(self) -> None:
         """Fast to read from usdt.yaml.
