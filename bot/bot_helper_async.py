@@ -7,7 +7,7 @@ from filelock import FileLock
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import print_tb, decimal_count, percent_change, round_float
+from ebloc_broker.broker._utils.tools import decimal_count, percent_change, print_tb, round_float
 
 
 class TP_calculate(Exception):
@@ -151,7 +151,7 @@ class BotHelperAsync:
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset not in ["BTC", "BNB", "USDT"]:
                         if helper.is_start or (spot_print_flag and config.status["futures"]["pos_count"] > 0):
-                            log(f" * spot_usdt={format(sum_usdt, '.2f')}")
+                            log(f" * usdt={format(sum_usdt, '.2f')}")
 
                         spot_print_flag = False
                         await self.spot_limit_usdt(asset, btc_quantity, sum_usdt, is_limit)

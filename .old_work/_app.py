@@ -5,7 +5,7 @@ import sys  # noqa
 import time
 
 from actions import parse_webhook
-from broker._utils.tools import print_tb, _time, log
+from broker._utils.tools import _time, log, print_tb
 from broker.utils import is_process_on  # noqa
 from dotenv import load_dotenv
 from flask import Flask, abort, request

@@ -6,21 +6,15 @@ from contextlib import suppress
 from typing import Dict
 
 from filelock import FileLock
-from bot.python_binance import Python_Binance
+
 from bot import helper
 from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
+from bot.python_binance import Python_Binance
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import (
-    QuietExit,
-    print_tb,
-    _exit,
-    _time,
-    delete_last_line,
-    percent_change,
-)
+from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 
 binance = Python_Binance()
 bot_async = BotHelperUsdtAsync()
@@ -37,8 +31,10 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         config.status["futures"]["locked"] = locked
         config.status["futures"]["locked_per"] = locked_usdt_per
 
-    log(f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}"
-        f"({format(locked_usdt_per, '.2f')}%)", end="")
+    log(
+        f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_usdt_per, '.2f')}%)",
+        end="",
+    )
     log("_______________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
@@ -178,7 +174,7 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
 
             if (
                 isolated_wallet < config.ISOLATED_WALLET_LIMIT
-                and asset_percent_change <= config.PERCENT_CHANGE_TO_ADD_USDT
+                and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
             ):
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
             elif isolated_wallet > config.ISOLATED_WALLET_LIMIT and asset_percent_change <= -5.0 and _per < 30.0:

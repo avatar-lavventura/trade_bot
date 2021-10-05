@@ -7,7 +7,7 @@ from time import sleep
 
 import ccxt
 from _mongodb import Mongo
-from broker._utils.tools import print_tb, _time, get_decimal_count, log
+from broker._utils.tools import _time, get_decimal_count, log, print_tb
 from dotenv import load_dotenv
 from pymongo import MongoClient
 

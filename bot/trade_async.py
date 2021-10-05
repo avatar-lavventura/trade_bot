@@ -2,18 +2,20 @@
 
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
+
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from filelock import FileLock
 from pymongo import MongoClient
+
 from bot import helper
 from bot.binance_balance import create_limit_order, create_market_order
 from bot.client_helper import DiscordClient
 from bot.config import config
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, print_tb, _time, decimal_count
+from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, print_tb
 
 is_trade = True
 
@@ -42,7 +44,7 @@ class Strategy:
     def parse_data_msg(self, data_msg):
         self.size: int = 0
         self.chunks = data_msg.split(",")
-        self.side = self.chunks[1].upper()
+        self.side_original = self.side = self.chunks[1].upper()
         self.symbol = self.chunks[0]
         if self.symbol[:-3] == "BTC":
             self.market = "BTC"
@@ -244,7 +246,7 @@ class BotHelper:
     async def _order(self, quantity, _type="MARKET"):
         """Open futures orders in given direction."""
         try:
-            # await self.bot_async.set_leverage(self.strategy.symbol, config.INITIAL_LEVERAGE)  # consumes time
+            # await self.bot_async.set_leverage(self.strategy.symbol, 1)  # consumes time
             await create_market_order(self.strategy.symbol, quantity, self.strategy.side)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
@@ -420,7 +422,11 @@ class BotHelper:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             current_price = output["last"]
             try:
-                initial_amount = config.cfg["setup"]["position"]["usdt"]["1s"] / current_price
+                if self.strategy.side_original == "SELL":  # could be riskly less position size is opened
+                    initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s_sell"] / current_price
+                else:
+                    initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s"] / current_price
+
                 self.strategy.size = self.get_initial_amount(initial_amount, "USDT")
                 order = self.spot_order(float(self.strategy.size))
                 log(order)
@@ -449,7 +455,8 @@ class BotHelper:
 
             log(
                 f"==> Opening {self.strategy.side} order in the {self.strategy.market} market for"
-                f" {self.strategy.asset} {self.strategy.symbol} ", end=""
+                f" {self.strategy.asset} {self.strategy.symbol} ",
+                end="",
             )
             if self.strategy.size != 0:
                 log(f"| size={self.strategy.size}")
@@ -472,11 +479,11 @@ class BotHelper:
     def check_on_going_positions(self):
         if self.strategy.market == "USDTPERP":
             if self.strategy.time_duration == "1m":
-                if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION_1m:
-                    raise QuietExit(f"Warning: {config.USDT_MAX_POSITION} pos")
+                if config.status["futures"]["pos_count"] >= config.USDTPERP_MAX_POSITION_1m:
+                    raise QuietExit(f"Warning: {config.USDTPERP_MAX_POSITION} pos")
             if self.strategy.time_duration == "9m":
-                if config.status["futures"]["pos_count"] >= config.USDT_MAX_POSITION:
-                    raise QuietExit(f"Warning: {config.USDT_MAX_POSITION} pos")
+                if config.status["futures"]["pos_count"] >= config.USDTPERP_MAX_POSITION:
+                    raise QuietExit(f"Warning: {config.USDTPERP_MAX_POSITION} pos")
         elif self.strategy.market == "BTC":
             if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION:
                 raise QuietExit(f"Warning: {config.SPOT_MAX_POSITION} pos")
@@ -521,7 +528,7 @@ class BotHelper:
 
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:
-            log(f"[{_time()}] ", end="")
+            log(f" * {_time()} ", end="")
             log(data_msg, "bold magenta")
             await self.discord_client.send_msg(data_msg)
             return
