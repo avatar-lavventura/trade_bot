@@ -44,7 +44,7 @@ class Strategy:
     def parse_data_msg(self, data_msg):
         self.size: int = 0
         self.chunks = data_msg.split(",")
-        self.side = self.chunks[1].upper()
+        self.side_original = self.side = self.chunks[1].upper()
         self.symbol = self.chunks[0]
         if self.symbol[:-3] == "BTC":
             self.market = "BTC"
@@ -422,7 +422,11 @@ class BotHelper:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             current_price = output["last"]
             try:
-                initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s"] / current_price
+                if self.strategy.side_original == "SELL":  # could be riskly less position size is opened
+                    initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s_sell"] / current_price
+                else:
+                    initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s"] / current_price
+
                 self.strategy.size = self.get_initial_amount(initial_amount, "USDT")
                 order = self.spot_order(float(self.strategy.size))
                 log(order)
@@ -524,7 +528,7 @@ class BotHelper:
 
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:
-            log(f"[{_time()}] ", end="")
+            log(f" * {_time()} ", end="")
             log(data_msg, "bold magenta")
             await self.discord_client.send_msg(data_msg)
             return

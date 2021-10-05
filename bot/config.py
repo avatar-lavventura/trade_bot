@@ -22,7 +22,7 @@ class Config:
         self.status = Yaml("status.yaml")
         # spot
         self.SPOT_LOCKED_PERCENT_LIMIT = self.cfg["setup"]["spot"]["LOCKED_PERCENT_LIMIT"]
-        self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["MULTIPLY_RATIO"]
+        self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["multiply_ratio"]
         self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["max_pos_1m"]
         self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["max_pos"]
         self.SPOT_IGNORE_LIST = self.cfg["setup"]["ignore"]["spot"]
@@ -42,10 +42,10 @@ class Config:
         self.IGNORE_BELOW_USDT = self.cfg["setup"]["IGNORE_BELOW_USDT"]
         self.ISOLATED_WALLET_LIMIT = self.cfg["setup"]["ISOLATED_WALLET_LIMIT"]
         #
-        self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["setup"]["position"]["short"]["1m"]
-        self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["position"]["long"]["1m"]
-        self.INITIAL_USDT_QTY_SHORT = self.cfg["setup"]["position"]["short"]["base"]
-        self.INITIAL_USDT_QTY_LONG = self.cfg["setup"]["position"]["long"]["base"]
+        self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["setup"]["usdtperp"]["pos"]["short"]["1m"]
+        self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]
+        self.INITIAL_USDT_QTY_SHORT = self.cfg["setup"]["usdtperp"]["pos"]["short"]["base"]
+        self.INITIAL_USDT_QTY_LONG = self.cfg["setup"]["usdtperp"]["pos"]["long"]["base"]
         # usdt
         self.usdt_percent_change_to_add = -abs(self.cfg["setup"]["usdt"]["percent_change_to_add"]) + 0.01
         self.usdt_multiply_ratio = self.cfg["setup"]["usdt"]["multiply_ratio"]
