@@ -19,4 +19,5 @@ class Python_Binance:
 
 if __name__ == "__main__":
     binance = Python_Binance()
-    binance.transfer_spot_to_futures(0.51)
+    binance.transfer_futures_to_spot(50)
+    # binance.transfer_spot_to_futures(252.43)

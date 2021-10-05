@@ -13,7 +13,7 @@ from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import print_tb, _time
+from ebloc_broker.broker._utils.tools import _time, print_tb
 
 client, _ = check_binance_obj()
 bot = BotHelper(client)

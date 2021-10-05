@@ -23,24 +23,22 @@ class Config:
         # spot
         self.SPOT_LOCKED_PERCENT_LIMIT = self.cfg["setup"]["spot"]["LOCKED_PERCENT_LIMIT"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["MULTIPLY_RATIO"]
-        self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["MAX_POSITION_1m"]
-        self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["MAX_POSITION"]
+        self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["max_pos_1m"]
+        self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["max_pos"]
         self.SPOT_IGNORE_LIST = self.cfg["setup"]["ignore"]["spot"]
-        self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot"]["PERCENT_CHANGE_TO_ADD"]) + 0.01
-
+        self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot"]["percent_change_to_add"]) + 0.01
+        #
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["BASE"]
         self.INITIAL_BTC_QTY = self.cfg["setup"]["spot"]["INITIAL_BTC_QTY"]
-        # futures
-        self.trbinance_usdt = self.goal["goal"]["trbinance"]["usdt"]
 
+        self.trbinance_usdt = self.goal["goal"]["trbinance"]["usdt"]
+        # usdtperp
         self.TP = self.cfg["setup"]["TP"]
         self.LOCKED_PERCENT_LIMIT_USDTPERP = self.cfg["setup"]["LOCKED_PERCENT_LIMIT_USDT"]
-        self.PERCENT_CHANGE_TO_ADD_USDT = -abs(self.cfg["setup"]["PERCENT_CHANGE_TO_ADD_USDT"]) + 0.01
-        self.USDTPERP_MULTIPLY_RATIO = self.cfg["setup"]["USDT_MULTIPLY_RATIO"]
-
-        self.INITIAL_LEVERAGE = self.cfg["setup"]["INITIAL_LEVERAGE"]
-        self.USDT_MAX_POSITION_1m = self.cfg["setup"]["USDT_MAX_POSITION_1m"]
-        self.USDT_MAX_POSITION = self.cfg["setup"]["USDT_MAX_POSITION"]
+        self.USDTPERP_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["usdtperp"]["percent_change_to_add"]) + 0.01
+        self.USDTPERP_MULTIPLY_RATIO = self.cfg["setup"]["usdtperp"]["multiply_ratio"]
+        self.USDTPERP_MAX_POSITION_1m = self.cfg["setup"]["usdtperp"]["max_pos_1m"]
+        self.USDTPERP_MAX_POSITION = self.cfg["setup"]["usdtperp"]["max_pos"]
         self.IGNORE_BELOW_USDT = self.cfg["setup"]["IGNORE_BELOW_USDT"]
         self.ISOLATED_WALLET_LIMIT = self.cfg["setup"]["ISOLATED_WALLET_LIMIT"]
         #
@@ -48,8 +46,9 @@ class Config:
         self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["position"]["long"]["1m"]
         self.INITIAL_USDT_QTY_SHORT = self.cfg["setup"]["position"]["short"]["base"]
         self.INITIAL_USDT_QTY_LONG = self.cfg["setup"]["position"]["long"]["base"]
-#
-        self.USDT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot_usdt"]["PERCENT_CHANGE_TO_ADD"]) + 0.01
+        # usdt
+        self.usdt_percent_change_to_add = -abs(self.cfg["setup"]["usdt"]["percent_change_to_add"]) + 0.01
+        self.usdt_multiply_ratio = self.cfg["setup"]["usdt"]["multiply_ratio"]
 
 
 config: Config = Config()

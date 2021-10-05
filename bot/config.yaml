@@ -1,14 +1,9 @@
 setup:
   IGNORE_BELOW_USDT: 0.01
-  INITIAL_LEVERAGE: 1
   ISOLATED_WALLET_LIMIT: 101
   LOCKED_PERCENT_LIMIT_USDT: 8
-  PERCENT_CHANGE_TO_ADD_USDT: 5.0
   STOP_LOCKED_PER: 50
   TP: 0.0051
-  USDT_MAX_POSITION: 3
-  USDT_MAX_POSITION_1m: 4
-  USDT_MULTIPLY_RATIO: 1.7
   ignore:
     spot:
     - PAIR
@@ -21,19 +16,24 @@ setup:
     short:
       1m: 20.0
       base: 12.0
-    usdt:
-      1s: 100
   spot:
     INITIAL_BTC_QTY: 0.00015
-    LOCKED_PERCENT_LIMIT: 100
-    MAX_POSITION: 1
-    MAX_POSITION_1m: 1
-    MULTIPLY_RATIO: 1.0
-    PERCENT_CHANGE_TO_ADD: 5.0
-    TP: 0.0051
-  spot_usdt:
     LOCKED_PERCENT_LIMIT: 95
-    MAX_POSITION: 1
-    MULTIPLY_RATIO: 1.1
-    PERCENT_CHANGE_TO_ADD: 5.0
+    MULTIPLY_RATIO: 1.0
     TP: 0.0051
+    max_pos: 1
+    max_pos_1m: 1
+    percent_change_to_add: 5.0
+  usdt:
+    LOCKED_PERCENT_LIMIT: 95
+    TP: 0.0051
+    max_pos: 1
+    multiply_ratio: 1.1
+    percent_change_to_add: 5.0
+    pos:
+      1s: 100
+  usdtperp:
+    max_pos: 3
+    max_pos_1m: 3
+    multiply_ratio: 1.7
+    percent_change_to_add: 5.0

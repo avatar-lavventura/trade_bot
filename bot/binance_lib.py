@@ -18,10 +18,10 @@ from dateutil.parser import parse
 from forex_python.converter import CurrencyRates
 
 from ebloc_broker.broker._utils.tools import (
-    print_tb,
     _percent_change,
     log,
     percent_change,
+    print_tb,
     timestamp_to_local,
     utc_to_local,
 )
