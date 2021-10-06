@@ -58,15 +58,14 @@ class BotHelperUsdtAsync(BotHelperAsync):
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
         limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
-        log(f"==> {asset} quantity={asset_balance} | ", end="")
-        log(f"entry_price={entry_price} | ", "bold", end="")
+        log(f"==> {asset} q={asset_balance} | ", end="")
+        log(f"e={entry_price} | ", "bold", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"limit_price={limit_price} ", "bold", end="")
+            log(f"l={limit_price} ", "bold", end="")
 
         asset_usdt_price = await self.spot_fetch_ticker(f"{asset}USDT")
         per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
         _per = format(per, ".2f")
-        log(f"{_per}% ", "blue", end="")
         profit = (asset_usdt_price - entry_price) * quantity
         if profit > 0:
             log(format(profit, ".2f"), "bold green", end="")
@@ -74,8 +73,10 @@ class BotHelperUsdtAsync(BotHelperAsync):
             log(format(profit, ".2f"), "bold red", end="")
 
         asset_percent_change = percent_change(
-            initial=entry_price, change=asset_usdt_price - entry_price, is_arrow_print=False
+            initial=entry_price, change=asset_usdt_price - entry_price, end="", is_arrow_print=False
         )
+        log(f"| {format(_sum, '.2f')}", "magenta", end="")
+        log(f"({_per}%) ", "bold magenta")
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
