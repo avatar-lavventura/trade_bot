@@ -11,12 +11,10 @@ from bot import helper
 from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
-from bot.python_binance import Python_Binance
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 
-binance = Python_Binance()
 bot_async = BotHelperUsdtAsync()
 
 
@@ -106,7 +104,7 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multi
     # Add more money only if the position is less than given amount(ex: 50$)
     # TODO: if unrealized > 5% close the position, improve
     if not _percent:
-        _percent = config.LOCKED_PERCENT_LIMIT_USDTPERP
+        _percent = config.locked_percent_limit_USDTPERP
 
     if not multiply:
         multiply = config.USDTPERP_MULTIPLY_RATIO
@@ -202,9 +200,9 @@ async def process_main():
     """
     config.reload()
     try:
+        *_, usdt_bal = await bot_async.spot_balance()
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
-        *_, usdt_bal = await bot_async.spot_balance()
         if usdt_bal > 0.0 and not helper.is_start:
             log("")
 

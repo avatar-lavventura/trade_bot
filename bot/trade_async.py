@@ -2,13 +2,11 @@
 
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
-
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from filelock import FileLock
 from pymongo import MongoClient
-
 from bot import helper
 from bot.binance_balance import create_limit_order, create_market_order
 from bot.client_helper import DiscordClient
@@ -27,7 +25,7 @@ class Strategy:
         self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
-            log(f"{data_msg}", "bold magenta", end="")
+            log(f"{data_msg},", "bold magenta", end="")
 
         with suppress(Exception):
             self.parse_data_msg(data_msg)
@@ -248,7 +246,7 @@ class BotHelper:
             await create_market_order(self.strategy.symbol, quantity, self.strategy.side)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
-                log(f"E: {e} quantity={quantity}", "red")
+                log(f"E: {e} quantity={quantity}")
                 decimal = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening sell order with new quantity={_quantity}")
@@ -375,7 +373,7 @@ class BotHelper:
         if current_price < config.IGNORE_BELOW_USDT:
             raise Exception(
                 f"Price of {self.strategy.symbol} is below {config.IGNORE_BELOW_USDT}$."
-                f"current_price={current_price}.PASS"
+                f"current_price={current_price}.PASS", "bold"
             )
 
         if self.strategy.is_buy():
@@ -420,7 +418,9 @@ class BotHelper:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             current_price = output["last"]
             try:
-                if self.strategy.side_original == "SELL":  # could be riskly less position size is opened
+                if self.strategy.asset in ["BTG"]:  # consider assets minumum buy is >= 50
+                    initial_amount = 100 / current_price
+                elif self.strategy.side_original == "SELL":  # could be riskly less position size is opened
                     initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s_sell"] / current_price
                 else:
                     initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s"] / current_price
