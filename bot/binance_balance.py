@@ -4,9 +4,7 @@ import asyncio
 import time
 from contextlib import suppress
 from typing import Dict
-
 from filelock import FileLock
-
 from bot import helper
 from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
@@ -167,15 +165,15 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
             log("| ", end="")
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
             log(f"({_per}%) ", "bold magenta", end="")
-            if isolated_wallet > config.ISOLATED_WALLET_LIMIT:
+            if isolated_wallet > config.isolated_wallet_limit:
                 log(f"Warning: Calculated locked amount is {_per}% ", end="")
 
             if (
-                isolated_wallet < config.ISOLATED_WALLET_LIMIT
+                isolated_wallet < config.isolated_wallet_limit
                 and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
             ):
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
-            elif isolated_wallet > config.ISOLATED_WALLET_LIMIT and asset_percent_change <= -5.0 and _per < 30.0:
+            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -5.0 and _per < 30.0:
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, 50.0)
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)

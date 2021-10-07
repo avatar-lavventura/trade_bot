@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-
 from filelock import FileLock
-
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
@@ -87,7 +85,8 @@ class BotHelperAsync:
 
     async def transfer_out(self, amount):
         """Transfer usdt from usdtperp to spot."""
-        await helper.exchange.future.transfer_in(code="USDT", amount=amount)
+        # __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
+        await helper.exchange.future.transfer_out(code="USDT", amount=amount)
 
     async def is_future_position_open(self, symbol_original) -> bool:
         futures = await helper.exchange.future.fetch_balance()
@@ -155,7 +154,8 @@ class BotHelperAsync:
             if not helper.is_start:
                 log()  # TODO: line splitter using rich
 
-            log(f" * usdt={format(sum_usdt, '.2f')}")
+            if sum_usdt > 0.0:
+                log(f" * usdt={format(sum_usdt, '.2f')}")
 
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]
@@ -213,9 +213,12 @@ class BotHelperAsync:
 
         try:
             balance = await self.fetch_balance(asset)
-            respone = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
+            response = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
             log("==> New limit-order is placed:")
-            log(respone, "bold cyan")
+            try:
+                log(response["info"], "bold cyan")
+            except:
+                log(response, "bold cyan")
         except Exception as e:
             log(f"E: Failed to create order with {helper.exchange.spot.id} {type(e).__name__}\n{e}", "bold red")
 

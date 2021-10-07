@@ -8,9 +8,15 @@ from bot_helper_async import BotHelperAsync
 
 bot_async = BotHelperAsync()
 
+
 async def main():
-    # __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
-    await bot_async.transfer_out(10)
+    try:
+        await bot_async.transfer_out(1000)
+    except Exception as e:
+        print_tb(e)
+    finally:
+        await helper.exchange.future.close()
+        await helper.exchange.spot.close()
 
 
 if __name__ == "__main__":
@@ -18,7 +24,7 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(main())
     except KeyboardInterrupt:
-        loop.run_until_complete(helper.exchange.close())
+        loop.run_until_complete(bot_async.close())
     except Exception as e:
         print_tb(e)
     finally:
