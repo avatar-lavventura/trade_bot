@@ -370,9 +370,9 @@ class BotHelper:
         if current_price == 0:
             raise Exception(f"current_price={current_price} is zero")
 
-        if current_price < config.IGNORE_BELOW_USDT:
+        if current_price < config.ignore_below_usdt:
             raise Exception(
-                f"Price of {self.strategy.symbol} is below {config.IGNORE_BELOW_USDT}$."
+                f"Price of {self.strategy.symbol} is below {config.ignore_below_usdt}$."
                 f"current_price={current_price}.PASS", "bold"
             )
 

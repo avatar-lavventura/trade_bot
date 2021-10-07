@@ -5,8 +5,8 @@ from ebloc_broker.broker._utils.yaml import Yaml
 
 class Config:
     def __init__(self) -> None:
-        self.NEW_DAY = "03:00:00"
-        self.FUND_TIMES = ["19:00:00", "03:00:00", "11:00:00"]
+        self.new_day = "03:00:00"
+        self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.initialize()
 
     def reload(self) -> None:
@@ -38,7 +38,7 @@ class Config:
         self.USDTPERP_MULTIPLY_RATIO = self.cfg["setup"]["usdtperp"]["multiply_ratio"]
         self.USDTPERP_MAX_POSITION_1m = self.cfg["setup"]["usdtperp"]["max_pos_1m"]
         self.USDTPERP_MAX_POSITION = self.cfg["setup"]["usdtperp"]["max_pos"]
-        self.IGNORE_BELOW_USDT = self.cfg["setup"]["IGNORE_BELOW_USDT"]
+        self.ignore_below_usdt = self.cfg["setup"]["ignore_below_usdt"]
         self.ISOLATED_WALLET_LIMIT = self.cfg["setup"]["ISOLATED_WALLET_LIMIT"]
         self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["setup"]["usdtperp"]["pos"]["short"]["1m"]
         self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]
