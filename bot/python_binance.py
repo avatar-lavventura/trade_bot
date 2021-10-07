@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 
-from bot.user_setup import check_binance_obj
+from bot import helper
+import asyncio
+from ebloc_broker.broker._utils.tools import print_tb
+from ebloc_broker.broker._utils._log import log
+from bot_helper_async import BotHelperAsync
 
+bot_async = BotHelperAsync()
 
-class Python_Binance:
-    def __init__(self):
-        self.client, self.balances = check_binance_obj()
-
-    def transfer_futures_to_spot(self, amount):
-        self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
-
-    def transfer_spot_to_futures(self, amount):
-        self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="1")
-
-    def transfer_spot_to_margin(self, amount):
-        self.client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
+async def main():
+    # __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
+    await bot_async.transfer_out(10)
 
 
 if __name__ == "__main__":
-    binance = Python_Binance()
-    binance.transfer_futures_to_spot(400)
-    # binance.transfer_spot_to_futures(252.43)
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        loop.run_until_complete(helper.exchange.close())
+    except Exception as e:
+        print_tb(e)
+    finally:
+        log("Program finished.", "bold green")

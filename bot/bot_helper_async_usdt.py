@@ -85,10 +85,10 @@ class BotHelperUsdtAsync(BotHelperAsync):
             log(f"new_order_size={new_order_size} | ", "bold blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_usdt_price) / sum_usdt
             log(f"==> {_per} of the total asset value")
-            # if float(_per) > config.SPOT_LOCKED_PERCENT_LIMIT:
+            # if float(_per) > config.SPOT_locked_percent_limit:
             #     # TODO: Calculate percent on full money on futures as well
             #     new_per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
-            #     per_to_buy = config.SPOT_LOCKED_PERCENT_LIMIT - abs(new_per)
+            #     per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
             #     usdt_amount_to_buy = per_to_buy * sum_usdt / 100.0
             #     _new_order_size = usdt_amount_to_buy / asset_usdt_price
             #     new_order_size = f"{_new_order_size:.{decimal}f}"

@@ -48,7 +48,6 @@ import binance_lib
 import requests
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
-
 from bot.python_binance import Python_Binance
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils import _log
@@ -100,10 +99,12 @@ lag_time = vars(args)["lag"]
 
 
 def transfer_futures_to_spot(amount):
+    # await helper.exchange.future.transfer_out(code="USDT", amount=50)
     client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
 
 
 def transfer_spot_to_futures(amount):
+    # await helper.exchange.future.transfer_in(code="USDT", amount=50)
     client.futures_account_transfer(asset="USDT", amount=float(amount), type="1")
 
 

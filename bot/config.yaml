@@ -10,18 +10,19 @@ setup:
     - PAIR
   spot:
     INITIAL_BTC_QTY: 0.00015
-    LOCKED_PERCENT_LIMIT: 95
+    LOCKED_PERCENT_LIMIT: {}
     TP: 0.0051
+    locked_percent_limit: 95
     max_pos: 1
     max_pos_1m: 1
     multiply_ratio: 1.0
     percent_change_to_add: 5.0
   usdt:
-    LOCKED_PERCENT_LIMIT: 95
     TP: 0.0051
+    locked_percent_limit: 95
     max_pos: 1
-    multiply_ratio: 1.2
-    percent_change_to_add: 6.0
+    multiply_ratio: 1.5
+    percent_change_to_add: 5.5
     pos:
       1s: 20
       1s_sell: 20
@@ -30,7 +31,7 @@ setup:
     max_pos: 2
     max_pos_1m: 2
     multiply_ratio: 1.7
-    percent_change_to_add: 7.0
+    percent_change_to_add: 5.0
     pos:
       long:
         1m: 13.0

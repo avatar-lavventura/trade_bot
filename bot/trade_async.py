@@ -246,7 +246,7 @@ class BotHelper:
             await create_market_order(self.strategy.symbol, quantity, self.strategy.side)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
-                log(f"E: {e} quantity={quantity}", "red")
+                log(f"E: {e} quantity={quantity}")
                 decimal = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening sell order with new quantity={_quantity}")

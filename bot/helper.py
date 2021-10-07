@@ -3,10 +3,8 @@
 from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
-
 import ccxt.async_support as ccxt
-
-from ebloc_broker.broker._utils.tools import _exit, unix_time_millis
+from ebloc_broker.broker._utils.tools import unix_time_millis
 from ebloc_broker.broker._utils.yaml import Yaml
 
 
@@ -40,7 +38,7 @@ class Exchange:
         self.future_markets = await self.future.load_markets()
         self.spot_markets = await self.spot.load_markets()
 
-    async def _close(self):
+    async def close(self):
         await self.future.close()
         await self.spot.close()
 
