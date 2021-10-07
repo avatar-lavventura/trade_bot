@@ -63,17 +63,17 @@ class BotHelperUsdtAsync(BotHelperAsync):
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"l={limit_price} ", "bold", end="")
 
-        asset_usdt_price = await self.spot_fetch_ticker(f"{asset}USDT")
-        per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
+        asset_price = await self.spot_fetch_ticker(f"{asset}USDT")
+        per = (100.0 * asset_balance * asset_price) / sum_usdt
         _per = format(per, ".2f")
-        profit = (asset_usdt_price - entry_price) * quantity
+        profit = (asset_price - entry_price) * quantity
         if profit > 0:
             log(format(profit, ".2f"), "bold green", end="")
         else:
             log(format(profit, ".2f"), "bold red", end="")
 
         asset_percent_change = percent_change(
-            initial=entry_price, change=asset_usdt_price - entry_price, end="", is_arrow_print=False
+            initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
         )
         log(f"| {format(_sum, '.2f')}", "magenta", end="")
         log(f"({_per}%) ", "bold magenta")
@@ -83,14 +83,14 @@ class BotHelperUsdtAsync(BotHelperAsync):
         if asset_percent_change <= config.usdt_percent_change_to_add:  #  and float(_per) < 50.0
             new_order_size = asset_balance * config.usdt_multiply_ratio
             log(f"new_order_size={new_order_size} | ", "bold blue", end="")
-            per = (100.0 * (asset_balance + new_order_size) * asset_usdt_price) / sum_usdt
+            per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_usdt
             log(f"==> {_per} of the total asset value")
-            # if float(_per) > config.SPOT_LOCKED_PERCENT_LIMIT:
+            # if float(_per) > config.SPOT_locked_percent_limit:
             #     # TODO: Calculate percent on full money on futures as well
-            #     new_per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
-            #     per_to_buy = config.SPOT_LOCKED_PERCENT_LIMIT - abs(new_per)
+            #     new_per = (100.0 * asset_balance * asset_price) / sum_usdt
+            #     per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
             #     usdt_amount_to_buy = per_to_buy * sum_usdt / 100.0
-            #     _new_order_size = usdt_amount_to_buy / asset_usdt_price
+            #     _new_order_size = usdt_amount_to_buy / asset_price
             #     new_order_size = f"{_new_order_size:.{decimal}f}"
 
             order = await self.spot_order(new_order_size, f"{asset}/USDT", "BUY")

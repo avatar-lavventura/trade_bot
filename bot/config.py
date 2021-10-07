@@ -5,8 +5,8 @@ from ebloc_broker.broker._utils.yaml import Yaml
 
 class Config:
     def __init__(self) -> None:
-        self.NEW_DAY = "03:00:00"
-        self.FUND_TIMES = ["19:00:00", "03:00:00", "11:00:00"]
+        self.new_day = "03:00:00"
+        self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.initialize()
 
     def reload(self) -> None:
@@ -25,7 +25,7 @@ class Config:
         self.trbinance_usdt = self.goal["goal"]["trbinance"]["usdt"]
         # spot
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot"]["percent_change_to_add"]) + 0.01
-        self.SPOT_LOCKED_PERCENT_LIMIT = self.cfg["setup"]["spot"]["LOCKED_PERCENT_LIMIT"]
+        self.SPOT_locked_percent_limit = self.cfg["setup"]["spot"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["multiply_ratio"]
         self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["max_pos_1m"]
         self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["max_pos"]
@@ -34,11 +34,11 @@ class Config:
         self.INITIAL_BTC_QTY = self.cfg["setup"]["spot"]["INITIAL_BTC_QTY"]
         # usdtperp
         self.USDTPERP_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["usdtperp"]["percent_change_to_add"]) + 0.01
-        self.LOCKED_PERCENT_LIMIT_USDTPERP = self.cfg["setup"]["usdtperp"]["locked_percent_limit"]
+        self.locked_percent_limit_USDTPERP = self.cfg["setup"]["usdtperp"]["locked_percent_limit"]
         self.USDTPERP_MULTIPLY_RATIO = self.cfg["setup"]["usdtperp"]["multiply_ratio"]
         self.USDTPERP_MAX_POSITION_1m = self.cfg["setup"]["usdtperp"]["max_pos_1m"]
         self.USDTPERP_MAX_POSITION = self.cfg["setup"]["usdtperp"]["max_pos"]
-        self.IGNORE_BELOW_USDT = self.cfg["setup"]["IGNORE_BELOW_USDT"]
+        self.ignore_below_usdt = self.cfg["setup"]["ignore_below_usdt"]
         self.ISOLATED_WALLET_LIMIT = self.cfg["setup"]["ISOLATED_WALLET_LIMIT"]
         self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["setup"]["usdtperp"]["pos"]["short"]["1m"]
         self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]

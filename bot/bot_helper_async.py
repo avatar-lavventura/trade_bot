@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-
 from filelock import FileLock
-
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
@@ -73,13 +71,22 @@ class BotHelperAsync:
 
         https://stackoverflow.com/a/54528397/2402577
         """
-        await helper.exchange._close()
+        await helper.exchange.close()
 
     ############
     # USDTPERP #
     ############
     async def _load_markets(self):
         await helper.exchange.future.load_markets()
+
+    async def transfer_in(self, amount):
+        """Transfer usdt from spot to usdtperp."""
+        await helper.exchange.future.transfer_in(code="USDT", amount=amount)
+
+    async def transfer_out(self, amount):
+        """Transfer usdt from usdtperp to spot."""
+        # __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
+        await helper.exchange.future.transfer_out(code="USDT", amount=amount)
 
     async def is_future_position_open(self, symbol_original) -> bool:
         futures = await helper.exchange.future.fetch_balance()
@@ -143,7 +150,10 @@ class BotHelperAsync:
         if sum_btc > 0.0:
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
-        if helper.is_start or config.status["futures"]["pos_count"] > 0:
+        if helper.is_start or config.status["futures"]["pos_count"] > 0 or config.status["spot"]["pos_count"] > 0:
+            if not helper.is_start:
+                log()  # TODO: line splitter using rich
+
             log(f" * usdt={format(sum_usdt, '.2f')}")
 
         for balance in balances["info"]["balances"]:
@@ -185,7 +195,7 @@ class BotHelperAsync:
 
     async def spot_fetch_ticker(self, asset) -> float:
         if "USDT" not in asset and "BTC" not in asset:
-            asset = asset + "/BTC"
+            asset = f"{asset}/BTC"
 
         price = await helper.exchange.spot.fetch_ticker(asset)
         return float(price["last"])
@@ -202,9 +212,12 @@ class BotHelperAsync:
 
         try:
             balance = await self.fetch_balance(asset)
-            respone = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
+            response = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
             log("==> New limit-order is placed:")
-            log(respone, "bold cyan")
+            try:
+                log(response["info"], "bold cyan")
+            except:
+                log(response, "bold cyan")
         except Exception as e:
             log(f"E: Failed to create order with {helper.exchange.spot.id} {type(e).__name__}\n{e}", "bold red")
 
@@ -319,18 +332,18 @@ class BotHelperAsync:
             log(f"new_order_size={new_order_size} | ", "blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_btc
             log(f"==> {_per} of the total asset value")
-            if float(_per) <= config.SPOT_LOCKED_PERCENT_LIMIT:
+            if float(_per) <= config.SPOT_locked_percent_limit:
                 order = await self.spot_order(new_order_size, _symbol, "BUY")
-                log(order["info"])
+                log(order["info"], "bold")
                 await self.new_limit_order(asset, limit_price)
             else:
                 new_per = (100.0 * asset_balance * asset_price) / sum_btc
-                per_to_buy = config.SPOT_LOCKED_PERCENT_LIMIT - abs(new_per)
+                per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
                 btc_amount_to_buy = per_to_buy * sum_btc / 100.0
                 _new_order_size = btc_amount_to_buy / asset_price
                 _new_order_size = f"{_new_order_size:.{decimal}f}"
                 order = await self.spot_order(_new_order_size, _symbol, "BUY")
-                log(order["info"])
+                log(order["info"], "bold")
                 await self.new_limit_order(asset, limit_price)
 
         open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/BTC")
