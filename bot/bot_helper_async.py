@@ -154,7 +154,8 @@ class BotHelperAsync:
             if not helper.is_start:
                 log()  # TODO: line splitter using rich
 
-            log(f" * usdt={format(sum_usdt, '.2f')}")
+            if sum_usdt > 0.0:
+                log(f" * usdt={format(sum_usdt, '.2f')}")
 
         for balance in balances["info"]["balances"]:
             asset = balance["asset"]

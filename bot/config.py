@@ -39,7 +39,7 @@ class Config:
         self.USDTPERP_MAX_POSITION_1m = self.cfg["setup"]["usdtperp"]["max_pos_1m"]
         self.USDTPERP_MAX_POSITION = self.cfg["setup"]["usdtperp"]["max_pos"]
         self.ignore_below_usdt = self.cfg["setup"]["ignore_below_usdt"]
-        self.ISOLATED_WALLET_LIMIT = self.cfg["setup"]["ISOLATED_WALLET_LIMIT"]
+        self.isolated_wallet_limit = self.cfg["setup"]["isolated_wallet_limit"]
         self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["setup"]["usdtperp"]["pos"]["short"]["1m"]
         self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]
         self.INITIAL_USDT_QTY_SHORT = self.cfg["setup"]["usdtperp"]["pos"]["short"]["base"]
