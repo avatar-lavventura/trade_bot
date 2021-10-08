@@ -1,5 +1,5 @@
 setup:
-  ISOLATED_WALLET_LIMIT: 100
+  ISOLATED_WALLET_LIMIT: {}
   STOP_LOCKED_PER: 50
   TP: 0.0051
   ignore:
@@ -8,6 +8,7 @@ setup:
     usdtperp:
     - PAIR
   ignore_below_usdt: 0.01
+  isolated_wallet_limit: 100
   spot:
     INITIAL_BTC_QTY: 0.00015
     TP: 0.0051
@@ -29,8 +30,8 @@ setup:
     locked_percent_limit: 5
     max_pos: 2
     max_pos_1m: 2
-    multiply_ratio: 1.7
-    percent_change_to_add: 5.0
+    multiply_ratio: 1.5
+    percent_change_to_add: 8.0
     pos:
       long:
         1m: 13.0

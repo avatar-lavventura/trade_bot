@@ -22,13 +22,13 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         if locked > config.status["log"]["futures"]["max_locked"]:
             config.status["log"]["futures"]["max_locked"] = locked
 
-        locked_usdt_per = (100.0 * locked) / usdt_bal
+        locked_percent = (100.0 * locked) / usdt_bal
         config.status["futures"]["total"] = usdt_bal
         config.status["futures"]["locked"] = locked
-        config.status["futures"]["locked_per"] = locked_usdt_per
+        config.status["futures"]["locked_per"] = locked_percent
 
     log(
-        f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_usdt_per, '.2f')}%)",
+        f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_percent, '.2f')}%)",
         end="",
     )
     log("_______________", "blue", end="")
@@ -98,11 +98,11 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
             await create_limit_order(symbol, position_amt, limit_price, side)
 
 
-async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multiply=None, _percent=None):
+async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multiply=None, percent=None):
     # Add more money only if the position is less than given amount(ex: 50$)
     # TODO: if unrealized > 5% close the position, improve
-    if not _percent:
-        _percent = config.locked_percent_limit_USDTPERP
+    if not percent:
+        percent = config.locked_percent_limit_USDTPERP
 
     if not multiply:
         multiply = config.USDTPERP_MULTIPLY_RATIO
@@ -111,7 +111,7 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multi
     new_amount_margin = isolated_wallet * multiply
     per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_bal
     _per = format(per, ".2f")
-    if float(_per) <= _percent:
+    if float(_per) <= percent:
         if config.status["futures"]["free"] > new_amount:
             await create_market_order(symbol, new_amount, side)
         else:
@@ -165,15 +165,15 @@ async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms
             log("| ", end="")
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
             log(f"({_per}%) ", "bold magenta", end="")
-            if isolated_wallet > config.ISOLATED_WALLET_LIMIT:
+            if isolated_wallet > config.isolated_wallet_limit:
                 log(f"Warning: Calculated locked amount is {_per}% ", end="")
 
             if (
-                isolated_wallet < config.ISOLATED_WALLET_LIMIT
+                isolated_wallet < config.isolated_wallet_limit
                 and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
             ):
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
-            elif isolated_wallet > config.ISOLATED_WALLET_LIMIT and asset_percent_change <= -5.0 and _per < 30.0:
+            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -5.0 and _per < 30.0:
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, 50.0)
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
