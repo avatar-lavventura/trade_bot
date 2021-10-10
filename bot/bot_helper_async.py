@@ -29,9 +29,9 @@ class TakeProfit:
         amount = abs(float(amount))
         index = 0
         if side == "long":
-            quantity = config.INITIAL_USDT_QTY_LONG
+            quantity = config._initial_usdt_qty_long
         else:  # side == "short":
-            quantity = config.INITIAL_USDT_QTY_SHORT
+            quantity = config._initial_usdt_qty_short
 
         if amount > (quantity + quantity / 2):
             # if the initial margin is more than first opened position amount
@@ -120,7 +120,7 @@ class BotHelperAsync:
     ########
     # SPOT #
     ########
-    async def spot_balance(self, is_limit=True):
+    async def spot_balance(self, is_limit=True) -> (float, float):
         """Calculate USDT balance in spot."""
         own_usd = 0.0
         sum_usdt = 0.0
@@ -150,7 +150,7 @@ class BotHelperAsync:
             own_usd = sum_btc * float(await self.spot_fetch_ticker("BTC/USDT"))
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
-        if helper.is_start or config.status["futures"]["pos_count"] > 0 or config.status["spot"]["pos_count"] > 0:
+        if helper.is_start or config.total_position_count() > 0:
             if not helper.is_start:
                 log()  # TODO: line splitter using rich
 
@@ -169,7 +169,7 @@ class BotHelperAsync:
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["spot"]["pos_count"] = count
 
-        return own_usd, float(sum_usdt)
+        return own_usd, sum_usdt
 
     async def spot_order(self, quantity, symbol, side):
         try:

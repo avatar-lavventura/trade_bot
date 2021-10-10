@@ -11,7 +11,7 @@ bot_async = BotHelperAsync()
 
 async def main():
     try:
-        await bot_async.transfer_out(1000)
+        await bot_async.transfer_out(15.56)
     except Exception as e:
         print_tb(e)
     finally:

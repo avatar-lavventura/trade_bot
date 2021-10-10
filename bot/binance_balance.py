@@ -39,7 +39,7 @@ def futures_bal(info, asset) -> float:
     return float(bot_async.futures_balance[info][asset])
 
 
-async def create_market_order(symbol: str, amount, side):
+async def create_market_order(symbol: str, amount, side) -> None:
     """Create market order for futures."""
     if side == "BUY":
         order = await helper.exchange.future.create_market_buy_order(symbol, amount)
@@ -98,17 +98,17 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
             await create_limit_order(symbol, position_amt, limit_price, side)
 
 
-async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multiply=None, percent=None):
+async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=None, percent=None):
     # Add more money only if the position is less than given amount(ex: 50$)
     # TODO: if unrealized > 5% close the position, improve
     if not percent:
         percent = config.locked_percent_limit_USDTPERP
 
-    if not multiply:
-        multiply = config.USDTPERP_MULTIPLY_RATIO
+    if not mul:
+        mul = config.USDTPERP_MULTIPLY_RATIO
 
-    new_amount = abs(position_amt) * multiply
-    new_amount_margin = isolated_wallet * multiply
+    new_amount = abs(position_amt) * mul
+    new_amount_margin = isolated_wallet * mul
     per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_bal
     _per = format(per, ".2f")
     if float(_per) <= percent:
@@ -121,12 +121,12 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, multi
             log(f"Warning: Total locked amount is {_per}% ", end="")
 
 
-async def process_future_positions(future_positions, usdt_bal, unix_timestamp_ms):
+async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
     print_flag = False
     usdt_bal += config.trbinance_usdt
     count = 0
     total_lost = 0
-    for position in future_positions:
+    for position in positions:
         #: Indicates total locked amount without applying any gain or loss
         isolated_wallet = abs(float(position["info"]["isolatedWallet"]))
         #: Indicates amount of collateral that is locked up
@@ -234,7 +234,10 @@ async def main():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            print_tb(e)
+            if "Timestamp for this request is outside of the recvWindow" in str(e):
+                log(f"E: {e}")
+            else:
+                print_tb(e)
 
 
 if __name__ == "__main__":
