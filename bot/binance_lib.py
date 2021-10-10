@@ -52,8 +52,7 @@ def get_color(color):
         return "red"
 
 
-def futures_history(binance, _symbol=None):
-    client = binance.client
+def futures_history(client, _symbol=None):
     name_temp = "hello_world"
     _COMMISSON = 0
     commission_flag = False

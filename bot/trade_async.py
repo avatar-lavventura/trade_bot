@@ -19,13 +19,16 @@ from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, pr
 class Strategy:
     def __init__(self, data_msg=""):
         self.symbol: str = ""
-        self.size: int = 0
         self.market: str = ""
         self.time_duration: str = ""
         self.unix_timestamp_ms: int = 0
+        self.size: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
-            log(f"{data_msg},", "bold magenta", end="")
+            if data_msg.endswith(","):
+                log(f"{data_msg}", "bold magenta", end="")
+            else:
+                log(f"{data_msg},", "bold magenta", end="")
 
         with suppress(Exception):
             self.parse_data_msg(data_msg)
@@ -38,7 +41,6 @@ class Strategy:
                     raise QuietExit(f"E: side should be `BUY` for the {self.market} market")
 
     def parse_data_msg(self, data_msg):
-        self.size: int = 0
         self.chunks = data_msg.split(",")
         self.side_original = self.side = self.chunks[1].upper()
         self.symbol = self.chunks[0]
@@ -274,7 +276,7 @@ class BotHelper:
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
-        _amount = None
+        amount = None
         entry_price = None
         for idx in range(10):
             try:
@@ -282,7 +284,7 @@ class BotHelper:
                     log(f"Fetch future positions [attempt={idx + 1}]", "cyan")
 
                 future_positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
-                entry_price, _amount, isolated_wallet = self.get_future_position(future_positions)
+                entry_price, amount, isolated_wallet = self.get_future_position(future_positions)
                 break
             except Exception as e:
                 print_tb(e, is_print_exc=False)
@@ -292,7 +294,7 @@ class BotHelper:
             log("==> Opening a limit order: ", end="")
             log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
-            await self._limit(_amount, entry_price, isolated_wallet, decimal)
+            await self._limit(amount, entry_price, isolated_wallet, decimal)
         except Exception as e:
             print_tb(e)
 
@@ -304,7 +306,7 @@ class BotHelper:
 
         try:
             if self.strategy.size == 0:
-                raise Exception("E: Quantity less than zero.")
+                raise Exception("E: Quantity is zero")
 
             await self._order(quantity=self.strategy.size)
         except Exception as e:

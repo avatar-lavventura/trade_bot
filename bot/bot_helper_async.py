@@ -122,6 +122,7 @@ class BotHelperAsync:
     ########
     async def spot_balance(self, is_limit=True):
         """Calculate USDT balance in spot."""
+        own_usd = 0.0
         sum_usdt = 0.0
         sum_btc = 0.0
         count = 0
@@ -145,9 +146,8 @@ class BotHelperAsync:
                     elif asset == "USDT":
                         sum_usdt += quantity
 
-        current_btc_price_USD = await self.spot_fetch_ticker("BTC/USDT")
-        own_usd = sum_btc * float(current_btc_price_USD)
-        if sum_btc > 0.0:
+        if sum_btc > 0.00002:
+            own_usd = sum_btc * float(await self.spot_fetch_ticker("BTC/USDT"))
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
         if helper.is_start or config.status["futures"]["pos_count"] > 0 or config.status["spot"]["pos_count"] > 0:
