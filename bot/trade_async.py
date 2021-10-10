@@ -19,13 +19,16 @@ from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, pr
 class Strategy:
     def __init__(self, data_msg=""):
         self.symbol: str = ""
-        self.size: int = 0
         self.market: str = ""
         self.time_duration: str = ""
         self.unix_timestamp_ms: int = 0
+        self.size: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
-            log(f"{data_msg},", "bold magenta", end="")
+            if data_msg.endswith(","):
+                log(f"{data_msg}", "bold magenta", end="")
+            else:
+                log(f"{data_msg},", "bold magenta", end="")
 
         with suppress(Exception):
             self.parse_data_msg(data_msg)
@@ -38,7 +41,6 @@ class Strategy:
                     raise QuietExit(f"E: side should be `BUY` for the {self.market} market")
 
     def parse_data_msg(self, data_msg):
-        self.size: int = 0
         self.chunks = data_msg.split(",")
         self.side_original = self.side = self.chunks[1].upper()
         self.symbol = self.chunks[0]
@@ -112,9 +114,9 @@ class BotHelper:
         if len(open_orders) > 0:
             for order in open_orders:
                 if (
-                    order["status"] == "open"
-                    and order["type"] == "limit"
-                    and order["side"] == self.opposite_side().lower()
+                    order["status"] == "open" and
+                    order["type"] == "limit" and
+                    order["side"] == self.opposite_side().lower()
                 ):
                     log(f"==> Attempt to cancel order: {order}")
                     await helper.exchange.future.cancel_order(order["id"], self.strategy.symbol)
@@ -137,9 +139,9 @@ class BotHelper:
 
     async def is_usdt_open(self, symbol) -> bool:
         # TODO: read from result of binance_balance.py
-        future_positions = await helper.exchange.future.fetch_positions()
+        positions = await helper.exchange.future.fetch_positions()
         self.get_exchange_future_timestamp()
-        for position in future_positions:
+        for position in positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
                 if symbol and symbol.replace("/", "") == position["symbol"].replace("/", ""):
@@ -150,13 +152,13 @@ class BotHelper:
         """Return number of open positions."""
         count = 0
         try:
-            future_positions = await helper.exchange.future.fetch_positions()
+            positions = await helper.exchange.future.fetch_positions()
         except Exception as e:
             print_tb(e)
             await _sleep(60)
             raise e
 
-        for position in future_positions:
+        for position in positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
                 count += 1
@@ -257,8 +259,8 @@ class BotHelper:
             else:
                 raise e
 
-    def get_future_position(self, future_positions):
-        for position in future_positions:
+    def get_future_position(self, positions):
+        for position in positions:
             if abs(float(position["info"]["isolatedWallet"])) > 0.0:
                 return (
                     float(position["entryPrice"]),
@@ -274,15 +276,15 @@ class BotHelper:
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
-        _amount = None
+        amount = None
         entry_price = None
         for idx in range(10):
             try:
                 if idx > 0:
                     log(f"Fetch future positions [attempt={idx + 1}]", "cyan")
 
-                future_positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
-                entry_price, _amount, isolated_wallet = self.get_future_position(future_positions)
+                positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
+                entry_price, amount, isolated_wallet = self.get_future_position(positions)
                 break
             except Exception as e:
                 print_tb(e, is_print_exc=False)
@@ -292,7 +294,7 @@ class BotHelper:
             log("==> Opening a limit order: ", end="")
             log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
-            await self._limit(_amount, entry_price, isolated_wallet, decimal)
+            await self._limit(amount, entry_price, isolated_wallet, decimal)
         except Exception as e:
             print_tb(e)
 
@@ -304,7 +306,7 @@ class BotHelper:
 
         try:
             if self.strategy.size == 0:
-                raise Exception("E: Quantity less than zero.")
+                raise Exception("E: Position size is zero")
 
             await self._order(quantity=self.strategy.size)
         except Exception as e:
@@ -368,7 +370,7 @@ class BotHelper:
         output = await self.symbol_price(self.strategy.symbol, "future")
         current_price = output["last"]
         if current_price == 0:
-            raise Exception(f"current_price={current_price} is zero")
+            raise Exception(f"current_price is zero")
 
         if current_price < config.ignore_below_usdt:
             raise Exception(
@@ -410,7 +412,6 @@ class BotHelper:
                 #    self.mongoDB.add_item(self.strategy.asset, order["transactTime"])
                 #    log(f"==> {order['transactTime']} added into mongoDB for {self.strategy.asset} in BTC")
                 self.spot_order_limit()
-                ###
             except Exception as e:
                 print_tb(e)
                 raise e
