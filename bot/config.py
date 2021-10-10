@@ -15,6 +15,9 @@ class Config:
     def get_spot_timestamp(self, asset):
         return self.timestamp["spot_timestamp"][asset]
 
+    def total_position_count(self) -> int:
+        return self.status["futures"]["pos_count"] + self.status["spot"]["pos_count"]
+
     def initialize(self) -> None:
         self.cfg = Yaml("config.yaml")
         self.timestamp = Yaml("timestamp.yaml")
