@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+
 from filelock import FileLock
+
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
@@ -16,7 +18,7 @@ class TakeProfit:
     def __init__(self):
         self.TAKE_PROFIT_LONG = []
         self.TAKE_PROFIT_SHORT = []
-        self.take_profit_percent: float = config.TP
+        self.take_profit_percent: float = config.take_profit
         # index:0 => 0.5% Profit
         self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent)
         self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent)
@@ -120,7 +122,7 @@ class BotHelperAsync:
     ########
     # SPOT #
     ########
-    async def spot_balance(self, is_limit=True) -> (float, float):
+    async def spot_balance(self, is_limit=True) -> [float, float]:
         """Calculate USDT balance in spot."""
         own_usd = 0.0
         sum_usdt = 0.0

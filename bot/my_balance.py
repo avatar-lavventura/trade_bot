@@ -3,7 +3,9 @@
 import asyncio
 import math
 from contextlib import suppress
+
 import yfinance as yf
+
 from bot import helper
 from bot.bot_helper_async import BotHelperAsync
 from bot.config import config

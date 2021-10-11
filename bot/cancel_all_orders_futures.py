@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from bot import helper
-from ebloc_broker.broker._utils.tools import print_tb
-from ebloc_broker.broker._utils._log import log
 import asyncio
+
+from bot import helper
 from bot.bot_helper_async import BotHelperAsync
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import print_tb
 
 bot_async = BotHelperAsync()
 
@@ -17,7 +18,7 @@ async def main():
             print(position)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(main())
