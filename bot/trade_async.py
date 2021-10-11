@@ -21,8 +21,8 @@ class Strategy:
         self.symbol: str = ""
         self.market: str = ""
         self.time_duration: str = ""
-        self.unix_timestamp_ms: int = 0
         self.size: int = 0
+        self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
             if data_msg.endswith(","):
@@ -38,7 +38,7 @@ class Strategy:
                 if self.time_duration == "1s":
                     self.side = "BUY"  # BUY for 1s
                 else:
-                    raise QuietExit(f"E: side should be `BUY` for the {self.market} market")
+                    raise QuietExit(f"E: side should be \"BUY\" for the {self.market} market")
 
     def parse_data_msg(self, data_msg):
         self.chunks = data_msg.split(",")
@@ -103,7 +103,7 @@ class BotHelper:
             raise e
 
     def opposite_side(self) -> str:
-        if self.strategy.side == "BUY":
+        if self.strategy.is_buy():
             return "SELL"
         else:
             return "BUY"
@@ -192,7 +192,8 @@ class BotHelper:
         for balance in balances["balances"]:
             if balance["asset"] == asset:
                 return float(balance["free"]) + float(balance["locked"])
-        return 0.0
+
+        return 0
 
     def get_spot_entry(self):
         asset_balance = self.asset_balance()
@@ -230,9 +231,10 @@ class BotHelper:
         try:
             log("==> attempting limit order for spot")
             limit_price, *_ = self.get_spot_entry()
-            orders = self.client.get_open_orders(symbol=self.strategy.symbol.replace("/", ""))
+            _symbol = self.strategy.symbol.replace("/", "")
+            orders = self.client.get_open_orders(symbol=_symbol)
             for order in orders:
-                self.client.cancel_order(symbol=self.strategy.symbol.replace("/", ""), orderId=order["orderId"])
+                self.client.cancel_order(symbol=_symbol, orderId=order["orderId"])
 
             order = self.client.order_limit_sell(
                 symbol=self.strategy.symbol.replace("/", ""), price=str(limit_price), quantity=self.asset_balance()
@@ -370,7 +372,7 @@ class BotHelper:
         output = await self.symbol_price(self.strategy.symbol, "future")
         current_price = output["last"]
         if current_price == 0:
-            raise Exception(f"current_price is zero")
+            raise Exception("E: current_price is zero")
 
         if current_price < config.ignore_below_usdt:
             raise Exception(
@@ -380,14 +382,14 @@ class BotHelper:
 
         if self.strategy.is_buy():
             if self.strategy.time_duration == "1m":
-                initial_amount = config.INITIAL_USDT_QTY_LONG_1m / current_price
+                initial_amount = config.initial_usdt_qty_long["1m"] / current_price
             else:
-                initial_amount = config.INITIAL_USDT_QTY_LONG / current_price
+                initial_amount = config._initial_usdt_qty_long / current_price
         else:  # short
             if self.strategy.time_duration == "1m":
-                initial_amount = config.INITIAL_USDT_QTY_SHORT_1m / current_price
+                initial_amount = config.initial_usdt_qty_short["1m"] / current_price
             else:
-                initial_amount = config.INITIAL_USDT_QTY_SHORT / current_price
+                initial_amount = config._initial_usdt_qty_short / current_price
 
         self.strategy.size = float(self.get_initial_amount(initial_amount, "USDT"))
         self.size_check(current_price)
@@ -458,7 +460,7 @@ class BotHelper:
                 end="",
             )
             if self.strategy.size != 0:
-                log(f"| size={self.strategy.size}")
+                log(f"| size={self.strategy.size}", "bold")
             else:
                 log("")
 
@@ -516,7 +518,7 @@ class BotHelper:
         else:
             log("PASS", "bold")  # already open position
 
-    async def trade(self):
+    async def trade(self) -> None:
         try:
             await self.trade_async()
         except Exception as e:
@@ -558,15 +560,15 @@ class BotHelper:
 
         free_usdt = config.status["futures"]["free"]
         if self.strategy.side == "BUY":
-            if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_LONG_1m:
+            if self.strategy.time_duration == "1m" and free_usdt < config.initial_usdt_qty_long[self.strategy.time_duration]:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
-            if self.strategy.time_duration == "9m" and free_usdt < config.INITIAL_USDT_QTY_LONG:
+            if self.strategy.time_duration == "9m" and free_usdt < config._initial_usdt_qty_long:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
         if self.strategy.side == "SELL":
-            if self.strategy.time_duration == "1m" and free_usdt < config.INITIAL_USDT_QTY_SHORT_1m:
+            if self.strategy.time_duration == "1m" and free_usdt < config.initial_usdt_qty_short[self.strategy.time_duration]:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
 
-            if self.strategy.time_duration == "9m" and free_usdt < config.INITIAL_USDT_QTY_SHORT:
+            if self.strategy.time_duration == "9m" and free_usdt < config._initial_usdt_qty_short:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")

@@ -29,9 +29,9 @@ class TakeProfit:
         amount = abs(float(amount))
         index = 0
         if side == "long":
-            quantity = config.INITIAL_USDT_QTY_LONG
+            quantity = config._initial_usdt_qty_long
         else:  # side == "short":
-            quantity = config.INITIAL_USDT_QTY_SHORT
+            quantity = config._initial_usdt_qty_short
 
         if amount > (quantity + quantity / 2):
             # if the initial margin is more than first opened position amount
