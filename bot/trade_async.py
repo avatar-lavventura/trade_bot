@@ -2,11 +2,13 @@
 
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
+
 import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from filelock import FileLock
 from pymongo import MongoClient
+
 from bot import helper
 from bot.binance_balance import create_limit_order, create_market_order
 from bot.client_helper import DiscordClient
@@ -38,7 +40,7 @@ class Strategy:
                 if self.time_duration == "1s":
                     self.side = "BUY"  # BUY for 1s
                 else:
-                    raise QuietExit(f"E: side should be \"BUY\" for the {self.market} market")
+                    raise QuietExit(f'E: side should be "BUY" for the {self.market} market')
 
     def parse_data_msg(self, data_msg):
         self.chunks = data_msg.split(",")
@@ -114,9 +116,9 @@ class BotHelper:
         if len(open_orders) > 0:
             for order in open_orders:
                 if (
-                    order["status"] == "open" and
-                    order["type"] == "limit" and
-                    order["side"] == self.opposite_side().lower()
+                    order["status"] == "open"
+                    and order["type"] == "limit"
+                    and order["side"] == self.opposite_side().lower()
                 ):
                     log(f"==> Attempt to cancel order: {order}")
                     await helper.exchange.future.cancel_order(order["id"], self.strategy.symbol)
@@ -377,7 +379,8 @@ class BotHelper:
         if current_price < config.ignore_below_usdt:
             raise Exception(
                 f"Price of {self.strategy.symbol} is below {config.ignore_below_usdt}$."
-                f"current_price={current_price}.PASS", "bold"
+                f"current_price={current_price}.PASS",
+                "bold",
             )
 
         if self.strategy.is_buy():
@@ -559,16 +562,17 @@ class BotHelper:
                 raise QuietExit(f"locked_percent={int(futures_locked_percent)}% PASS")
 
         free_usdt = config.status["futures"]["free"]
+        duration = self.strategy.time_duration
         if self.strategy.side == "BUY":
-            if self.strategy.time_duration == "1m" and free_usdt < config.initial_usdt_qty_long["1m"]:
+            if duration == "1m" and free_usdt < config.initial_usdt_qty_long[duration]:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
-            if self.strategy.time_duration == "9m" and free_usdt < config._initial_usdt_qty_long:
+            if duration == "9m" and free_usdt < config._initial_usdt_qty_long:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
 
         if self.strategy.side == "SELL":
-            if self.strategy.time_duration == "1m" and free_usdt < config.initial_usdt_qty_short["1m"]:
+            if duration == "1m" and free_usdt < config.initial_usdt_qty_short[duration]:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
 
-            if self.strategy.time_duration == "9m" and free_usdt < config._initial_usdt_qty_short:
+            if duration == "9m" and free_usdt < config._initial_usdt_qty_short:
                 raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")

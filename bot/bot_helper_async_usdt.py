@@ -80,7 +80,7 @@ class BotHelperUsdtAsync(BotHelperAsync):
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
-        if asset_percent_change <= config.usdt_percent_change_to_add:  #  and float(_per) < 50.0
+        if asset_percent_change <= config.usdt_percent_change_to_add:  # and float(_per) < 50.0
             new_order_size = asset_balance * config.usdt_multiply_ratio
             log(f"new_order_size={new_order_size} | ", "bold blue", end="")
             per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_usdt

@@ -48,6 +48,7 @@ import binance_lib
 import requests
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
+
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils.tools import log, run

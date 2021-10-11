@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from ebloc_broker.broker._utils.yaml import Yaml
 from typing import Dict
+
+from ebloc_broker.broker._utils.yaml import Yaml
 
 
 class Config:

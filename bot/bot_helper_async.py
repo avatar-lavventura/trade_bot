@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+
 from filelock import FileLock
+
 from bot import helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
