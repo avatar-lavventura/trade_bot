@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 from ebloc_broker.broker._utils.yaml import Yaml
+from typing import Dict
 
 
 class Config:
     def __init__(self) -> None:
+        self.initial_usdt_qty_short = {}  # type: Dict[str, int]
+        self.initial_usdt_qty_long = {}  # type: Dict[str, int]
         self.new_day = "03:00:00"
         self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.initialize()
@@ -43,10 +46,13 @@ class Config:
         self.USDTPERP_MAX_POSITION = self.cfg["setup"]["usdtperp"]["max_pos"]
         self.ignore_below_usdt = self.cfg["setup"]["ignore_below_usdt"]
         self.isolated_wallet_limit = self.cfg["setup"]["isolated_wallet_limit"]
-        self.INITIAL_USDT_QTY_SHORT_1m = self.cfg["setup"]["usdtperp"]["pos"]["short"]["1m"]
-        self.INITIAL_USDT_QTY_LONG_1m = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]
-        self.INITIAL_USDT_QTY_SHORT = self.cfg["setup"]["usdtperp"]["pos"]["short"]["base"]
-        self.INITIAL_USDT_QTY_LONG = self.cfg["setup"]["usdtperp"]["pos"]["long"]["base"]
+
+        self._initial_usdt_qty_short = self.cfg["setup"]["usdtperp"]["pos"]["short"]["base"]
+        self.initial_usdt_qty_short["1m"] = self.cfg["setup"]["usdtperp"]["pos"]["short"]["1m"]
+        #
+        self._initial_usdt_qty_long = self.cfg["setup"]["usdtperp"]["pos"]["long"]["base"]
+        self.initial_usdt_qty_long["1m"] = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]
+
         # usdt
         self.usdt_percent_change_to_add = -abs(self.cfg["setup"]["usdt"]["percent_change_to_add"]) + 0.01
         self.usdt_multiply_ratio = self.cfg["setup"]["usdt"]["multiply_ratio"]

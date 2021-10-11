@@ -39,7 +39,7 @@ def futures_bal(info, asset) -> float:
     return float(bot_async.futures_balance[info][asset])
 
 
-async def create_market_order(symbol: str, amount, side):
+async def create_market_order(symbol: str, amount, side) -> None:
     """Create market order for futures."""
     if side == "BUY":
         order = await helper.exchange.future.create_market_buy_order(symbol, amount)
@@ -234,7 +234,10 @@ async def main():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            print_tb(e)
+            if "Timestamp for this request is outside of the recvWindow" in str(e):
+                log(f"E: {e}")
+            else:
+                print_tb(e)
 
 
 if __name__ == "__main__":
