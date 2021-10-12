@@ -25,18 +25,18 @@ $ systemctl enable ufw
 $ sudo ufw status
 Status: active
 
-To                         Action      From
---                         ------      ----
-8080                       ALLOW       Anywhere
-80                         ALLOW       Anywhere
-443                        ALLOW       Anywhere
-81                         ALLOW       Anywhere
-5000                       ALLOW       Anywhere
-8080 (v6)                  ALLOW       Anywhere (v6)
-80 (v6)                    ALLOW       Anywhere (v6)
-443 (v6)                   ALLOW       Anywhere (v6)
-81 (v6)                    ALLOW       Anywhere (v6)
-5000 (v6)                  ALLOW       Anywhere (v6)
+To                   Action      From
+--                   ------      ----
+8080                 ALLOW       Anywhere
+80                   ALLOW       Anywhere
+443                  ALLOW       Anywhere
+81                   ALLOW       Anywhere
+5000                 ALLOW       Anywhere
+8080 (v6)            ALLOW       Anywhere (v6)
+80 (v6)              ALLOW       Anywhere (v6)
+443 (v6)             ALLOW       Anywhere (v6)
+81 (v6)              ALLOW       Anywhere (v6)
+5000 (v6)            ALLOW       Anywhere (v6)
 #+end_src
 
 ** Nginx Full Setup Instructions

@@ -58,7 +58,7 @@ class BotHelperUsdtAsync(BotHelperAsync):
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
         limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
-        log(f"==> {asset} q={asset_balance} | ", end="")
+        log(f"==> {asset} q={format(asset_balance, '.4f')} | ", end="")
         log(f"e={entry_price} | ", "bold", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"l={limit_price} ", "bold", end="")
@@ -75,7 +75,7 @@ class BotHelperUsdtAsync(BotHelperAsync):
         asset_percent_change = percent_change(
             initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
         )
-        log(f"| {format(_sum, '.2f')}", "magenta", end="")
+        log(f"[white]|[/white] {format(_sum, '.2f')}", "bold magenta", end="")
         log(f"({_per}%) ", "bold magenta")
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
