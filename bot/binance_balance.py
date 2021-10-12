@@ -24,15 +24,20 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         if locked > config.status["log"]["futures"]["max_locked"]:
             config.status["log"]["futures"]["max_locked"] = locked
 
-        locked_percent = (100.0 * locked) / usdt_bal
+        locked_per = (100.0 * locked) / usdt_bal
         config.status["futures"]["total"] = usdt_bal
         config.status["futures"]["locked"] = locked
-        config.status["futures"]["locked_per"] = locked_percent
+        config.status["futures"]["locked_per"] = locked_per
 
-    log(
-        f" * balance={format(usdt_bal, '.2f')} | locked={format(locked, '.2f')}({format(locked_percent, '.2f')}%)",
-        end="",
-    )
+    log(f" * balance={format(usdt_bal, '.2f')}", end="")
+    if float(locked) == 0.0:
+        log("_______________", "bold blue", end="")
+    else:
+        log(
+            f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold",
+            end="",
+        )
+
     log("_______________", "blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
@@ -104,7 +109,7 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
     # Add more money only if the position is less than given amount(ex: 50$)
     # TODO: if unrealized > 5% close the position, improve
     if not percent:
-        percent = config.locked_percent_limit_USDTPERP
+        percent = config.locked_per_limit_usdtperp
 
     if not mul:
         mul = config.USDTPERP_MULTIPLY_RATIO
@@ -112,15 +117,15 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
     new_amount = abs(position_amt) * mul
     new_amount_margin = isolated_wallet * mul
     per = (100.0 * (isolated_wallet + new_amount_margin)) / usdt_bal
-    _per = format(per, ".2f")
-    if float(_per) <= percent:
+    _per = float(format(per, ".2f"))
+    if _per <= percent:
         if config.status["futures"]["free"] > new_amount:
             await create_market_order(symbol, new_amount, side)
         else:
             raise QuietExit("Warning: Not enough free USDT")
     else:
-        if float(_per) < 100:
-            log(f"Warning: Total locked amount is {_per}% ", end="")
+        if _per < 100:
+            log(f"Warning: Total locked amount is {_per}%", end="")
 
 
 async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
@@ -157,7 +162,12 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
                 limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
 
             asset = "{0: <5}".format(symbol.replace("/USDT", ""))
+
             log(f"{asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", "bold", end="")
+            if float(entry_price) < 0 or float(limit_price) < 0:
+                update_spot_timestamp(unix_timestamp_ms)
+                return
+
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
             total_lost -= unrealized_profit
@@ -175,7 +185,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
                 and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
             ):
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
-            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -5.0 and _per < 30.0:
+            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -5.0 and float(_per) < 30.0:
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, 50.0)
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
@@ -193,6 +203,11 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
     return print_flag
 
 
+def update_spot_timestamp(unix_timestamp_ms: int):
+    if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
+        config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
+
+
 async def process_main():
     """Process binance check operations.
 
@@ -203,6 +218,9 @@ async def process_main():
         *_, usdt_bal = await bot_async.spot_balance()
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
+        if config.status["spot"]["pos_count"] == 0:
+            update_spot_timestamp(unix_timestamp_ms)
+
         if usdt_bal > 0.0 and not helper.is_start:
             log("")
 
