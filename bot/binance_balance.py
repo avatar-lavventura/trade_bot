@@ -31,14 +31,13 @@ def future_stats(usdt_bal, unix_timestamp_ms):
 
     log(f" * balance={format(usdt_bal, '.2f')}", end="")
     if float(locked) == 0.0:
-        log("_______________", "bold blue", end="")
+        log("______________________", "bold blue", end="")
     else:
         log(
-            f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold",
-            end="",
+            f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold", end="",
         )
 
-    log("_______________", "blue", end="")
+    log("_______________", "bold blue", end="")
     log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
 
 
@@ -90,7 +89,7 @@ async def cancel_check_orders(symbol, limit_price, side, entry_price, position_a
             cancel_count[order["symbol"]] = True
             order_p = float(order["info"]["price"])
             delta_change = 100.0 * abs(limit_price - order_p) / order_p
-            log("")
+            log()
             if delta_change > 0.05:
                 order_p = float(order["info"]["price"])
                 is_cancel_buy_side = side == "BUY" and (limit_price < order_p or order_p < entry_price)
@@ -185,8 +184,9 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
                 and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
             ):
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
-            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -5.0 and float(_per) < 30.0:
-                await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, 50.0)
+            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -7.0 and float(_per) < 30.0:
+                # when isolated_wallet is greater than isolated_wallet_limit(~100$)
+                await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, percent=50.0)
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
@@ -208,11 +208,12 @@ def update_spot_timestamp(unix_timestamp_ms: int):
         config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
 
 
-async def process_main():
+async def process_main(channel):
     """Process binance check operations.
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
+    # await channel.send("alper")
     config.reload()
     try:
         *_, usdt_bal = await bot_async.spot_balance()

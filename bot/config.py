@@ -43,18 +43,16 @@ class Config:
         #
         self._initial_usdt_qty_long = self.cfg["setup"]["usdtperp"]["pos"]["long"]["base"]
         self.initial_usdt_qty_long["1m"] = self.cfg["setup"]["usdtperp"]["pos"]["long"]["1m"]
-
         # usdt
         self.usdt_percent_change_to_add = -abs(self.cfg["setup"]["usdt"]["percent_change_to_add"]) + 0.01
         self.usdt_multiply_ratio = self.cfg["setup"]["usdt"]["multiply_ratio"]
-
         # spot
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["spot"]["percent_change_to_add"]) + 0.01
         self.SPOT_locked_percent_limit = self.cfg["setup"]["spot"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["setup"]["spot"]["multiply_ratio"]
         self.SPOT_MAX_POSITION_1m = self.cfg["setup"]["spot"]["max_pos_1m"]
         self.SPOT_MAX_POSITION = self.cfg["setup"]["spot"]["max_pos"]
-        self.SPOT_IGNORE_LIST = self.cfg["setup"]["ignore"]["spot"]
+        self.SPOT_IGNORE_LIST = self.cfg["setup"]["usdt"]["ignore"]
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["base"]
         self.INITIAL_BTC_QTY = self.cfg["setup"]["spot"]["INITIAL_BTC_QTY"]
 

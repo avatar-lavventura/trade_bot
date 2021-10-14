@@ -2,13 +2,10 @@
 
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
-
-import ccxt
 from _mongodb import Mongo
 from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from filelock import FileLock
 from pymongo import MongoClient
-
 from bot import helper
 from bot.binance_balance import create_limit_order, create_market_order
 from bot.client_helper import DiscordClient
@@ -28,7 +25,7 @@ class Strategy:
         if "enter" in data_msg:
             log(f" * {_time()} ", end="")
             if data_msg.endswith(","):
-                log(f"{data_msg}", "bold magenta", end="")
+                log(data_msg, "bold magenta", end="")
             else:
                 log(f"{data_msg},", "bold magenta", end="")
 
@@ -89,19 +86,7 @@ class BotHelper:
                 return await helper.exchange.future.fetch_ticker(symbol)
             else:
                 return await helper.exchange.spot.fetch_ticker(symbol)
-        except ccxt.RequestTimeout as e:
-            log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            await _sleep(0.25)
-            return await self.symbol_price(symbol, _type)
-        except ccxt.DDoSProtection as e:
-            log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            await _sleep(0.25)
-            return await self.symbol_price(symbol, _type)
-        except ccxt.ExchangeNotAvailable as e:
-            log(f"[{type(e).__name__}] {str(e)[0:200]}", "red")
-            await _sleep(0.25)
-            return await self.symbol_price(symbol, _type)
-        except ccxt.ExchangeError as e:
+        except Exception as e:
             raise e
 
     def opposite_side(self) -> str:
@@ -135,7 +120,7 @@ class BotHelper:
 
         return btc_open_position_count
 
-    def get_exchange_future_timestamp(self):
+    def get_exchange_future_timestamp(self) -> None:
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
         self.current_bar_index_local = int(int((self.unix_timestamp_ms - 1) / 900))
 
@@ -165,7 +150,7 @@ class BotHelper:
             if initial_margin > 0.0:
                 count += 1
                 if is_print:
-                    log(position, "blue")
+                    log(position, "bold blue")
 
         return count
 
@@ -200,9 +185,9 @@ class BotHelper:
     def get_spot_entry(self):
         asset_balance = self.asset_balance()
         contracts = 0.0
-        _sum = 0.0
         quantity = 0.0
         decimal = 0
+        _sum = 0.0
         log("trade_price=", "bold", end="")
         _symbol = self.strategy.symbol.replace("/", "")
         for trade in enumerate(reversed(self.client.get_my_trades(symbol=_symbol))):
@@ -274,7 +259,7 @@ class BotHelper:
 
         raise Exception("E: Order related to the symbol couldn't be found.")
 
-    async def futures_limit_order(self):
+    async def futures_limit_order(self) -> None:
         try:
             await self._futures_cancel_order()
         except Exception as e:
@@ -465,7 +450,7 @@ class BotHelper:
             if self.strategy.size != 0:
                 log(f"| size={self.strategy.size}", "bold")
             else:
-                log("")
+                log()
 
             if self.strategy.is_buy():
                 await self.buy()
@@ -531,8 +516,7 @@ class BotHelper:
 
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:
-            log(f" * {_time()} ", end="")
-            log(data_msg, "bold magenta")
+            log(f" * {_time()} [bold magenta]{data_msg}")
             await self.discord_client.send_msg(data_msg)
             return
 
@@ -557,7 +541,7 @@ class BotHelper:
         self.check_on_going_positions()
         futures_locked_percent = config.status["futures"]["locked_per"]
         if self.strategy.time_duration != "1m":
-            if futures_locked_percent > config.cfg["setup"]["STOP_LOCKED_PER"]:
+            if futures_locked_percent > config.cfg["setup"]["stop_locked_per"]:
                 raise QuietExit(f"locked_percent={int(futures_locked_percent)}% PASS")
 
         free_usdt = config.status["futures"]["free"]
