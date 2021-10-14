@@ -31,7 +31,7 @@ class Config:
         self.trbinance_usdt = self.goal["goal"]["trbinance"]["usdt"]
         # usdtperp
         self.USDTPERP_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["setup"]["usdtperp"]["percent_change_to_add"]) + 0.01
-        self.locked_percent_limit_USDTPERP = self.cfg["setup"]["usdtperp"]["locked_percent_limit"]
+        self.locked_per_limit_usdtperp = self.cfg["setup"]["usdtperp"]["locked_percent_limit"]
         self.USDTPERP_MULTIPLY_RATIO = self.cfg["setup"]["usdtperp"]["multiply_ratio"]
         self.USDTPERP_MAX_POSITION_1m = self.cfg["setup"]["usdtperp"]["max_pos_1m"]
         self.USDTPERP_MAX_POSITION = self.cfg["setup"]["usdtperp"]["max_pos"]

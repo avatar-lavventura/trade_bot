@@ -495,26 +495,25 @@ class BotHelper:
             if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION:
                 raise QuietExit(f"Warning: {config.SPOT_MAX_POSITION} pos")
 
-    async def _trade(self, strategy):
+    async def _trade(self):
         is_open = False
-        if strategy.market == "USDTPERP":
-            is_open = await self.is_usdt_open(strategy.symbol)
-        elif strategy.market == "BTC":
+        if self.strategy.market == "USDTPERP":
+            is_open = await self.is_usdt_open(self.strategy.symbol)
+        elif self.strategy.market == "BTC":
             balances = self.client.get_account()
             for balance in balances["balances"]:
-                if balance["asset"] == strategy.asset and float(balance["locked"]) > 0.0:
+                if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0.0:
                     is_open = True
                     break
 
         if not is_open:
             try:
-                self.strategy = strategy
                 await self.trade_async()
                 with FileLock(config.status.fp_lock, timeout=1):
                     #: in case many alerts come in same minute
-                    if strategy.market == "USDTPERP":
+                    if self.strategy.market == "USDTPERP":
                         config.status["futures"]["pos_count"] += 1
-                    elif strategy.market == "USDT":
+                    elif self.strategy.market == "USDT":
                         config.status["spot"]["pos_count"] += 1
             except Exception as e:
                 print_tb(e)
@@ -547,7 +546,7 @@ class BotHelper:
         elif self.strategy.market == "BTC" and self.strategy.is_sell():
             log("Warning: Ignore BTC pair, no need to sell.")
 
-        await self._trade(self.strategy)
+        await self._trade()
 
     def pre_check(self) -> None:
         """Fast to read from usdt.yaml.
@@ -563,16 +562,19 @@ class BotHelper:
 
         free_usdt = config.status["futures"]["free"]
         duration = self.strategy.time_duration
+        base_durations = ["9m", "21m"]
+        quiet_exit_flag = False
         if self.strategy.side == "BUY":
             if duration == "1m" and free_usdt < config.initial_usdt_qty_long[duration]:
-                raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
-
-            if duration == "9m" and free_usdt < config._initial_usdt_qty_long:
-                raise QuietExit(f"Not enough free USDT({free_usdt}), side=BUY")
+                quiet_exit_flag = True
+            elif duration in base_durations and free_usdt < config._initial_usdt_qty_long:
+                quiet_exit_flag = True
 
         if self.strategy.side == "SELL":
             if duration == "1m" and free_usdt < config.initial_usdt_qty_short[duration]:
-                raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
+                quiet_exit_flag = True
+            elif duration in base_durations and free_usdt < config._initial_usdt_qty_short:
+                quiet_exit_flag = True
 
-            if duration == "9m" and free_usdt < config._initial_usdt_qty_short:
-                raise QuietExit(f"Not enough free USDT({free_usdt}), side=SELL")
+        if quiet_exit_flag:
+            raise QuietExit(f"Not enough free USDT({free_usdt}), side={self.strategy.side}")

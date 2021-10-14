@@ -24,7 +24,7 @@ setup:
       1s: 15
       1s_sell: 15
   usdtperp:
-    locked_percent_limit: 5
+    locked_percent_limit: 10
     max_pos: 2
     max_pos_1m: 3
     multiply_ratio: 1.5
