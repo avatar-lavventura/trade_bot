@@ -34,8 +34,7 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         log("_______________", "bold blue", end="")
     else:
         log(
-            f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold",
-            end="",
+            f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold", end="",
         )
 
     log("_______________", "blue", end="")
