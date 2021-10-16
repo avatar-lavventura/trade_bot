@@ -65,9 +65,9 @@ headers = {
     )
 }
 
-MAIN_ASSET = "BTC"  # "BNB"
+MAIN_ASSET = "BTC"
 SLEEP_DURATION = 45
-ignore_balance_list = ["EON", "ADD", "MEETONE", "ATD", "EOP"]
+ignore_balance_list = []
 start = 0
 TIME_TO_FORCE_BUY = 0.1
 PERCENT_TO_BUY = 95

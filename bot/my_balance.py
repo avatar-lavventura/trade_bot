@@ -63,7 +63,7 @@ async def fetch_balance() -> float:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
                 if print_flag:
-                    log("")
+                    log()
                 else:
                     print_flag = True
 
