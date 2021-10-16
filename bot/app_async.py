@@ -62,7 +62,7 @@ async def startup():
 
 
 @app.route("/")
-async def notify():  # noqa
+async def notify():
     return "OK"
 
 
@@ -76,7 +76,7 @@ async def webhook():
     if data_msg:
         try:
             if any(x in data_msg for x in ["enter", "alert"]):
-                await do_trade(data_msg.rstrip())
+                await do_trade(data_msg.replace(":00Z", "").rstrip())
 
             return "OK"
         except QuietExit as e:

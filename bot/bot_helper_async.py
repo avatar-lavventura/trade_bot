@@ -153,10 +153,10 @@ class BotHelperAsync:
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
         if helper.is_start or config.total_position_count() > 0:
-            if not helper.is_start:
+            if not helper.is_start and sum_usdt > 0.01:
                 log()  # TODO: line splitter using rich
 
-            if sum_usdt > 0.0:
+            if sum_usdt > 0.01:
                 log(f" * usdt={format(sum_usdt, '.2f')}")
 
         for balance in balances["info"]["balances"]:
