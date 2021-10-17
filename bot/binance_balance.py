@@ -21,8 +21,11 @@ bot_async = BotHelperUsdtAsync()
 def future_stats(usdt_bal, unix_timestamp_ms):
     with FileLock(config.status.fp_lock, timeout=1):
         locked = usdt_bal - config.status["futures"]["free"]
-        if locked > config.status["log"]["futures"]["max_locked"]:
-            config.status["log"]["futures"]["max_locked"] = locked
+        try:
+            if locked > config.status["log"]["futures"]["max_locked"]:
+                config.status["log"]["futures"]["max_locked"] = locked
+        except TypeError:
+            config.status["log"]["futures"]["max_locked"] = 0
 
         locked_per = (100.0 * locked) / usdt_bal
         config.status["futures"]["total"] = usdt_bal
@@ -197,18 +200,24 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
         if config.status["futures"]["pos_count"] != count:
             config.status["futures"]["pos_count"] = count
 
-        if count > config.status["log"]["futures"]["max_position_count"]:
-            config.status["log"]["futures"]["max_position_count"] = count
+        try:
+            if count > config.status["log"]["futures"]["max_position_count"]:
+                config.status["log"]["futures"]["max_position_count"] = count
+        except TypeError:
+            config.status["log"]["futures"]["max_position_count"] = 0
 
     return print_flag
 
 
 def update_spot_timestamp(unix_timestamp_ms: int):
-    if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
-        config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
+    try:
+        if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
+            config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
+    except TypeError:
+        config.timestamp["spot_timestamp"]["base"] = 0
 
 
-async def process_main(channel):
+async def process_main(channel=None):
     """Process binance check operations.
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445

@@ -8,8 +8,10 @@ from pathlib import Path
 import requests
 from binance.client import Client
 
+from ebloc_broker.broker._utils.yaml import Yaml
+
 client = None
-HOME = str(Path.home())
+HOME = Path.home()
 
 
 def save_obj(fname, client=None):
@@ -39,14 +41,9 @@ def check_binance_obj():
     try:
         client = load_obj(save_fname)
     except:
-        _file = f"{HOME}/.binance.txt"
-        if not os.path.exists(_file):
-            raise Exception(f"{_file} does not exist")
-
-        file1 = open(_file, "r")
-        Lines = file1.readlines()
-        api_key = str(Lines[0].strip())
-        api_secret = str(Lines[1].strip())
+        _cfg = Yaml(HOME / ".binance.yaml")
+        api_key = str(_cfg["b"]["key"])
+        api_secret = str(_cfg["b"]["secret"])
         client = Client(api_key, api_secret)
         save_obj(save_fname, client)
 
