@@ -1,4 +1,4 @@
-setup:
+root:
   ignore_below_usdt: 0.01
   isolated_wallet_limit: 100
   spot:
@@ -27,7 +27,7 @@ setup:
     max_pos: 2
     max_pos_1m: 3
     multiply_ratio: 1.5
-    percent_change_to_add: 6.0
+    percent_change_to_add: 5.0
     pos:
       long:
         1m: 13.0
