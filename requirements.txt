@@ -14,7 +14,7 @@ black==21.9b0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==1.57.52
+ccxt==1.58.43
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -29,7 +29,7 @@ decorator==5.0.9
 discord.py==1.7.3
 distlib==0.3.2
 filelock==3.0.12
-flake8==3.9.2
+flake8==4.0.1
 Flask==2.0.1
 forex-python==1.5
 gevent==21.1.2
@@ -66,6 +66,7 @@ parso==0.8.2
 pathspec==0.9.0
 pexpect==4.8.0
 pickleshare==0.7.5
+pkg_resources==0.0.0
 platformdirs==2.2.0
 pluggy==0.13.1
 pre-commit==2.14.0
@@ -73,10 +74,10 @@ priority==2.0.0
 prompt-toolkit==3.0.20
 ptyprocess==0.7.0
 pycares==4.0.0
-pycodestyle==2.7.0
+pycodestyle==2.8.0
 pycparser==2.20
 pydocstyle==6.1.1
-pyflakes==2.3.1
+pyflakes==2.4.0
 Pygments==2.10.0
 pylint==2.10.2
 pymongo==3.12.0
@@ -91,7 +92,7 @@ PyYAML==5.4.1
 Quart==0.15.1
 regex==2021.8.21
 requests==2.26.0
-rich==10.7.0
+rich==10.12.0
 rope==0.20.1
 ruamel.yaml==0.17.13
 ruamel.yaml.clib==0.2.6

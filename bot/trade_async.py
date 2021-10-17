@@ -414,9 +414,9 @@ class BotHelper:
                 if self.strategy.asset in ["BTG"]:  # consider assets minumum buy is >= 50
                     initial_amount = 100 / current_price
                 elif self.strategy.side_original == "SELL":  # could be riskly less position size is opened
-                    initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s_sell"] / current_price
+                    initial_amount = config.cfg["root"]["usdt"]["pos"]["1s_sell"] / current_price
                 else:
-                    initial_amount = config.cfg["setup"]["usdt"]["pos"]["1s"] / current_price
+                    initial_amount = config.cfg["root"]["usdt"]["pos"]["1s"] / current_price
 
                 self.strategy.size = self.get_initial_amount(initial_amount, "USDT")
                 order = self.spot_order(float(self.strategy.size))
@@ -543,7 +543,7 @@ class BotHelper:
         self.check_on_going_positions()
         futures_locked_percent = config.status["futures"]["locked_per"]
         if self.strategy.time_duration != "1m":
-            if futures_locked_percent > config.cfg["setup"]["stop_locked_per"]:
+            if futures_locked_percent > config.cfg["root"]["stop_locked_per"]:
                 raise QuietExit(f"locked_percent={int(futures_locked_percent)}% PASS")
 
         free_usdt = config.status["futures"]["free"]
