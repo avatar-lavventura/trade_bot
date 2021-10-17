@@ -14,7 +14,7 @@ logger.setLevel(logging.CRITICAL)
 
 class DiscordClient:
     def __init__(self):
-        _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+        _config = Yaml(Path.home() / ".binance.yaml")
         self.bot = discord.Client()
         self.TOKEN = _config["discord"]["TOKEN"]
         self.channel_name = _config["discord"]["CHANNEL_NAME"]

@@ -3,6 +3,7 @@
 # TODO: close short/logn position if you are in >%1 gain or
 #       https://github.com/jaggedsoft/node-binance-api/ issue olarak sor
 
+from ebloc_broker.broker._utils.yaml import Yaml
 import math
 import os
 import pickle
@@ -19,7 +20,7 @@ from bs4 import BeautifulSoup
 from dateutil.parser import parse
 from utils import log, utc_to_local
 
-HOME = str(Path.home())
+HOME = Path.home()
 SYMBOL = "GRTUSDT"
 
 """
@@ -513,18 +514,10 @@ def run():
 
 if __name__ == "__main__":
     print("To run: nohup python -u ./binance_track.py > cmd.log & \n")
-
-    _file = f"{HOME}/.binance.txt"
-    if not os.path.exists(_file):
-        with open(_file, "w"):
-            pass
-
-    # Using readlines()
-    file1 = open(_file, "r")
-
-    Lines = file1.readlines()
-    api_key = str(Lines[0].strip())
-    api_secret = str(Lines[1].strip())
+    HOME = Path.home()
+    _cfg = Yaml(HOME / ".binance.yaml")
+    api_key = str(_cfg["b"]["key"])
+    api_secret = str(_cfg["b"]["secret"])
     client = Client(api_key, api_secret)
     # try:
     #     details = client.get_max_margin_transfer(asset="BTC")

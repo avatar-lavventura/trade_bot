@@ -12,7 +12,7 @@ from ebloc_broker.broker._utils.yaml import Yaml
 
 class Exchange:
     def __init__(self):
-        helper_cfg = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+        helper_cfg = Yaml(Path.home() / ".binance.yaml")
         ops = {
             "apiKey": str(helper_cfg["b"]["key"]),
             "secret": str(helper_cfg["b"]["secret"]),

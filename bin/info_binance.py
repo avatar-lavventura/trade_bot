@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+from ebloc_broker.broker._utils.yaml import Yaml
 import math
 import os
 import pickle
@@ -298,12 +300,10 @@ def run():
 
 if __name__ == "__main__":
     print("To run: nohup python -u ./binance_track.py > cmd.log & \n")
-
-    # Using readlines()
-    file1 = open(HOME + "/.binance.txt", "r")
-    Lines = file1.readlines()
-    api_key = str(Lines[0].strip())
-    api_secret = str(Lines[1].strip())
+    HOME = Path.home()
+    _cfg = Yaml(HOME / ".binance.yaml")
+    api_key = str(_cfg["b"]["key"])
+    api_secret = str(_cfg["b"]["secret"])
     client = Client(api_key, api_secret)
 
     # get latest price from Binance API
