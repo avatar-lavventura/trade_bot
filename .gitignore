@@ -4,7 +4,6 @@
 .idea/
 data/
 .env_secret
-.binance.txt
 cmd.log
 git-auto-fetch/git-auto-fetch
 doo.sh
