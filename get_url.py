@@ -6,10 +6,11 @@ import time
 from contextlib import closing
 from operator import itemgetter
 
-from broker._utils.tools import log
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+
+from ebloc_broker.broker._utils.tools import log
 
 options = Options()
 options.add_argument("--disable-extensions")
@@ -83,7 +84,7 @@ def get_url(url, name):
                     side = "LONG"
                 elif res[1] > res[2]:
                     side = "SHORT"
-                log(f"{position} => {res} {side}", color="green")
+                log(f"{position} => {res} {side}", color="bold green")
 
                 key = f"{_position}_{side}"
                 try:
@@ -103,7 +104,7 @@ def get_url(url, name):
                     side = "SHORT"
                 elif res[1] > res[2]:
                     side = "LONG"
-                log(position + " => " + str(res) + " " + side, "red")
+                log(position + " => " + str(res) + " " + side, "bold red")
 
 
 if __name__ == "__main__":

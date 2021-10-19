@@ -20,3 +20,4 @@ https://github.com/viniciuschiele/flask-apscheduler
 ** TODO calculate leverage
 ** TODO 1 saniyelikte SELL sinyali gelirse ve USDTPERP de varsa kagit usdt-spot ta buy yerine usdtprep de sell yap
 ** TODO liq convert timestamp into normal date
+** TODO tolganin dedigini 15 dakikalik yerine 4 saatlik band olarak dene

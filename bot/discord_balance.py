@@ -9,7 +9,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot import binance_balance, helper
 from bot.binance_balance import process_main
-from ebloc_broker.broker._utils.tools import get_dt_time
 from ebloc_broker.broker._utils.yaml import Yaml
 
 logging.getLogger("apscheduler.executors.default").propagate = False
@@ -44,9 +43,6 @@ class Discord_Alpy:
         await helper.exchange.set_markets()
 
         scheduler = AsyncIOScheduler()
-        # scheduler.add_job(self.send_msg, "cron", hour="12")
-        # scheduler.add_job(self.send_msg, "cron", hour="18")
-        # For test purposes
         scheduler.add_job(self._process_main, "cron", second="*/20", timezone="Europe/Istanbul")
         scheduler.start()
 
@@ -60,17 +56,6 @@ class Discord_Alpy:
     async def _process_main(self):
         await self.pre_discord_setup()
         await process_main(self.channel)
-
-    async def send_msg(self, msg=""):
-        await self.pre_discord_setup()
-        if not self.channel:
-            print("E: channel is empty")
-        else:
-            if not msg:
-                msg = f"Tick! The time is: {get_dt_time().strftime('%Y-%m-%d %H:%M:%S')}"
-                print(msg)
-                await self.channel.send(msg)
-        # await binance_balance.process_main(channel)
 
 
 _discord = Discord_Alpy()

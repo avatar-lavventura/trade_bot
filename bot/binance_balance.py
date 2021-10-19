@@ -285,4 +285,4 @@ if __name__ == "__main__":
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
-        log("END", "bold green")
+        log("FIN")

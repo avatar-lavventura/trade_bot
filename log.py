@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -8,7 +7,8 @@ from pathlib import Path
 from binance.client import Client
 from matplotlib import pyplot
 
-from bot.tools import log
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.yaml import Yaml
 
 HOME = str(Path.home())
 
@@ -17,17 +17,10 @@ x_data, y_data, z_data = [], [], []
 figure = pyplot.figure()
 (line,) = pyplot.plot_date(x_data, y_data, "-")
 
-_file = f"{HOME}/.binance.txt"
-if not os.path.exists(_file):
-    with open(_file, "w"):
-        pass
-
-# Using readlines()
-file1 = open(_file, "r")
-
-Lines = file1.readlines()
-api_key = str(Lines[0].strip())
-api_secret = str(Lines[1].strip())
+HOME = Path.home()
+_cfg = Yaml(HOME / ".binance.yaml")
+api_key = str(_cfg["b"]["key"])
+api_secret = str(_cfg["b"]["secret"])
 client = Client(api_key, api_secret)
 
 

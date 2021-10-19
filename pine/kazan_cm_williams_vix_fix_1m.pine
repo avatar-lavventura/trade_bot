@@ -5,14 +5,12 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      calc_on_every_tick=true, pyramiding=100000,
      currency=currency.USD, commission_type=strategy.commission.percent,
      commission_value=0.1, overlay=false)
-fromMonth = 8
+fromMonth = 9
 fromDay   = 1
 thruMonth = 12
 thruDay   = 30
 fromYear  = 2021
 thruYear  = 2021
-testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
-testPeriodStop  = timestamp(thruYear, thruMonth, thruDay, 0, 0)
 start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
