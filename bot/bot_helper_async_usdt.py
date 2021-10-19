@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import decimal_count, percent_change, round_float
-
 from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import decimal_count, percent_change, round_float
 
 
 class BotHelperUsdtAsync(BotHelperAsync):
@@ -59,38 +58,39 @@ class BotHelperUsdtAsync(BotHelperAsync):
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
         limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
-        log(f"==> {asset} quantity={asset_balance} | ", end="")
-        log(f"entry_price={entry_price} | ", "bold", end="")
+        log(f"==> {asset} q={format(asset_balance, '.4f')} | ", end="")
+        log(f"e={entry_price} | ", "bold", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"limit_price={limit_price} ", "bold", end="")
+            log(f"l={limit_price} ", "bold", end="")
 
-        asset_usdt_price = await self.spot_fetch_ticker(f"{asset}USDT")
-        per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
+        asset_price = await self.spot_fetch_ticker(f"{asset}USDT")
+        per = (100.0 * asset_balance * asset_price) / sum_usdt
         _per = format(per, ".2f")
-        log(f"{_per}% ", "blue", end="")
-        profit = (asset_usdt_price - entry_price) * quantity
+        profit = (asset_price - entry_price) * quantity
         if profit > 0:
             log(format(profit, ".2f"), "bold green", end="")
         else:
             log(format(profit, ".2f"), "bold red", end="")
 
         asset_percent_change = percent_change(
-            initial=entry_price, change=asset_usdt_price - entry_price, is_arrow_print=False
+            initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
         )
+        log(f"[white]|[/white] {format(_sum, '.2f')}", "bold magenta", end="")
+        log(f"({_per}%) ", "bold magenta")
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
-        if asset_percent_change <= config.usdt_percent_change_to_add:  #  and float(_per) < 50.0
+        if asset_percent_change <= config.usdt_percent_change_to_add:  # and float(_per) < 50.0
             new_order_size = asset_balance * config.usdt_multiply_ratio
             log(f"new_order_size={new_order_size} | ", "bold blue", end="")
-            per = (100.0 * (asset_balance + new_order_size) * asset_usdt_price) / sum_usdt
+            per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_usdt
             log(f"==> {_per} of the total asset value")
-            # if float(_per) > config.SPOT_LOCKED_PERCENT_LIMIT:
+            # if float(_per) > config.SPOT_locked_percent_limit:
             #     # TODO: Calculate percent on full money on futures as well
-            #     new_per = (100.0 * asset_balance * asset_usdt_price) / sum_usdt
-            #     per_to_buy = config.SPOT_LOCKED_PERCENT_LIMIT - abs(new_per)
+            #     new_per = (100.0 * asset_balance * asset_price) / sum_usdt
+            #     per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
             #     usdt_amount_to_buy = per_to_buy * sum_usdt / 100.0
-            #     _new_order_size = usdt_amount_to_buy / asset_usdt_price
+            #     _new_order_size = usdt_amount_to_buy / asset_price
             #     new_order_size = f"{_new_order_size:.{decimal}f}"
 
             order = await self.spot_order(new_order_size, f"{asset}/USDT", "BUY")

@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 
-import os
 from pathlib import Path
 
 import ccxt
 
-HOME = str(Path.home())
+from ebloc_broker.broker._utils.yaml import Yaml
 
-_file = f"{HOME}/.binance.txt"
-if not os.path.exists(_file):
-    with open(_file, "w"):
-        pass
-
-file1 = open(_file, "r")
-Lines = file1.readlines()
-api_key = str(Lines[0].strip())
-api_secret = str(Lines[1].strip())
+HOME = Path.home()
+_cfg = Yaml(HOME / ".binance.yaml")
+api_key = str(_cfg["b"]["key"])
+api_secret = str(_cfg["b"]["secret"])
 
 
 def forces_order(exchange, symbol, since=None, limit=None, params={}):

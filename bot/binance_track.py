@@ -48,11 +48,10 @@ import binance_lib
 import requests
 from binance_lib import futures_history, positions
 from bs4 import BeautifulSoup
+
+from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils.tools import log, run
-
-from bot.python_binance import Python_Binance
-from bot.user_setup import check_binance_obj
 
 HOME = str(Path.home())
 _log.ll.LOG_FILENAME = "progress.log"
@@ -66,9 +65,9 @@ headers = {
     )
 }
 
-MAIN_ASSET = "BTC"  # "BNB"
+MAIN_ASSET = "BTC"
 SLEEP_DURATION = 45
-ignore_balance_list = ["EON", "ADD", "MEETONE", "ATD", "EOP"]
+ignore_balance_list = []
 start = 0
 TIME_TO_FORCE_BUY = 0.1
 PERCENT_TO_BUY = 95
@@ -100,10 +99,12 @@ lag_time = vars(args)["lag"]
 
 
 def transfer_futures_to_spot(amount):
+    # await helper.exchange.future.transfer_out(code="USDT", amount=50)
     client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
 
 
 def transfer_spot_to_futures(amount):
+    # await helper.exchange.future.transfer_in(code="USDT", amount=50)
     client.futures_account_transfer(asset="USDT", amount=float(amount), type="1")
 
 
@@ -230,11 +231,11 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
             time.sleep(0.25)
 
 
-def _trade(binance, usdt_balance, is_trade=True):
+def _trade(client, usdt_balance, is_trade=True):
     if not is_log:
         block_print()
 
-    com, latest_symbol_income, daily_progress, funding_dict = futures_history(binance)
+    com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
     # _trade_cont(funding_dict, daily_progress, latest_symbol_income)
 
 
@@ -538,20 +539,10 @@ def trade_cont(client, balances):
 
 
 if __name__ == "__main__":
-    binance = Python_Binance()
-    # client.futures_account_balance()[1]["withdrawAvailable"]
-    for balance in binance.balances["balances"]:
+    client, balances = check_binance_obj()
+    for balance in balances["balances"]:
         if balance["asset"] == "USDT":
             usdt_balance = balance["free"]
             break
 
-    _trade(binance, usdt_balance, is_trade)
-    # trade_cont(client, balances)
-
-# try:
-#     details = client.get_max_margin_transfer(asset="BTC")
-#     print(client.get_all_margin_orders())
-#     print(details)
-#     # print(client.futures_account_balance())
-# except:
-#     pass
+    _trade(client, usdt_balance, is_trade)

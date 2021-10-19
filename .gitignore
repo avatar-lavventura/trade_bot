@@ -29,3 +29,5 @@ InvalidOrder
 status.yaml
 progress.log
 .tracking.txt
+timestamp.yaml
+.eggs

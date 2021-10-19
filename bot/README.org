@@ -1,81 +1,100 @@
 * Guide
-ip: https://alpyr-bot.duckdns.org/webhook
 
-- https://github.com/ccxt/ccxt/tree/master/examples/py
-- https://sandwich.finance/
+`sudo pip3 install -e .`
+
+- *google_instance_account:* avatar.doo.avatar@gmail.com
+
+ip: https://alpyrbot.duckdns.org/webhook
+
 - https://discord.com/developers/applications
-- [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)
+- https://sandwich.finance/
+** [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)
+
 
 ** [Nginx setup](http://alpyr.duckdns.org:81/)
 
-#+begin_src bash
-admin@example.com
-changeme
-#+end_src
+First: (http://IP:81/login)
 
----
+Open port `81` and `5000` in Google Instance
 
 #+begin_src bash
+sudo firewall-cmd --add-port=5000/tcp --permanent --zone=docker
+
+sudo ufw allow 5000
+sudo ufw allow 8080
 sudo ufw allow 80
 sudo ufw allow 81
 sudo ufw allow 443
-
-$ sudo ufw enable
-$ systemctl enable ufw
-$ sudo ufw status
+sudo ufw enable
+sudo systemctl enable ufw
+#
+$ sudo ufw status verbose
 Status: active
-
-To                         Action      From
---                         ------      ----
-8080                       ALLOW       Anywhere
-80                         ALLOW       Anywhere
-443                        ALLOW       Anywhere
-81                         ALLOW       Anywhere
-5000                       ALLOW       Anywhere
-8080 (v6)                  ALLOW       Anywhere (v6)
-80 (v6)                    ALLOW       Anywhere (v6)
-443 (v6)                   ALLOW       Anywhere (v6)
-81 (v6)                    ALLOW       Anywhere (v6)
-5000 (v6)                  ALLOW       Anywhere (v6)
 #+end_src
+
+----------------------------------------------------
+#+begin_src bash
+admin@example.com  | alper.alimoglu@gmail.com
+changeme
+#+end_src
+
+
+- First `alpyr.duckdns.org` and `alpyrbot.duckdns.org` should have the correct new IP.
+
+*** Details
+#+begin_src bash
+Domain name: alpyr.duckdns.org       | alpyrbot.duckdns.org
+Scheme: http                         | http
+IP: ...                              | same_ip
+Forward: 81                          | 5000
+[X] Block Comman Exploits
+[X] Websockets Support
+
+Save
+#+end_src
+
+*** SSL
+#+begin_src bash
+Request new SSLcertificate
+[X] HTTP/2 Support
+[X] Force SSL
+[X] HSTS Enables
+
+Save
+#+end_src,
 
 ** Nginx Full Setup Instructions
 
-```cp docker ~/docker```
-
 #+begin_src bash
+cp docker ~/docker
 sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 sudo systemctl start docker.service
-
-sudo ufw status
-sudo chown jenkins:docker /var/run/docker.sock
-docker-compose up -d
 #+end_src
 
 - [IP_example](http://IP/webhook)
 
 https://askubuntu.com/a/1046217/660555
 
-------------------------------------------------------------------
-
 - http://www.duckdns.org  // login using github
 - https://nginxproxymanager.com/setup/
-- https://ubuntu.com/blog/ubuntu-bionic-using-chrony-to-configure-ntp
 
-# localhost
-
-#+begin_src bash
-curl -v localhost:5000
-curl -X POST http://localhost:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
-#+end_src
-
-# public
+*** public
 
 #+begin_src bash
-curl https://alpyr-bot.duckdns.org
-curl -X POST https://alpyr-bot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
+curl https://alpyrbot.duckdns.org
+curl -X POST http://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
+curl -X POST http://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 #+end_src
+
+*** localhost
+
+#+begin_src bash
+curl -v 127.0.0.1:5000
+curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
+curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
+#+end_src
+
 
 # Port-Forwarding, not required
 #+begin_src bash
@@ -84,14 +103,14 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 
 -----------------
 
-# Tradingview alerts some links
+** Tradingview alerts some links
 
 1. [Binance Minimum Trading Rules](https://liquidation.atsutane.net/calc)
 2. [puppeteer google browser](https://github.com/puppeteer/puppeteer)
 3. [fake gmail address generator and inbox](https://maildim.com/)
 4. TV_username_last_used => `roxanroxanroxan_5` // ends at Oct 28, 2021
 
-# Git Push:
+** Git Push:
 
 #+begin_src bash
 # https://github.com/newren/git-filter-repo#how-do-i-install-it

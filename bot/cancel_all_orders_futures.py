@@ -2,9 +2,8 @@
 
 import asyncio
 
-from bot_helper_async import BotHelperAsync
-
 from bot import helper
+from bot.bot_helper_async import BotHelperAsync
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import print_tb
 
@@ -12,13 +11,11 @@ bot_async = BotHelperAsync()
 
 
 async def main():
-    try:
-        await bot_async.transfer_out(15.56)
-    except Exception as e:
-        print_tb(e)
-    finally:
-        await helper.exchange.future.close()
-        await helper.exchange.spot.close()
+    future_positions = await helper.exchange.future.fetch_positions()
+    for position in future_positions:
+        initial_margin = abs(float(position["info"]["isolatedWallet"]))
+        if initial_margin > 0.0:
+            print(position)
 
 
 if __name__ == "__main__":

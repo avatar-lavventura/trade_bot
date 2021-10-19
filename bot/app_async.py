@@ -4,10 +4,11 @@ import asyncio
 import logging
 
 import quart.flask_patch  # noqa
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _exit, print_tb
 from flask import abort, request  # noqa
 from quart import Quart
+
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import QuietExit, _exit, print_tb
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
@@ -61,7 +62,7 @@ async def startup():
 
 
 @app.route("/")
-async def notify():  # noqa
+async def notify():
     return "OK"
 
 
@@ -74,8 +75,8 @@ async def webhook():
     data_msg = request.get_data(as_text=True)
     if data_msg:
         try:
-            if any(n in data_msg for n in ["enter", "alert"]):
-                await do_trade(data_msg.rstrip())
+            if any(x in data_msg for x in ["enter", "alert"]):
+                await do_trade(data_msg.replace(":00Z", "").rstrip())
 
             return "OK"
         except QuietExit as e:

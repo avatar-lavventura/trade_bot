@@ -10,7 +10,8 @@ countdown () {  # https://superuser.com/a/611582/723632
 
 while true
 do
-    python3 binance_balance.py
+    python3 discord_balance.py
+    # python3 binance_balance.py
     echo -e "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
     countdown 60
 done

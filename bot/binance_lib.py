@@ -15,6 +15,8 @@ import sys
 import time
 
 from dateutil.parser import parse
+from forex_python.converter import CurrencyRates
+
 from ebloc_broker.broker._utils.tools import (
     _percent_change,
     log,
@@ -23,7 +25,6 @@ from ebloc_broker.broker._utils.tools import (
     timestamp_to_local,
     utc_to_local,
 )
-from forex_python.converter import CurrencyRates
 
 c = CurrencyRates()
 TOTAL_BALANCE = 1000
@@ -51,8 +52,7 @@ def get_color(color):
         return "red"
 
 
-def futures_history(binance, _symbol=None):
-    client = binance.client
+def futures_history(client, _symbol=None):
     name_temp = "hello_world"
     _COMMISSON = 0
     commission_flag = False
@@ -138,7 +138,7 @@ def futures_history(binance, _symbol=None):
                 latest_time = local_dt.strftime("%H:%M:%S")
                 if local_dt.strftime("%d") != _day:
                     if daily_progress != 0.0:
-                        print("will be deleted", end="\r")
+                        print("                   ", end="\r")
 
                     _color = get_color(daily_progress)
                     if daily_progress != 0.0:
@@ -193,7 +193,7 @@ def futures_history(binance, _symbol=None):
     log(f"{arrow_in} {_daily_progress}$ {arrow_out} | ", _color, end="")
     log(f"{format(100.0 * float(_daily_progress) / TOTAL_BALANCE, '.2f')}% ", _color, end="")
     log(counter + 1)
-    log("")
+    log()
     return _COMMISSON, latest_symbol_income, daily_progress, funding_dict
 
 
@@ -254,7 +254,7 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
                 _leverage = round(abs(pc / real_pc))
                 log(f" x{_leverage}")
             else:
-                log("")
+                log()
 
             return True
     return False
