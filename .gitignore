@@ -30,3 +30,4 @@ progress.log
 .tracking.txt
 timestamp.yaml
 .eggs
+liq.log

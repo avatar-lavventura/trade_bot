@@ -32,16 +32,19 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         config.status["futures"]["locked"] = locked
         config.status["futures"]["locked_per"] = locked_per
 
-    log(f" * balance={format(usdt_bal, '.2f')}", end="")
+    is_write = True
     if float(locked) == 0.0:
-        log("______________________", "bold blue", end="")
+        is_write = False
+        log(f" * balance={format(usdt_bal, '.2f')}", end="", is_write=False)
+        log("______________________", "bold blue", end="", is_write=False)
     else:
+        log(f" * balance={format(usdt_bal, '.2f')}", end="")
         log(
             f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold", end="",
         )
 
-    log("_______________", "bold blue", end="")
-    log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow")
+    log("_______________", "bold blue", end="", is_write=is_write)
+    log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow", is_write=is_write)
 
 
 def futures_bal(info, asset) -> float:

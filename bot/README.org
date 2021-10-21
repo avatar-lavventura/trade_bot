@@ -1,5 +1,6 @@
 * Guide
 
+~sudo pip3 install -e .~
 `sudo pip3 install -e .`
 
 - *google_instance_account:* avatar.doo.avatar@gmail.com
