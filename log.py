@@ -8,23 +8,20 @@ from binance.client import Client
 from matplotlib import pyplot
 
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.yaml import Yaml
 
-HOME = str(Path.home())
-
-x_data, y_data, z_data = [], [], []
-
+x_data = []
+y_data = []
+z_data = []
 figure = pyplot.figure()
 (line,) = pyplot.plot_date(x_data, y_data, "-")
-
 HOME = Path.home()
-_cfg = Yaml(HOME / ".binance.yaml")
+_cfg = HOME / ".binance.yaml"
 api_key = str(_cfg["b"]["key"])
 api_secret = str(_cfg["b"]["secret"])
 client = Client(api_key, api_secret)
 
 
-def update(frame):
+def update():
     future = client.futures_position_information(symbol="GRTUSDT")
     mark = future[0]["markPrice"]
 

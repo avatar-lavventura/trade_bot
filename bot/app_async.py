@@ -17,8 +17,6 @@ app = Quart(__name__)
 
 async def start():
     # margin_usdt = app.client_helper.get_balance_margin_USDT()
-    # if not is_process_on("[n]grok", "ngrok"):
-    #     sys.exit(1)
     print(" * s t a r t i n g", flush=True)
 
 
@@ -45,8 +43,8 @@ async def startup():
     """
     from bot.client_helper import ClientHelper, DiscordClient
     from bot import helper
+    from bot.user_setup import check_binance_obj
     import bot.trade_async as bot_trade
-    from user_setup import check_binance_obj
 
     loop = asyncio.get_event_loop()
     app.discord_client = DiscordClient()
