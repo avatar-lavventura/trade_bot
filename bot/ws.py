@@ -4,22 +4,15 @@ import websocket
 
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import _time
+from bot.__init__ import LiqBase
+from ebloc_broker.broker._utils import _log
 
+_log.ll.LOG_FILENAME = "liq.log"
 
-class Liq:
+class Liq(LiqBase):
     def __init__(self):
+        super().__init__()
         self.socket = "wss://fstream.binance.com/ws/!forceOrder@arr"
-        self.ignore_list = [
-            "BTCUSDT",
-            "ETHUSDT",
-            "BNBUSDT",
-            "BTCBUSD",
-            "ETHBUSD",
-            "LTCUSDT",
-            "BCHUSDT",
-            "1000XECUSDT",
-            "BNBBUSD",
-        ]
         self.ws = websocket.WebSocketApp(self.socket, on_message=self.on_message, on_close=self.on_close)
         self.symbol: str = ""
         self.order_quantity = 0
@@ -49,9 +42,9 @@ class Liq:
             log(f"==> price={self.price}")
             log(f"==> average_price={self.average_price}")
             log(f"==> liq_amount={amount}")
-            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
 
-    def on_message(self, ws, message):
+    def on_message(self, ws, message):  # noqa
         """Fetch liquidation Order Streams.
 
         __ https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams
