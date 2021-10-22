@@ -10,9 +10,14 @@ from quart import Quart
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import QuietExit, _exit, print_tb
 
+# from ebloc_broker.broker.utils import is_process_on
+
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
 app = Quart(__name__)
+
+# if not is_process_on("[r]un_app.py", "run_app.py"):
+#     sys.exit(1)
 
 
 async def start():

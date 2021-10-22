@@ -38,7 +38,7 @@ class Liq(LiqBase):
             log(f"==> order_quantity={self.order_quantity}")
             log(f"==> event_time={self.event_time}")
             log(f"==> order_last_filled_quantity={self.order_last_filled_quantity}")
-            log(f"==> order_filled_accumulated_quantity={self.order_filled_accumulated_quantity}")
+            log(f"==> order_filled_accumulated_q={self.order_filled_accumulated_quantity}")
             log(f"==> order_trade_time={self.order_trade_time}")
             log(f"==> price={self.price}")
             log(f"==> average_price={self.average_price}")
