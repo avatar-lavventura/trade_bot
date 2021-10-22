@@ -4,9 +4,8 @@ import asyncio
 from contextlib import suppress
 from pathlib import Path
 
-from user_setup import check_binance_obj
-
 from bot.bot_helper_async import BotHelperAsync
+from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import print_tb
 
@@ -36,5 +35,5 @@ if __name__ == "__main__":
         print_tb(e)
         loop.run_until_complete(main())
     finally:
-        log("Program finished.", "bold green")
+        log("FIN")
         loop.run_until_complete(bot_async.close())

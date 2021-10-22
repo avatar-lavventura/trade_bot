@@ -126,15 +126,16 @@ class BotHelper:
         self.unix_timestamp_ms = helper.exchange.get_future_timestamp()
         self.current_bar_index_local = int(int((self.unix_timestamp_ms - 1) / 900))
 
-    async def is_usdt_open(self, symbol) -> bool:
-        # TODO: read from result of binance_balance.py
+    async def is_usdt_open(self, symbol=None) -> bool:
+        if not symbol:
+            return False
+
         positions = await helper.exchange.future.fetch_positions()
         self.get_exchange_future_timestamp()
         for position in positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
-            if initial_margin > 0.0:
-                if symbol and symbol.replace("/", "") == position["symbol"].replace("/", ""):
-                    return True
+            if initial_margin > 0.0 and symbol.replace("/", "") == position["symbol"].replace("/", ""):
+                return True
         return False
 
     async def get_usdt_open_position_count(self, is_print=False) -> int:
