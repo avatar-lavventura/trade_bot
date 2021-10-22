@@ -21,11 +21,11 @@ bot_async = BotHelperUsdtAsync()
 def future_stats(usdt_bal, unix_timestamp_ms):
     with FileLock(config.status.fp_lock, timeout=1):
         locked = usdt_bal - config.status["futures"]["free"]
-        try:
-            if locked > config.status["log"]["futures"]["max_locked"]:
-                config.status["log"]["futures"]["max_locked"] = locked
-        except TypeError:
+        if not isinstance(config.status["log"]["futures"]["max_locked"], int):
             config.status["log"]["futures"]["max_locked"] = 0
+
+        if locked > config.status["log"]["futures"]["max_locked"]:
+            config.status["log"]["futures"]["max_locked"] = locked
 
         locked_per = (100.0 * locked) / usdt_bal
         config.status["futures"]["total"] = usdt_bal
@@ -167,7 +167,6 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
                 limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
 
             asset = "{0: <5}".format(symbol.replace("/USDT", ""))
-
             log(f"{asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", "bold", end="")
             if float(entry_price) < 0 or float(limit_price) < 0:
                 update_spot_timestamp(unix_timestamp_ms)
@@ -177,47 +176,46 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
             total_lost -= unrealized_profit
             asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
-            per = (100.0 * initial_margin) / usdt_bal
-            _per = format(per, ".2f")
+            per = format((100.0 * initial_margin) / usdt_bal, ".2f")
             log("| ", end="")
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
-            log(f"({_per}%) ", "bold magenta", end="")
+            log(f"({per}%) ", "bold magenta", end="")
             if isolated_wallet > config.isolated_wallet_limit:
-                log(f"Warning: Calculated locked amount is {_per}% ", end="")
+                log(f"Warning: Calculated locked amount is {per}% ", end="")
 
             if (
                 isolated_wallet < config.isolated_wallet_limit
                 and asset_percent_change <= config.USDTPERP_PERCENT_CHANGE_TO_ADD
             ):
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal)
-            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -7.0 and float(_per) < 30.0:
+            elif isolated_wallet > config.isolated_wallet_limit and asset_percent_change <= -7.0 and float(per) < 30.0:
                 # when isolated_wallet is greater than isolated_wallet_limit(~100$)
                 await new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, 1.0, percent=50.0)
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
-    if total_lost > 0.00:
+    if total_lost > 0.01:
         log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
 
     with FileLock(config.status.fp_lock, timeout=1):
         if config.status["futures"]["pos_count"] != count:
             config.status["futures"]["pos_count"] = count
 
-        try:
-            if count > config.status["log"]["futures"]["max_position_count"]:
-                config.status["log"]["futures"]["max_position_count"] = count
-        except TypeError:
+        if not isinstance(config.status["log"]["futures"]["max_position_count"], int):
             config.status["log"]["futures"]["max_position_count"] = 0
+
+        if count > config.status["log"]["futures"]["max_position_count"]:
+            config.status["log"]["futures"]["max_position_count"] = count
 
     return print_flag
 
 
 def update_spot_timestamp(unix_timestamp_ms: int):
-    try:
-        if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
-            config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
-    except TypeError:
+    if not isinstance(config.timestamp["spot_timestamp"]["base"], int):
         config.timestamp["spot_timestamp"]["base"] = 0
+
+    if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
+        config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
 
 
 async def process_main(channel=None):
