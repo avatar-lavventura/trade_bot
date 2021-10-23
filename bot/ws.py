@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import websocket
-
 from bot.lib import LiqBase
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils._log import log
@@ -28,7 +27,7 @@ class Liq(LiqBase):
     def log_result(self):
         amount = int(self.order_quantity * self.average_price)
         if amount > 1000:
-            log(f"==> symbol={self.symbol} {_time()}")
+            log(f" * {_time()} [magenta]{self.symbol}", "bold")
             log(f"==> side={self.side} | ", end="")
             if self.side == "BUY":
                 log("shorts liquadated")
@@ -36,14 +35,14 @@ class Liq(LiqBase):
                 log("longs liquadated")
 
             log(f"==> order_quantity={self.order_quantity}")
+            log(f"==> last_filled_quantity={self.order_last_filled_quantity}")
+            log(f"==> filled_accumulated_q={self.order_filled_accumulated_quantity}")
             log(f"==> event_time={self.event_time}")
-            log(f"==> order_last_filled_quantity={self.order_last_filled_quantity}")
-            log(f"==> order_filled_accumulated_q={self.order_filled_accumulated_quantity}")
             log(f"==> order_trade_time={self.order_trade_time}")
             log(f"==> price={self.price}")
             log(f"==> average_price={self.average_price}")
             log(f"==> liq_amount={amount}")
-            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 
     def on_message(self, ws, message):  # noqa
         """Fetch liquidation Order Streams.

@@ -60,7 +60,7 @@ class Config:
         self.SPOT_MAX_POSITION = self.cfg["root"]["spot"]["max_pos"]
         self.SPOT_IGNORE_LIST = self.cfg["root"]["usdt"]["ignore"]
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["base"]
-        self.INITIAL_BTC_QTY = self.cfg["root"]["spot"]["INITIAL_BTC_QTY"]
+        self.initial_btc_quantity = self.cfg["root"]["spot"]["initial_btc_quantity"]
 
 
 config: Config = Config()
