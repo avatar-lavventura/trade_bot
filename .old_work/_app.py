@@ -69,7 +69,7 @@ async def close():
 
 async def main():
     client_helper = ClientHelper(client)
-    margin_usdt = client_helper.get_balance_margin_USDT()
+    margin_usdt = client_helper.get_balance_margin_usdt()
     filename = ".ip"
     with open(filename) as f:
         _ip = f.readlines()

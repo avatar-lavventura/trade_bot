@@ -3,13 +3,13 @@
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
 
-from _mongodb import Mongo
-from bot_helper_async import TP, BotHelperAsync, TP_calculate
 from filelock import FileLock
 from pymongo import MongoClient
 
 from bot import helper
+from bot._mongodb import Mongo
 from bot.binance_balance import create_limit_order, create_market_order
+from bot.bot_helper_async import TP, BotHelperAsync, TP_calculate
 from bot.client_helper import DiscordClient
 from bot.config import config
 from ebloc_broker.broker._utils._async import _sleep
@@ -40,6 +40,9 @@ class Strategy:
                     self.side = "BUY"  # BUY for 1s
                 else:
                     raise QuietExit(f'E: side should be "BUY" for the {self.market} market')
+
+        if self.time_duration == "":
+            self.time_duration = config.BASE_TIME_DURATION
 
     def parse_data_msg(self, data_msg):
         self.chunks = data_msg.split(",")
@@ -470,12 +473,12 @@ class BotHelper:
 
     def check_on_going_positions(self):
         if self.strategy.market == "USDTPERP":
-            if self.strategy.time_duration == "1m":
-                if config.status["futures"]["pos_count"] >= config.USDTPERP_MAX_POSITION_1m:
-                    raise QuietExit(f"Warning: {config.USDTPERP_MAX_POSITION} pos")
-            if self.strategy.time_duration == "9m":
-                if config.status["futures"]["pos_count"] >= config.USDTPERP_MAX_POSITION:
-                    raise QuietExit(f"Warning: {config.USDTPERP_MAX_POSITION} pos")
+            if self.strategy.time_duration == "":
+                self.strategy.time_duration = "9m"
+
+            pos_count = config.USDTPERP_MAX_POSITION[self.strategy.time_duration]
+            if config.status["futures"]["pos_count"] >= pos_count:
+                raise QuietExit(f"Warning: {pos_count} pos")
         elif self.strategy.market == "BTC":
             if config.status["spot"]["pos_count"] >= config.SPOT_MAX_POSITION:
                 raise QuietExit(f"Warning: {config.SPOT_MAX_POSITION} pos")
@@ -544,12 +547,12 @@ class BotHelper:
         self.check_on_going_positions()
         futures_locked_percent = config.status["futures"]["locked_per"]
         if self.strategy.time_duration != "1m":
-            if futures_locked_percent > config.cfg["root"]["stop_locked_per"]:
+            if futures_locked_percent > config.cfg["root"]["usdtperp"]["stop_locked_per"]:
                 raise QuietExit(f"locked_percent={int(futures_locked_percent)}% PASS")
 
         free_usdt = config.status["futures"]["free"]
         duration = self.strategy.time_duration
-        base_durations = ["9m", "21m"]
+        base_durations = ["9m", "15m", "21m"]
         quiet_exit_flag = False
         if self.strategy.side == "BUY":
             if duration == "1m" and free_usdt < config.initial_usdt_qty_long[duration]:

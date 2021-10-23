@@ -27,8 +27,8 @@ plot(wt2, color=color.red)
 plot(wt1-wt2, color=color.new(color.blue, 70), style=plot.style_area)
 plot(cross(wt1, wt2) ? wt2 : na, color=color.black , style=plot.style_circles, linewidth=3)
 plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 > wt1 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
-barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? color.aqua : color.yellow) : na)
 plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth = 2)
+// barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? color.aqua : color.yellow) : na)
 
 // if is_div_long
 //    label.new(bar_index, na, "↑", color=color.aqua, textcolor=color.black, style=label.style_label_up, size=size.small, yloc=yloc.belowbar)

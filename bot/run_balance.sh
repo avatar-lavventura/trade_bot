@@ -12,8 +12,8 @@ while true
 do
     python3 discord_balance.py
     # python3 binance_balance.py
-    echo -e "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-    countdown 60
+    echo -e "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+    countdown 30
 done
 # LOG_FILE=_binance_balance.log
 # nohup python3 -u binance_balance.py >> $LOG_FILE 2>&1 &
