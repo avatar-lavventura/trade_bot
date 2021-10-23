@@ -5,6 +5,7 @@ import time
 from contextlib import suppress
 from typing import Dict
 
+from ccxt.base.errors import RequestTimeout
 from filelock import FileLock
 
 from bot import helper
@@ -248,6 +249,8 @@ async def process_main(channel=None):
         if not is_printed or helper.is_start:
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
+    except RequestTimeout:
+        _exit("E: recvWindow=5000")
     except KeyError:
         print_tb()
         _exit("E: KeyError")

@@ -26,6 +26,7 @@ root:
     locked_percent_limit: 10
     max_pos: 3
     max_pos_1m: 3
+    max_pos_21m: 1
     multiply_ratio: 1.5
     percent_change_to_add: 6.0
     pos:
