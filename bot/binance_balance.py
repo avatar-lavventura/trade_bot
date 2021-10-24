@@ -233,8 +233,8 @@ async def process_main(channel=None):
         if config.status["spot"]["pos_count"] == 0:
             update_spot_timestamp(unix_timestamp_ms)
 
-        if usdt_bal > 0.0 and not helper.is_start:
-            log("")
+        if usdt_bal > 0.1 and not helper.is_start:
+            log()
 
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["futures"]["free"] = futures_bal("free", "USDT") + usdt_bal
@@ -250,7 +250,7 @@ async def process_main(channel=None):
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
     except RequestTimeout:
-        _exit("E: recvWindow=5000")
+        _exit("E: Timestamp for this request is outside of the recvWindow=5000")
     except KeyError:
         print_tb()
         _exit("E: KeyError")

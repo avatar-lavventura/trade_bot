@@ -14,7 +14,7 @@ thruYear  = 2021
 start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
-msg = "enter_9m"
+msg = "enter_21m=" + timeframe.period
 // VMMA
 lower_band_value = input(3.5, title = "long_offset")
 upper_band_value = input(3.0, title = "short_offset")  // 3.6 safer
@@ -41,7 +41,6 @@ plot(hp and rangeHigh ? rangeHigh : na, title="range high percentile", style=plo
 plot(hp and rangeLow ? rangeLow : na, title="range high percentile", style=plot.style_line, linewidth=4, color=color.orange)
 plot(sd and _upper_band ? _upper_band : na, title="upper band", style=plot.style_line, linewidth=3, color=color.aqua)
 plot(wvf, title="williams_vix_fix", style=plot.style_histogram, linewidth=4, color=col)
-//
 buy_signal  = (col[1] == color.lime and col == color.gray) and long_VWMA
 sell_signal = (col[1] == color.lime and col == color.gray) and short_VWMA and close > 0.1
 if strategy.position_size[0] != 0  // close position for alpy-bot new incoming alerts

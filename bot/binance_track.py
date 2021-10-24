@@ -339,7 +339,7 @@ def telegram_msg(text, _receipt=""):
         if msg:
             _mail = "\n".join(msg)
             _mail = f"{text}\nbinance_symbols@{found_ones}\n{_mail}"
-            msg_to_send = f"{_mail}\n=====================================\n{_receipt}"
+            msg_to_send = f"{_mail}\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n{_receipt}"
             start = time.time()
         else:
             msg_to_send = str(text)
