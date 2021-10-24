@@ -18,7 +18,7 @@ HOME = str(Path.home())
 DCA = [5, 10, 25]
 load_dotenv(override=True)
 INITIAL_USDT_QTY = float(os.getenv("INITIAL_USDT_QTY"))
-INITIAL_BTC_QTY = float(os.getenv("INITIAL_BTC_QTY"))
+initial_btc_quantity = float(os.getenv("initial_btc_quantity"))
 TP = float(os.getenv("TP"))
 TAKE_PROFIT_LONG = 1.000 + TP
 TAKE_PROFIT_SHORT = 1.000 - TP
@@ -126,7 +126,7 @@ class BotHelper:
         else:  # self.strategy.side == "SELL":
             return "BUY"
 
-    def _futures_cancel_order(self):
+    def usdtperp_cancel_order(self):
         """Cancel if already opened orders."""
         orders = self.client.futures_get_all_orders(symbol=self.strategy.symbol.replace("/", ""), type="LIMIT")
         if not orders:
@@ -305,7 +305,7 @@ class BotHelper:
 
     def futures_limit_order(self):
         try:
-            self._futures_cancel_order()
+            self.usdtperp_cancel_order()
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
@@ -415,7 +415,7 @@ class BotHelper:
             output = self.symbol_price(self.strategy.symbol, "spot")
             current_price = output["last"]
             try:
-                initial_amount = INITIAL_BTC_QTY / current_price
+                initial_amount = initial_btc_quantity / current_price
                 self.strategy.position_size = self.get_initial_amount(initial_amount, "BTC")
                 order = self.spot_order(self.strategy.position_size)
                 log(order)

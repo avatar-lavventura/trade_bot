@@ -34,7 +34,7 @@ class Strategy:
         with suppress(Exception):
             self.parse_data_msg(data_msg)
 
-        if self.market in ["BTC", "USDT"]:
+        if self.market in ["BTC", "USDT", "BNB"]:
             if self.side == "SELL":
                 if self.time_duration == "1s":
                     self.side = "BUY"  # BUY for 1s
@@ -62,7 +62,7 @@ class Strategy:
             self.symbol = self.symbol.replace(self.market, "/USDT")
 
         self.position_alert_msg = self.chunks[2]
-        self.time_duration = self.position_alert_msg.rsplit("_", 1)[1]
+        self.time_duration = self.position_alert_msg.rsplit("_", 1)[1].lower()
         self.current_bar_index = self.chunks[3]  # differs for each pair
         self.time = self.chunks[4]
 
@@ -100,7 +100,7 @@ class BotHelper:
         else:
             return "BUY"
 
-    async def _futures_cancel_order(self):
+    async def usdtperp_cancel_order(self):
         """Cancel if already an order is open corresponding to the given symbol."""
         open_orders = await helper.exchange.future.fetch_open_orders(self.strategy.symbol)
         if len(open_orders) > 0:
@@ -143,7 +143,6 @@ class BotHelper:
 
     async def get_usdt_open_position_count(self, is_print=False) -> int:
         """Return number of open positions."""
-        count = 0
         try:
             positions = await helper.exchange.future.fetch_positions()
         except Exception as e:
@@ -151,6 +150,7 @@ class BotHelper:
             await _sleep(60)
             raise e
 
+        count = 0
         for position in positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
             if initial_margin > 0.0:
@@ -267,7 +267,7 @@ class BotHelper:
 
     async def futures_limit_order(self) -> None:
         try:
-            await self._futures_cancel_order()
+            await self.usdtperp_cancel_order()
         except Exception as e:
             log(f"E: Cancel order: {e}")
 
@@ -348,14 +348,14 @@ class BotHelper:
         if initial_amount > 1.0:
             if _type == "BTC":
                 return int(initial_amount)
-            else:  # USDTPERP
+            else:  # usdtperp
                 return int(round(initial_amount))
         else:
             return float(format(initial_amount, ".4f"))
 
     def size_check(self, current_price):
         """Handle order's notional must be no smaller than 5.0."""
-        log(f"current_price={current_price}", "bold")
+        log(f"p={current_price}", "bold")
         if self.strategy.size >= 1.0 and self.strategy.size * current_price < 5.0:
             self.strategy.size += 1
             log(f"==> size_check: current_price={current_price} size={self.strategy.size}", "bold")
@@ -396,7 +396,7 @@ class BotHelper:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             current_price = output["last"]
             try:
-                initial_amount = config.INITIAL_BTC_QTY / current_price
+                initial_amount = config.initial_btc_quantity / current_price
                 self.strategy.size = self.get_initial_amount(initial_amount, "BTC")
                 order = self.spot_order(float(self.strategy.size))
                 log(order)
