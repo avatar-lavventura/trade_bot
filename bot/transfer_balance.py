@@ -3,17 +3,17 @@
 import asyncio
 
 from bot_helper_async import BotHelperAsync
-
-from bot import helper
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import print_tb
+
+from bot import helper
 
 bot_async = BotHelperAsync()
 
 
 async def main():
     try:
-        await bot_async.transfer_out(15.56)
+        await bot_async.transfer_in(0.06)
     except Exception as e:
         print_tb(e)
     finally:

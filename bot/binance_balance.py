@@ -6,15 +6,15 @@ from contextlib import suppress
 from typing import Dict
 
 from ccxt.base.errors import RequestTimeout
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 from filelock import FileLock
 
 from bot import helper
 from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 
 bot_async = BotHelperUsdtAsync()
 
@@ -233,7 +233,7 @@ async def process_main(channel=None):
         if config.status["spot"]["pos_count"] == 0:
             update_spot_timestamp(unix_timestamp_ms)
 
-        if usdt_bal > 0.0 and not helper.is_start:
+        if usdt_bal > 0.1 and not helper.is_start:
             log()
 
         with FileLock(config.status.fp_lock, timeout=1):

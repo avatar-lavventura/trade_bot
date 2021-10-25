@@ -5,7 +5,6 @@ from email.utils import parsedate
 from pathlib import Path
 
 import ccxt.async_support as ccxt
-
 from ebloc_broker.broker._utils.tools import unix_time_millis
 from ebloc_broker.broker._utils.yaml import Yaml
 

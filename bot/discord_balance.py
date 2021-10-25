@@ -6,10 +6,10 @@ from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from ebloc_broker.broker._utils.yaml import Yaml
 
 from bot import binance_balance, helper
 from bot.binance_balance import process_main
-from ebloc_broker.broker._utils.yaml import Yaml
 
 logging.getLogger("apscheduler.executors.default").propagate = False
 

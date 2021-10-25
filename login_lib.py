@@ -5,7 +5,6 @@ import pickle
 from pathlib import Path
 
 from binance.client import Client
-
 from ebloc_broker.broker._utils.yaml import Yaml
 
 HOME = str(Path.home())

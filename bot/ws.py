@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import websocket
-
-from bot.lib import LiqBase
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import _time
+
+from bot.lib import LiqBase
 
 _log.ll.LOG_FILENAME = "liq.log"
 
@@ -73,7 +73,7 @@ class Liq(LiqBase):
                 elif _item[0] == "T":
                     self.order_trade_time = _item[1]
 
-        if self.symbol not in self.ignore_list and "BUSDT" not in self.symbol and "_" not in self.symbol:
+        if self.symbol not in self.ignore_list and "_" not in self.symbol:
             self.log_result()
 
     def on_close(self):

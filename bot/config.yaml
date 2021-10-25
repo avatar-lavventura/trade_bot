@@ -30,9 +30,9 @@ root:
     percent_change_to_add: 4.0
     pos:
       long:
-        1m: 13.0
-        base: 12.0
+        1m: 14.0
+        base: 13.0
       short:
-        1m: 13.0
-        base: 12.0
+        1m: 14.0
+        base: 13.0
     stop_locked_per: 50

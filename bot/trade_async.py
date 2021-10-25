@@ -3,6 +3,9 @@
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
 
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils._log import br, log
+from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, print_tb
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -12,9 +15,6 @@ from bot.binance_balance import create_limit_order, create_market_order
 from bot.bot_helper_async import TP, BotHelperAsync, TP_calculate
 from bot.client_helper import DiscordClient
 from bot.config import config
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, print_tb
 
 
 class Strategy:
@@ -250,8 +250,16 @@ class BotHelper:
                 if float(_quantity) > 0.0:
                     return await self._order(_quantity)
                 else:
+                    if self.strategy.size >= 0.90 and self.strategy.size < 1:
+                        self.strategy.size = 1
+
                     log("E: Quantity less than zero, nothing to do.")
             else:
+                if self.strategy.size >= 0.90 and self.strategy.size < 1:
+                    log("==> re-opening sell order with new quantity=1")
+                    self.strategy.size = 1
+                    return await self._order(self.strategy.size)
+
                 raise e
 
     def get_future_position(self, positions):
@@ -276,14 +284,16 @@ class BotHelper:
         for idx in range(10):
             try:
                 if idx > 0:
-                    log(f"Fetch future positions [attempt={idx + 1}]", "cyan")
+                    _attempt = br(f"attempt={idx + 1}")
+                    log(f"Fetch future positions {_attempt}", "bold cyan")
 
+                # at funding times like 3:00 am nearyly 16 seconds binance may freeze
                 positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
                 entry_price, amount, isolated_wallet = self.get_future_position(positions)
                 break
             except Exception as e:
-                print_tb(e, is_print_exc=False)
-                await _sleep()
+                print_tb(str(e), is_print_exc=False)
+                await _sleep(2)
 
         try:
             log("==> Opening a limit order: ", end="")
@@ -301,11 +311,11 @@ class BotHelper:
 
         try:
             if self.strategy.size == 0:
-                raise Exception("E: Position size is zero")
+                raise Exception("E: Position size is less than zero")
 
             await self._order(quantity=self.strategy.size)
         except Exception as e:
-            print_tb(e)
+            print_tb(str(e))
             raise e
 
     def spot_order(self, quantity: float, symbol=None, side=None):

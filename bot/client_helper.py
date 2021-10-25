@@ -5,7 +5,6 @@ from contextlib import suppress
 from pathlib import Path
 
 import discord
-
 from ebloc_broker.broker._utils.tools import log
 from ebloc_broker.broker._utils.yaml import Yaml
 

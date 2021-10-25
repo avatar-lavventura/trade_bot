@@ -16,8 +16,6 @@ import time
 from contextlib import suppress
 
 from dateutil.parser import parse
-from forex_python.converter import CurrencyRates
-
 from ebloc_broker.broker._utils.tools import (
     _percent_change,
     log,
@@ -26,6 +24,7 @@ from ebloc_broker.broker._utils.tools import (
     timestamp_to_local,
     utc_to_local,
 )
+from forex_python.converter import CurrencyRates
 
 c = CurrencyRates()
 TOTAL_BALANCE = 1000
