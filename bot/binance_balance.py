@@ -182,7 +182,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
             log(f"({per}%) ", "bold magenta", end="")
             if isolated_wallet > config.isolated_wallet_limit:
-                log(f"Warning: Calculated locked amount is {per}% ", end="")
+                log(f"Warning: calc_locked={per}% ", end="")
 
             if (
                 isolated_wallet < config.isolated_wallet_limit
@@ -233,7 +233,7 @@ async def process_main(channel=None):
         if config.status["spot"]["pos_count"] == 0:
             update_spot_timestamp(unix_timestamp_ms)
 
-        if usdt_bal > 0.0 and not helper.is_start:
+        if usdt_bal > 0.1 and not helper.is_start:
             log()
 
         with FileLock(config.status.fp_lock, timeout=1):

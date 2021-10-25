@@ -15,4 +15,14 @@ class LiqBase:
             "BNBBUSD",
             "ICPUSDT",
             "ETCUSDT",
+            "1000SHIBUSDT",
+            "AAVE",
+            "AXSUSDT",
+            "AVAXUSDT",
+            "SOLUSDT",
+            "EGLD",
+            "HNT",
+            "KSM",
+            "LUNA",
+            "YFI"
         ]

@@ -37,7 +37,7 @@ async def do_trade(msg):
 
 @app.before_serving
 async def startup():
-    """Startup function.
+    """Run before serving quart server.
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
