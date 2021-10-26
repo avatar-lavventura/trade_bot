@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# npx @alleyway/create-tradingview-alerts-home
-cp config_future.yml config.yml
+time_interval="1m"
+sed -i.bak "s/^\(  interval:\ \).*/\1$time_interval/" config/futures.yml
+rm -f config/futures.yml.bak
+grep '  interval:' config/futures.yml
+
+cp config/futures.yml config.yml
 cp add-alerts.js tradingview-alerts-home/node_modules/@alleyway/add-tradingview-alerts-tool/dist/add-alerts.js
-#
-./tradingview-alerts-home/atat --delay 1500 add-alerts
+./tradingview-alerts-home/atat --delay 2000 add-alerts

@@ -19,14 +19,17 @@ class DiscordClient:
         self.bot = discord.Client()
         self.TOKEN = _config["discord"]["TOKEN"]
         self.channel_name = _config["discord"]["CHANNEL_NAME"]
-        self.channel = None
+        self.channel = {}
 
-    async def send_msg(self, msg="OK"):
+    async def send_msg(self, msg="OK", channel_name=""):
         await self.bot.wait_until_ready()
-        if not self.channel:
-            self.channel = discord.utils.get(self.bot.get_all_channels(), name=self.channel_name)
+        if not channel_name:
+            channel_name = self.channel_name
 
-        await self.channel.send(msg)
+        if channel_name not in self.channel:
+            self.channel[channel_name] = discord.utils.get(self.bot.get_all_channels(), name=channel_name)
+
+        await self.channel[channel_name].send(msg)
 
 
 class ClientHelper:
@@ -46,18 +49,16 @@ class ClientHelper:
         self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
 
     def get_balance_margin_usdt(self) -> float:
-        try:
+        with suppress(Exception):
             _len = len(self.client.get_margin_account()["userAssets"])
-            for x in range(_len):
-                if self.client.get_margin_account()["userAssets"][x]["asset"] == "USDT":
-                    balance_USDT = self.client.get_margin_account()["userAssets"][x]["free"]
-                    return float(balance_USDT)
-        except:
-            pass
+            for idx in range(_len):
+                if self.client.get_margin_account()["userAssets"][idx]["asset"] == "USDT":
+                    balance_usdt = self.client.get_margin_account()["userAssets"][idx]["free"]
+                    return float(balance_usdt)
 
         return 0.0
 
-    def spot_balance(self, balances=None):
+    def spot_balance(self, balances=None) -> None:
         sum_btc = 0.0
         if not balances:
             balances = self.client.get_account()

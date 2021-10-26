@@ -1,0 +1,20 @@
+root:
+    _balance: 1432.16
+    free_usdt: 1374.53519892
+futures:
+    locked: 0.0
+    locked_per: 0.0
+    pos_count: 0.0
+    total: 0.0
+log:
+    futures:
+        max_locked: 0.0
+        max_position_count: 0.0
+risk:
+    1_per: 14.32
+    2_per: 28.64
+    3_per: 42.96
+    4_per: 57.29
+    5_per: 71.61
+spot:
+    pos_count: 2

@@ -1,4 +1,4 @@
-# https://stackoverflow.com/a/64270086/2402577
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -13,6 +13,8 @@ sched = BlockingScheduler()
 date: Use when you want to run the job just once at a certain point of time
 interval: Use when you want to run the job at fixed intervals of time
 cron: Use when you want to run the job periodically at certain time(s) of day
+
+__ https://stackoverflow.com/a/64270086/2402577
 """
 
 
@@ -23,7 +25,6 @@ def job():
 
 try:
     sched.start()
-    # job()
 except KeyboardInterrupt:
     print("Program stopped manually !!!")
     try:

@@ -29,7 +29,7 @@ from ebloc_broker.broker._utils.tools import (
 
 c = CurrencyRates()
 TOTAL_BALANCE = 1000
-_arrow = "=============="
+_arrow = "==========="
 arrow_in = _arrow + ">"
 arrow_out = "<" + _arrow
 
@@ -89,7 +89,7 @@ def futures_history(client, _symbol=None):
         latest_symbol_income = abs(float(latest_position["income"]))
     except Exception as e:
         if "Invalid API-key" in str(e):
-            log(f"E: {e}", "red")
+            log(f"E: {e}")
             sys.exit(1)
 
         print_tb()
@@ -97,6 +97,7 @@ def futures_history(client, _symbol=None):
         time.sleep(15)
         return
 
+    to_print = ""
     for future in history_log:
         if future["symbol"] != name_temp and "eksi" not in future["info"]:
             name_temp = future["symbol"]
@@ -112,6 +113,7 @@ def futures_history(client, _symbol=None):
                     _pad = " "
 
                 if _sum != 0.0:
+                    log(to_print, end="")
                     log(f"{_pad}%.4f" % _sum, _color, end="")
                     _lost_value = the_lost(_list)
                     if _lost_value == 0.00:
@@ -124,7 +126,7 @@ def futures_history(client, _symbol=None):
 
                 _name = "{:<9}".format(name_temp)
                 if _sum != 0.0:
-                    log(f"==> {_name.replace('USDT', '').replace('1000SHIB', 'SHIB ')} ", end="")
+                    to_print = f"==> {_name.replace('USDT', '').replace('1000SHIB', 'SHIB ')} "
 
                 commission = []
                 _list = []
@@ -150,9 +152,7 @@ def futures_history(client, _symbol=None):
 
                     daily_progress = 0
                     counter = 0
-                    _name = "{:<9}".format(name_temp)
-                    log("\n [magenta]*[/magenta] " + local_dt.strftime("%d/%m/%Y %A"), "cyan")
-                    log(f"==> {_name.replace('USDT', '').replace('1000', '')} ", end="")
+                    log(f"\n [magenta]*[/magenta] [bold cyan]{local_dt.strftime('%d/%m/%Y %A')}")
 
                 _day = local_dt.strftime("%d")
 
@@ -165,6 +165,7 @@ def futures_history(client, _symbol=None):
         daily_progress += sum(_list)
         _lost_value = the_lost(_list)
         if _lost_value == 0.00:
+            log(to_print, end="")
             log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
         else:
             log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
@@ -173,6 +174,7 @@ def futures_history(client, _symbol=None):
     _sum = _sum - sum(commission)
     daily_progress += _sum
     _color = get_color(_sum)
+    log(to_print, end="")
     if _sum > 0.0:
         log(f" {format(_sum, '.4f')}", _color, end="")
     else:

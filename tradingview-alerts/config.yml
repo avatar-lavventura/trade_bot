@@ -1,0 +1,16 @@
+files:
+  input: config/usdt_spot.yml
+tradingview:
+  chartUrl: https://www.tradingview.com/chart/N3Qrs2jN/
+  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  interval: 15m
+alert:
+  condition:
+    primaryLeft: alpy
+  actions:
+    notifyOnApp: false
+    showPopup: false
+    sendEmail: false
+    webhook:
+      enabled: true
+      url: "http://IP/webhook"
