@@ -5,6 +5,7 @@ import time
 from contextlib import suppress
 from typing import Dict
 
+from ccxt.base.errors import RequestTimeout
 from filelock import FileLock
 
 from bot import helper
@@ -21,21 +22,22 @@ bot_async = BotHelperUsdtAsync()
 def future_stats(usdt_bal, unix_timestamp_ms):
     with FileLock(config.status.fp_lock, timeout=1):
         locked = usdt_bal - config.status["futures"]["free"]
-        try:
-            if locked > config.status["log"]["futures"]["max_locked"]:
-                config.status["log"]["futures"]["max_locked"] = locked
-        except TypeError:
+        if not isinstance(config.status["log"]["futures"]["max_locked"], int):
             config.status["log"]["futures"]["max_locked"] = 0
+
+        if locked > config.status["log"]["futures"]["max_locked"]:
+            config.status["log"]["futures"]["max_locked"] = locked
 
         locked_per = (100.0 * locked) / usdt_bal
         config.status["futures"]["total"] = usdt_bal
         config.status["futures"]["locked"] = locked
         config.status["futures"]["locked_per"] = locked_per
 
-    log(f" * balance={format(usdt_bal, '.2f')}", end="")
+    is_write = True
     if float(locked) == 0.0:
         log("______________________", "bold blue", end="")
     else:
+        log(f" * balance={format(usdt_bal, '.2f')}", end="")
         log(
             f" | locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold", end="",
         )
@@ -164,7 +166,6 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
                 limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
 
             asset = "{0: <5}".format(symbol.replace("/USDT", ""))
-
             log(f"{asset} e={format(entry_price, '.4')} l={format(float(limit_price), '.4f')}", "bold", end="")
             if float(entry_price) < 0 or float(limit_price) < 0:
                 update_spot_timestamp(unix_timestamp_ms)
@@ -174,13 +175,12 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0.0 else "green", end="")
             total_lost -= unrealized_profit
             asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
-            per = (100.0 * initial_margin) / usdt_bal
-            _per = format(per, ".2f")
+            per = format((100.0 * initial_margin) / usdt_bal, ".2f")
             log("| ", end="")
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
-            log(f"({_per}%) ", "bold magenta", end="")
+            log(f"({per}%) ", "bold magenta", end="")
             if isolated_wallet > config.isolated_wallet_limit:
-                log(f"Warning: Calculated locked amount is {_per}% ", end="")
+                log(f"Warning: calc_locked={per}% ", end="")
 
             if (
                 isolated_wallet < config.isolated_wallet_limit
@@ -193,31 +193,31 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
 
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
-    if total_lost > 0.00:
+    if total_lost > 0.01:
         log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
 
     with FileLock(config.status.fp_lock, timeout=1):
         if config.status["futures"]["pos_count"] != count:
             config.status["futures"]["pos_count"] = count
 
-        try:
-            if count > config.status["log"]["futures"]["max_position_count"]:
-                config.status["log"]["futures"]["max_position_count"] = count
-        except TypeError:
+        if not isinstance(config.status["log"]["futures"]["max_position_count"], int):
             config.status["log"]["futures"]["max_position_count"] = 0
+
+        if count > config.status["log"]["futures"]["max_position_count"]:
+            config.status["log"]["futures"]["max_position_count"] = count
 
     return print_flag
 
 
 def update_spot_timestamp(unix_timestamp_ms: int):
-    try:
-        if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
-            config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
-    except TypeError:
+    if not isinstance(config.timestamp["spot_timestamp"]["base"], int):
         config.timestamp["spot_timestamp"]["base"] = 0
 
+    if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
+        config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
 
-async def process_main(channel=None):
+
+async def process_main(channel):
     """Process binance check operations.
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
@@ -231,8 +231,8 @@ async def process_main(channel=None):
         if config.status["spot"]["pos_count"] == 0:
             update_spot_timestamp(unix_timestamp_ms)
 
-        if usdt_bal > 0.0 and not helper.is_start:
-            log("")
+        if usdt_bal > 0.1 and not helper.is_start:
+            log()
 
         with FileLock(config.status.fp_lock, timeout=1):
             config.status["futures"]["free"] = futures_bal("free", "USDT") + usdt_bal
@@ -247,6 +247,8 @@ async def process_main(channel=None):
         if not is_printed or helper.is_start:
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
+    except RequestTimeout:
+        _exit("E: Timestamp for this request is outside of the recvWindow=5000")
     except KeyError:
         print_tb()
         _exit("E: KeyError")
@@ -285,4 +287,4 @@ if __name__ == "__main__":
         time.sleep(120)
         loop.run_until_complete(main())
     finally:
-        log("END", "bold green")
+        log("FIN")

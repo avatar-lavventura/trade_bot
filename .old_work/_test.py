@@ -8,7 +8,7 @@ from tools import print_tb
 from user_setup import check_binance_obj
 
 HOME = str(Path.home())
-INITIAL_BTC_QTY = 0.0002
+initial_btc_quantity = 0.0002
 INITIAL_USDT_QTY = 15
 DCA = [5, 10, 25]
 TP = 0.0052

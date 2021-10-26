@@ -4,8 +4,6 @@
 .idea/
 data/
 .env_secret
-.binance.txt
-cmd.log
 git-auto-fetch/git-auto-fetch
 doo.sh
 .binance
@@ -27,7 +25,9 @@ bot/.env_secret
 InsufficientFunds
 InvalidOrder
 status.yaml
-progress.log
 .tracking.txt
 timestamp.yaml
 .eggs
+cmd.log
+liq.log
+progress.log

@@ -112,7 +112,7 @@ def transfer_spot_to_margin(amount):
     client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
 
 
-def get_balance_margin_USDT():
+def get_balance_margin_usdt():
     try:
         _len = len(client.get_margin_account()["userAssets"])
         for x in range(_len):
@@ -133,7 +133,7 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
     seperate_line_line = True
     _symbol = None
     futures_usd = client_helper.get_futures_usdt(is_both=False)
-    margin_usdt = get_balance_margin_USDT()
+    margin_usdt = get_balance_margin_usdt()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
     log(f"==> Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ", end="")
     log(f"TOTAL={_format(total_balance)}", "green")
@@ -339,7 +339,7 @@ def telegram_msg(text, _receipt=""):
         if msg:
             _mail = "\n".join(msg)
             _mail = f"{text}\nbinance_symbols@{found_ones}\n{_mail}"
-            msg_to_send = f"{_mail}\n=====================================\n{_receipt}"
+            msg_to_send = f"{_mail}\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n{_receipt}"
             start = time.time()
         else:
             msg_to_send = str(text)

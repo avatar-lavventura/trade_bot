@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
 import logging
-from contextlib import suppress
 from pathlib import Path
-
+from bot import helper
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from bot import binance_balance, helper
-from bot.binance_balance import process_main
 from ebloc_broker.broker._utils.tools import get_dt_time
 from ebloc_broker.broker._utils.yaml import Yaml
+from bot.binance_balance import process_main
 
 logging.getLogger("apscheduler.executors.default").propagate = False
 
@@ -18,7 +16,7 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 class Discord_Alpy:
     def __init__(self):
         try:
-            _config = Yaml(Path.home() / ".binance.yaml")
+            _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
             self.channel: str = ""
             self.client = discord.Client()
             self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
@@ -28,9 +26,6 @@ class Discord_Alpy:
         except SystemExit:
             pass
         except KeyboardInterrupt:
-            with suppress(KeyboardInterrupt):
-                self.client.loop.run_until_complete(binance_balance.bot_async.close())
-
             self.client.loop.close()
             print("Program ended.")
 
