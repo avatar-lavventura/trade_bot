@@ -6,15 +6,15 @@ from contextlib import suppress
 from typing import Dict
 
 from ccxt.base.errors import RequestTimeout
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 from filelock import FileLock
 
 from bot import helper
 from bot.bot_helper_async import TP  # , BotHelperAsync
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import QuietExit, _exit, _time, delete_last_line, percent_change, print_tb
 
 bot_async = BotHelperUsdtAsync()
 
@@ -182,7 +182,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms):
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
             log(f"({per}%) ", "bold magenta", end="")
             if isolated_wallet > config.isolated_wallet_limit:
-                log(f"Warning: Calculated locked amount is {per}% ", end="")
+                log(f"Warning: calc_locked={per}% ", end="")
 
             if (
                 isolated_wallet < config.isolated_wallet_limit

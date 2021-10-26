@@ -4,10 +4,11 @@ import asyncio
 import logging
 
 import quart.flask_patch  # noqa
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _exit, print_tb
 from flask import abort, request  # noqa
 from quart import Quart
+
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import QuietExit, _exit, print_tb
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
@@ -36,7 +37,7 @@ async def do_trade(msg):
 
 @app.before_serving
 async def startup():
-    """Startup function.
+    """Run before serving quart server.
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
