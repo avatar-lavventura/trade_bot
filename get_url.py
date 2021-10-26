@@ -6,10 +6,11 @@ import time
 from contextlib import closing
 from operator import itemgetter
 
-from ebloc_broker.broker._utils.tools import log
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+
+from ebloc_broker.broker._utils.tools import log
 
 options = Options()
 options.add_argument("--disable-extensions")

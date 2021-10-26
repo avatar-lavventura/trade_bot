@@ -106,6 +106,7 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 ** Tradingview alerts some links
 
 1. [Binance Minimum Trading Rules](https://liquidation.atsutane.net/calc)
+   ~Balance: 15, PercentBal: 100, Leverage: 1~
 2. [puppeteer google browser](https://github.com/puppeteer/puppeteer)
 3. [fake gmail address generator and inbox](https://maildim.com/)
 4. TV_username_last_used => ~roxanroxanroxan_5~ // ends at Oct 28, 2021

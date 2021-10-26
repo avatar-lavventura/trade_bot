@@ -3,9 +3,6 @@
 # TODO: convert self.client.* into async calls
 from contextlib import suppress
 
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils._log import br, log
-from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, print_tb
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -15,6 +12,9 @@ from bot.binance_balance import create_limit_order, create_market_order
 from bot.bot_helper_async import TP, BotHelperAsync, TP_calculate
 from bot.client_helper import DiscordClient
 from bot.config import config
+from ebloc_broker.broker._utils._async import _sleep
+from ebloc_broker.broker._utils._log import br, log
+from ebloc_broker.broker._utils.tools import QuietExit, _time, decimal_count, print_tb
 
 
 class Strategy:

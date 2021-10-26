@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import websocket
+
+from bot.lib import LiqBase
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils._log import log
 from ebloc_broker.broker._utils.tools import _time
-
-from bot.lib import LiqBase
 
 _log.ll.LOG_FILENAME = "liq.log"
 
@@ -28,18 +28,20 @@ class Liq(LiqBase):
     def log_result(self):
         amount = int(self.order_quantity * self.average_price)
         if amount > 1000:
-            log(f" * {_time()} [magenta]{self.symbol}", "bold")
+            log(f" * {_time()} {self.event_time}", "bold")
+            log(f"==> symbol={self.symbol}")
             log(f"==> side={self.side} | ", end="")
             if self.side == "BUY":
-                log("shorts liquadated")
+                log("shorts liquadated", "bold")
+                log("==> opposite_side=[red]SELL", "bold")
             else:
-                log("longs liquadated")
+                log("longs liquadated", "bold")
+                log("==> opposite_side=[green]BUY", "bold")
 
             log(f"==> order_quantity={self.order_quantity}")
             log(f"==> last_filled_quantity={self.order_last_filled_quantity}")
             log(f"==> filled_accumulated_q={self.order_filled_accumulated_quantity}")
-            log(f"==> event_time={self.event_time}")
-            log(f"==> order_trade_time={self.order_trade_time}")
+            log(f"==> order_time={self.order_trade_time}")
             log(f"==> price={self.price}")
             log(f"==> average_price={self.average_price}")
             log(f"==> liq_amount={amount}")

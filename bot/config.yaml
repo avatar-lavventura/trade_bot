@@ -27,7 +27,7 @@ root:
     max_pos_1m: 3
     max_pos_21m: 1
     multiply_ratio: 1.5
-    percent_change_to_add: 4.0
+    percent_change_to_add: 6.0
     pos:
       long:
         1m: 14.0
