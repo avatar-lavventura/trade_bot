@@ -11,10 +11,7 @@ HOME = Path.home()
 _cfg = Yaml(HOME / ".binance.yaml")
 api_key = str(_cfg["b"]["key"])
 api_secret = str(_cfg["b"]["secret"])
-
 ops = {"apiKey": api_key, "secret": api_secret, "options": {"adustForTimeDifference": True}}
 exchange = ccxt.binance(ops)
-
-_file = ".secret.pk"
-with open(_file, "wb") as f:
+with open(".secret.pk", "wb") as f:
     pickle.dump(exchange, f, pickle.HIGHEST_PROTOCOL)

@@ -2,24 +2,20 @@
 
 import asyncio
 import logging
+from pathlib import Path
 
 import quart.flask_patch  # noqa
-from flask import abort, request  # noqa
+from flask import abort, request
 from quart import Quart
 
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import QuietExit, _exit, print_tb
+from ebloc_broker.broker._utils.tools import _exit, print_tb
+from ebloc_broker.broker.errors import QuietExit
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
+
 app = Quart(__name__)
-
-
-async def start():
-    # margin_usdt = app.client_helper.get_balance_margin_USDT()
-    # if not is_process_on("[n]grok", "ngrok"):
-    #     sys.exit(1)
-    print(" * s t a r t i n g", flush=True)
 
 
 async def do_trade(msg):
@@ -39,15 +35,17 @@ async def do_trade(msg):
 
 @app.before_serving
 async def startup():
-    """Startup function.
+    """Run before serving quart server.
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
     from bot.client_helper import ClientHelper, DiscordClient
     from bot import helper
+    from bot.user_setup import check_binance_obj
     import bot.trade_async as bot_trade
-    from user_setup import check_binance_obj
+    from ebloc_broker.broker._utils import _log
 
+    _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
     loop = asyncio.get_event_loop()
     app.discord_client = DiscordClient()
     await app.discord_client.bot.login(app.discord_client.TOKEN)
@@ -58,7 +56,8 @@ async def startup():
     app.bot_trade = bot_trade.BotHelper(client, app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
-    await start()
+    print(" * s t a r t i n g | curl https://alpyrbot.duckdns.org", flush=True)
+    # margin_usdt = app.client_helper.get_balance_margin_usdt()
 
 
 @app.route("/")
@@ -83,7 +82,7 @@ async def webhook():
             if e:
                 log(str(e), "bold")
         except KeyError:
-            _exit("E: KeyError")
+            _exit("KeyError")
         except Exception as e:
             print_tb(e)
 
@@ -94,6 +93,7 @@ async def webhook():
 
 def main():
     app.run("", port=5000, debug=False)
+    print("end")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from tools import print_tb
 from user_setup import check_binance_obj
 
 HOME = str(Path.home())
-INITIAL_BTC_QTY = 0.0002
+initial_btc_quantity = 0.0002
 INITIAL_USDT_QTY = 15
 DCA = [5, 10, 25]
 TP = 0.0052
@@ -31,7 +31,7 @@ if __name__ == "__main__":  # noqa: C901
         balances = client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] == asset:
-                asset_balance = float(balance["free"]) + float(balance["locked"])
+                asset_balance = float(balance["free_usdt"]) + float(balance["locked"])
                 break
 
         quantity = 0
@@ -58,5 +58,5 @@ if __name__ == "__main__":  # noqa: C901
 
     # balances = client.get_account()
     # for balance in balances["balances"]:
-    #     if balance["asset"] != "BNB" and float(balance["free"]) + float(balance["locked"]) > 0.00000000:
+    #     if balance["asset"] != "BNB" and float(balance["free_usdt"]) + float(balance["locked"]) > 0.00000000:
     #         print(balance)

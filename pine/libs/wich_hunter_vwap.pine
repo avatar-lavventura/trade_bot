@@ -1,0 +1,20 @@
+// @version = 4
+study("Wick Hunter VWAP", shorttitle = "Wick Hunter VWAP", overlay=true, precision=2)
+// __ https://www.tradingview.com/script/rwe3kmXH-Wick-Hunter-VWAP/
+vwap_period = input(title="Period", defval=5)
+vwap_perc_above = input(title = "Percentage Above (Short Entry)", defval=2.0)
+vwap_perc_below = input(title = "Percentage Below (Long Entry)", defval=2.0)
+vwap_label_offset = input(title = "Label Offset", defval=15)
+vwap_source = hlc3
+vwap_price_volume = vwap_source * volume
+sum_vwap_source = sum(vwap_price_volume, vwap_period)
+sum_volume = sum(volume, vwap_period)
+vwap_value = sum_vwap_source / sum_volume
+vwap_above = vwap_value * (1 + (vwap_perc_above / 100))
+vwap_below = vwap_value * (1 - (vwap_perc_below / 100))
+vwap_plot = plot(vwap_value)
+vwap_above_plot = plot(vwap_above, color = color.red)
+vwap_below_plot = plot(vwap_below, color = color.green)
+// sadece bu indikatorle dene, ayarlardan period'u 5 yap, charti da 15m yap
+// asagi ve yukari bandlar 2, sen istersen onlari degistir ama digerlerine
+// dokunma

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+from contextlib import suppress
 from pathlib import Path
 
 import discord
@@ -14,18 +15,21 @@ logger.setLevel(logging.CRITICAL)
 
 class DiscordClient:
     def __init__(self):
-        _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+        _config = Yaml(Path.home() / ".binance.yaml")
         self.bot = discord.Client()
         self.TOKEN = _config["discord"]["TOKEN"]
         self.channel_name = _config["discord"]["CHANNEL_NAME"]
-        self.channel = None
+        self.channel = {}
 
-    async def send_msg(self, msg="OK"):
+    async def send_msg(self, msg="OK", channel_name=""):
         await self.bot.wait_until_ready()
-        if not self.channel:
-            self.channel = discord.utils.get(self.bot.get_all_channels(), name=self.channel_name)
+        if not channel_name:
+            channel_name = self.channel_name
 
-        await self.channel.send(msg)
+        if channel_name not in self.channel:
+            self.channel[channel_name] = discord.utils.get(self.bot.get_all_channels(), name=channel_name)
+
+        await self.channel[channel_name].send(msg)
 
 
 class ClientHelper:
@@ -35,28 +39,26 @@ class ClientHelper:
     def _format(self, value, decimal=2):
         return format(float(value), f".{decimal}f")
 
-    def transfer_futures_to_spot(self, amount):
-        self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
-
     def transfer_spot_to_futures(self, amount):
         self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="1")
 
     def transfer_spot_to_margin(self, amount):
         self.client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
 
-    def get_balance_margin_USDT(self) -> float:
-        try:
+    def transfer_futures_to_spot(self, amount):
+        self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
+
+    def get_balance_margin_usdt(self) -> float:
+        with suppress(Exception):
             _len = len(self.client.get_margin_account()["userAssets"])
-            for x in range(_len):
-                if self.client.get_margin_account()["userAssets"][x]["asset"] == "USDT":
-                    balance_USDT = self.client.get_margin_account()["userAssets"][x]["free"]
-                    return float(balance_USDT)
-        except:
-            pass
+            for idx in range(_len):
+                if self.client.get_margin_account()["userAssets"][idx]["asset"] == "USDT":
+                    balance_usdt = self.client.get_margin_account()["userAssets"][idx]["free"]
+                    return float(balance_usdt)
 
         return 0.0
 
-    def spot_balance(self, balances=None):
+    def spot_balance(self, balances=None) -> None:
         sum_btc = 0.0
         if not balances:
             balances = self.client.get_account()
@@ -64,15 +66,13 @@ class ClientHelper:
         for balance in balances["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
-                try:
+                with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset == "BTC":
                         sum_btc += btc_quantity
                     else:
                         _price = self.client.get_symbol_ticker(symbol=asset + "BTC")
                         sum_btc += btc_quantity * float(_price["price"])
-                except:
-                    pass
 
         current_btc_price_USD = self.client.get_symbol_ticker(symbol="BTCUSDT")["price"]
         own_usd = sum_btc * float(current_btc_price_USD)

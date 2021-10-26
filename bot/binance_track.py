@@ -112,7 +112,7 @@ def transfer_spot_to_margin(amount):
     client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
 
 
-def get_balance_margin_USDT():
+def get_balance_margin_usdt():
     try:
         _len = len(client.get_margin_account()["userAssets"])
         for x in range(_len):
@@ -133,7 +133,7 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
     seperate_line_line = True
     _symbol = None
     futures_usd = client_helper.get_futures_usdt(is_both=False)
-    margin_usdt = get_balance_margin_USDT()
+    margin_usdt = get_balance_margin_usdt()
     total_balance = float(futures_usd) + float(usdt_balance) + margin_usdt
     log(f"==> Futures={futures_usd} USD | SPOT={_format(usdt_balance)} USD | MARGIN={margin_usdt} ", end="")
     log(f"TOTAL={_format(total_balance)}", "green")
@@ -170,7 +170,7 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
     current_date = date.today()
     for key, value in funding_dict.items():
         fund_fee = value[0]
-        if fund_fee < 0.0:
+        if fund_fee < 0:
             _color = "red"
         else:
             _color = "green"
@@ -229,14 +229,6 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
             time.sleep(lag_time * 60)
         else:
             time.sleep(0.25)
-
-
-def _trade(client, usdt_balance, is_trade=True):
-    if not is_log:
-        block_print()
-
-    com, latest_symbol_income, daily_progress, funding_dict = futures_history(client)
-    # _trade_cont(funding_dict, daily_progress, latest_symbol_income)
 
 
 def block_print():
@@ -339,7 +331,7 @@ def telegram_msg(text, _receipt=""):
         if msg:
             _mail = "\n".join(msg)
             _mail = f"{text}\nbinance_symbols@{found_ones}\n{_mail}"
-            msg_to_send = f"{_mail}\n=====================================\n{_receipt}"
+            msg_to_send = f"{_mail}\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n{_receipt}"
             start = time.time()
         else:
             msg_to_send = str(text)
@@ -384,20 +376,16 @@ def load_obj(name):
 
 
 def get_url(url):
-    # response = urlopen(url).read()
-    # download the homepage
-    _response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(_response.text, "lxml")
-    announcements = soup.find_all("a", {"class": "css-1neg3js"})
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "lxml")
+    announcements = soup.find_all("a", {"class": "css-szrgoy"})
     print(announcements)
 
 
 def check_url(url):
-    # response = urlopen(url).read()
-    # download the homepage
-    _response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(_response.text, "lxml")
-    announcements = soup.find_all("a", {"class": "css-1neg3js"})
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "lxml")
+    announcements = soup.find_all("a", {"class": "css-szrgoy"})
     for ann in announcements:
         announcement = ann.text.strip()
         find_between(announcement)
@@ -410,11 +398,12 @@ def _run():
         syms[balance["asset"]] = True
         # print(balance["asset"])
 
-    url = "https://www.binance.com/en/support/announcement/c-48"
-    check_url(url)
+    for url in [
+        "https://www.binance.com/en/support/announcement/c-48",
+        "https://www.binance.com/en/support/announcement/c-49",
+    ]:
+        check_url(url)
 
-    url = "https://www.binance.com/en/support/announcement/c-49"
-    check_url(url)
     print(found_ones)
     _receipt = "upps"
     found_flag = False
@@ -508,20 +497,8 @@ def trade_cont(client, balances):
     current_btc_price_USD = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
     # current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
     # current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
-    futures_usd = client_helper.get_futures_usdt()
-    log(f"==> Futures={futures_usd} USD")
     own_usd = 0.0
     own_usd = sum_btc * float(current_btc_price_USD)
-    # own_try = sum_btc * float(current_btc_price_TRY)
-    print("Spot => %.8f BTC == " % sum_btc, end="")
-    print("%.8f USD == " % own_usd)
-    print("overview => %.2f USD" % (float(own_usd) + float(futures_usd)))
-    # for asset in client.futures_account_balance():
-    #     name = asset["asset"]
-    #     balance = asset["balance"]
-    #
-    # save_obj("symbols")
-    # sys.exit()
     try:
         global org_symbols
         org_symbols = load_obj("symbols")
@@ -545,4 +522,4 @@ if __name__ == "__main__":
             usdt_balance = balance["free"]
             break
 
-    _trade(client, usdt_balance, is_trade)
+    trade_cont(client, balances)

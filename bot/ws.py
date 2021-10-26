@@ -2,12 +2,17 @@
 
 import websocket
 
+from bot.lib import LiqBase
+from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _time
+from ebloc_broker.broker._utils.tools import _time, print_tb
+
+_log.ll.LOG_FILENAME = "liq.log"
 
 
-class Liq:
+class Liq(LiqBase):
     def __init__(self):
+        super().__init__()
         self.socket = "wss://fstream.binance.com/ws/!forceOrder@arr"
         self.ws = websocket.WebSocketApp(self.socket, on_message=self.on_message, on_close=self.on_close)
         self.symbol: str = ""
@@ -22,24 +27,27 @@ class Liq:
 
     def log_result(self):
         amount = int(self.order_quantity * self.average_price)
-        log(f"==> symbol={self.symbol} {_time()}")
-        log(f"==> side={self.side} | ", end="")
-        if self.side == "BUY":
-            log("shorts liquadated")
-        else:
-            log("longs liquadated")
+        if amount > 1000:
+            log(f" * {_time()} {self.event_time}", "bold")
+            log(f"==> symbol={self.symbol}")
+            log(f"==> side={self.side} | ", end="")
+            if self.side == "BUY":
+                log("shorts liquadated", "bold")
+                log("==> opposite_side=[red]SELL", "bold")
+            else:
+                log("longs liquadated", "bold")
+                log("==> opposite_side=[green]BUY", "bold")
 
-        log(f"==> order_quantity={self.order_quantity}")
-        log(f"==> event_time={self.event_time}")
-        log(f"==> order_last_filled_quantity={self.order_last_filled_quantity}")
-        log(f"==> order_filled_accumulated_quantity={self.order_filled_accumulated_quantity}")
-        log(f"==> order_trade_time={self.order_trade_time}")
-        log(f"==> price={self.price}")
-        log(f"==> average_price={self.average_price}")
-        log(f"==> liq_amount={amount}")
-        log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+            log(f"==> order_quantity={self.order_quantity}")
+            log(f"==> last_filled_quantity={self.order_last_filled_quantity}")
+            log(f"==> filled_accumulated_q={self.order_filled_accumulated_quantity}")
+            log(f"==> order_time={self.order_trade_time}")
+            log(f"==> price={self.price}")
+            log(f"==> average_price={self.average_price}")
+            log(f"==> liq_amount={amount}")
+            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 
-    def on_message(self, ws, message):
+    def on_message(self, ws, message):  # noqa
         """Fetch liquidation Order Streams.
 
         __ https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams
@@ -67,12 +75,20 @@ class Liq:
                 elif _item[0] == "T":
                     self.order_trade_time = _item[1]
 
-        if self.symbol not in ["BTCUSDT", "ETHUSDT", "BNBUSDT"] and "BUSDT" not in self.symbol:
+        if self.symbol not in self.ignore_list and "_" not in self.symbol:
             self.log_result()
 
     def on_close(self):
         log("closed")
 
 
-liq = Liq()
-liq.ws.run_forever()
+def main():
+    try:
+        liq = Liq()
+        liq.ws.run_forever()
+    except Exception as e:
+        print_tb(e)
+
+
+if __name__ == "__main__":
+    main()

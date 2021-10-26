@@ -1,24 +1,26 @@
 * Guide
 
-`sudo pip3 install -e .`
+** [Nginx setup](http://alpyr.duckdns.org:81/)
 
-- *google_instance_account:* avatar.doo.avatar@gmail.com
+IP: [[https://alpyrbot.duckdns.org/webhook]]
 
-ip: https://alpyrbot.duckdns.org/webhook
+- [[https://discord.com/developers/applications]]
+- [[https://sandwich.finance]]
+- [[https://bigpara.hurriyet.com.tr/borsa/canli-borsa/]]
 
-- https://discord.com/developers/applications
-- https://sandwich.finance/
 ** [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)
 
 
-** [Nginx setup](http://alpyr.duckdns.org:81/)
+First: ([[<ip_address>:81/login]])
 
-First: (http://IP:81/login)
+- [[https://console.cloud.google.com/networking/firewalls][Firewall setup]]
 
-Open port `81` and `5000` in Google Instance
+Open port ~81~ and ~5000~ in Google Instance
 
 #+begin_src bash
 sudo firewall-cmd --add-port=5000/tcp --permanent --zone=docker
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all --zone=docker
 
 sudo ufw allow 5000
 sudo ufw allow 8080
@@ -27,19 +29,15 @@ sudo ufw allow 81
 sudo ufw allow 443
 sudo ufw enable
 sudo systemctl enable ufw
-#
-$ sudo ufw status verbose
-Status: active
+sudo ufw status verbose  # Status should be: active
 #+end_src
 
-----------------------------------------------------
-#+begin_src bash
+#+begin_src yaml
 admin@example.com  | alper.alimoglu@gmail.com
-changeme
+password: changeme
 #+end_src
 
-
-- First `alpyr.duckdns.org` and `alpyrbot.duckdns.org` should have the correct new IP.
+- First ~alpyr.duckdns.org~ and ~alpyrbot.duckdns.org~ should have the correct new IP.
 
 *** Details
 #+begin_src bash
@@ -72,7 +70,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo systemctl start docker.service
 #+end_src
 
-- [IP_example](http://IP/webhook)
+- [[http://IP/webhook][IP_example]]
 
 https://askubuntu.com/a/1046217/660555
 
@@ -101,14 +99,17 @@ curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 5000
 #+end_src
 
------------------
+-------------------
 
 ** Tradingview alerts some links
 
-1. [Binance Minimum Trading Rules](https://liquidation.atsutane.net/calc)
-2. [puppeteer google browser](https://github.com/puppeteer/puppeteer)
-3. [fake gmail address generator and inbox](https://maildim.com/)
-4. TV_username_last_used => `roxanroxanroxan_5` // ends at Oct 28, 2021
+1. [[https://liquidation.atsutane.net/calc][Binance Minimum Trading Rules]]
+   ~Balance: 15, PercentBal: 100, Leverage: 1~
+2. [[https://github.com/puppeteer/puppeteer][puppeteer google browser]]
+3. [[https://maildim.com][fake gmail address generator and inbox]]
+4. tv_username_last_used => ~roxanroxanroxan_14~
+5. yb digital card used: 3 times
+   ending: ****
 
 ** Git Push:
 
@@ -146,4 +147,11 @@ sudo timedatectl set-timezone UTC
 sudo systemctl restart systemd-timesyncd.service
 systemctl status systemd-timesyncd
 timedatectl status
+#+end_src
+
+** tradingview-alerts setup
+#+begin_src bash
+npx @alleyway/create-tradingview-alerts-home
+cd tradingview-alerts-home
+npm install
 #+end_src

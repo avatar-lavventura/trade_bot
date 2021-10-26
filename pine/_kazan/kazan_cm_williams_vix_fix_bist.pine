@@ -1,0 +1,103 @@
+//@version=4
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy_vix", calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=false)
+fromMonth = 10
+fromDay   = 1
+thruMonth = 12
+thruDay   = 30
+fromYear  = 2021
+thruYear  = 2021
+start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+msg = timeframe.period + "_alert_bist"
+msg_aggr = msg + "_aggr"
+// vwma
+upper_band_value = input(3.0, title = "short_offset")  // ~~~___
+lower_band_value = input(3.5, title = "long_offset")   // ~~~
+ma = vwma(hlc3, 24)
+// Williams Vix Fix Formula
+pd = input(22, title="LookBack Period Standard Deviation High")
+bbl = input(20, title="Bolinger Band Length")
+mult = input(2.0    , minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+lb = input(50  , title="Look Back Period Percentile High")
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+new = input(false, title="Highlight Bars Below Use Original Criteria" )
+sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
+sbcc = input(false, title="Show Highlight Bar if WVF IS True")
+new2 = input(false, title="Highlight Bars Below Use FILTERED Criteria" )
+sbcFilt = input(true, title="Show Highlight Bar For Filtered Entry")
+sbcAggr = input(true, title="Show Highlight Bar For AGGRESSIVE Filtered Entry")
+new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
+sgb = input(false, title="Check Box To Turn Bars Gray?")
+//Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
+ltLB = input(40, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
+mtLB = input(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
+str = input(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
+//Alerts Instructions and Options Below...Inputs Tab
+new4 = input(false, title="Turn On/Off ALERTS Below" )
+new5 = input(false, title="To Activate Alerts You HAVE To Check The Boxes Below For Any Alert Criteria You Want")
+new6 = input(false, title="You Can Un Check The Box BELOW To Turn Off the WVF Histogram And Just See True/False Alert Criteria")
+swvf = input(true, title="Show Williams Vix Fix Histogram, Uncheck to Turn Off!")
+sa1 = input(false, title="Show Alert WVF = True?")
+sa2 = input(false, title="Show Alert WVF Was True Now False?")
+sa3 = input(false, title="Show Alert WVF Filtered?")
+sa4 = input(true, title="Show Alert WVF AGGRESSIVE Filter?")
+//Williams Vix Fix Formula
+wvf = ((highest(close, pd)-low)/(highest(close, pd)))*100
+sDev = mult * stdev(wvf, bbl)
+midLine = sma(wvf, bbl)
+lowerBand = midLine - sDev
+upperBand = midLine + sDev
+rangeHigh = (highest(wvf, lb)) * ph
+//Filtered Bar Criteria
+upRange = low > low[1] and close > high[1]
+upRange_Aggr = close > close[1] and close > open[1]
+//Filtered Criteria
+filtered = ((wvf[1] >= upperBand[1] or wvf[1] >= rangeHigh[1]) and (wvf < upperBand and wvf < rangeHigh))
+filtered_Aggr = (wvf[1] >= upperBand[1] or wvf[1] >= rangeHigh[1]) and not (wvf < upperBand and wvf < rangeHigh)
+//Alerts Criteria
+alert1 = wvf >= upperBand or wvf >= rangeHigh ? 1 : 0
+alert2 = (wvf[1] >= upperBand[1] or wvf[1] >= rangeHigh[1]) and (wvf < upperBand and wvf < rangeHigh) ? 1 : 0
+alert3 = upRange and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered ? 1 : 0
+alert4 = upRange_Aggr and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered_Aggr ? 1 : 0
+//Highlight Bar Criteria
+barcolor(sbcAggr and alert4 ? color.orange : na)
+barcolor(sbcFilt and alert3 ? color.fuchsia : na)
+barcolor(sbc and ((wvf[1] >= upperBand[1] or wvf[1] >= rangeHigh[1]) and (wvf < upperBand and wvf < rangeHigh)) ? color.aqua : na)
+barcolor(sbcc and (wvf >= upperBand or wvf >= rangeHigh) ? color.lime : na)
+barcolor(sgb and close ? color.gray : na)
+//Coloring Criteria of Williams Vix Fix
+col = wvf >= upperBand or wvf >= rangeHigh ? color.lime : color.gray
+col_aggressive = alert4 ? color.orange : color.red
+//Plots for Williams Vix Fix Histogram and Alerts
+plot(swvf and wvf ? wvf * -1 : na, title="Williams Vix Fix", style=plot.style_columns, linewidth = 4, color=col)
+plot(sa1 and alert1 ? alert1 : 0, title="Alert If WVF = True", style=plot.style_columns, linewidth=2, color=color.lime)
+plot(sa2 and alert2 ? alert2 : 0, title="Alert If WVF Was True Now False", style=plot.style_columns, linewidth=2, color=color.aqua)
+plot(sa3 and alert3 ? alert3 : 0, title="Alert Filtered Entry", style=plot.style_columns, linewidth=2, color=color.fuchsia)
+plot(sa4 and alert4 ? alert4 : 0, title="Alert Aggressive Filtered Entry", style=plot.style_columns, linewidth=2, color=color.orange)
+
+buy_signal  = (col_aggressive == color.orange or (col[1] == color.lime and col == color.gray))
+if strategy.position_size[0] != 0  // close position for alpy-bot new incoming alerts
+    if bar_index > abs(strategy.position_size) or (col[1] == color.gray and col == color.gray)
+        strategy.close_all(when=window())
+
+if buy_signal
+    if strategy.opentrades[0] == 0 or strategy.position_size < 0
+        if col_aggressive == color.orange
+            strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr)
+        else
+            strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
+    else
+        if bar_index > abs(strategy.position_size)
+            if strategy.position_size[0] != 0
+                strategy.close_all(when=window())
+            else
+                if col_aggressive == color.orange
+                    strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr)
+                else
+                    strategy.entry("Long", strategy.long, qty=bar_index, when=window(), alert_message=msg)

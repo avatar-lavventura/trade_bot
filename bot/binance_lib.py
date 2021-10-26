@@ -13,6 +13,7 @@
 
 import sys
 import time
+from contextlib import suppress
 
 from dateutil.parser import parse
 from forex_python.converter import CurrencyRates
@@ -28,7 +29,7 @@ from ebloc_broker.broker._utils.tools import (
 
 c = CurrencyRates()
 TOTAL_BALANCE = 1000
-_arrow = "=============="
+_arrow = "==========="
 arrow_in = _arrow + ">"
 arrow_out = "<" + _arrow
 
@@ -88,7 +89,7 @@ def futures_history(client, _symbol=None):
         latest_symbol_income = abs(float(latest_position["income"]))
     except Exception as e:
         if "Invalid API-key" in str(e):
-            log(f"E: {e}", "red")
+            log(f"E: {e}")
             sys.exit(1)
 
         print_tb()
@@ -96,6 +97,7 @@ def futures_history(client, _symbol=None):
         time.sleep(15)
         return
 
+    to_print = ""
     for future in history_log:
         if future["symbol"] != name_temp and "eksi" not in future["info"]:
             name_temp = future["symbol"]
@@ -111,19 +113,20 @@ def futures_history(client, _symbol=None):
                     _pad = " "
 
                 if _sum != 0.0:
+                    log(to_print, end="")
                     log(f"{_pad}%.4f" % _sum, _color, end="")
                     _lost_value = the_lost(_list)
                     if _lost_value == 0.00:
-                        log(f" | COMM={format(sum(commission), '.4f')} ", end="")
+                        log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
                     else:
-                        log(f" | COMM={format(sum(commission), '.4f')} ", end="")
+                        log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
                         log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", "red", end="")
 
                     log(f" {latest_time} ", "yellow")
 
                 _name = "{:<9}".format(name_temp)
                 if _sum != 0.0:
-                    log(f"==> {_name.replace('USDT', '')} ", end="")
+                    to_print = f"==> {_name.replace('USDT', '').replace('1000SHIB', 'SHIB ')} "
 
                 commission = []
                 _list = []
@@ -149,16 +152,12 @@ def futures_history(client, _symbol=None):
 
                     daily_progress = 0
                     counter = 0
-                    _name = "{:<9}".format(name_temp)
-                    log("\n" + local_dt.strftime("%d/%m/%Y %A"), "cyan")
-                    log(f"==> {_name.replace('USDT', '')} ", end="")
+                    log(f"\n [magenta]*[/magenta] [bold cyan]{local_dt.strftime('%d/%m/%Y %A')}")
 
                 _day = local_dt.strftime("%d")
 
-            try:
+            with suppress(Exception):
                 commission.append(comm_dict[future["tradeId"]])
-            except:
-                pass
 
     if commission_flag:
         _COMMISSON = sum(commission)
@@ -166,14 +165,16 @@ def futures_history(client, _symbol=None):
         daily_progress += sum(_list)
         _lost_value = the_lost(_list)
         if _lost_value == 0.00:
-            log(f" | COMM={format(sum(commission), '.4f')} ", end="")
+            log(to_print, end="")
+            log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
         else:
-            log(f" | COMM={format(sum(commission), '.4f')} ", end="")
-            log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", "red", end="")
+            log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
+            log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", "bold red", end="")
 
     _sum = _sum - sum(commission)
     daily_progress += _sum
     _color = get_color(_sum)
+    log(to_print, end="")
     if _sum > 0.0:
         log(f" {format(_sum, '.4f')}", _color, end="")
     else:
@@ -182,10 +183,10 @@ def futures_history(client, _symbol=None):
     _lost_value = the_lost(_list)
     if daily_progress != 0.0:
         if _lost_value == 0.00:
-            log(f" | COMM={format(sum(commission), '.4f')} ", end="")
+            log(f" | COMM={format(sum(commission), '.4f')} ", "bold", end="")
         else:
             log(f" | COMM={format(sum(commission), '.4f')} ", end="")
-            log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", "red", end="")
+            log(f"LOST={format(abs(the_lost(_list)), '.4f')} ", "bold red", end="")
 
     log(f" {latest_time}", "yellow")
     _color = get_color(daily_progress)
@@ -229,7 +230,7 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
                 else:
                     log(f"Sx{future['leverage']} ", "red", end="")
 
-                log(f"COMM={latest_symbol_income}", "blue", end="")
+                log(f"COMM={latest_symbol_income}", "bold blue", end="")
                 _s = _symbol.replace("USDT", "") + "BTC"
                 _btc_price = int(float(client.get_symbol_ticker(symbol="BTCUSDT")["price"]))
                 _token_price = float(client.get_symbol_ticker(symbol=_s)["price"])
