@@ -1,4 +1,4 @@
-# Alert format example:
+# Alert format example
 
 ```
 "ticker": "{{ticker}}",
@@ -22,21 +22,11 @@
   liquidate and rise back up 40%
 - Before buying it look for its BTC graph
 - Look for "W", its a good sign for a pump
-
---------------
-
 - izle: https://www.youtube.com/watch?v=UX4Jcv8vXkk
 - yazdigin bot divergence
 bulunca wallet balance in 1% i ile pozisyon alsin, pozisyonu kapamak icin aldigi
 fiyatin 1% uzagina limit order koysun yani 1% profit ile kapasin
 
-## Message
-
-```
-BUY SIGNAL 15 Minute
-==================
-{{exchange}}:{{ticker}}, price = {{close}}, volume = {{volume}}
-```
 # References
 - Squeeze momentum by LazyBear
 - [Custom timeframe indicator by ChrisMoody](
@@ -44,3 +34,4 @@ BUY SIGNAL 15 Minute
 - [VWAP oscillator by filbfilb](https://www.tradingview.com/script/9Zc2BnWa-VWAP-Oscillator/)
 - [TonyUX EMA scalper by tux](https://www.tradingview.com/script/egfSfN1y-TonyUX-EMA-Scalper-Buy-Sell/)
 - [EMA 20/50/100/200](https://www.tradingview.com/script/48ZWvclR-EMA-20-50-100-200/)
+- [Time frame period](https://tradingcode.net/tradingview/time-frame-period)

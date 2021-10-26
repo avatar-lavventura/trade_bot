@@ -9,6 +9,7 @@ class Config:
     def __init__(self) -> None:
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
+        self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
         self.new_day = "03:00:00"
         self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.initialize()
@@ -29,12 +30,17 @@ class Config:
         self.status = Yaml("status.yaml")
         self.take_profit = self.cfg["root"]["take_profit"] + 0.0001
         self.trbinance_usdt = self.goal["goal"]["trbinance"]["usdt"]
+
         # usdtperp
         self.USDTPERP_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["usdtperp"]["percent_change_to_add"]) + 0.01
         self.locked_per_limit_usdtperp = self.cfg["root"]["usdtperp"]["locked_percent_limit"]
         self.USDTPERP_MULTIPLY_RATIO = self.cfg["root"]["usdtperp"]["multiply_ratio"]
-        self.USDTPERP_MAX_POSITION_1m = self.cfg["root"]["usdtperp"]["max_pos_1m"]
-        self.USDTPERP_MAX_POSITION = self.cfg["root"]["usdtperp"]["max_pos"]
+
+        self.BASE_TIME_DURATION = "9m"
+        self.USDTPERP_MAX_POSITION["9m"] = self.cfg["root"]["usdtperp"]["max_pos"]
+        self.USDTPERP_MAX_POSITION["1m"] = self.cfg["root"]["usdtperp"]["max_pos_1m"]
+        self.USDTPERP_MAX_POSITION["21m"] = self.cfg["root"]["usdtperp"]["max_pos_21m"]
+
         self.ignore_below_usdt = self.cfg["root"]["ignore_below_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
         #
@@ -54,7 +60,7 @@ class Config:
         self.SPOT_MAX_POSITION = self.cfg["root"]["spot"]["max_pos"]
         self.SPOT_IGNORE_LIST = self.cfg["root"]["usdt"]["ignore"]
         self.SPOT_TIMESTAMP = self.timestamp["spot_timestamp"]["base"]
-        self.INITIAL_BTC_QTY = self.cfg["root"]["spot"]["INITIAL_BTC_QTY"]
+        self.initial_btc_quantity = self.cfg["root"]["spot"]["initial_btc_quantity"]
 
 
 config: Config = Config()

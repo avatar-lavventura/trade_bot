@@ -8,12 +8,18 @@ countdown () {  # https://superuser.com/a/611582/723632
    done
 }
 
+num=$(ps aux | grep -E "[p]ython3 discord_balance.py" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
+if [ $num -ge 1 ]; then
+    echo "Warning: run_balance is already running, count="$num
+    exit
+fi
+
 while true
 do
     python3 discord_balance.py
     # python3 binance_balance.py
-    echo -e "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-    countdown 60
+    echo -e "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+    countdown 30
 done
 # LOG_FILE=_binance_balance.log
 # nohup python3 -u binance_balance.py >> $LOG_FILE 2>&1 &

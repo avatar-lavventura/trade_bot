@@ -2,13 +2,12 @@ root:
   ignore_below_usdt: 0.01
   isolated_wallet_limit: 100
   spot:
-    INITIAL_BTC_QTY: 0.00015
+    initial_btc_quantity: 0.00015
     locked_percent_limit: 95
     max_pos: 1
     max_pos_1m: 1
     multiply_ratio: 1.0
     percent_change_to_add: 5.0
-  stop_locked_per: 50
   take_profit: 0.005
   usdt:
     ignore:
@@ -16,7 +15,7 @@ root:
     locked_percent_limit: 95
     max_pos: 0.1
     multiply_ratio: 0.01
-    percent_change_to_add: 5
+    percent_change_to_add: 6
     pos:
       1s: 15
       1s_sell: 15
@@ -24,10 +23,11 @@ root:
     ignore:
     - PAIR
     locked_percent_limit: 10
-    max_pos: 2
+    max_pos: 3
     max_pos_1m: 3
+    max_pos_21m: 1
     multiply_ratio: 1.5
-    percent_change_to_add: 5.0
+    percent_change_to_add: 6
     pos:
       long:
         1m: 13.0
@@ -35,3 +35,4 @@ root:
       short:
         1m: 13.0
         base: 12.0
+    stop_locked_per: 50

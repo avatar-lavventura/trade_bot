@@ -5,45 +5,42 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      calc_on_every_tick=true, pyramiding=100000,
      currency=currency.USD, commission_type=strategy.commission.percent,
      commission_value=0.1, overlay=false)
-fromMonth = 8
+fromMonth = 10
 fromDay   = 1
 thruMonth = 12
 thruDay   = 30
 fromYear  = 2021
 thruYear  = 2021
-testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
-testPeriodStop  = timestamp(thruYear, thruMonth, thruDay, 0, 0)
 start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
-msg = "enter_1m"
-// VMMA
-lower_band_value = input(3.0, title = "long_offset")
-upper_band_value = input(3.0, title = "short_offset")  // 3.6 safer
-ma = vwma(hlc3, 24)
+msg = "enter_" + timeframe.period
+// vwma
+lower_band_value = input(3.5, title = "long_offset")
+upper_band_value = input(3.0, title = "short_offset")
+ma = vwma(hlc3, 24)n
 long_VWMA  = close <= ma * (1 - lower_band_value / 100)
 short_VWMA = close >= ma * (1 + lower_band_value / 100)
 // CM_Williams_Vix_Fix
 pd = input(22, title="LookBack Period Standard Deviation High")
-bbl = input(20, title="Bolinger Band Length")
-mult = input(2.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+bl = input(20, title="Bolinger Band Length")
+mu = input(2.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
 lb = input(50, title="Look Back Period Percentile High")
 ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
 pl = input(1.01, title="Lowest Percentile - 1.10=90%, 1.05=95%, 1.01=99%")
 hp = input(false, title="Show High Range - Based on Percentile and LookBack Period")
 sd = input(false, title="Show Standard Deviation Line")
 wvf = ((highest(close, pd) - low) / (highest(close, pd))) * 100
-sDev = mult * stdev(wvf, bbl)
+sDev = mu * stdev(wvf, bl)
 midLine = sma(wvf, bbl)
 _upper_band = midLine + sDev
 rangeHigh = (highest(wvf, lb)) * ph
 rangeLow = (lowest(wvf, lb)) * pl
 col = wvf >= _upper_band or wvf >= rangeHigh ? color.lime : color.gray
-plot(hp and rangeHigh ? rangeHigh : na, title="range high percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
-plot(hp and rangeLow ? rangeLow : na, title="range high percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(hp and rangeHigh ? rangeHigh : na, title="range_high_percentile", style=plot.style_linebr, linewidth=4, color=color.orange)
+plot(hp and rangeLow ? rangeLow : na, title="range_high_percentile", style=plot.style_line, linewidth=4, color=color.orange)
 plot(sd and _upper_band ? _upper_band : na, title="upper band", style=plot.style_line, linewidth=3, color=color.aqua)
 plot(wvf, title="williams_vix_fix", style=plot.style_histogram, linewidth=4, color=col)
-//
 buy_signal  = (col[1] == color.lime and col == color.gray) and long_VWMA
 sell_signal = (col[1] == color.lime and col == color.gray) and short_VWMA and close > 0.1
 if strategy.position_size[0] != 0  // close position for alpy-bot new incoming alerts

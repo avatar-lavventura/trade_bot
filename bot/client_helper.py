@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+from contextlib import suppress
 from pathlib import Path
 
 import discord
@@ -14,7 +15,7 @@ logger.setLevel(logging.CRITICAL)
 
 class DiscordClient:
     def __init__(self):
-        _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+        _config = Yaml(Path.home() / ".binance.yaml")
         self.bot = discord.Client()
         self.TOKEN = _config["discord"]["TOKEN"]
         self.channel_name = _config["discord"]["CHANNEL_NAME"]
@@ -35,16 +36,16 @@ class ClientHelper:
     def _format(self, value, decimal=2):
         return format(float(value), f".{decimal}f")
 
-    def transfer_futures_to_spot(self, amount):
-        self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
-
     def transfer_spot_to_futures(self, amount):
         self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="1")
 
     def transfer_spot_to_margin(self, amount):
         self.client.transfer_spot_to_margin(asset="USDT", amount=float(amount), type="1")
 
-    def get_balance_margin_USDT(self) -> float:
+    def transfer_futures_to_spot(self, amount):
+        self.client.futures_account_transfer(asset="USDT", amount=float(amount), type="2")
+
+    def get_balance_margin_usdt(self) -> float:
         try:
             _len = len(self.client.get_margin_account()["userAssets"])
             for x in range(_len):
@@ -64,15 +65,13 @@ class ClientHelper:
         for balance in balances["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
-                try:
+                with suppress(Exception):
                     btc_quantity = float(balance["free"]) + float(balance["locked"])
                     if asset == "BTC":
                         sum_btc += btc_quantity
                     else:
                         _price = self.client.get_symbol_ticker(symbol=asset + "BTC")
                         sum_btc += btc_quantity * float(_price["price"])
-                except:
-                    pass
 
         current_btc_price_USD = self.client.get_symbol_ticker(symbol="BTCUSDT")["price"]
         own_usd = sum_btc * float(current_btc_price_USD)
