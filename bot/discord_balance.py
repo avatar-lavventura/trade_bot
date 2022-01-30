@@ -2,15 +2,18 @@
 
 import logging
 from pathlib import Path
-from bot import helper
+
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from ebloc_broker.broker._utils.tools import get_dt_time
-from ebloc_broker.broker._utils.yaml import Yaml
+from bot import binance_balance, cfg, helper
 from bot.binance_balance import process_main
+from ebloc_broker.broker._utils import _log
+from ebloc_broker.broker._utils.tools import print_tb
+from ebloc_broker.broker._utils.yaml import Yaml
 
 logging.getLogger("apscheduler.executors.default").propagate = False
+_log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
 
 
 class Discord_Alpy:
@@ -18,6 +21,7 @@ class Discord_Alpy:
         try:
             _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
             self.channel: str = ""
+            self.channel_alerts: str = ""
             self.client = discord.Client()
             self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
             self.TOKEN = str(_config["discord"]["TOKEN"])
@@ -28,20 +32,20 @@ class Discord_Alpy:
         except KeyboardInterrupt:
             self.client.loop.close()
             print("Program ended.")
+        except Exception as e:
+            print_tb(e)
+            breakpoint()  # DEBUG
 
     async def task(self):
         """Add task in order to schedule discord to send messages.
 
-        - every minute, 10th second: (..., minute="*", second="10")
-        - every 30 seconds: (..., second="*/30")
-        - at 30th second: (..., second="30")
+        - runs every minute, 10th second: (..., minute="*", second="10")
+        - runs every 30 seconds: (..., second="*/30")
+        - runs at 30th second: (..., second="30")
         """
         await helper.exchange.set_markets()
 
         scheduler = AsyncIOScheduler()
-        # scheduler.add_job(self.send_msg, "cron", hour="12")
-        # scheduler.add_job(self.send_msg, "cron", hour="18")
-        # For test purposes
         scheduler.add_job(self._process_main, "cron", second="*/20", timezone="Europe/Istanbul")
         scheduler.start()
 
@@ -52,20 +56,13 @@ class Discord_Alpy:
         if not self.channel:
             self.channel = discord.utils.get(self.client.get_all_channels(), name=self.channel_name)
 
+        if not self.channel_alerts:
+            self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
+
     async def _process_main(self):
         await self.pre_discord_setup()
-        await process_main(self.channel)
-
-    async def send_msg(self, msg=""):
-        await self.pre_discord_setup()
-        if not self.channel:
-            print("E: channel is empty")
-        else:
-            if not msg:
-                msg = f"Tick! The time is: {get_dt_time().strftime('%Y-%m-%d %H:%M:%S')}"
-                print(msg)
-                await self.channel.send(msg)
-        # await binance_balance.process_main(channel)
+        await process_main(self)
 
 
-_discord = Discord_Alpy()
+if __name__ == "__main__":
+    Discord_Alpy()

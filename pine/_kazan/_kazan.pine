@@ -1,0 +1,135 @@
+//@version=4
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy_vix", calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
+     process_orders_on_close=true, default_qty_type=strategy.cash,
+     calc_on_every_tick=true, pyramiding=100000,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1, overlay=false)
+
+fromMonth = 10
+fromDay   = 1
+thruMonth = 12
+thruDay   = 30
+fromYear  = 2021
+thruYear  = 2021
+start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+msg = timeframe.period + "_enter"
+msg_aggr = msg + "_aggr"
+
+// wave_trend
+n1 = 10  // channel Length
+n2 = 21  // average Length
+// obLevel1 = 60  // Over Bought Level 1
+// obLevel2 = 53  // Over Bought Level 2
+osLevel2 = -53  // Over Sold Level 2
+// osLevel1 = -60  // Over Sold Level 1
+src = hlc3
+esa = ema(src, n1)
+d = ema(abs(src - esa), n1)
+ci = (src - esa) / (0.015 * d)
+tci = ema(ci, n2)
+wt1 = tci  // green-line
+// wt2 = sma(wt1, 4)  // red-line
+is_wave_trend_check = wt1 <= osLevel2
+
+// wich_hunter_vwap
+vwap_period = input(title="Period", defval=5)
+vwap_perc_above = input(title = "Percentage Above (Short Entry)", defval=2.0) // ~~~___
+vwap_perc_below = input(title = "Percentage Below (Long Entry)", defval=2.0)  // ~~~
+vwap_label_offset = input(title = "Label Offset", defval=15)
+vwap_source = hlc3
+vwap_price_volume = vwap_source * volume
+sum_vwap_source = sum(vwap_price_volume, vwap_period)
+sum_volume = sum(volume, vwap_period)
+vwap_value = sum_vwap_source / sum_volume
+vwap_above = vwap_value * (1 + (vwap_perc_above / 100))
+vwap_below = vwap_value * (1 - (vwap_perc_below / 100))
+long_VWMA = close <= vwap_value * (1 - (vwap_perc_below / 100))
+
+// vwma
+// upper_band_value = input(3.0, title = "short_offset")  // ~~~___
+// lower_band_value = input(3.5, title = "long_offset")   // ~~~
+// ma = vwma(hlc3, 24)
+// long_VWMA  = close <= ma * (1 - lower_band_value / 100)
+// short_VWMA = close >= ma * (1 + lower_band_value / 100)
+
+// williams vix fix formula
+pd = input(22, title="LookBack Period Standard Deviation High")
+bbl = input(20, title="Bolinger Band Length")
+mult = input(2.0    , minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+lb = input(50  , title="Look Back Period Percentile High")
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+new = input(false, title="Highlight Bars Below Use Original Criteria" )
+sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
+sbcc = input(false, title="Show Highlight Bar if WVF IS True")
+new2 = input(false, title="Highlight Bars Below Use FILTERED Criteria" )
+new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
+sgb = input(false, title="Check Box To Turn Bars Gray?")
+// Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
+ltLB = input(40, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
+mtLB = input(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
+str = input(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
+// Alerts Instructions and Options Below...Inputs Tab
+new4 = input(false, title="Turn On/Off ALERTS Below" )
+new5 = input(false, title="To Activate Alerts You HAVE To Check The Boxes Below For Any Alert Criteria You Want")
+new6 = input(false, title="You Can Un Check The Box BELOW To Turn Off the WVF Histogram And Just See True/False Alert Criteria")
+swvf = input(true, title="Show Williams Vix Fix Histogram, Uncheck to Turn Off!")
+sa1 = input(false, title="Show Alert WVF = True?")
+sa2 = input(false, title="Show Alert WVF Was True Now False?")
+sa3 = input(false, title="Show Alert WVF Filtered?")
+sa4 = input(true, title="Show Alert WVF AGGRESSIVE Filter?")
+// Williams Vix Fix Formula
+wvf = ((highest(close, pd)-low)/(highest(close, pd)))*100
+sDev = mult * stdev(wvf, bbl)
+midLine = sma(wvf, bbl)
+upper_band = midLine + sDev
+rangeHigh = (highest(wvf, lb)) * ph
+//Filtered Bar Criteria
+upRange = low > low[1] and close > high[1]
+upRange_aggr = close > close[1] and close > open[1]
+// Filtered Criteria
+filtered = ((wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and (wvf < upper_band and wvf < rangeHigh))
+filtered_aggr = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and not (wvf < upper_band and wvf < rangeHigh)
+// Alerts Criteria
+alert1 = wvf >= upper_band or wvf >= rangeHigh ? 1 : 0
+alert2 = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and (wvf < upper_band and wvf < rangeHigh) ? 1 : 0
+alert3 = upRange and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered ? 1 : 0
+alert4 = upRange_aggr and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered_aggr ? 1 : 0
+// Highlight Bar Criteria
+barcolor(alert3 ? color.fuchsia : na)
+barcolor(alert4 ? color.orange : na)
+barcolor(sbc and ((wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and (wvf < upper_band and wvf < rangeHigh)) ? color.aqua : na)
+barcolor(sbcc and (wvf >= upper_band or wvf >= rangeHigh) ? color.lime : na)
+barcolor(sgb and close ? color.gray : na)
+// Coloring Criteria of Williams Vix Fix
+col = wvf >= upper_band or wvf >= rangeHigh ? color.lime : color.gray
+col_aggressive = alert4 ? color.orange : color.red
+// Plots for Williams Vix Fix Histogram and Alerts
+plot(swvf and wvf ? wvf * -1 : na, title="Williams Vix Fix", style=plot.style_columns, linewidth = 4, color=col)
+plot(sa1 and alert1 ? alert1 : 0, title="alert if WVF = True", style=plot.style_columns, linewidth=2, color=color.lime)
+plot(sa2 and alert2 ? alert2 : 0, title="alert if WVF was true now false", style=plot.style_columns, linewidth=2, color=color.aqua)
+plot(sa3 and alert3 ? alert3 : 0, title="alert filtered entry", style=plot.style_columns, linewidth=2, color=color.fuchsia)
+plot(sa4 and alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.style_columns, linewidth=2, color=color.orange)
+// Buy Alerts
+buy_signal  = (col_aggressive == color.orange or (col[1] == color.lime and col == color.gray)) and long_VWMA and is_wave_trend_check
+if strategy.position_size[0] != 0  // close position for alpy-bot new incoming alerts
+    if bar_index > abs(strategy.position_size) or (col[1] == color.gray and col == color.gray)
+        strategy.close_all(when=window())
+
+if buy_signal
+    if strategy.opentrades[0] == 0 or strategy.position_size < 0
+        if col_aggressive == color.orange
+            strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr)
+        else
+            strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
+    else
+        if bar_index > abs(strategy.position_size)
+            if strategy.position_size[0] != 0
+                strategy.close_all(when=window())
+            else
+                if col_aggressive == color.orange
+                    strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr)
+                else
+                    strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)

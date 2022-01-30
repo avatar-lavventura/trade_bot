@@ -1,23 +1,12 @@
 #    -*- mode: org -*-
 
 * alpy
-** TODO Spot tarafinda 4h cross sinyal 3AM oncesi gelirse al
-** TODO  `bar_index` on pine strategy
 ** TODO save timestamp for orders to record its bar_index
 or compare current bar_index value with latest position's bar index.
-** TODO Carry usdt from spot if there not enough in futures
 ** TODO Give alert if 10% is locked and alert came for that pair
 ** TODO run_app log disable writing into a file?
 ** TODO 30 dakika icinde ters yone poz acma
 ex: 3:50 SHORT ... 4:12 LONG gelirse, 30 dakika icinde ters yone sinyal geldigi
 icin ignore yap// prev position side
-** TODO trade_main() call using flask-apscheduler
-https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
-https://github.com/viniciuschiele/flask-apscheduler
-** TODO yaml: lock/re-load/modify/write and make sure you catch any setting of something already set by another process.
 ** TODO 3. ekleme 9% gorurse 2 kat ekleme yap
-** TODO binance_balance add overall lost to left end
-** TODO calculate leverage
-** TODO 1 saniyelikte SELL sinyali gelirse ve USDTPERP de varsa kagit usdt-spot ta buy yerine usdtprep de sell yap
-** TODO liq convert timestamp into normal date
-** TODO tolganin dedigini 15 dakikalik yerine 4 saatlik band olarak dene
+** TODO python code at home machine to add new added pairs into TV alert
