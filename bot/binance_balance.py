@@ -7,7 +7,7 @@ from typing import Dict
 from ccxt.base.errors import RequestTimeout  # noqa
 from filelock import FileLock
 
-from bot import cfg, helper
+from bot import helper
 from bot.bot_helper_async import TP
 from bot.bot_helper_async_usdt import BotHelperUsdtAsync
 from bot.config import config
