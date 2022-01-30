@@ -5,8 +5,10 @@
 //Alerts Enabled for 4 Different Criteria
 //Ability To Plot Alerts True/False Conditions on top of the WVF Histogram
 //Or Get Rid Of the Histogram and just see True/False Alerts Conditions.
+//
 // __ https://www.tradingview.com/script/pJpXG5JH-CM-Williams-Vix-Fix-V3-Ultimate-Filtered-Alerts/
 // __ https://vimeopro.com/user32804960/tradingview-indicators/video/115973132
+// **Designed for daily chart**
 
 study(title="CM_Williams_Vix_Fix_V3_Ultimate_Filtered_Alerts", shorttitle="CM_WVF_V3_Ult", overlay=false)
 //Inputs Tab Criteria.

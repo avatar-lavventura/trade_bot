@@ -1,0 +1,17 @@
+files:
+  input: pairs.csv
+tradingview:  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  chartUrl: https://www.tradingview.com/chart/rg5CI6t1/?symbol=BINANCE%3ABTCUSDT
+  interval: 1m
+alert:
+  condition:
+    primaryLeft: alpy_vix
+  actions:
+    notifyOnApp: false
+    showPopup: false
+    sendEmail: false
+    webhook:
+      enabled: true
+      url: "https://alpyrbot.duckdns.org/webhook"
+  message: >
+    {{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},{{strategy.position_size}},{{time}},

@@ -15,10 +15,10 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 class Discord_Alpy:
     def __init__(self):
         try:
-            _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+            cfg = Yaml(Path(f"{Path.home()}/.binance.yaml"))
             self.client = discord.Client()
-            self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
-            self.TOKEN = str(_config["discord"]["TOKEN"])
+            self.channel_name = str(cfg["discord"]["CHANNEL_NAME"])
+            self.TOKEN = str(cfg["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
         except SystemExit:
@@ -37,7 +37,6 @@ class Discord_Alpy:
         scheduler = AsyncIOScheduler()
         # scheduler.add_job(self.send_msg, "cron", hour="12")
         # scheduler.add_job(self.send_msg, "cron", hour="18")
-        # For test purposes
         scheduler.add_job(self.send_msg, "cron", second="*/20", timezone="Europe/Istanbul")
         scheduler.start()
 

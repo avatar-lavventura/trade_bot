@@ -114,3 +114,145 @@ CLOSED: [2021-10-16 Sat 19:08]
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE if pozition size 12$ multiply ratio should be min 1
+CLOSED: [2021-11-07 Sun 11:41]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-11-07 Sun 11:41
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE liq convert timestamp into normal date
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE calculate leverage
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE tolganin dedigini 15 dakikalik yerine 4 saatlik band olarak dene
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 1 dakikalikta turunca olunca gir
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE accept CHESS
+CLOSED: [2021-12-05 Sun 12:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE SPOT timestamp update yap
+CLOSED: [2021-12-05 Sun 12:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE `bar_index` on pine strategy
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Spot tarafinda 4h cross sinyal 3AM oncesi gelirse al
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE trade_main() call using flask-apscheduler
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
+https://github.com/viniciuschiele/flask-apscheduler
+
+* DONE yaml: lock/re-load/modify/write and make sure you catch any setting of something already set by another process.
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE binance_balance add overall lost to left end
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 1 saniyelikte SELL sinyali gelirse ve USDTPERP de varsa kagit usdt-spot ta buy yerine usdtprep de sell yap
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE carry usdt from spot if there not enough in futures
+CLOSED: [2022-01-19 Wed 15:30]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-01-19 Wed 15:30
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
