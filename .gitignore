@@ -1,3 +1,6 @@
+requirements.txt.bak
+bot/program.log
+*.*.bak
 *.lock
 .*.lock
 --force
@@ -20,7 +23,6 @@ node_modules/
 user_data/
 package-lock.json
 pairs_temp.csv
-tradingview-alerts/config.yml
 bot/.env_secret
 InsufficientFunds
 InvalidOrder
@@ -31,3 +33,10 @@ timestamp.yaml
 cmd.log
 liq.log
 progress.log
+.mypy_cache/
+bot.egg-info/
+status.yaml
+*.yaml~
+run_balance.yaml
+/.mypy_cache/
+.mypy_cache/

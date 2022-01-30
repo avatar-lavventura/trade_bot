@@ -1,8 +1,8 @@
 files:
-  input: pairs.csv
+  input: pairs_usdt_spot.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/ZgERyOFj/?symbol=BINANCE%3ASUSHIUSDTPERP
-  interval: 21m  # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  chartUrl: https://www.tradingview.com/chart/N3Qrs2jN/
+  interval: 1s # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
 alert:
   condition:
     primaryLeft: alpy_vix

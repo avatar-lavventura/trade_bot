@@ -1,4 +1,15 @@
 //@version=4
+
+// RSI DIVERGENCE is a difference between a fast and a slow RSI . Default values
+// are 5 for the fast one and 14 for the slow one.  You can use this indicator in 2
+// different ways: normal RSI: check double or triple top/bottom on a chart
+// meanwhile RSI is descending/ascending (check the example on chart) signal line:
+// when RSI Divergence cross zero line from bottom to top you get a buy signal (the
+// line become green), vice versa when the RSI Divergence cross zero line in the
+// opposite way you get a sell signal (the line become red)
+//
+// https://www.tradingview.com/script/fH6e5TuN-RSI-Divergence/
+
 study(title="RSI Divergence", shorttitle="RSI Divergence")
 src_fast = security(syminfo.tickerid, "60", close)
 src_slow = security(syminfo.tickerid, "60", close)

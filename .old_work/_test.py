@@ -31,7 +31,7 @@ if __name__ == "__main__":  # noqa: C901
         balances = client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] == asset:
-                asset_balance = float(balance["free"]) + float(balance["locked"])
+                asset_balance = float(balance["free_usdt"]) + float(balance["locked"])
                 break
 
         quantity = 0
@@ -58,5 +58,5 @@ if __name__ == "__main__":  # noqa: C901
 
     # balances = client.get_account()
     # for balance in balances["balances"]:
-    #     if balance["asset"] != "BNB" and float(balance["free"]) + float(balance["locked"]) > 0.00000000:
+    #     if balance["asset"] != "BNB" and float(balance["free_usdt"]) + float(balance["locked"]) > 0.00000000:
     #         print(balance)

@@ -35,7 +35,7 @@ def load_obj(name):
 
 
 def check_binance_obj():
-    global client
+    client = None
     try:
         client = load_obj("binance")
     except:
@@ -45,3 +45,5 @@ def check_binance_obj():
         api_secret = str(_cfg["b"]["secret"])
         client = Client(api_key, api_secret)
         save_obj("binance", client)
+
+    return client

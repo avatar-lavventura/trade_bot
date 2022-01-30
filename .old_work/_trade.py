@@ -144,8 +144,8 @@ class BotHelper:
         balances = self.client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] not in ["BTC", "BNB"]:
-                if float(balance["locked"]) > 0.0 or float(balance["free"]) > 0.0:
-                    # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
+                if float(balance["locked"]) > 0.0 or float(balance["free_usdt"]) > 0.0:
+                    # TODO: check float(balance["free_usdt"]) USDT value if > 1.0 USDT
                     btc_open_position_size += 1
                     if not flag:
                         flag = True
@@ -214,7 +214,7 @@ class BotHelper:
         balances = self.client.get_account()
         for balance in balances["balances"]:
             if balance["asset"] == asset:
-                return float(balance["free"]) + float(balance["locked"])
+                return float(balance["free_usdt"]) + float(balance["locked"])
         return 0.0
 
     def get_spot_entry(self):
@@ -397,8 +397,7 @@ class BotHelper:
             return float(format(initial_amount, ".4f"))
 
     def update_position_size(self, current_price):
-        """Handles order's notional must be no smaller than 5.0 (unless you choose
-        reduce only)."""
+        """Handle order's notional."""
         if self.strategy.position_size >= 1.0 and self.strategy.position_size * current_price < 5.0:
             self.strategy.position_size += 1
 

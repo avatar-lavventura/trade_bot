@@ -27,7 +27,7 @@ bot = BotHelper(client)
 
 for balance in balances["balances"]:
     if balance["asset"] == "USDT":
-        usdt_balance = balance["free"]
+        usdt_balance = balance["free_usdt"]
         break
 
 

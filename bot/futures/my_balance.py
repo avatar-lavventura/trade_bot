@@ -20,6 +20,15 @@ bot = BotHelper(client)
 bot_async = BotHelperAsync()
 
 
+def get_gold(gold_gr: float) -> float:
+    """Return silver price."""
+    msft = yf.Ticker("GC=F")
+    info = msft.info
+    gold_oz_price = info["regularMarketPrice"]
+    oz_to_gram = 31.103477
+    return (gold_oz_price / oz_to_gram) * gold_gr
+
+
 def get_silver(silver_gr: float) -> float:
     """Return silver price."""
     msft = yf.Ticker("SI=F")
@@ -72,7 +81,7 @@ async def fetch_balance() -> float:  # noqa
                 symbol_temp = symbol.replace("/USDT", "")
                 log(f"==> {symbol_temp} entry={entry_price}", end="")
                 unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
-                if unrealized_profit < 0.0:
+                if unrealized_profit < 0:
                     log(f" {unrealized_profit}", "red", end="")
                 else:
                     log(f" {unrealized_profit}", "green", end="")

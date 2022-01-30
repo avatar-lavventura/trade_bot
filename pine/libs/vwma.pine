@@ -1,10 +1,10 @@
 //@version=4
 strategy(title="vwma", overlay=true)
 upperBandValue = input(3.0, title = "Short Offset")
-lowerBandValue = input(3.0, title = "Long Offset")
+lowerBandValue = input(3.5, title = "Long Offset")
 src = hlc3
 len = 24
 ma = vwma(src, len)
-plot(ma, title="VWMA", color=color.blue)
-upperBand = plot(ma * (1 + upperBandValue / 100), title="Upper Band", color=color.red)
-lowerBand = plot(ma * (1 - lowerBandValue / 100), title="Lower Band", color=color.green)
+plot(ma, title="vwma", color=color.blue)
+upperBand = plot(ma * (1 + upperBandValue / 100), title="upper_band", color=color.red)
+lowerBand = plot(ma * (1 - lowerBandValue / 100), title="lower_band", color=color.green)

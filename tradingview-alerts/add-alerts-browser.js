@@ -126,8 +126,7 @@ const addAlertsMain = async (configFileName) => {
             return document.title.includes("Denied");
         });
     }
-    await askQuestion("> Are you sure you want to continue? "); //
-
+    await askQuestion("#> Are you sure you want to continue? (CTRL + C to quit)");
     if (accessDenied) {
         if (config.tradingview.username && config.tradingview.password) {
             await login(page, config.tradingview.username, config.tradingview.password);
