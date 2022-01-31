@@ -57,7 +57,7 @@ HOME = str(Path.home())
 _log.ll.LOG_FILENAME = "progress.log"
 _log.ll.IS_PRINT = False
 
-SEP = "====================================================================================="
+SEP = "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
 headers = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95"
@@ -472,7 +472,7 @@ def trade_cont(client, balances):
     print(client.get_asset_balance(asset=MAIN_ASSET))
     # free_asset = get_free_balance()
     # info = client.get_account()
-    # margin ===============================================
+    # margin # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # print(client.get_open_margin_orders(symbol='ETHBTC'))
     # for d in client.get_margin_account()['userAssets']:
     #     if d['free'] != "0":
@@ -480,7 +480,7 @@ def trade_cont(client, balances):
 
     # ua = {d['asset']: d for d in data['userAssets']}
     # print(ua['BTC']['free'])
-    # ======================================================
+    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     sum_btc = 0.0
     for _balance in balances["balances"]:
         asset = _balance["asset"]

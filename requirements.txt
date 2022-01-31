@@ -1,6 +1,6 @@
 aiodns==3.0.0
 aiofiles==0.7.0
-aiohttp==3.7.4.post0
+aiohttp==3.8.1
 appdirs==1.4.4
 APScheduler==3.7.0
 astroid==2.7.2
@@ -14,7 +14,7 @@ black==21.9b0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==1.71.36
+ccxt==1.72.30
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -94,7 +94,7 @@ PyYAML==5.4.1
 Quart==0.15.1
 regex==2021.8.21
 requests==2.26.0
-rich==10.12.0
+rich==11.0.0
 rope==0.21.0
 ruamel.yaml==0.17.13
 ruamel.yaml.clib==0.2.6
@@ -124,8 +124,8 @@ websockets==9.1
 Werkzeug==2.0.1
 wrapt==1.12.1
 wsproto==1.0.0
-yapf==0.31.0
-yarl==1.6.3
+yapf==0.32.0
+yarl==1.7.2
 yfinance==0.1.63
 zope.event==4.5.0
 zope.interface==5.4.0

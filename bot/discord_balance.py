@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import logging
+import sys
+from contextlib import suppress
 from pathlib import Path
 
 import discord
@@ -17,9 +19,13 @@ _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
 
 
 class Discord_Alpy:
-    def __init__(self):
+    def __init__(self, _type):
         try:
-            _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+            self._type = cfg.TYPE = _type
+            helper.exchange.init(_type)
+
+            print(f" * bot_type={_type}")
+            _config = Yaml(Path.home() / ".binance.yaml")
             self.channel: str = ""
             self.channel_alerts: str = ""
             self.client = discord.Client()
@@ -30,6 +36,9 @@ class Discord_Alpy:
         except SystemExit:
             pass
         except KeyboardInterrupt:
+            with suppress(KeyboardInterrupt):
+                self.client.loop.run_until_complete(binance_balance.bot_async.close())
+
             self.client.loop.close()
             print("Program ended.")
         except Exception as e:
@@ -65,4 +74,9 @@ class Discord_Alpy:
 
 
 if __name__ == "__main__":
-    Discord_Alpy()
+    try:
+        _type = sys.argv[1:][0]
+    except:
+        _type = "usdt"
+
+    Discord_Alpy(_type)

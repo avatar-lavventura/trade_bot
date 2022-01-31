@@ -39,10 +39,10 @@ async def startup():
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
-    from bot.client_helper import ClientHelper, DiscordClient
-    from bot import helper
-    from bot.user_setup import check_binance_obj
     import bot.trade_async as bot_trade
+    from bot import helper
+    from bot.client_helper import ClientHelper, DiscordClient
+    from bot.user_setup import check_binance_obj
     from ebloc_broker.broker._utils import _log
 
     _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
@@ -52,6 +52,7 @@ async def startup():
     loop.create_task(app.discord_client.bot.connect())
     client, app.balances = check_binance_obj()  # TODO
     app.client_helper = ClientHelper(client)
+    helper.exchange.init_both()
     await helper.exchange.set_markets()
     app.bot_trade = bot_trade.BotHelper(client, app.discord_client)
     app._bot_trade = bot_trade
@@ -93,7 +94,6 @@ async def webhook():
 
 def main():
     app.run("", port=5000, debug=False)
-    print("end")
 
 
 if __name__ == "__main__":

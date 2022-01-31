@@ -7,9 +7,9 @@ from typing import Dict
 from ccxt.base.errors import RequestTimeout  # noqa
 from filelock import FileLock
 
-from bot import helper
+from bot import cfg, helper
 from bot.bot_helper_async import TP
-from bot.bot_helper_async_usdt import BotHelperUsdtAsync
+from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
@@ -17,7 +17,7 @@ from ebloc_broker.broker._utils.tools import _exit, _time, delete_multiple_lines
 from ebloc_broker.broker.errors import QuietExit
 
 RUN_FUTURES = False
-bot_async = BotHelperUsdtAsync()
+bot_async = BotHelperSpotAsync()
 
 
 def future_stats(usdt_bal, unix_timestamp_ms):
@@ -240,9 +240,6 @@ def update_spot_timestamp(unix_timestamp_ms: int):
     if unix_timestamp_ms > config.run_balance["root"]["timestamp"]:
         config.run_balance["root"]["timestamp"] = unix_timestamp_ms
 
-    if unix_timestamp_ms > config.timestamp["spot_timestamp"]["base"]:
-        config.timestamp["spot_timestamp"]["base"] = unix_timestamp_ms
-
 
 def _percent(amount, ratio):
     return float(format(amount * ratio / 100, ".2f"))
@@ -261,7 +258,7 @@ async def process_main(obj):
             unix_timestamp_ms = helper.exchange.get_spot_timestamp()
 
         update_spot_timestamp(unix_timestamp_ms)  # first update spot.timestamp
-        *_, usdt_bal, free_usdt = await bot_async.spot_balance()
+        *_, usdt_bal, free_usdt = await bot_async.spot_balance(balance_type=cfg.TYPE)
         if RUN_FUTURES:
             bot_async.futures_balance = await helper.exchange.future.fetch_balance()
             unix_timestamp_ms = helper.exchange.get_future_timestamp()
@@ -294,12 +291,12 @@ async def process_main(obj):
         elif helper.is_start and config.status["spot"]["pos_count"] == 0:
             delete_multiple_lines(1)
 
-        # for alert in config.ALERTS:
-        #     if _alert:
-        #         asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
-        #         if float(asset_price) > _alert["price"]:
-        #             await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=19)
-
+        for alert in config.ALERTS:
+            _alert = config.ALERTS[alert]
+            if _alert:
+                asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
+                if float(asset_price) > _alert["price"]:
+                    await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=19)
     except RequestTimeout:
         _exit("Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
@@ -342,6 +339,3 @@ if __name__ == "__main__":
         print_tb(e)
         with suppress(KeyboardInterrupt):
             loop.run_until_complete(bot_async.close())
-
-        # time.sleep(120)
-        # loop.run_until_complete(main())  # infinite loop

@@ -6,8 +6,7 @@ from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
-from bot import helper
-from bot._mongodb import Mongo
+from bot import cfg, helper
 from bot.binance_balance import create_limit_order, create_market_order
 from bot.bot_helper_async import TP, BotHelperAsync, TP_calculate
 from bot.client_helper import DiscordClient
@@ -95,9 +94,9 @@ class BotHelper:
         self.mongoDB = Mongo(mc, mc["trader_bot"]["order"])
         self.unix_timestamp_ms: int = 0
         self.current_bar_index_local: int = 0
-        self.client = client
         self.strategy = Strategy()
         self.bot_async = BotHelperAsync()
+        self.client = client
         if discord_client:
             self.discord_client: "DiscordClient" = discord_client
 
@@ -106,7 +105,10 @@ class BotHelper:
             if _type == "future:":
                 return await helper.exchange.future.fetch_ticker(symbol)
             else:
-                return await helper.exchange.spot.fetch_ticker(symbol)
+                if self.strategy.market == "USDT":
+                    return await helper.exchange.spot_usdt.fetch_ticker(symbol)
+                else:
+                    return await helper.exchange.spot_btc.fetch_ticker(symbol)
         except Exception as e:
             raise e
 
@@ -235,14 +237,17 @@ class BotHelper:
         log(f"quantity={asset_balance} | entry={_entry_price} | limit={limit_price}", "bold")
         return limit_price, _entry_price
 
-    def spot_order_limit(self):
+    async def spot_order_limit(self):
         try:
             log("==> attempting limit order for spot ", end="")
             limit_price, *_ = self.get_spot_entry()
             _symbol = self.strategy.symbol.replace("/", "")
             orders = self.client.get_open_orders(symbol=_symbol)
             for order in orders:
-                self.client.cancel_order(symbol=_symbol, orderId=order["orderId"])
+                if self.strategy.market == "USDT":
+                    await helper.exchange.spot_usdt.cancel_order(order["orderId"], _symbol)
+                elif self.strategy.market == "BTC":
+                    await helper.exchange.spot_btc.cancel_order(order["orderId"], _symbol)
 
             order = self.client.order_limit_sell(
                 symbol=self.strategy.symbol.replace("/", ""), price=str(limit_price), quantity=self.asset_balance()
@@ -343,7 +348,7 @@ class BotHelper:
             print_tb(str(e))
             raise e
 
-    def spot_order(self, quantity: float, symbol=None, side=None):
+    async def spot_order(self, quantity: float, symbol=None, side=None):
         if symbol:
             self.strategy.symbol = symbol
 
@@ -358,9 +363,16 @@ class BotHelper:
             if not side:
                 side = self.strategy.side
 
-            order = self.client.order_market(symbol=symbol.replace("/", ""), side=side, quantity=quantity)
+            if self.strategy.market == "USDT":
+                order = await helper.exchange.spot_usdt.create_market_buy_order(symbol, quantity)
+            elif self.strategy.market == "BTC":
+                order = await helper.exchange.spot_btc.create_market_buy_order(symbol, quantity)
+
+            order = order["info"]
             #: creates new item or overwrites on it
-            config.timestamp["spot_timestamp"][self.strategy.asset] = order["transactTime"]
+            config.timestamp[f"{self.strategy.market.lower()}_timestamp"][self.strategy.asset] = int(
+                order["transactTime"]
+            )
             with suppress(Exception):
                 del order["timeInForce"]
                 del order["orderListId"]
@@ -394,14 +406,14 @@ class BotHelper:
 
                 log(f"==> re-opening {side} order | ", end="")
                 if float(_quantity) > 0:
-                    return self.spot_order(float(_quantity))
+                    return await self.spot_order(float(_quantity))
                 else:
                     log("E: Quantity less than or equal to zero, nothing to do")
             elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
                 quantity += 0.1
                 quantity = float("{:.1f}".format(quantity))  # sometimes overround 1.2000000000000002
                 log(f"==> re-opening {side} order | ", end="")
-                return self.spot_order(float(quantity))
+                return await self.spot_order(float(quantity))
             else:
                 if "Filter failure: LOT_SIZE" in str(e):
                     log(str(e))
@@ -465,7 +477,7 @@ class BotHelper:
                 self.strategy.size = self.get_initial_amount(initial_amount, "BTC")
                 decimal = self.get_decimal_count(self.strategy.size)
                 self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
-                order = self.spot_order(float(self.strategy.size))
+                order = await self.spot_order(float(self.strategy.size))
                 log(order, "bold")
                 # mongoDB_insert_flag = False
                 # if self.asset_balance() == 0.00000000:
@@ -474,7 +486,7 @@ class BotHelper:
                 # if mongoDB_insert_flag:
                 #    self.mongoDB.add_item(self.strategy.asset, order["transactTime"])
                 #    log(f"==> {order['transactTime']} added into mongoDB for {self.strategy.asset} in BTC")
-                self.spot_order_limit()
+                await self.spot_order_limit()
             except Exception as e:
                 print_tb(e)
                 raise e
@@ -482,11 +494,6 @@ class BotHelper:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             last_price = output["last"]
             try:
-                # if self.strategy.asset in ["BTG"]:  # consider assets minumum buy is >= 50
-                #     initial_amount = 100 / last_price
-                # if self.strategy.side_original == "SELL":  # could be riskly less position size is opened
-                #     initial_amount = config.cfg["root"]["usdt"]["1s_alert"]["sell"] / last_price
-                # else:
                 initial_amount = config.cfg["root"]["usdt"]["pos"]["base"] / last_price
                 self.strategy.size = self.get_initial_amount(initial_amount, "USDT")
                 decimal = self.get_decimal_count(self.strategy.size)
@@ -494,9 +501,9 @@ class BotHelper:
                 if float(self.strategy.size) == 0.0:
                     self.strategy.size = 0.1
 
-                log(self.spot_order(float(self.strategy.size)))
+                log(await self.spot_order(float(self.strategy.size)))
                 if self.strategy.asset not in config.SPOT_IGNORE_LIST:
-                    self.spot_order_limit()
+                    await self.spot_order_limit()
             except Exception as e:
                 print_tb(e)
                 raise e
@@ -599,7 +606,8 @@ class BotHelper:
             log(str(e))
         finally:
             await helper.exchange.future.close()
-            await helper.exchange.spot.close()
+            await helper.exchange.spot_usdt.close()
+            await helper.exchange.spot_btc.close()
 
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:

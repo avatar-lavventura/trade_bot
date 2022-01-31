@@ -7,6 +7,7 @@ from typing import Dict
 
 from filelock import FileLock
 
+from bot import cfg
 from ebloc_broker.broker._utils.yaml import Yaml
 
 
@@ -28,10 +29,11 @@ class Config:
         self.initialize()
 
     def get_spot_timestamp(self, asset):
-        if self.timestamp["spot_timestamp"][asset] == {}:
-            self.timestamp["spot_timestamp"][asset] = self.run_balance["root"]["timestamp"]
+        key = f"{cfg.TYPE.lower()}_timestamp"
+        if self.timestamp[key][asset] == {}:
+            self.timestamp[key][asset] = self.run_balance["root"]["timestamp"]
 
-        return self.timestamp["spot_timestamp"][asset]
+        return int(self.timestamp[key][asset])
 
     def total_position_count(self) -> int:
         return self.status["futures"]["pos_count"] + self.status["spot"]["pos_count"]
@@ -83,12 +85,12 @@ class Config:
 
         # spot
         self.SPOT_TIMESTAMP = self.run_balance["root"]["timestamp"]
-        self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["spot"]["percent_change_to_add"]) + 0.01
-        self.SPOT_locked_percent_limit = self.cfg["root"]["spot"]["locked_percent_limit"]
-        self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["spot"]["multiply_ratio"]
-        self.SPOT_IGNORE_LIST = self.cfg["root"]["usdt"]["ignore"]
-        self.initial_btc_quantity = self.cfg["root"]["spot"]["initial_btc_quantity"]
+        self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
+        self.SPOT_locked_percent_limit = self.cfg["root"]["btc"]["locked_percent_limit"]
+        self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
+        self.initial_btc_quantity = self.cfg["root"]["btc"]["initial_btc_quantity"]
 
+        self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         # usdtperp
         # ========
         # self.USDTPERP_PERCENT_CHANGE_TO_ADD = (

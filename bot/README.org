@@ -81,16 +81,16 @@ https://askubuntu.com/a/1046217/660555
 
 #+begin_src bash
 curl https://alpyrbot.duckdns.org
-curl -X POST http://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
-curl -X POST http://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
+curl -X POST https://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
+curl -X POST https://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 #+end_src
 
 *** localhost
 
 #+begin_src bash
 curl -v 127.0.0.1:5000
-curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
-curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
+curl -X POST https://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
+curl -X POST https://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 #+end_src
 
 

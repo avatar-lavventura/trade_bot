@@ -1,9 +1,9 @@
 root:
     GXS: 39
-    NULS: 16
+    NULS: 17
     DUSK: 25
     ELF: 13
-    GTO: 10
+    GTO: 13
     CHESS: 14
     VIDT: 6
     KP3R: 5
@@ -18,14 +18,14 @@ root:
     POLS: 7
     PYR: 13
     AUCTION: 7
-    ANY: 17
-    WTC: 4
+    ANY: 18
+    WTC: 5
     DEXE: 4
     WAXP: 4
-    COS: 7
+    COS: 8
     CITY: 6
     LINA: 4
-    CLV: 6
+    CLV: 7
     BADGER: 7
     SYS: 7
     LSK: 6
@@ -34,22 +34,22 @@ root:
     QNT: 6
     RAMP: 7
     LPT: 3
-    MITH: 4
+    MITH: 5
     TCT: 6
     NBS: 7
-    DOCK: 4
+    DOCK: 5
     TRU: 11
-    FRONT: 3
+    FRONT: 4
     FIS: 3
     DF: 5
     WING: 3
-    PNT: 6
+    PNT: 7
     POND: 3
     PHA: 5
     RGT: 9
     YGG: 2
     MC: 3
-    GNO: 4
+    GNO: 5
     SANTOS: 1
     ATM: 3
     OG: 5
@@ -58,10 +58,10 @@ root:
     BAR: 3
     ERN: 2
     SLP: 9
-    RNDR: 3
+    RNDR: 5
     JASMY: 5
     TRIBE: 2
-    COTI: 3
+    COTI: 4
     RAY: 1
     FLUX: 7
     QI: 2
@@ -72,14 +72,14 @@ root:
     AMP: 1
     CELO: 2
     CRV: 3
-    AGLD: 1
+    AGLD: 11
     CAKE: 1
     ARPA: 1
     IRIS: 2
-    COCOS: 1
+    COCOS: 3
     MTL: 1
     ANKR: 2
-    GALA: 2
+    GALA: 3
     HARD: 3
     RAD: 4
     C98: 1
@@ -87,7 +87,7 @@ root:
     FXS: 7
     UNFI: 2
     RARE: 8
-    CVX: 4
+    CVX: 5
     LTO: 2
     ACM: 1
     SPELL: 1
@@ -104,9 +104,9 @@ root:
     FTT: 2
     EPS: 1
     KEEP: 2
-    DYDX: 1
+    DYDX: 2
     NEAR: 1
-    JOE: 3
+    JOE: 7
     BAT: 2
     HBAR: 1
     BUSD: 1
@@ -126,45 +126,45 @@ root:
     RVN: 1
     BETA: 2
     XEC: 1
-    CHR: 1
+    CHR: 2
     MDX: 2
     AION: 4
     SXP: 1
-    PEOPLE: 7
+    PEOPLE: 9
     IOTX: 1
     REN: 2
-    DREP: 2
-    ATOM: 1
+    DREP: 6
+    ATOM: 2
     BLZ: 1
     ENJ: 1
     DEGO: 1
     TORN: 1
     CELR: 1
-    IMX: 5
+    IMX: 6
     VITE: 1
     ORN: 1
-    UTK: 1
+    UTK: 2
     FUN: 1
     STX: 3
-    ACH: 2
+    ACH: 3
     NANO: 3
-    WRX: 1
+    WRX: 2
     WNXM: 2
     KNC: 1
     FET: 1
-    VGX: 1
+    VGX: 2
     REQ: 1
     JUV: 2
-    PERL: 1
+    PERL: 2
     GRT: 1
-    LOKA: 3
-    MFT: 1
+    LOKA: 4
+    MFT: 3
     BTCST: 1
     DATA: 1
     INJ: 1
     DAR: 2
     BTTC: 3
-    NMR: 5
+    NMR: 9
     IDEX: 1
     TVK: 1
     XVG: 1
@@ -172,3 +172,14 @@ root:
     ZEN: 3
     API3: 2
     XVS: 1
+    SCRT: 1
+    HIVE: 1
+    MOVR: 1
+    RIF: 1
+    BOND: 1
+    ACA: 9
+    NKN: 1
+    STORJ: 1
+    STRAX: 2
+    PLA: 2
+    FLM: 1

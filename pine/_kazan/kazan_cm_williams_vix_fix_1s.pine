@@ -24,7 +24,7 @@ vwap_price_volume = vwap_source * volume
 sum_vwap_source = sum(vwap_price_volume, vwap_period)
 sumVolume = sum(volume, vwap_period)
 vwap_value = sum_vwap_source / sumVolume
-vwap_above  = vwap_value * (1 + (0.76 / 100))
+vwap_above  = vwap_value * (1 + (0.75 / 100))
 _vwap_above = vwap_value * (1 + (1.20 / 100))
 long_VWMA = vwap_above <= close and close < _vwap_above
 // CM_Williams_Vix_Fix
@@ -35,8 +35,8 @@ mult = input(2.0 , minval=1, maxval=5, title="Bollinger Band Standard Devaition 
 lb = input(50, title="Look Back Period Percentile High")
 ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
 new = input(false, title="Highlight Bars Below Use Original Criteria" )
-sbc = input(false, title="Show Highlight Bar if WVF WAS True and IS Now False")
-sbcc = input(false, title="Show Highlight Bar if WVF IS True")
+sbc = input(false, title="show Highlight Bar if WVF WAS True and IS Now False")
+sbcc = input(false, title="show Highlight Bar if WVF IS True")
 new2 = input(false, title="Highlight Bars Below Use FILTERED Criteria" )
 new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
 sgb = input(false, title="Check Box To Turn Bars Gray?")
@@ -48,11 +48,11 @@ str = input(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X
 new4 = input(false, title="Turn On/Off ALERTS Below" )
 new5 = input(false, title="To Activate Alerts You HAVE To Check The Boxes Below For Any Alert Criteria You Want")
 new6 = input(false, title="You Can Un Check The Box BELOW To Turn Off the WVF Histogram And Just See True/False Alert Criteria")
-swvf = input(true, title="Show Williams Vix Fix Histogram, Uncheck to Turn Off!")
-sa1 = input(false, title="Show Alert WVF = True?")
-sa2 = input(false, title="Show Alert WVF Was True Now False?")
-sa3 = input(false, title="Show Alert WVF Filtered?")
-sa4 = input(true, title="Show Alert WVF AGGRESSIVE Filter?")
+swvf = input(true, title="show Williams Vix Fix Histogram, Uncheck to Turn Off!")
+sa1 = input(false, title="show Alert WVF = True?")
+sa2 = input(false, title="show Alert WVF Was True Now False?")
+sa3 = input(false, title="show Alert WVF Filtered?")
+sa4 = input(true, title="show Alert WVF AGGRESSIVE Filter?")
 // williams vix fix formula
 wvf = ((highest(close, pd)-low)/(highest(close, pd)))*100
 sDev = mult * stdev(wvf, bbl)
@@ -90,7 +90,7 @@ plot(sa4 and alert4 ? alert4 : 0, title="alert Aggressive Filtered Entry", style
 // Buy Alerts *
 // ************
 if close < vwap_value * (1 + (0.8/100))
-    msg := msg + "_0.76"
+    msg := msg + "_0.75"
 else if close < vwap_value * (1 + (0.9/100))
     msg:= msg + "_0.8"
 else if close < vwap_value * (1 + (1.0/100))
