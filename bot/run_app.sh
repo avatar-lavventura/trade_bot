@@ -11,16 +11,17 @@ countdown () {  # https://superuser.com/a/611582/723632
 num=$(ps axuww | grep -E "[h]ypercorn app_async:app" | \
           grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
 if [ $num -ge 1 ]; then
-    echo "Warning: run_app is already running"
+    echo "warning: run_app is already running"
     exit
 fi
 
 while true
 do
+    clear -x
     hypercorn app_async:app -b 0.0.0.0:5000 # --reload
     echo -e "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
     echo "countdown for 30 seconds"
-    countdown 30 && echo "[  OK  ]"
+    countdown 30 && echo "[   OK   ]"
 done
 
 # LOG_FILE=trade.log

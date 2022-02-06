@@ -1,7 +1,8 @@
 #    -*- mode: org -*-
 
 * alpy
-** TODO save timestamp for orders to record its bar_index
+** TODO seperate stauts.yaml for btc and spot
+cial** TODO save timestamp for orders to record its bar_index
 or compare current bar_index value with latest position's bar index.
 ** TODO Give alert if 10% is locked and alert came for that pair
 ** TODO run_app log disable writing into a file?

@@ -40,14 +40,14 @@ if [ $num -ge 1 ]; then
     exit
 fi
 
-clear
+clear -x
 check_app
 while true
 do
     python3 discord_balance.py $1
     echo -e "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-    echo "countdown for 30 seconds"
-    countdown 30 && echo "[  OK  ]"
+    printf "countdown for 30 seconds "
+    countdown 30 && echo "[  ${GREEN}OK${NC}  ]"
 done
 
 # LOG_FILE=_binance_balance.log

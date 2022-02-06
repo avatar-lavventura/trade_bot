@@ -50,11 +50,12 @@ async def startup():
     app.discord_client = DiscordClient()
     await app.discord_client.bot.login(app.discord_client.TOKEN)
     loop.create_task(app.discord_client.bot.connect())
-    client, app.balances = check_binance_obj()  # TODO
-    app.client_helper = ClientHelper(client)
+
+    # client, app.balances = check_binance_obj()  # TODO
+    # app.client_helper = ClientHelper()
     helper.exchange.init_both()
     await helper.exchange.set_markets()
-    app.bot_trade = bot_trade.BotHelper(client, app.discord_client)
+    app.bot_trade = bot_trade.BotHelper(app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
     print(" * s t a r t i n g | curl https://alpyrbot.duckdns.org", flush=True)

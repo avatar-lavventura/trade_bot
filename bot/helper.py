@@ -33,17 +33,17 @@ class Exchange:
             "options": {"adustForTimeDifference": True},
         }
         if not ops["apiKey"] or not ops["secret"]:
-            print("E: apiKey or secret is {}")
+            raise Exception("apiKey or secret is {}")
 
         self.spot_usdt = ccxt.binance(ops)
-        ops = None
+        #
         ops = {
             "apiKey": str(helper_cfg["anne_b"]["key"]),
             "secret": str(helper_cfg["anne_b"]["secret"]),
             "options": {"adustForTimeDifference": True},
         }
         if not ops["apiKey"] or not ops["secret"]:
-            print("E: apiKey or secret is {}")
+            raise Exception("apiKey or secret is {}")
 
         self.spot_btc = ccxt.binance(ops)
         ops = None
@@ -66,7 +66,7 @@ class Exchange:
             }
 
         if not ops["apiKey"] or not ops["secret"]:
-            print("E: apiKey or secret is {}")
+            raise Exception("apiKey or secret is {}")
 
         if is_futures:
             self.future = ccxt.binanceusdm(ops)

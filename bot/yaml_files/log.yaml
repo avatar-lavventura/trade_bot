@@ -1,31 +1,31 @@
 root:
     GXS: 39
-    NULS: 17
+    NULS: 18
     DUSK: 25
     ELF: 13
     GTO: 13
-    CHESS: 14
-    VIDT: 6
+    CHESS: 15
+    VIDT: 7
     KP3R: 5
-    PUNDIX: 3
+    PUNDIX: 6
     WAVES: 3
-    PORTO: 7
-    LAZIO: 5
+    PORTO: 9
+    LAZIO: 6
     CTXC: 7
     BURGER: 4
     WAN: 5
-    KMD: 3
+    KMD: 4
     POLS: 7
     PYR: 13
     AUCTION: 7
     ANY: 18
     WTC: 5
-    DEXE: 4
+    DEXE: 7
     WAXP: 4
     COS: 8
     CITY: 6
     LINA: 4
-    CLV: 7
+    CLV: 21
     BADGER: 7
     SYS: 7
     LSK: 6
@@ -34,29 +34,29 @@ root:
     QNT: 6
     RAMP: 7
     LPT: 3
-    MITH: 5
+    MITH: 7
     TCT: 6
-    NBS: 7
+    NBS: 9
     DOCK: 5
-    TRU: 11
+    TRU: 12
     FRONT: 4
-    FIS: 3
-    DF: 5
-    WING: 3
-    PNT: 7
+    FIS: 11
+    DF: 6
+    WING: 4
+    PNT: 9
     POND: 3
-    PHA: 5
+    PHA: 7
     RGT: 9
     YGG: 2
     MC: 3
     GNO: 5
     SANTOS: 1
     ATM: 3
-    OG: 5
-    ASR: 10
-    PSG: 2
+    OG: 7
+    ASR: 11
+    PSG: 3
     BAR: 3
-    ERN: 2
+    ERN: 3
     SLP: 9
     RNDR: 5
     JASMY: 5
@@ -67,43 +67,43 @@ root:
     QI: 2
     ALGO: 4
     BTS: 1
-    HIGH: 1
+    HIGH: 2
     FORTH: 1
     AMP: 1
     CELO: 2
     CRV: 3
-    AGLD: 11
+    AGLD: 12
     CAKE: 1
-    ARPA: 1
+    ARPA: 5
     IRIS: 2
-    COCOS: 3
+    COCOS: 4
     MTL: 1
     ANKR: 2
-    GALA: 3
+    GALA: 5
     HARD: 3
     RAD: 4
-    C98: 1
+    C98: 2
     TFUEL: 2
-    FXS: 7
+    FXS: 9
     UNFI: 2
-    RARE: 8
-    CVX: 5
-    LTO: 2
+    RARE: 13
+    CVX: 10
+    LTO: 3
     ACM: 1
     SPELL: 1
     ALPACA: 6
     ONE: 1
     ANT: 4
     IOST: 1
-    FIO: 2
-    VTHO: 3
+    FIO: 4
+    VTHO: 6
     OOKI: 2
     FTM: 8
     EUR: 1
     VOXEL: 4
     FTT: 2
-    EPS: 1
-    KEEP: 2
+    EPS: 4
+    KEEP: 5
     DYDX: 2
     NEAR: 1
     JOE: 7
@@ -118,68 +118,81 @@ root:
     FIDA: 1
     KAVA: 1
     AR: 2
-    BEAM: 1
+    BEAM: 2
     1INCH: 1
     KLAY: 1
     OCEAN: 1
     DODO: 1
     RVN: 1
     BETA: 2
-    XEC: 1
+    XEC: 3
     CHR: 2
-    MDX: 2
-    AION: 4
+    MDX: 7
+    AION: 7
     SXP: 1
-    PEOPLE: 9
+    PEOPLE: 10
     IOTX: 1
     REN: 2
     DREP: 6
     ATOM: 2
     BLZ: 1
     ENJ: 1
-    DEGO: 1
+    DEGO: 6
     TORN: 1
     CELR: 1
     IMX: 6
-    VITE: 1
+    VITE: 3
     ORN: 1
-    UTK: 2
+    UTK: 3
     FUN: 1
     STX: 3
-    ACH: 3
+    ACH: 13
     NANO: 3
     WRX: 2
     WNXM: 2
     KNC: 1
-    FET: 1
-    VGX: 2
-    REQ: 1
-    JUV: 2
+    FET: 2
+    VGX: 3
+    REQ: 2
+    JUV: 3
     PERL: 2
     GRT: 1
-    LOKA: 4
+    LOKA: 5
     MFT: 3
     BTCST: 1
-    DATA: 1
-    INJ: 1
+    DATA: 2
+    INJ: 3
     DAR: 2
     BTTC: 3
-    NMR: 9
-    IDEX: 1
-    TVK: 1
-    XVG: 1
+    NMR: 10
+    IDEX: 4
+    TVK: 2
+    XVG: 2
     ALCX: 1
-    ZEN: 3
-    API3: 2
-    XVS: 1
+    ZEN: 4
+    API3: 9
+    XVS: 3
     SCRT: 1
     HIVE: 1
     MOVR: 1
     RIF: 1
-    BOND: 1
-    ACA: 9
+    BOND: 2
+    ACA: 11
     NKN: 1
     STORJ: 1
-    STRAX: 2
+    STRAX: 4
     PLA: 2
     FLM: 1
+    DOGE: 9
+    MBL: 1
+    KEY: 1
+    ENS: 1
+    ETC: 2
+    UMA: 1
+    POLY: 1
+    OXT: 3
+    FLOW: 1
+    AUDIO: 1
+    MBOX: 1
+    OGN: 2
+    TROY: 1

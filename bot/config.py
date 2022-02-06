@@ -36,7 +36,7 @@ class Config:
         return int(self.timestamp[key][asset])
 
     def total_position_count(self) -> int:
-        return self.status["futures"]["pos_count"] + self.status["spot"]["pos_count"]
+        return self.status["futures"]["pos_count"] + self.status_usdt["count"]
 
     def yaml_wrapper(self, path):
         dirname = os.path.dirname(os.path.abspath(path))
@@ -58,13 +58,16 @@ class Config:
 
     def initialize(self) -> None:
         base_dir = Path.home() / ".bot"
-
         self.cfg = self.yaml_wrapper(base_dir / "config.yaml")
         self.cfg_usdtprep = self.yaml_wrapper(base_dir / "config_usdtprep.yaml")
         self.timestamp = self.yaml_wrapper(base_dir / "timestamp.yaml")
         self.run_balance = self.yaml_wrapper(base_dir / "run_balance.yaml")
         self.goal = self.yaml_wrapper(base_dir / "goal.yaml")
         self.status = self.yaml_wrapper(base_dir / "status.yaml")
+
+        self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")
+        self.status_btc = self.yaml_wrapper(base_dir / "btc_pos_count.yaml")
+        self.risk = self.yaml_wrapper(base_dir / "risk.yaml")["root"]
         self.log = self.yaml_wrapper(base_dir / "log.yaml")
         self.alerts = self.yaml_wrapper(base_dir / "alerts.yaml")
         self.ALERTS = self.alerts["alerts"]

@@ -81,7 +81,7 @@ https://askubuntu.com/a/1046217/660555
 
 #+begin_src bash
 curl https://alpyrbot.duckdns.org
-curl -X POST https://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
+curl -X POST https://alpyrbot.duckdns.org/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
 curl -X POST https://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 #+end_src
 
@@ -89,8 +89,8 @@ curl -X POST https://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.9
 
 #+begin_src bash
 curl -v 127.0.0.1:5000
+curl -X POST https://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
 curl -X POST https://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
-curl -X POST https://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 #+end_src
 
 
@@ -103,13 +103,15 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 
 ** Tradingview alerts some links
 
-1. [[https://liquidation.atsutane.net/calc][Binance Minimum Trading Rules]]
+1. [[https://liquidation.atsutane.net/calc][Binance Minimum Trading Rules for Futures]]
    ~Balance: 15, PercentBal: 100, Leverage: 1~
 2. [[https://github.com/puppeteer/puppeteer][puppeteer google browser]]
 3. [[https://maildim.com][fake gmail address generator and inbox]]
-4. tv_username_last_used => ~roxanroxanroxan_14~
-5. yb digital card used: 3 times
+4. [[https://temp-sms.org][SMS reciever New Zealand Phone number]]
+5. tv_username_last_used => ~roxanroxanroxan_14~
+6. yb digital card used: 3 times
    ending: ****
+7. ~e2-small~ does the job on google instance
 
 ** Git Push:
 

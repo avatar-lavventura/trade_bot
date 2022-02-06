@@ -22,9 +22,8 @@ class Discord_Alpy:
     def __init__(self, _type):
         try:
             self._type = cfg.TYPE = _type
-            helper.exchange.init(_type)
-
             print(f" * bot_type={_type}")
+            helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
             self.channel: str = ""
             self.channel_alerts: str = ""

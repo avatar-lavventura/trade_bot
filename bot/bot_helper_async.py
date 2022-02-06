@@ -154,6 +154,7 @@ class BotHelperAsync:
         except Exception as e:
             raise e
 
+        current_btc_price = float(await self.spot_fetch_ticker("BTC/USDT"))
         for balance in self.balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
@@ -165,13 +166,21 @@ class BotHelperAsync:
                         # price = await self.spot_fetch_ticker(asset)
                         # sum_btc += quantity * float(price)
                         price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
-                        usdt_to_added = quantity * float(price)
-                        if usdt_to_added > 10:  # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
-                            # below 10$ would not count as open position
-                            config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
-                            config.asset_list.append(asset)
-                            if asset not in config.SPOT_IGNORE_LIST:
-                                count += 1
+                        if cfg.TYPE == "usdt":
+                            usdt_to_added = quantity * float(price)
+                            if usdt_to_added > 10:  # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
+                                # below 10$ would not count as open position
+                                config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
+                                config.asset_list.append(asset)
+                                if asset not in config.SPOT_IGNORE_LIST:
+                                    count += 1
+                        elif cfg.TYPE == "btc":
+                            usdt_to_added = quantity * float(price) * current_btc_price
+                            if usdt_to_added > 4:
+                                config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
+                                config.asset_list.append(asset)
+                                if asset not in config.SPOT_IGNORE_LIST:
+                                    count += 1
 
                         sum_usdt += usdt_to_added
                     elif asset == cfg.TYPE.upper():
@@ -179,7 +188,7 @@ class BotHelperAsync:
                         sum_usdt += quantity
 
         if sum_btc > 0.00002:
-            own_usd = sum_btc * float(await self.spot_fetch_ticker("BTC/USDT"))
+            own_usd = sum_btc * current_btc_price
             log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
 
         sum_usdt = float(format(sum_usdt, ".2f"))
@@ -187,26 +196,30 @@ class BotHelperAsync:
             if not helper.is_start and sum_usdt > 0.01:
                 console_ruler(character="-=")
 
-            if cfg.TYPE.lower() == "usdt":
-                if len(config.asset_list) == 0:
-                    #: cleans timestamp.yaml
-                    config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(
-                        base=config.run_balance["root"]["timestamp"]
-                    )
-                    _console_clear()
-                    log(f":beer: [bold green]usdt=[/bold green]{sum_usdt}")
-                else:
-                    log(f" * usdt={sum_usdt}")
-
-                config.sum_usdt = sum_usdt
-                if sum_usdt > 1.0:
-                    if config.status["spot"]["pos_count"] == 0:
-                        with FileLock(config.status.fp_lock, timeout=1):
-                            if config.status["root"]["_balance"] != sum_usdt:
-                                config.status["root"]["_balance"] = sum_usdt
+            if len(config.asset_list) == 0:
+                #: cleans timestamp.yaml
+                config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(base=config.run_balance["root"]["timestamp"])
+                _console_clear()
+                log(f":beer: [bold green]usdt=[/bold green]{sum_usdt}")
             else:
+                log(f" * usdt={sum_usdt}")
+
+            config.sum_usdt = sum_usdt
+            if sum_usdt > 1.0:
+                if cfg.TYPE.lower() == "usdt":
+                    pos_count = config.status_usdt["count"]
+                elif cfg.TYPE.lower() == "btc":
+                    pos_count = config.status_btc["count"]
+
+                if pos_count == 0 and config.status["root"][cfg.TYPE]["balance"] != sum_usdt:
+                    with FileLock(config.status.fp_lock, timeout=1):
+                        config.status["root"][cfg.TYPE]["balance"] = sum_usdt
+
+            if cfg.TYPE.lower() == "btc":
                 _console_clear()
                 log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
+                if cfg.TYPE == "btc":
+                    config.status["root"][cfg.TYPE]["balance"] = sum_btc
 
         total_lost = 0.0
         cfg.discord_message = ".\n"
@@ -222,8 +235,12 @@ class BotHelperAsync:
             if cfg.discord_message != ".\n":
                 cfg.discord_sent_message = await self.channel.send(msg, delete_after=19)
 
-        with FileLock(config.status.fp_lock, timeout=1):
-            config.status["spot"]["pos_count"] = count
+        if cfg.TYPE.lower() == "usdt":
+            with FileLock(config.status_usdt.fp_lock, timeout=1):
+                config.status_usdt["count"] = count
+        elif cfg.TYPE.lower() == "btc":
+            with FileLock(config.status_btc.fp_lock, timeout=1):
+                config.status_btc["count"] = count
 
         self.update_timestamp_status()
         return own_usd, sum_usdt, only_usdt
@@ -247,7 +264,7 @@ class BotHelperAsync:
                 if float(_quantity) > 0.0:
                     return await self.spot_order(_quantity, symbol, side)
                 else:
-                    log("E: quantity is zero, nothing to do.")
+                    log("E: quantity is zero, nothing to do")
             elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
                 quantity += 0.1
                 #: Fixes if its overrounded, ex: 1.2000000000000002
@@ -321,13 +338,10 @@ class BotHelperAsync:
             _since = config.SPOT_TIMESTAMP
 
         trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=_since)
-        # trades_usdt = await helper.exchange.spot.fetch_my_trades(asset + "/USDT", since=_since)
-        # all_trades = trades + trades_usdt  # merge USDT transactions
-        all_trades = trades
         ordering = {}
-        for idx, trade in enumerate(all_trades):
+        for idx, trade in enumerate(trades):
             try:
-                # In case orders occur in the same timestamp
+                # in case orders occur in the same timestamp
                 ordering[trade["timestamp"]].append(idx)
             except:
                 ordering[trade["timestamp"]] = [idx]
@@ -336,7 +350,7 @@ class BotHelperAsync:
         timestamp_list = sorted(ordering, reverse=True)
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
-                trade = all_trades[inner_index]
+                trade = trades[inner_index]
                 decimal = decimal_count(trade["price"])
                 qty = float(trade["info"]["qty"])
                 # botrade_cost = qty * float(trade["info"]["price"])
@@ -364,11 +378,8 @@ class BotHelperAsync:
 
         entry_price = _sum / quantity
         if _sum <= 0 or abs(quantity - asset_balance) > 0.01:
-            log(f"Warning: {asset} sum={_sum} qty={quantity} asset_balance={asset_balance}")
+            log(f"warning: {asset} sum={_sum} qty={quantity} asset_balance={asset_balance}")
             entry_price = 0.0005738
-            # for index in enumerate(timestamp_list):
-            #     trade = all_trades[ordering[index[1]]]
-            #     print(f"{trade['timestamp']} {trade['info']['qty']}")
         else:
             entry_price = float(f"{entry_price:.{decimal}f}")
 

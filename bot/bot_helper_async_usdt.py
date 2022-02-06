@@ -110,7 +110,10 @@ class BotHelperSpotAsync(BotHelperAsync):
             quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, all_trades, is_return=True)
 
         if quantity == 0:
-            raise Exception("E: quantity is zero")
+            if asset in config.SPOT_IGNORE_LIST:
+                return 0
+
+            raise Exception(f"E: quantity is zero for asset={asset}")
 
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
