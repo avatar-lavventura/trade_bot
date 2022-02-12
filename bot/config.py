@@ -64,7 +64,7 @@ class Config:
         self.run_balance = self.yaml_wrapper(base_dir / "run_balance.yaml")
         self.goal = self.yaml_wrapper(base_dir / "goal.yaml")
         self.status = self.yaml_wrapper(base_dir / "status.yaml")
-
+        self.stats = self.yaml_wrapper(base_dir / "stats.yaml")
         self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")
         self.status_btc = self.yaml_wrapper(base_dir / "btc_pos_count.yaml")
         self.risk = self.yaml_wrapper(base_dir / "risk.yaml")["root"]
@@ -80,7 +80,9 @@ class Config:
         # usdt
         self.usdt_percent_change_to_add = -abs(self.cfg["root"]["usdt"]["percent_change_to_add"]) + 0.01
         self.usdt_multiply_ratio = self.cfg["root"]["usdt"]["multiply_ratio"]
-        self.SPOT_MAX_POSITION = self.cfg["root"]["usdt"]["max_pos"]
+        self.USDT_MAX_POSITION = self.cfg["root"]["usdt"]["max_pos"]
+        self.BTC_MAX_POSITION = self.cfg["root"]["btc"]["max_pos"]
+
         self.initial_usdt_qty_short["1m"] = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["short"]["1m"]
         self._initial_usdt_qty_long = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
         self.initial_usdt_qty_long["1m"] = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["1m"]

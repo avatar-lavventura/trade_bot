@@ -15,13 +15,13 @@ from ebloc_broker.broker._utils.tools import print_tb
 from ebloc_broker.broker._utils.yaml import Yaml
 
 logging.getLogger("apscheduler.executors.default").propagate = False
-_log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
 
 
 class Discord_Alpy:
     def __init__(self, _type):
         try:
             self._type = cfg.TYPE = _type
+            _log.ll.LOG_FILENAME = Path.home() / ".bot" / f"program_{_type}.log"
             print(f" * bot_type={_type}")
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
@@ -54,7 +54,7 @@ class Discord_Alpy:
         await helper.exchange.set_markets()
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(self._process_main, "cron", second="*/20", timezone="Europe/Istanbul")
+        scheduler.add_job(self._process_main, "cron", second=f"*/{cfg.BALANCE_INTERVAL}", timezone="Europe/Istanbul")
         scheduler.start()
 
     async def pre_discord_setup(self):

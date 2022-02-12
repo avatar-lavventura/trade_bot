@@ -1,9 +1,6 @@
 #!/bin/bash
 
-RED="\033[1;31m"
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
-
+RED="\033[1;31m"; GREEN='\033[0;32m'; NC='\033[0m'
 if [ "$#" -ne 1 ]; then
     echo "Illegal number of parameters provide <usdt or btc>"
     exit 1
@@ -45,9 +42,10 @@ check_app
 while true
 do
     python3 discord_balance.py $1
-    echo -e "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+    echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
     printf "countdown for 30 seconds "
-    countdown 30 && echo "[  ${GREEN}OK${NC}  ]"
+    countdown 30
+    echo "[  ${GREEN}OK${NC}  ]"
 done
 
 # LOG_FILE=_binance_balance.log

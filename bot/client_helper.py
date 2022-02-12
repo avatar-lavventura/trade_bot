@@ -76,7 +76,7 @@ class ClientHelper:
 
         current_btc_price_USD = self.client.get_symbol_ticker(symbol="BTCUSDT")["price"]
         own_usd = sum_btc * float(current_btc_price_USD)
-        log(" * Spot => %.8f BTC == " % sum_btc, end="")
+        log(" * Spot => %.8f BTC [blue]==[/blue] " % sum_btc, end="")
         log("%.8f USDT" % own_usd)
 
     def get_futures_usdt(self, is_both=True) -> float:

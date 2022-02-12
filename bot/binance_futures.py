@@ -10,7 +10,7 @@ from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
 from bot.spot_lib import cancel_check_orders, new_order, update_spot_timestamp
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _time, percent_change
+from ebloc_broker.broker._utils.tools import _date, percent_change
 
 bot_async = BotHelperSpotAsync()
 
@@ -129,7 +129,7 @@ def future_stats(usdt_bal, unix_timestamp_ms):
         log(f"locked={format(locked, '.2f')}({format(locked_per, '.2f')}%)", "bold", end="")
 
     log("_______________", "bold blue", end="", is_write=is_write)
-    log(f"{_time().replace('2021-','')} {unix_timestamp_ms}", "yellow", is_write=is_write)
+    log(f"{_date().replace('2021-','')} {unix_timestamp_ms}", "yellow", is_write=is_write)
 
 
 def futures_bal(info, asset) -> float:

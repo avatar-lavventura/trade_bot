@@ -5,7 +5,7 @@ from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
-from bot import cfg, helper
+from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync, TP_calculate
 from bot.client_helper import DiscordClient
 from bot.config import config
@@ -13,20 +13,20 @@ from bot.mongodb import Mongo
 from bot.spot_lib import create_limit_order, create_market_order
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import br, log
-from ebloc_broker.broker._utils.tools import _time, decimal_count, print_tb
+from ebloc_broker.broker._utils.tools import _date, decimal_count, print_tb
 from ebloc_broker.broker.errors import QuietExit
 
 
 class Strategy:
     def __init__(self, data_msg=""):
+        self.exchange = None
         self.symbol: str = ""
         self.market: str = ""
-        self.exchange = None
         self.time_duration: str = ""
         self.size: int = 0
         self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
-            log(f" * {_time()} ", end="")
+            log(f" * {_date()} ", end="")
             if data_msg.endswith(","):
                 log(data_msg, "bold magenta", end="")
             else:
@@ -39,7 +39,7 @@ class Strategy:
             log(f"   ABORT {self.symbol}", "bold orange1")
             raise Exception
 
-        if self.market in ["BTC", "BNB", "USDT", "ETH"]:
+        if self.market in ["BTC", "BNB", "ETH", "USDT"]:
             if self.side == "SELL":
                 if self.time_duration == "1s":
                     self.side = "BUY"  # BUY for 1s
@@ -154,7 +154,6 @@ class BotHelper:
             positions = await helper.exchange.future.fetch_positions()
         except Exception as e:
             print_tb(e)
-            await _sleep(60)
             raise e
 
         count = 0
@@ -423,11 +422,6 @@ class BotHelper:
             self.strategy.size += 1
             log(f"==> size_check: last_price={last_price} size={self.strategy.size}", "bold")
 
-    def ignore_below_usdtperp(self, last_price):
-        ignore_limit_usdt = 0.01
-        if last_price < ignore_limit_usdt:
-            raise Exception(f"{self.strategy.symbol} price<{ignore_limit_usdt}$, last_price={last_price}, PASS", "bold")
-
     async def calculate_futures_size(self):
         self.strategy.size = 0
         output = await self.symbol_price(self.strategy.symbol, "future")
@@ -435,7 +429,6 @@ class BotHelper:
         if last_price == 0:
             raise Exception("E: last_price is zero")
 
-        # ignore_below_usdtperp(last_price)
         if self.strategy.is_buy():
             if self.strategy.time_duration == "1m":
                 initial_amount = config.initial_usdt_qty_long["1m"] / last_price
@@ -474,7 +467,11 @@ class BotHelper:
                 self.strategy.size = 0.1
 
         log(await self.spot_order(float(self.strategy.size)))
-        # config.stats[data()] += 1
+        try:
+            config.stats["root"][self.strategy.market.lower()][_date(_type="month")] += 1
+        except:
+            config.stats["root"][self.strategy.market.lower()][_date(_type="month")] = 1
+
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()
 
@@ -520,8 +517,9 @@ class BotHelper:
         try:
             if self.strategy.market == "USDTPERP":
                 return helper.exchange.future_markets[self.strategy.symbol]["precision"]["price"]
-            else:  # elif self.strategy.market in ["BTC", "USDT"]:
-                return helper.exchange.spot_markets[self.strategy.symbol]["precision"]["price"]
+
+            # for btc and usdt spot market
+            return helper.exchange.spot_markets[self.strategy.symbol]["precision"]["price"]
         except:
             return decimal_count(value)
 
@@ -534,15 +532,15 @@ class BotHelper:
             if config.status["futures"]["pos_count"] >= pos_count:
                 raise QuietExit(f"warning: {pos_count} pos")
         elif self.strategy.market == "BTC":
-            if config.status_btc["count"] >= config.SPOT_MAX_POSITION:
-                raise QuietExit(f"warning: {config.SPOT_MAX_POSITION} pos")
+            if config.status_btc["count"] >= config.BTC_MAX_POSITION:
+                raise QuietExit(f"warning: {config.BTC_MAX_POSITION} pos")
         elif self.strategy.market == "USDT":
             if self.strategy.asset in config.white_list:
-                if config.status_usdt["count"] >= config.SPOT_MAX_POSITION + 1:
-                    raise QuietExit(f"warning: {config.SPOT_MAX_POSITION + 1} pos")
+                if config.status_usdt["count"] >= config.USDT_MAX_POSITION + 1:
+                    raise QuietExit(f"warning: {config.USDT_MAX_POSITION + 1} pos")
             else:
-                if config.status_usdt["count"] >= config.SPOT_MAX_POSITION:
-                    raise QuietExit(f"warning: {config.SPOT_MAX_POSITION} pos")
+                if config.status_usdt["count"] >= config.USDT_MAX_POSITION:
+                    raise QuietExit(f"warning: {config.USDT_MAX_POSITION} pos")
 
     async def _trade(self):
         is_open = False
@@ -614,7 +612,7 @@ class BotHelper:
             elif "_bist" in data_msg:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
-                log(f" * {_time()} [bold magenta]{data_msg}")
+                log(f" * {_date()} [bold magenta]{data_msg}")
                 await self.discord_client.send_msg(data_msg, "alpy")
 
             return

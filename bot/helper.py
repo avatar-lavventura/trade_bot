@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
@@ -97,7 +98,15 @@ class Exchange:
             self.future_markets = await self.future.load_markets()
 
     async def close(self):
-        await self.spot.close()
+        with suppress(Exception):
+            await self.spot.close()
+
+        with suppress(Exception):
+            await self.spot_btc.close()
+
+        with suppress(Exception):
+            await self.spot_usdt.close()
+
         if is_futures:
             await self.future.close()
 

@@ -8,7 +8,7 @@ from filelock import FileLock
 from bot import cfg, helper
 from bot.config import config
 from ebloc_broker.broker._utils._log import _console_clear, console_ruler, log
-from ebloc_broker.broker._utils.tools import _time, decimal_count, percent_change, print_tb, round_float
+from ebloc_broker.broker._utils.tools import _date, decimal_count, percent_change, print_tb, round_float
 
 
 class TP_calculate(Exception):
@@ -154,7 +154,7 @@ class BotHelperAsync:
         except Exception as e:
             raise e
 
-        current_btc_price = float(await self.spot_fetch_ticker("BTC/USDT"))
+        btcusdt_price = float(await self.spot_fetch_ticker("BTC/USDT"))
         for balance in self.balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
@@ -164,7 +164,6 @@ class BotHelperAsync:
                 else:
                     if asset not in ["USDT", "BNB", "ETH", "PAX", "PAXG"]:
                         # price = await self.spot_fetch_ticker(asset)
-                        # sum_btc += quantity * float(price)
                         price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
                         if cfg.TYPE == "usdt":
                             usdt_to_added = quantity * float(price)
@@ -175,7 +174,8 @@ class BotHelperAsync:
                                 if asset not in config.SPOT_IGNORE_LIST:
                                     count += 1
                         elif cfg.TYPE == "btc":
-                            usdt_to_added = quantity * float(price) * current_btc_price
+                            sum_btc += quantity * float(price)
+                            usdt_to_added = quantity * float(price) * btcusdt_price
                             if usdt_to_added > 4:
                                 config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
                                 config.asset_list.append(asset)
@@ -188,8 +188,8 @@ class BotHelperAsync:
                         sum_usdt += quantity
 
         if sum_btc > 0.00002:
-            own_usd = sum_btc * current_btc_price
-            log(" * Spot=%.8f BTC == %.2f USDT" % (sum_btc, own_usd))
+            own_usd = sum_btc * btcusdt_price
+            log(" * spot=%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usd))
 
         sum_usdt = float(format(sum_usdt, ".2f"))
         if helper.is_start or config.total_position_count() > 0:
@@ -200,9 +200,11 @@ class BotHelperAsync:
                 #: cleans timestamp.yaml
                 config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(base=config.run_balance["root"]["timestamp"])
                 _console_clear()
-                log(f":beer: [bold green]usdt=[/bold green]{sum_usdt}")
+                if cfg.TYPE.lower() == "usdt":
+                    log(f":beer:  [bold green]usdt=[/bold green]{sum_usdt}")
             else:
-                log(f" * usdt={sum_usdt}")
+                if cfg.TYPE.lower() == "usdt":
+                    log(f" * usdt={sum_usdt} | [blue]{_date(_type='hour')}[/blue]")
 
             config.sum_usdt = sum_usdt
             if sum_usdt > 1.0:
@@ -231,7 +233,7 @@ class BotHelperAsync:
         msg = f"{cfg.discord_message}total_lost=`{format(total_lost, '.2f')}$` | usdt=`{sum_usdt}$`"
         if total_lost < -0.1:
             log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", filename="balance.log")
-            log(f"{format(total_lost, '.2f')}$ [blue]{_time(_type='hour')}", "red", filename="balance.log")
+            log(f"{format(total_lost, '.2f')}$ [blue]{_date(_type='hour')}", "red", filename="balance.log")
             if cfg.discord_message != ".\n":
                 cfg.discord_sent_message = await self.channel.send(msg, delete_after=19)
 
@@ -294,11 +296,18 @@ class BotHelperAsync:
         try:
             balance = await self.fetch_balance(asset)
             response = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
-            log("==> new limit-order:")
+            log("==> new_limit_order:")
             if "info" in response:
-                log(response["info"], "bold cyan")
-            else:
-                log(response, "bold cyan")
+                response = response["info"]
+
+            with suppress(Exception):
+                del response["clientOrderId"]
+                del response["timeInForce"]
+                del response["cummulativeQuoteQty"]
+                del response["orderListId"]
+                del response["status"]
+
+            log(response, "bold cyan")
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
                 log(f"E: Failed to create order with {type(e).__name__} {e}")
@@ -366,15 +375,6 @@ class BotHelperAsync:
 
                 quantity = round_float(quantity, 8)
                 _sum = round_float(_sum, 8)
-
-                # try:
-                #     _quantity[quantity] += 1
-                #     if _quantity[quantity] > 3:
-                #         is_break = True
-                # except:
-                #     _quantity[quantity] = 1
-                # if is_break:
-                #     break
 
         entry_price = _sum / quantity
         if _sum <= 0 or abs(quantity - asset_balance) > 0.01:

@@ -11,7 +11,7 @@ root:
         multiply_ratio: 1.07
         percent_change_to_add: 10
     usdt:
-        max_pos: 3
+        max_pos: 4
         multiply_ratio: 1.08
         percent_change_to_add: 7
         pos:

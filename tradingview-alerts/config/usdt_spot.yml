@@ -1,5 +1,5 @@
 files:
-  input: pairs_usdt_spot.csv
+  input: pairs_usdt.csv
 tradingview:
   chartUrl: https://www.tradingview.com/chart/N3Qrs2jN/
   interval: 1s # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M

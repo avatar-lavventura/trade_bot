@@ -13,7 +13,7 @@ from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils._async import _sleep
 from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _time, print_tb
+from ebloc_broker.broker._utils.tools import _date, print_tb
 
 client, _ = check_binance_obj()
 bot = BotHelper(client)
@@ -65,7 +65,7 @@ async def fetch_balance() -> float:  # noqa
         future_balance += float(bot_async.futures_balance["total"]["USDT"])
         total_balance += future_balance
         future_balance = format(future_balance, ".2f")
-        log(f" * {_time()} | Futures={future_balance}", end="")
+        log(f" * {_date()} | Futures={future_balance}", end="")
         await goal()
         future_positions = await helper.exchange.future.fetch_positions()
         for position in future_positions:

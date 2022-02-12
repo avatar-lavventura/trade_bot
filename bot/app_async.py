@@ -2,10 +2,9 @@
 
 import asyncio
 import logging
-from pathlib import Path
-
 import quart.flask_patch  # noqa
 from flask import abort, request
+from pathlib import Path
 from quart import Quart
 
 from ebloc_broker.broker._utils._log import log
@@ -41,8 +40,7 @@ async def startup():
     """
     import bot.trade_async as bot_trade
     from bot import helper
-    from bot.client_helper import ClientHelper, DiscordClient
-    from bot.user_setup import check_binance_obj
+    from bot.client_helper import DiscordClient
     from ebloc_broker.broker._utils import _log
 
     _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
@@ -50,9 +48,6 @@ async def startup():
     app.discord_client = DiscordClient()
     await app.discord_client.bot.login(app.discord_client.TOKEN)
     loop.create_task(app.discord_client.bot.connect())
-
-    # client, app.balances = check_binance_obj()  # TODO
-    # app.client_helper = ClientHelper()
     helper.exchange.init_both()
     await helper.exchange.set_markets()
     app.bot_trade = bot_trade.BotHelper(app.discord_client)
