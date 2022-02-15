@@ -12,8 +12,8 @@ if ! [[ $1 == "usdt" || $1 == "btc" ]] ; then
 fi
 
 check_app () {
-    printf "curl https://alpyrbot.duckdns.org  [  "
-    if curl -sL --fail https://alpyrbot.duckdns.org -o /dev/null; then
+    printf "curl https://alpybot.duckdns.org  [  "
+    if curl -sL --fail https://alpybot.duckdns.org -o /dev/null; then
         echo -e "${GREEN}OK${NC}  ]"
     else
         echo -e "${RED}FAIL${NC}  ]"
@@ -29,8 +29,6 @@ countdown () {  # https://superuser.com/a/611582/723632
    done
 }
 
-~/venv/bin/python3 -m pip install -Uq ccxt 2>/dev/null
-
 num=$(ps aux | grep -E "[p]ython3 discord_balance.py $1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
 if [ $num -ge 1 ]; then
     echo "warning: run_balance is already running, count="$num
@@ -38,7 +36,7 @@ if [ $num -ge 1 ]; then
 fi
 
 clear -x
-check_app
+# check_app
 while true
 do
     python3 discord_balance.py $1

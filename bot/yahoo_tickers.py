@@ -34,7 +34,7 @@ async def main():
     # total_balance = total_balance + silver_usdt
     total_balance = format(total_balance, ".2f")
     config.goal["portfolio"]["_TOTAL"] = float(total_balance)
-    log(f"total_balance={total_balance}")
+    log(f"total_balance={total_balance} | {time_now}")
     # mongo_db.add_item(time_now, config.goal["portfolio"])
     log("SUCCESS")
 

@@ -3,6 +3,11 @@
 import asyncio
 from contextlib import suppress
 
+from broker._utils._async import _sleep
+from broker._utils._log import log
+from broker._utils.tools import _exit, delete_multiple_lines, print_tb
+from broker.errors import QuietExit
+from broker.libs.math import _percent
 from ccxt.base.errors import RequestTimeout  # noqa
 from filelock import FileLock
 
@@ -11,18 +16,13 @@ from bot.binance_futures import future_stats, futures_bal, process_future_positi
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
 from bot.spot_lib import update_spot_timestamp
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _exit, delete_multiple_lines, print_tb
-from ebloc_broker.broker.errors import QuietExit
-from ebloc_broker.broker.libs.math import _percent
 
 RUN_FUTURES = False
 bot_async = BotHelperSpotAsync()
 
 
 async def process(unix_timestamp_ms):
-    update_spot_timestamp(unix_timestamp_ms)  # first update spot.timestamp
+    update_spot_timestamp(unix_timestamp_ms)  # first update spot timestamps
     *_, usdt_bal, free_usdt = await bot_async.spot_balance(balance_type=cfg.TYPE)
     if RUN_FUTURES:
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
@@ -32,12 +32,12 @@ async def process(unix_timestamp_ms):
         log()
 
     if RUN_FUTURES:
-        with FileLock(config.status.fp_lock, timeout=1):
+        with FileLock(config.status.fp_lock, timeout=5):
             config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
 
         usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
     else:
-        with FileLock(config.status.fp_lock, timeout=1):
+        with FileLock(config.status.fp_lock, timeout=5):
             if cfg.TYPE == "usdt":
                 config.status["root"][cfg.TYPE]["balance"] = usdt_bal
                 config.status["root"][cfg.TYPE]["free"] = free_usdt
@@ -62,7 +62,7 @@ async def process(unix_timestamp_ms):
         if _alert:
             asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
             if float(asset_price) > _alert["price"]:
-                await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=19)
+                await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=cfg.SLEEP_INTERVAL)
 
 
 async def process_main(obj):
@@ -85,7 +85,7 @@ async def process_main(obj):
         _exit("KeyError")
     except Exception as e:
         if "quantity is zero" in str(e):
-            log(f"warning: {e}, nothing to worry about")
+            log(f"warning: {e}, [green]don't worry")
         elif "Timestamp for this request is outside of the recvWindow" in str(e):
             log("E: Timestamp for this request is outside of the recvWindow")
         else:

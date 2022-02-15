@@ -1,21 +1,20 @@
 root:
     isolated_wallet_limit: 150
     discord_msg_above_usdt: 100
-    take_profit: 0.0049
+    take_profit: 0.0055 # 0.0049
     ignore: # for all
       - FTM
     btc:
-        max_pos: 1
-        initial_btc_quantity: 0.00015
-        locked_percent_limit: 95
+        max_pos: 3
+        initial: 0.00025 # 0.00015
         multiply_ratio: 1.07
-        percent_change_to_add: 10
+        percent_change_to_add: 5
+        locked_percent_limit: 95
+        take_profit: 0.005
     usdt:
         max_pos: 4
+        initial: 12
         multiply_ratio: 1.08
-        percent_change_to_add: 7
-        pos:
-            base: 12
-        1s_alert:
-            sell: 10
+        percent_change_to_add: 4
         locked_percent_limit: 90
+        take_profit: 0.0055

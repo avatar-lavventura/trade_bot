@@ -4,7 +4,7 @@ aiohttp==3.8.1
 appdirs==1.4.4
 APScheduler==3.7.0
 astroid==2.7.2
-async-timeout==3.0.1
+async-timeout==4.0.2
 attrs==21.2.0
 autopep8==1.5.7
 backcall==0.2.0
@@ -14,7 +14,7 @@ black==21.9b0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==1.72.30
+ccxt==1.74.77
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -122,7 +122,7 @@ webencodings==0.5.1
 websocket-client==1.2.1
 websockets==9.1
 Werkzeug==2.0.1
-wrapt==1.12.1
+wrapt==1.13.3
 wsproto==1.0.0
 yapf==0.32.0
 yarl==1.7.2

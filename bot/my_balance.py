@@ -92,7 +92,7 @@ async def fetch_balance() -> float:  # noqa
                 log(f" {format(per, '.2f')}% ", "blue", end="")
                 log(f"{format(initial_margin, '.2f')} ", "blue", end="")
 
-        log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
+        log(f"lost={format(total_lost, '.2f')}$", "bold red")
         return total_balance
     except Exception as e:
         print_tb(e)

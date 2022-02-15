@@ -46,7 +46,7 @@ from pathlib import Path
 
 import binance_lib
 import requests
-from binance_lib import futures_history, positions
+from binance_lib import positions
 from bs4 import BeautifulSoup
 
 from bot.user_setup import check_binance_obj
@@ -498,6 +498,7 @@ def trade_cont(client, balances):
     # current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
     # current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
     own_usd = sum_btc * float(current_btc_price_USD)
+    log(f"own_usd={own_usd}")
     try:
         global org_symbols
         org_symbols = load_obj("symbols")

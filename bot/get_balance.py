@@ -15,7 +15,7 @@ def get_balance(client_helper):
     margin_usdt = client_helper.get_balance_margin_usdt()
     futures_usd = client_helper._get_futures_usdt()
     futures_usd = client_helper._get_futures_usdt()
-    log(f" * futures={futures_usd} USDT | spot={client_helper._format(usdt_balance)} USD | margin={margin_usdt} ")
+    log(f" * futures={futures_usd} USDT | spot={client_helper._format(usdt_balance)} USD | margin={margin_usdt}")
     client_helper.spot_balance()
 
 

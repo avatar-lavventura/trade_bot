@@ -4,7 +4,7 @@ from contextlib import suppress
 
 from filelock import FileLock
 
-from bot import helper
+from bot import cfg, helper
 from bot.bot_helper_async import TP
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
@@ -75,7 +75,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms, chann
                 await channel.send(
                     f"{asset} isolated_wallet={int(isolated_wallet)}, "
                     f"unrealized_profit={unrealized_profit}({format(asset_percent_change, '.2f')}%)",
-                    delete_after=20,  # new message will come in 20 seconds
+                    delete_after=cfg.SLEEP_INTERVAL,
                 )
 
             if (
@@ -90,11 +90,11 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms, chann
             await cancel_check_orders(symbol, limit_price, side, entry_price, position_amt)
 
     if total_lost > 0.0125:
-        log(f"total_lost={format(total_lost, '.2f')}$", "bold red")
+        log(f"lost={format(total_lost, '.2f')}$", "bold red")
 
-    with FileLock(config.status.fp_lock, timeout=1):
-        if config.status["futures"]["pos_count"] != count:
-            config.status["futures"]["pos_count"] = count
+    with FileLock(config.status.fp_lock, timeout=5):
+        if config.status_usdtperp["count"] != count:
+            config.status_usdtperp["count"] = count
 
         if not isinstance(config.status["log"]["futures"]["max_position_count"], int):
             config.status["log"]["futures"]["max_position_count"] = 0
@@ -106,7 +106,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms, chann
 
 
 def future_stats(usdt_bal, unix_timestamp_ms):
-    with FileLock(config.status.fp_lock, timeout=1):
+    with FileLock(config.status.fp_lock, timeout=5):
         locked = usdt_bal - config.status["root"]["free_usdt"]
         if not isinstance(config.status["log"]["futures"]["max_locked"], int):
             config.status["log"]["futures"]["max_locked"] = 0

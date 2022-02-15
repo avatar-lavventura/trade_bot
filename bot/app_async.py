@@ -2,14 +2,14 @@
 
 import asyncio
 import logging
-import quart.flask_patch  # noqa
-from flask import abort, request
 from pathlib import Path
-from quart import Quart
 
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _exit, print_tb
-from ebloc_broker.broker.errors import QuietExit
+import quart.flask_patch  # noqa
+from broker._utils._log import log
+from broker._utils.tools import print_tb
+from broker.errors import QuietExit
+from flask import abort, request
+from quart import Quart
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
@@ -38,10 +38,11 @@ async def startup():
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
+    from broker._utils import _log
+
     import bot.trade_async as bot_trade
     from bot import helper
     from bot.client_helper import DiscordClient
-    from ebloc_broker.broker._utils import _log
 
     _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
     loop = asyncio.get_event_loop()
@@ -53,7 +54,7 @@ async def startup():
     app.bot_trade = bot_trade.BotHelper(app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
-    print(" * s t a r t i n g | curl https://alpyrbot.duckdns.org", flush=True)
+    print(" * s t a r t i n g | curl https://alpybot.duckdns.org", flush=True)
     # margin_usdt = app.client_helper.get_balance_margin_usdt()
 
 
@@ -64,10 +65,11 @@ async def notify():
 
 @app.route("/webhook", methods=["POST"])
 async def webhook():
-    """Receive webhook from tradingview."""
+    """Receive webhook from tradingview alerts."""
     if request.method != "POST":
         abort(400)
 
+    # TODO: Do nothing in high cpu usage
     data_msg = request.get_data(as_text=True)
     if data_msg:
         try:
@@ -78,8 +80,9 @@ async def webhook():
         except QuietExit as e:
             if e:
                 log(str(e), "bold")
-        except KeyError:
-            _exit("KeyError")
+        except KeyError as e:
+            if e:
+                log(str(e), "bold")
         except Exception as e:
             print_tb(e)
 
