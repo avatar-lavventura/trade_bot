@@ -3,7 +3,6 @@
 
 Archived entries from file /home/alper/trade_bot/bot/TODO.org
 
-
 * DONE PULL already open positions from yaml that is written by binance_balance.py
 CLOSED: [2021-09-12 Sun 03:20]
 :PROPERTIES:
@@ -253,6 +252,166 @@ CLOSED: [2022-01-19 Wed 15:30]
 :ARCHIVE_TIME: 2022-01-19 Wed 15:30
 :ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
 :ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 3. ekleme 9% gorurse 2 kat ekleme yap
+CLOSED: [2022-02-24 Thu 11:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:54
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE FIX ==> opening BUY order in the USDT market for ACH ACH/USDT order_quantity=185.0
+CLOSED: [2022-02-24 Thu 11:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:54
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+#+begin_src python
+Traceback (most recent call last):
+  File "/home/tomasina_alim/trade_bot/bot/trade_async.py", line 352, in spot_order
+  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 2723,
+in create_order
+    response = await getattr(self, method)(self.extend(request, params))
+  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4952,
+in request
+  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
+104, in fetch2
+    return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
+169, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response,
+json_response, request_headers, request_body)
+  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4908,
+in handle_errors
+    message = self.safe_string(response, 'msg')
+  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/base/exchange.py", line 566, in
+throw_exactly_matched_exception
+    raise exact(message)
+ccxt.base.errors.InsufficientFunds: binance Account has insufficient balance for requested action.
+An exception of type InsufficientFunds occurred. Arguments:
+('binance Account has insufficient balance for requested action.',)
+binance Account has insufficient balance for requested action.
+#+end_src
+
+* DONE 30 dakika icinde ters yone poz acma
+CLOSED: [2022-02-24 Thu 11:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:55
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+ex: 3:50 SHORT ... 4:12 LONG gelirse, 30 dakika icinde ters yone sinyal geldigi
+icin ignore yap// prev position side
+
+* DONE save timestamp for orders to record its bar_index
+CLOSED: [2022-02-24 Thu 11:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:55
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+Compare current bar_index value with latest position's bar index.
+
+* DONE seperate stauts.yaml for btc and spot
+CLOSED: [2022-02-24 Thu 11:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:56
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Give alert if 10% is locked and alert came for that pair
+CLOSED: [2022-02-25 Fri 08:42]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-25 Fri 08:42
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE run_app log disable writing into a file
+CLOSED: [2022-02-25 Fri 08:42]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-25 Fri 08:42
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE yellow calculate all locked position percent amount
+CLOSED: [2022-02-26 Sat 16:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-26 Sat 16:56
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE usdt ignore prices < 0.001 also remove them from blacklist
+CLOSED: [2022-02-28 Mon 10:19]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-28 Mon 10:19
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE discord.py edit message
+CLOSED: [2022-03-07 Mon 10:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-07 Mon 10:49
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+https://stackoverflow.com/questions/55711572/how-to-edit-a-message-in-discord-py
+
+* DONE Remove usdt pairs less than (0.02 cent)
+CLOSED: [2022-03-07 Mon 21:20]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-07 Mon 21:20
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Seems like trade__async does not update order count in btc
+CLOSED: [2022-03-13 Sun 13:13]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-13 Sun 13:13
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Apply swap space into google instance
+CLOSED: [2022-03-15 Tue 15:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-15 Tue 15:49
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT/carry google instance to ~Taiwan: asia-east1~
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:

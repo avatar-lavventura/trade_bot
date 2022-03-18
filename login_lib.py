@@ -5,8 +5,7 @@ import pickle
 from pathlib import Path
 
 from binance.client import Client
-
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.yaml import Yaml
 
 HOME = str(Path.home())
 
@@ -35,7 +34,7 @@ def load_obj(name):
 
 
 def check_binance_obj():
-    client = None
+    global client
     try:
         client = load_obj("binance")
     except:
@@ -45,5 +44,3 @@ def check_binance_obj():
         api_secret = str(_cfg["b"]["secret"])
         client = Client(api_key, api_secret)
         save_obj("binance", client)
-
-    return client

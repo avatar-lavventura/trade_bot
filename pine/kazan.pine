@@ -1,12 +1,9 @@
 //@version=4
 strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
-     shorttitle="alpy_vix", calc_on_order_fills=true, initial_capital=750, default_qty_value=7,
-     process_orders_on_close=true, default_qty_type=strategy.cash,
-     calc_on_every_tick=true, pyramiding=100000,
-     currency=currency.USD, commission_type=strategy.commission.percent,
-     commission_value=0.1, overlay=false)
-
-fromMonth = 1
+     shorttitle="alpy_vix", calc_on_order_fills=true, process_orders_on_close=true,
+     default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000,
+     overlay=false)
+fromMonth = 2
 fromDay   = 1
 thruMonth = 1
 thruDay   = 1
@@ -36,7 +33,7 @@ wt2 = sma(wt1, 4)  // red-line
 // is_wave_trend_check = wt2 < wt1 and wt1 <= osLevel2
 is_wave_trend_check = wt2 < wt1 and wt1 <= osLevel2
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 source = close
 useCurrentRes = input(true, title="Use Current Chart Resolution?")
 resCustom = input(title="Use Different Timeframe? Uncheck Box Above", type=input.resolution, defval="60")
@@ -61,10 +58,7 @@ histB_IsDown = outHist < outHist[1] and outHist <= 0
 histB_IsUp = outHist > outHist[1] and outHist <= 0
 macdIsAbove = outMacD >= outSignal
 macdIsBelow = outMacD < outSignal
-// plotColor = hist_colorChange ? histA_IsUp ? aqua : histA_IsDown ? blue : histB_IsDown ? red : histB_IsUp ? maroon :yellow :gray
-// macdColor = macdIsAbove ? lime : red : red
-// signalColor = macdColorChange ? macdIsAbove ? yellow : yellow : lime
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 // williams vix fix formula
 pd = input(22, title="lookback period standard deviation high")

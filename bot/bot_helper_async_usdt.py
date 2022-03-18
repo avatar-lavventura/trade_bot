@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
+from broker._utils._log import log
+from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
+
 from bot import cfg, helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
 
 
-class BotHelperUsdtAsync(BotHelperAsync):
+class BotHelperSpotAsync(BotHelperAsync):
     def __init__(self):
         self.channel = None
         self.channel_alerts = None
 
-    async def check_position_to_pass(self, asset, entry_price, _sum, profit, is_limit, _per, asset_percent_change):
+    async def check_position_to_pass(self, asset, _sum, is_limit, _per):
         if _sum > config.isolated_wallet_limit:
             log("PASS_1", "bold")
             return True
@@ -29,13 +30,13 @@ class BotHelperUsdtAsync(BotHelperAsync):
         return False
 
     async def check_is_limit_order_exist(self, asset, limit_price):
-        open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/USDT")
+        open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/{cfg.TYPE.upper()}")
         if not open_orders:
-            await self.new_limit_order(asset, limit_price, "USDT")
+            await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
         else:
             for order in open_orders:
                 if order["info"]["side"] == "SELL" and float(limit_price) < float(order["price"]):
-                    await self.new_limit_order(asset, limit_price, "USDT")
+                    await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
 
     def get_decimal_count(self, symbol, value) -> int:
         try:
@@ -63,13 +64,14 @@ class BotHelperUsdtAsync(BotHelperAsync):
                 quantity = round_float(quantity, 8)
                 _sum = round_float(_sum, 8)
                 if is_return:
-                    config.timestamp["spot_timestamp"][trade["symbol"].replace("/USDT", "")] = trade["timestamp"]
+                    key = f"{cfg.TYPE.lower()}_timestamp"
+                    config.timestamp[key][trade["symbol"].replace(f"/{cfg.TYPE.upper()}", "")] = trade["timestamp"]
                     return (quantity, _sum, decimal)
 
         return (quantity, _sum, decimal)
 
-    async def spot_limit_usdt(self, asset, asset_balance, sum_usdt, is_limit=True):
-        """Spot limit for USDT."""
+    async def spot_limit(self, asset, asset_balance, sum_bal, is_limit=True):
+        """Spot limit for SPOT."""
         try:
             since = config.get_spot_timestamp(asset)
             if not since:
@@ -80,8 +82,8 @@ class BotHelperUsdtAsync(BotHelperAsync):
         if len(str(since)) == 10:
             since = since * 1000
 
-        trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT", since=since)
-        # all_trades = trades + trades_usdt  # merge USDT transactions
+        trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{cfg.TYPE.upper()}", since=since)
+        # all_trades = trades + trades_usdt  # merge SPOT transactions
         all_trades = trades
         ordering = {}
         for idx, trade in enumerate(all_trades):
@@ -96,74 +98,87 @@ class BotHelperUsdtAsync(BotHelperAsync):
         if timestamp_list:
             quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, all_trades)
         else:
-            trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT")
+            trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{cfg.TYPE.upper()}")
             all_trades = trades
             ordering = {}
             for idx, trade in enumerate(all_trades):
                 try:
                     ordering[trade["timestamp"]].append(idx)
-                except:
+                except Exception:
                     ordering[trade["timestamp"]] = [idx]
 
             timestamp_list = sorted(ordering, reverse=True)
             quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, all_trades, is_return=True)
 
         if quantity == 0:
-            raise Exception("E: quantity is zero")
+            if asset in config.SPOT_IGNORE_LIST:
+                return 0
+
+            raise Exception(f"E: quantity is zero for asset={asset}")
 
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
         limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
         _quantity = format(asset_balance, ".4f")
-        log(f"==> {asset} q={remove_trailing_zeros(_quantity)} | e={entry_price} | ", end="", filename="balance.log")
+        log(f"[green]==>[/green] {asset} q={remove_trailing_zeros(_quantity)} | e={entry_price} | ", "bold", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"l={limit_price} | ", "bold", end="", filename="balance.log")
+            log(f"l={limit_price} | ", "bold", end="")
 
         if entry_price == limit_price:
             raise Exception(f"entry_price and limit_price are same, equal to {entry_price}")
 
-        asset_price = await self.spot_fetch_ticker(f"{asset}USDT")
-        log(f"p={asset_price} ", "bold", end="", filename="balance.log")
-        per = (100.0 * asset_balance * asset_price) / sum_usdt
-        _per = format(per, ".2f")
+        asset_price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
+        log(f"p={asset_price} ", "bold", end="")
+        per = format((100.0 * asset_balance * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * quantity
-        log(format(profit, ".2f"), "bold green" if profit > 0 else "bold red", end="", filename="balance.log")
-        asset_percent_change = percent_change(
-            initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False, filename="balance.log"
-        )
-        log(f"| [bold magenta]{format(_sum, '.2f')} ({_per}%) ", end="", filename="balance.log")
+        if profit != 0.0:
+            if cfg.TYPE.lower() == "usdt":
+                log(format(profit, ".2f"), "bold green" if profit > 0 else "red", end="")
+            else:
+                log(format(profit * 1000, ".5f"), "bold green" if profit > 0 else "red", end="")
+
+            asset_percent_change = percent_change(
+                initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
+            )
+        else:
+            asset_percent_change = 0.0
+
+        if cfg.TYPE.lower() == "usdt":
+            log(f"| [bold magenta]{format(_sum, '.2f')} ([yellow]{per}%[/yellow]) ", end="")
+        else:
+            log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ([yellow]{per}%[/yellow]) ", end="")
+
+        cfg.locked_balance += float(per)
         if self.channel and _sum > config.discord_msg_above_usdt:
             if asset_percent_change < -0.5 or profit < -0.5:
-                cfg.discord_message += f"{asset} e={entry_price} lost={format(profit, '.2f')} ({format(asset_percent_change, '.2f')}%) | `{format(_sum, '.2f')}`\n"  # noqa
+                cfg.discord_message += (
+                    f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(asset_percent_change, '.2f')}%)"
+                    f" `{round(_sum)}`\n"
+                )
 
-        log(is_console_out=False, filename="balance.log")
+        if self.channel:
+            cfg.discord_message_full += (
+                f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(asset_percent_change, '.2f')}%)"
+                f" `{round(_sum)}`\n"
+            )
+
         if asset in config.SPOT_IGNORE_LIST:
             log()
             return profit
-
-        if not await self.check_position_to_pass(
-            asset, entry_price, _sum, profit, is_limit, _per, asset_percent_change
-        ):
-            if asset_percent_change <= -2 and asset_percent_change <= config.usdt_percent_change_to_add:
-                new_order_size = asset_balance * config.usdt_multiply_ratio
+        elif not await self.check_position_to_pass(asset, _sum, is_limit, per):
+            if asset_percent_change <= -1.99 and asset_percent_change <= config.env[cfg.TYPE].percent_change_to_add:
+                new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio
                 if new_order_size * asset_price < 10:
                     # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
                     new_order_size = asset_balance * 1.05
 
                 log(f"new_order_size={new_order_size}", "bold")
-                per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_usdt
-                log(f"==> {format(float(_per), '.2f')}% => {format(float(per), '.2f')}% of the total asset value")
-                # if float(_per) > config.SPOT_locked_percent_limit:
-                #     # TODO: Calculate percent on full money on futures as well
-                #     new_per = (100.0 * asset_balance * asset_price) / sum_usdt
-                #     per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
-                #     usdt_amount_to_buy = per_to_buy * sum_usdt / 100.0
-                #     _new_order_size = usdt_amount_to_buy / asset_price
-                #     new_order_size = f"{_new_order_size:.{decimal}f}"
-                order = await self.spot_order(new_order_size, f"{asset}/USDT", "BUY")
+                per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_bal
+                log(f"==> {format(float(per), '.2f')}% => {format(float(per), '.2f')}% of the total asset value")
+                order = await self.spot_order(new_order_size, f"{asset}/{cfg.TYPE.upper()}", "BUY")
                 if order:
                     log(order["info"])
-                    await self.new_limit_order(asset, limit_price, "USDT")
+                    await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
 
         await self.check_is_limit_order_exist(asset, limit_price)
         return profit

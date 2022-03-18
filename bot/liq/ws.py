@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import websocket
+from ebloc_broker.broker._utils import _log
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import _date, print_tb
 from pymongo import MongoClient
 
 from bot.lib import LiqBase
 from bot.mongodb import Mongo
-from ebloc_broker.broker._utils import _log
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _time, print_tb
 
 _log.ll.LOG_FILENAME = "liq.log"
 mc = MongoClient()
@@ -40,7 +40,7 @@ class Liq(LiqBase):
                 "liq_amount": amount,
             }
             mongo.add_item(self.symbol, self.order_trade_time, item)
-            log(f" * {_time()} {self.event_time}", "bold")
+            log(f" * {_date()} {self.event_time}", "bold")
             log(f"==> symbol={self.symbol}")
             log(f"==> side={self.side} | ", end="")
             if self.side == "BUY":

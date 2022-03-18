@@ -1,25 +1,30 @@
 #!/usr/bin/env python3
 
 import logging
+import sys
+from contextlib import suppress
 from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
-from bot import binance_balance, cfg, helper
-from bot.binance_balance import process_main
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils.tools import print_tb
 from ebloc_broker.broker._utils.yaml import Yaml
 
+from bot import binance_balance, cfg, helper
+from bot.binance_balance import process_main
+
 logging.getLogger("apscheduler.executors.default").propagate = False
-_log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
 
 
 class Discord_Alpy:
-    def __init__(self):
+    def __init__(self, _type):
         try:
-            _config = Yaml(Path(f"{Path.home()}/.binance.yaml"))
+            self._type = cfg.TYPE = _type
+            _log.ll.LOG_FILENAME = Path.home() / ".bot" / f"program_{_type}.log"
+            print(f" * bot_type={_type}")
+            helper.exchange.init(_type)
+            _config = Yaml(Path.home() / ".binance.yaml")
             self.channel: str = ""
             self.channel_alerts: str = ""
             self.client = discord.Client()
@@ -30,8 +35,12 @@ class Discord_Alpy:
         except SystemExit:
             pass
         except KeyboardInterrupt:
+            with suppress(KeyboardInterrupt):
+                self.client.loop.run_until_complete(binance_balance.bot_async.close())
+
+            self.client.loop.run_until_complete(cfg.discord_sent_message.delete())
             self.client.loop.close()
-            print("Program ended.")
+            print("## Program ended")
         except Exception as e:
             print_tb(e)
             breakpoint()  # DEBUG
@@ -46,7 +55,7 @@ class Discord_Alpy:
         await helper.exchange.set_markets()
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(self._process_main, "cron", second="*/20", timezone="Europe/Istanbul")
+        scheduler.add_job(self._process_main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -65,4 +74,9 @@ class Discord_Alpy:
 
 
 if __name__ == "__main__":
-    Discord_Alpy()
+    try:
+        _type = sys.argv[1:][0]
+    except:
+        _type = "usdt"
+
+    Discord_Alpy(_type)

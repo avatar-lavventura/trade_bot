@@ -1,35 +1,49 @@
 * Guide
 
-** [Nginx setup](http://alpyr.duckdns.org:81/)
+** [[http://alpyr.duckdns.org:81][Nginx setup]]
 
-IP: [[https://alpyrbot.duckdns.org/webhook]]
+IP: [[https://alpybot.duckdns.org/webhook]]
 
 - [[https://discord.com/developers/applications]]
 - [[https://sandwich.finance]]
 - [[https://bigpara.hurriyet.com.tr/borsa/canli-borsa/]]
-
-** [swap space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04)
-
+- [[https://nginxproxymanager.com/setup/#configuration-file]]
 
 First: ([[<ip_address>:81/login]])
 
 - [[https://console.cloud.google.com/networking/firewalls][Firewall setup]]
 
-Open port ~81~ and ~5000~ in Google Instance
+Open port ~443~, ~81~, and ~5000~ in Google Instance, under ~default-allow-http~.
+
+* Enable Port Google-Instance
+
+– Navigation Menu => VPN Network => Firewall => Create Firewall Rule
+– Name: ipfs
+– Logs: Off
+– Type: Ingress
+– Priority: 1000
+– Targets => All instances in the network
+– Source IP ranges: 0.0.0.0/0
+– TCP: 5000
+– Action: Allow
+– default
+– Off
+– Open instance, Edit, network tags => add ipfs
+– sudo service network-manager restart or reboot in case
 
 #+begin_src bash
 sudo firewall-cmd --add-port=5000/tcp --permanent --zone=docker
 sudo firewall-cmd --reload
 sudo firewall-cmd --list-all --zone=docker
 
-sudo ufw allow 5000
-sudo ufw allow 8080
-sudo ufw allow 80
-sudo ufw allow 81
-sudo ufw allow 443
+sudo ufw allow 5000/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 81/tcp
+sudo ufw allow 443/tcp
 sudo ufw enable
 sudo systemctl enable ufw
-sudo ufw status verbose  # Status should be: active
+sudo ufw status verbose
+sudo nmap localhost
 #+end_src
 
 #+begin_src yaml
@@ -37,14 +51,14 @@ admin@example.com  | alper.alimoglu@gmail.com
 password: changeme
 #+end_src
 
-- First ~alpyr.duckdns.org~ and ~alpyrbot.duckdns.org~ should have the correct new IP.
+- First ~alpyr.duckdns.org~ and ~alpybot.duckdns.org~ should have the correct new IP.
 
 *** Details
 #+begin_src bash
-Domain name: alpyr.duckdns.org       | alpyrbot.duckdns.org
-Scheme: http                         | http
-IP: ...                              | same_ip
-Forward: 81                          | 5000
+Domain name: alpyr.duckdns.org     | alpybot.duckdns.org
+Scheme: http                       | http
+<IP>                               | same_ip
+Forward: 81                        | 5000
 [X] Block Comman Exploits
 [X] Websockets Support
 
@@ -80,36 +94,31 @@ https://askubuntu.com/a/1046217/660555
 *** public
 
 #+begin_src bash
-curl https://alpyrbot.duckdns.org
-curl -X POST http://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
-curl -X POST http://alpyrbot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
+curl https://alpybot.duckdns.org
+curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
+curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
 #+end_src
 
 *** localhost
 
 #+begin_src bash
 curl -v 127.0.0.1:5000
+curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
 curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
-curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,enter,1.943,"
-#+end_src
-
-
-# Port-Forwarding, not required
-#+begin_src bash
-sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 5000
 #+end_src
 
 -------------------
 
 ** Tradingview alerts some links
 
-1. [[https://liquidation.atsutane.net/calc][Binance Minimum Trading Rules]]
+1. [[https://liquidation.atsutane.net/calc][Binance Minimum Trading Rules for Futures]]
    ~Balance: 15, PercentBal: 100, Leverage: 1~
 2. [[https://github.com/puppeteer/puppeteer][puppeteer google browser]]
 3. [[https://maildim.com][fake gmail address generator and inbox]]
-4. tv_username_last_used => ~roxanroxanroxan_14~
-5. yb digital card used: 3 times
-   ending: ****
+4. [[https://temp-sms.org][SMS reciever New Zealand Phone number]]
+5. tv__username__last__used => ~roxanroxanroxan_16~
+6. yb digital card used: 4 times last used ending: **41
+7. ~e2-small~ does the job on google instance
 
 ** Git Push:
 
@@ -155,3 +164,9 @@ npx @alleyway/create-tradingview-alerts-home
 cd tradingview-alerts-home
 npm install
 #+end_src
+
+* Google Instance
+
+– Create with 15 GB boot disk, ~e2-small~ // Ubuntu LTS minimal
+– 1 non-preemptible e2-micro VM instance per month in one of the following
+US regions: ~Oregon: us-west1~, ~Iowa: us-central1~, ~South Carolina: us-east1~

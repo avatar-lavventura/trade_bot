@@ -5,9 +5,8 @@ from datetime import datetime
 from pathlib import Path
 
 from binance.client import Client
+from broker._utils._log import log
 from matplotlib import pyplot
-
-from ebloc_broker.broker._utils._log import log
 
 x_data = []
 y_data = []

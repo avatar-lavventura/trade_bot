@@ -1,4 +1,9 @@
-spot_timestamp:
-    base: 1643279521
-    XVS: 1643453126951
-    JOE: 1643531896770
+usdt_timestamp:
+    base: 1647471441
+    WRX: 1647477553890
+    IRIS: 1647547498462
+btc_timestamp:
+    base: 1647414561
+    ANC: 1647515561418
+    RNDR: 1647540422699
+    ENJ: 1647561633388
