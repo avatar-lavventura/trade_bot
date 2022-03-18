@@ -46,18 +46,18 @@ from pathlib import Path
 
 import binance_lib
 import requests
-from binance_lib import futures_history, positions
+from binance_lib import positions
 from bs4 import BeautifulSoup
-
-from bot.user_setup import check_binance_obj
 from ebloc_broker.broker._utils import _log
 from ebloc_broker.broker._utils.tools import log, run
+
+from bot.user_setup import check_binance_obj
 
 HOME = str(Path.home())
 _log.ll.LOG_FILENAME = "progress.log"
 _log.ll.IS_PRINT = False
 
-SEP = "====================================================================================="
+SEP = "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
 headers = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95"
@@ -472,7 +472,7 @@ def trade_cont(client, balances):
     print(client.get_asset_balance(asset=MAIN_ASSET))
     # free_asset = get_free_balance()
     # info = client.get_account()
-    # margin ===============================================
+    # margin # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # print(client.get_open_margin_orders(symbol='ETHBTC'))
     # for d in client.get_margin_account()['userAssets']:
     #     if d['free'] != "0":
@@ -480,7 +480,7 @@ def trade_cont(client, balances):
 
     # ua = {d['asset']: d for d in data['userAssets']}
     # print(ua['BTC']['free'])
-    # ======================================================
+    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     sum_btc = 0.0
     for _balance in balances["balances"]:
         asset = _balance["asset"]
@@ -497,8 +497,8 @@ def trade_cont(client, balances):
     current_btc_price_USD = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
     # current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
     # current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
-    own_usd = 0.0
     own_usd = sum_btc * float(current_btc_price_USD)
+    log(f"own_usd={own_usd}")
     try:
         global org_symbols
         org_symbols = load_obj("symbols")

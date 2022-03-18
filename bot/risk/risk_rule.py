@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from bot.config import config
 from ebloc_broker.broker._utils._log import log
+
+from bot.config import config
 
 
 def percent(amount, ratio):
@@ -9,8 +10,8 @@ def percent(amount, ratio):
 
 
 def main():
-    free_usdt = config.status["root"]["free_usdt"]
-    log(f"free_usdt={free_usdt}\n", "bold")
+    free_usdt = config.status["root"]["usdt"]["free"]
+    log(f"free_usdt={free_usdt}", "bold")
     for i in range(1, 10):
         output = percent(free_usdt, i / 10)
         log(f" * [yellow]%{i / 10}[/yellow] -> {output}")

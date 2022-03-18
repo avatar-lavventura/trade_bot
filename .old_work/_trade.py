@@ -161,7 +161,7 @@ class BotHelper:
                     return True
         return False
 
-    def get_usdt_open_position_count(self, is_print=False) -> int:
+    def get_futures_open_position_count(self, is_print=False) -> int:
         count = 0
         future_positions = helper.exchange.future.fetch_positions()
         for position in future_positions:
@@ -459,7 +459,7 @@ class BotHelper:
         log("==> Attempt for trading. ", color="cyan")
         try:
             if self.strategy.market_position != "flat":
-                log(f"==> Opening {self.strategy.side} order in the {self.strategy.market} market")
+                log(f"==> opening {self.strategy.side} order in the {self.strategy.market} market")
                 if self.strategy.is_buy():
                     self.buy()
                 elif self.strategy.is_sell():
@@ -478,14 +478,14 @@ class BotHelper:
 
     def check_on_going_positions(self, strategy) -> bool:
         if strategy.market == "USDTPERP":
-            usdt_open_position_size = self.get_usdt_open_position_count()
+            usdt_open_position_size = self.get_futures_open_position_count()
             if usdt_open_position_size >= USDT_MAX_POSITION_NUMBER:
-                # log(f"Warning: There is already ongoing {USDT_MAX_POSITION_NUMBER} of positions.")
+                # log(f"warning: There is already ongoing {USDT_MAX_POSITION_NUMBER} of positions.")
                 return True
         elif strategy.market == "BTC":
             btc_open_position_size = self.get_btc_open_positions()
             if btc_open_position_size >= BTC_MAX_POSITION_NUMBER:
-                # log(f"Warning: There is already ongoing {BTC_MAX_POSITION_NUMBER} of positions")
+                # log(f"warning: There is already ongoing {BTC_MAX_POSITION_NUMBER} of positions")
                 return True
         return False
 
@@ -541,10 +541,10 @@ class BotHelper:
 
         output = self.check_on_going_positions(strategy)
         if "enter" not in strategy.position_alert_msg or strategy.symbol == "TEST" or output:
-            # log(f"Warning: ignore, nothing to do. {strategy.position_alert_msg}")
+            # log(f"warning: ignore, nothing to do. {strategy.position_alert_msg}")
             pass
         elif strategy.market == "BTC" and strategy.is_sell():
-            log("Warning: Ignore BTC pair, no need to sell.")
+            log("warning: Ignore BTC pair, no need to sell.")
         elif is_trade:
             self._trade(strategy)
 

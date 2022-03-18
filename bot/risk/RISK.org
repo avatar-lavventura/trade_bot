@@ -60,3 +60,12 @@ Trading is hard. Don't trade if you don't have an edge. Deciding when to enter a
 trade, where to put a stop loss and when to exit requires skills.
 
 [[https://pastebin.com/sqJUcbjp][link]]
+
+* Start slowly. Question every trade.
+// Write down your assessment and refer to your comments before making your next
+trade.
+
+1. What motivated it?
+2. How was the trade managed?
+3. Was it successful? Why?
+4. Did you lode? Why?

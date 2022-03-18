@@ -40,3 +40,4 @@ status.yaml
 run_balance.yaml
 /.mypy_cache/
 .mypy_cache/
+cpu.log

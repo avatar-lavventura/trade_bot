@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+from ebloc_broker.broker._utils.tools import log
+
 from bot.client_helper import ClientHelper
 from bot.trade_async import BotHelper, Strategy
 from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils.tools import log
 
 
 def get_balance(client_helper):
@@ -15,7 +16,7 @@ def get_balance(client_helper):
     margin_usdt = client_helper.get_balance_margin_usdt()
     futures_usd = client_helper._get_futures_usdt()
     futures_usd = client_helper._get_futures_usdt()
-    log(f" * futures={futures_usd} USDT | spot={client_helper._format(usdt_balance)} USD | margin={margin_usdt} ")
+    log(f" * futures={futures_usd} USDT | spot={client_helper._format(usdt_balance)} USD | margin={margin_usdt}")
     client_helper.spot_balance()
 
 

@@ -84,7 +84,7 @@ async def main():
     bot.get_btc_open_positions()
     client_helper.spot_balance()
     log(f" * Futures {futures_usd} USD | SPOT={client_helper._format(usdt_balance)} USD | MARGIN={margin_usdt} ")
-    usdt_open_position_size = bot.get_usdt_open_position_count()
+    usdt_open_position_size = bot.get_futures_open_position_count()
     log(f"   * usdt_open_position_size={usdt_open_position_size}")
     log(" * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", color="blue")
     app_server = WSGIServer(("0.0.0.0", 5000), app)

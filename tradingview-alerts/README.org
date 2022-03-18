@@ -1,6 +1,6 @@
-# Setup
+* Setup
 
-```
+#+begin_src bash
 npx @alleyway/create-tradingview-alerts-home
 npm install
-```
+#+end_src

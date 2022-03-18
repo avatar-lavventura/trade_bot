@@ -1,0 +1,17 @@
+files:
+  input: pairs_btc.csv
+tradingview:
+  chartUrl: https://www.tradingview.com/chart/Kwlc5uuo/
+  interval: 3m # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+alert:
+  condition:
+    primaryLeft: alpy_vix
+  actions:
+    notifyOnApp: false
+    showPopup: false
+    sendEmail: false
+    webhook:
+      enabled: true
+      url: "https://alpybot.duckdns.org/webhook"
+  message: >
+    {{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},{{strategy.position_size}},{{time}},

@@ -1,7 +1,7 @@
 files:
   input: pairs_temp.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/N3Qrs2jN/
+  chartUrl: https://www.tradingview.com/chart/Kwlc5uuo/
   # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
   interval: 15m
 alert:
