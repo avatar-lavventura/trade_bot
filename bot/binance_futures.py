@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
+from broker._utils._log import log
+from broker._utils.tools import _date, percent_change
 from contextlib import suppress
-
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _date, percent_change
 from filelock import FileLock
 
 from bot import cfg, helper
@@ -43,12 +42,12 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms, chann
                 log("==> ", "red", end="")
                 side = "SELL"
                 change = entry_price - price
-                limit_price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{precision}f}"
+                limit_price = f"{float(entry_price) * TP.get_profit_amount(isolated_wallet):.{precision}f}"
             else:
                 log("==> ", "green", end="")
                 side = "BUY"
                 change = price - entry_price
-                limit_price = f"{float(entry_price) * TP.get_profit_amount('long', isolated_wallet):.{precision}f}"
+                limit_price = f"{float(entry_price) * TP.get_profit_amount(isolated_wallet):.{precision}f}"
 
             asset = "{0: <5}".format(symbol.replace("/USDT", ""))
             log(

@@ -16,8 +16,7 @@ def cpu_percent():
     """
     while True:
         # gives a single float value
-        cpu_avg = psutil.cpu_percent(20)  # 4
-        if cpu_avg > 10:
+        if psutil.cpu_percent(20) > 10:  # psutil.cpu_percent(4)
             log(f"The CPU usage is: [cyan]{cpu_avg}%[/cyan]    [blue]{_date(_type='hour')}[/blue]")
 
 

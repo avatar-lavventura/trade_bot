@@ -3,8 +3,8 @@
 from contextlib import suppress
 from typing import Dict
 
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker.errors import QuietExit
+from broker._utils._log import log
+from broker.errors import QuietExit
 
 from bot import helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync

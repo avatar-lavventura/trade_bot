@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
+from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -218,7 +217,7 @@ class BotHelper:
 
         entry_price = _sum / contracts
         _entry_price = f"{entry_price:.{decimal}f}"
-        limit_price = f"{float(_entry_price) * TP.get_profit_amount('long'):.{decimal}f}"
+        limit_price = f"{float(_entry_price) * TP.get_profit_amount():.{decimal}f}"
         log(f"quantity={asset_balance} | entry={_entry_price} | limit={limit_price}", "bold")
         return limit_price, _entry_price
 

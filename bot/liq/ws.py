@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import websocket
-from ebloc_broker.broker._utils import _log
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _date, print_tb
+from broker._utils import _log
+from broker._utils._log import log
+from broker._utils.tools import _date, print_tb
 from pymongo import MongoClient
 
 from bot.lib import LiqBase

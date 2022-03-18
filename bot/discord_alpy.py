@@ -5,8 +5,8 @@ from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from ebloc_broker.broker._utils.tools import get_dt_time
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.tools import get_dt_time
+from broker._utils.yaml import Yaml
 
 logging.getLogger("apscheduler.executors.default").propagate = False
 
@@ -54,7 +54,7 @@ class Discord_Alpy:
 
 _discord = Discord_Alpy()
 
-# from ebloc_broker.broker._utils._async import _sleep
+# from broker._utils._async import _sleep
 # global MESSAGE
 # await self.client.wait_until_ready()
 # while True:

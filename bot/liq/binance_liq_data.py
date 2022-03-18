@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import ccxt
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.yaml import Yaml
 
 HOME = Path.home()
 _cfg = Yaml(HOME / ".binance.yaml")

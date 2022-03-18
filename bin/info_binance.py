@@ -11,8 +11,8 @@ from pathlib import Path
 
 import requests
 from binance.client import Client
+from broker._utils.yaml import Yaml
 from bs4 import BeautifulSoup
-from ebloc_broker.broker._utils.yaml import Yaml
 
 HOME = str(Path.home())
 balances = None

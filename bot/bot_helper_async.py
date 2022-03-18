@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-from typing import Tuple
-
 from broker._utils._log import _console_clear, console_ruler, log
 from broker._utils.tools import _date, decimal_count, percent_change, print_tb, round_float
+from contextlib import suppress
 from filelock import FileLock
+from typing import List, Tuple
 
 from bot import cfg, helper
 from bot.config import config
@@ -17,45 +16,36 @@ class TP_calculate(Exception):
 
 class TakeProfit:
     def __init__(self):
-        self.TAKE_PROFIT_LONG = []
-        self.TAKE_PROFIT_SHORT = []
-        self.take_profit_percent: float = config.take_profit
+        self.take_profit: float = config.take_profit
+        self.TAKE_PROFIT: List[float] = []
         # index:0 => 0.5% profit
-        self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent)
-        self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent)
+        self.TAKE_PROFIT.append(1.000 + self.take_profit)
         # index:1 => ex: 0.5 * 2 (1%) profit
         multiply_ratio = 1
-        self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent * multiply_ratio)
-        self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent * multiply_ratio)
+        self.TAKE_PROFIT.append(1.000 + self.take_profit * multiply_ratio)
 
-    def get_profit_amount(self, side, amount=0.0) -> float:
+    def get_profit_amount(self, amount=0) -> float:
         amount = abs(float(amount))
         index = 0
-        if side == "long":
-            quantity = config._initial_usdt_qty
-        else:  # side == "short":
-            quantity = config._initial_usdt_qty_short
+        # if side == "long":
+        #     quantity = config._initial_usdt_qty
+        # else:  # side == "short":
+        #     quantity = config._initial_usdt_qty_short
 
-        if amount > (quantity + quantity / 2):
-            # if the initial margin is more than first opened position amount
-            index = 1
+        # if amount > (quantity + quantity / 2):
+        #     # if the initial margin is more than first opened position amount
+        #     index = 1
+        return self.TAKE_PROFIT[index]
 
-        if side == "long":
-            return self.TAKE_PROFIT_LONG[index]
-        else:  # side == "short":
-            return self.TAKE_PROFIT_SHORT[index]
-
-    def get_long_tp(self, entry_price, isolated_wallet, decimal):
-        price = f"{float(entry_price) * self.get_profit_amount('long', isolated_wallet):.{decimal}f}"
-        price = float(price)
+    def get_long_tp(self, entry_price, isolated_wallet, decimal) -> float:
+        price = float(f"{float(entry_price) * self.get_profit_amount(isolated_wallet):.{decimal}f}")
         if price <= entry_price:
             raise TP_calculate(f"limit_price={price}, decimal={decimal} calculated wrong")
 
         return price
 
-    def get_short_tp(self, entry_price, isolated_wallet, decimal):
-        price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{decimal}f}"
-        price = float(price)
+    def get_short_tp(self, entry_price, isolated_wallet, decimal) -> float:
+        price = float(f"{float(entry_price) * TP.get_profit_amount(isolated_wallet):.{decimal}f}")
         if price >= entry_price:
             raise TP_calculate(f"limit_price={price}, decimal={decimal} calculated wrong")
 
@@ -138,12 +128,12 @@ class BotHelperAsync:
             if asset not in config.SPOT_IGNORE_LIST:
                 del config.timestamp[key][asset]
 
-    async def _discord_send(self, msg, _lost, name):
+    async def _discord_send(self, msg, _lost, count, name):
         cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
         if cfg.locked_balance > 0:
             log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", filename=cfg.balance_fn)
             log(
-                f"[red]{_lost}{name}[/red] locked=([yellow]{cfg.locked_balance}%[/yellow])",
+                f"[red]{_lost}{name}[/red] locked=([yellow]{cfg.locked_balance}%[/yellow]) [blue]{count}[/blue] pos",
                 "bold",
                 filename=cfg.balance_fn,
             )
@@ -265,7 +255,7 @@ class BotHelperAsync:
 
         if cfg.TYPE.lower() == "usdt":
             if lost < -0.1:
-                await self._discord_send(msg, format(lost, ".2f"), "$")
+                await self._discord_send(msg, format(lost, ".2f"), pos_count, "$")
             else:
                 if cfg.discord_sent_message:
                     await cfg.discord_sent_message.delete()
@@ -274,7 +264,7 @@ class BotHelperAsync:
             with FileLock(config.status_usdt.fp_lock, timeout=5):
                 config.status_usdt["count"] = count
         elif cfg.TYPE.lower() == "btc":
-            await self._discord_send(msg, format(lost * 1000, ".5f"), " mBTC")
+            await self._discord_send(msg, format(lost * 1000, ".5f"), pos_count, " mBTC")
             with FileLock(config.status_btc.fp_lock, timeout=5):
                 config.status_btc["count"] = count
 
@@ -284,8 +274,7 @@ class BotHelperAsync:
     async def spot_order(self, quantity, symbol, side):
         try:
             log(f"==> market_buy_order_quantity={quantity}", "bold")
-            output = await helper.exchange.spot.create_market_buy_order(symbol, quantity)
-            return output
+            return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             if "Account has insufficient balance" in str(e):
                 log("E: Account has insufficient balance for requested action")
@@ -350,7 +339,7 @@ class BotHelperAsync:
         balance = await helper.exchange.spot.fetch_balance()
         return balance[code]["total"]
 
-    async def spot_limit(self, asset, asset_balance, sum_btc, is_limit=True):
+    async def spot_limit(self, asset, asset_balance, sum_bal, is_limit=True):
         """Order spot limit.
 
         * Python sort list based on key sorted list:
@@ -382,14 +371,11 @@ class BotHelperAsync:
                 trade = trades[inner_index]
                 decimal = decimal_count(trade["price"])
                 qty = float(trade["info"]["qty"])
-                # botrade_cost = qty * float(trade["info"]["price"])
                 trade_cost = trade["cost"]  # ignoring fees
                 if trade["info"]["isBuyer"]:
-                    # log(qty, "green")
                     quantity += qty
                     _sum += trade_cost
                 else:
-                    # log(qty, "red")
                     quantity -= qty
                     _sum -= trade_cost
 
@@ -397,13 +383,8 @@ class BotHelperAsync:
                 _sum = round_float(_sum, 8)
 
         entry_price = _sum / quantity
-        if _sum <= 0 or abs(quantity - asset_balance) > 0.01:
-            log(f"warning: {asset} sum={_sum} qty={quantity} asset_balance={asset_balance}")
-            entry_price = 0.0005738
-        else:
-            entry_price = float(f"{entry_price:.{decimal}f}")
-
-        limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
+        entry_price = float(f"{entry_price:.{decimal}f}")
+        limit_price = f"{entry_price * TP.get_profit_amount():.{decimal}f}"
         log(f"==> {asset} quantity={asset_balance} | entry_price={entry_price} | ", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"limit_price={limit_price} ", end="")
@@ -413,14 +394,14 @@ class BotHelperAsync:
         except Exception as e:
             raise Exception(f"asset({asset}) is not found in ticker") from e
 
-        per = format((100.0 * asset_balance * asset_price) / sum_btc, ".2f")
+        per = format((100.0 * asset_balance * asset_price) / sum_bal, ".2f")
         log(f"{per}% ", "blue", end="")
-        asset_percent_change = percent_change(
-            initial=entry_price, change=asset_price - entry_price, is_arrow_print=False
-        )
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
             return
 
+        asset_percent_change = percent_change(
+            initial=entry_price, change=asset_price - entry_price, is_arrow_print=False
+        )
         if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and float(per) < 50.0:
             new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
             log(f"==> new_order_size={new_order_size} | {per} of the total asset value", end="")
@@ -429,9 +410,9 @@ class BotHelperAsync:
                 log(order["info"], "bold")
                 await self.new_limit_order(asset, limit_price)
             else:
-                new_per = (100.0 * asset_balance * asset_price) / sum_btc
+                new_per = (100.0 * asset_balance * asset_price) / sum_bal
                 per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
-                btc_amount_to_buy = per_to_buy * sum_btc / 100.0
+                btc_amount_to_buy = per_to_buy * sum_bal / 100.0
                 _new_order_size = btc_amount_to_buy / asset_price
                 _new_order_size = f"{_new_order_size:.{decimal}f}"
                 order = await self.spot_order(_new_order_size, f"{asset}/BTC", "BUY")

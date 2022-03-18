@@ -20,6 +20,7 @@ class LiqBase:
             "ETCUSDT",
             "ETHBUSD",
             "ETHUSDT",
+            "EOSUSDT",
             "HNTUSDT",
             "ICPUSDT",
             "KSMUSDT",

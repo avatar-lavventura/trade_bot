@@ -9,11 +9,11 @@ from bot.config import config
 
 
 class BotHelperSpotAsync(BotHelperAsync):
-    def __init__(self):
+    def __init__(self) -> None:
         self.channel = None
         self.channel_alerts = None
 
-    async def check_position_to_pass(self, asset, _sum, is_limit, _per):
+    async def check_position_to_pass(self, asset, _sum, is_limit, _per) -> bool:
         if _sum > config.isolated_wallet_limit:
             log("PASS_1", "bold")
             return True
@@ -114,11 +114,11 @@ class BotHelperSpotAsync(BotHelperAsync):
             if asset in config.SPOT_IGNORE_LIST:
                 return 0
 
-            raise Exception(f"E: quantity is zero for asset={asset}")
+            raise Exception(f"E: quantity is zero asset={asset}")
 
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
-        limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
+        limit_price = f"{entry_price * TP.get_profit_amount(_sum):.{decimal}f}"
         _quantity = format(asset_balance, ".4f")
         log(f"[green]==>[/green] {asset} q={remove_trailing_zeros(_quantity)} | e={entry_price} | ", "bold", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
@@ -131,17 +131,17 @@ class BotHelperSpotAsync(BotHelperAsync):
         log(f"p={asset_price} ", "bold", end="")
         per = format((100.0 * asset_balance * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * quantity
-        if profit != 0.0:
+        if profit != 0:
             if cfg.TYPE.lower() == "usdt":
                 log(format(profit, ".2f"), "bold green" if profit > 0 else "red", end="")
             else:
                 log(format(profit * 1000, ".5f"), "bold green" if profit > 0 else "red", end="")
 
-            asset_percent_change = percent_change(
+            _percent_change = percent_change(
                 initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
             )
         else:
-            asset_percent_change = 0.0
+            _percent_change = 0
 
         if cfg.TYPE.lower() == "usdt":
             log(f"| [bold magenta]{format(_sum, '.2f')} ([yellow]{per}%[/yellow]) ", end="")
@@ -149,16 +149,15 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ([yellow]{per}%[/yellow]) ", end="")
 
         cfg.locked_balance += float(per)
-        if self.channel and _sum > config.discord_msg_above_usdt:
-            if asset_percent_change < -0.5 or profit < -0.5:
-                cfg.discord_message += (
-                    f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(asset_percent_change, '.2f')}%)"
-                    f" `{round(_sum)}`\n"
-                )
+        if self.channel and _sum > config.discord_msg_above_usdt and (_percent_change < -0.5 or profit < -0.5):
+            cfg.discord_message += (
+                f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%)"
+                f" `{round(_sum)}`\n"
+            )
 
         if self.channel:
             cfg.discord_message_full += (
-                f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(asset_percent_change, '.2f')}%)"
+                f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%)"
                 f" `{round(_sum)}`\n"
             )
 
@@ -166,7 +165,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             log()
             return profit
         elif not await self.check_position_to_pass(asset, _sum, is_limit, per):
-            if asset_percent_change <= -1.99 and asset_percent_change <= config.env[cfg.TYPE].percent_change_to_add:
+            if _percent_change <= -1.99 and _percent_change <= config.env[cfg.TYPE].percent_change_to_add:
                 new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio
                 if new_order_size * asset_price < 10:
                     # usdt_multiply_ratio may 0.1, minimum order should be more than 10$

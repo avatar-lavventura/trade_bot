@@ -41,7 +41,7 @@ class Config:
     def total_position_count(self) -> int:
         return self.status["futures"]["pos_count"] + self.status_usdt["count"]
 
-    def _yaml_wrapper(self, path, dirname, filename):
+    def _yaml_wrapper(self, path, dirname, filename, auto_dump=True):
         if filename[0] == ".":
             fp_lockname = f"initialize_{filename}.lock"
         else:
@@ -49,7 +49,7 @@ class Config:
 
         fp_lock = os.path.join(dirname, fp_lockname)
         with FileLock(fp_lock, timeout=5):
-            yaml_obj = Yaml(path)
+            yaml_obj = Yaml(path, auto_dump=auto_dump)
 
         if os.path.isfile(fp_lock):
             with suppress(FileNotFoundError):
@@ -57,16 +57,12 @@ class Config:
 
         return yaml_obj
 
-    def yaml_wrapper(self, path):
+    def yaml_wrapper(self, path, auto_dump=True):
         dirname = os.path.dirname(os.path.abspath(path))
         filename = os.path.basename(path)
         try:
-            return self._yaml_wrapper(path, dirname, filename)
+            return self._yaml_wrapper(path, dirname, filename, auto_dump)
         except:
-            # An exception of type ComposerError occurred. Arguments:
-            # ('expected a single document in the stream',
-            # <ruamel.yaml.error.FileMark object at 0x7ff7910b67c0>, 'but found
-            # another document', <ruamel.yaml.error.FileMark object at 0x7ff7910b6f80>)
             shutil.copyfile(Path.home() / "bot" / "yaml_files" / filename, path)
             return self._yaml_wrapper(path, dirname, filename)
 
@@ -81,7 +77,8 @@ class Config:
         self.env = {}  # type: Dict[str, Env]
         self.env["usdt"] = Env()
         self.env["btc"] = Env()
-        self.cfg = self.yaml_wrapper(base_dir / "config.yaml")
+        self.cfg = self.yaml_wrapper(base_dir / "config.yaml", auto_dump=False)
+        self.alerts = self.yaml_wrapper(base_dir / "alerts.yaml", auto_dump=False)
         self.cfg_usdtprep = self.yaml_wrapper(base_dir / "config_usdtprep.yaml")
         self.timestamp = self.yaml_wrapper(base_dir / "timestamp.yaml")
         self.run_balance = self.yaml_wrapper(base_dir / "run_balance.yaml")
@@ -89,7 +86,6 @@ class Config:
         self.status = self.yaml_wrapper(base_dir / "status.yaml")
         self.stats = self.yaml_wrapper(base_dir / "stats.yaml")
         self.log = self.yaml_wrapper(base_dir / "log.yaml")
-        self.alerts = self.yaml_wrapper(base_dir / "alerts.yaml")
         self.ALERTS = self.alerts["alerts"]
         self._initial_usdt_qty = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
 
@@ -108,7 +104,6 @@ class Config:
         self.risk["usdt"] = self.yaml_wrapper(base_dir / "risk_usdt.yaml")["root"]
         self.risk["btc"] = self.yaml_wrapper(base_dir / "risk_btc.yaml")["root"]
 
-        self.status_usdtperp = self.yaml_wrapper(base_dir / "usdtperp_pos_count.yaml")
         self.status_usdtperp = self.yaml_wrapper(base_dir / "usdtperp_pos_count.yaml")
         self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")
         self.status_btc = self.yaml_wrapper(base_dir / "btc_pos_count.yaml")

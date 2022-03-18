@@ -47,9 +47,9 @@ from pathlib import Path
 import binance_lib
 import requests
 from binance_lib import positions
+from broker._utils import _log
+from broker._utils.tools import log, run
 from bs4 import BeautifulSoup
-from ebloc_broker.broker._utils import _log
-from ebloc_broker.broker._utils.tools import log, run
 
 from bot.user_setup import check_binance_obj
 

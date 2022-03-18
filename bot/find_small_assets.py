@@ -3,7 +3,7 @@
 import asyncio
 from contextlib import suppress
 
-from ebloc_broker.broker._utils.tools import print_tb
+from broker._utils.tools import print_tb
 
 from bot import helper
 

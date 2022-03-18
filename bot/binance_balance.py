@@ -8,7 +8,7 @@ from broker._utils._log import log
 from broker._utils.tools import _exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
-from ccxt.base.errors import RequestTimeout  # noqa
+from ccxt.base.errors import RequestTimeout  # NOQA
 from filelock import FileLock
 
 from bot import cfg, helper
@@ -21,17 +21,24 @@ RUN_FUTURES = False
 bot_async = BotHelperSpotAsync()
 
 
+async def alert():
+    for alert in config.ALERTS:
+        _alert = config.ALERTS[alert]
+        if _alert:
+            asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
+            if float(asset_price) > _alert["price"]:
+                await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=cfg.SLEEP_INTERVAL)
+
+
 async def process(unix_timestamp_ms):
     update_spot_timestamp(unix_timestamp_ms)  # first update spot timestamps
     *_, usdt_bal, free_usdt = await bot_async.spot_balance(balance_type=cfg.TYPE)
-    if RUN_FUTURES:
-        bot_async.futures_balance = await helper.exchange.future.fetch_balance()
-        unix_timestamp_ms = helper.exchange.get_future_timestamp()
-
     if usdt_bal > 0.125 and not helper.is_start:
         log()
 
     if RUN_FUTURES:
+        bot_async.futures_balance = await helper.exchange.future.fetch_balance()
+        unix_timestamp_ms = helper.exchange.get_future_timestamp()
         with FileLock(config.status.fp_lock, timeout=5):
             config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
 
@@ -57,12 +64,8 @@ async def process(unix_timestamp_ms):
     elif helper.is_start and config.status_usdt["count"] == 0:
         delete_multiple_lines(1)
 
-    for alert in config.ALERTS:
-        _alert = config.ALERTS[alert]
-        if _alert:
-            asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
-            if float(asset_price) > _alert["price"]:
-                await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=cfg.SLEEP_INTERVAL)
+    if cfg.TYPE == "usdt":
+        await alert()
 
 
 async def process_main(obj):

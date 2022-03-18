@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ebloc_broker.broker._utils.tools import log
+from broker._utils.tools import log
 
 from bot.client_helper import ClientHelper
 from bot.trade_async import BotHelper, Strategy

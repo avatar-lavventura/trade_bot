@@ -13,6 +13,8 @@ start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
 msg = timeframe.period + "_enter"
+msg_aggr = msg + "_aggr"
+msg_aggr_removed = timeframe.period + "_alert_abort"
 
 // wave_trend: https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT/
 n1 = 10  // channel Length
@@ -117,16 +119,29 @@ plot(alert4 ? alert4 : 0, title="alert Aggressive Filtered Entry", style=plot.st
 
 // buy alerts
 // ==========
-if strategy.position_size[0] != 0 and bar_index > abs(strategy.position_size)
-    // close position for alpy-bot new incoming alerts
-    strategy.close_all(when=window())
+if strategy.position_size[0] != 0  // close position for alpy-bot new incoming alerts
+    if bar_index > abs(strategy.position_size) or (col[1] == color.gray and col == color.gray)
+        strategy.close_all(when=window())
 
-if macdIsAbove and is_wave_trend_check  // for 30m in BTC-SPOT
+// buy_signal = (col_aggressive == color.orange or (col[1] == color.lime and col == color.gray)) and macdIsAbove and is_wave_trend_check
+// buy_signal = ((col[1] == color.lime and col == color.gray)) and macdIsAbove and is_wave_trend_check  // better with <1m intervals
+buy_signal = macdIsAbove and is_wave_trend_check  // for 30m in BTC-SPOT
+if buy_signal
     if strategy.opentrades[0] == 0 or strategy.position_size < 0
-        strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
+        if col_aggressive == color.orange
+            strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr)
+        else
+            strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
     else
         if bar_index > abs(strategy.position_size)
             if strategy.position_size[0] != 0
+                // if (col_aggressive[1] != color.orange or col_fuchsia[1] != color.fuchsia) and (col_aggressive != color.orange or col_fuchsia != color.fuchsia)
+                //    strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr_removed)
+                // if (col_aggressive[1] != color.orange or col_aggressive != color.orange)
+                //     strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr_removed)
                 strategy.close_all(when=window())
             else
-                strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
+                if col_aggressive == color.orange
+                    strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg_aggr)
+                else
+                    strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
