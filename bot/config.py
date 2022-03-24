@@ -2,12 +2,11 @@
 
 import os
 import shutil
+from broker._utils.yaml import Yaml
 from contextlib import suppress
+from filelock import FileLock
 from pathlib import Path
 from typing import Dict
-
-from broker._utils.yaml import Yaml
-from filelock import FileLock
 
 from bot import cfg
 
@@ -21,11 +20,11 @@ class Config:
         self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.base_durations = ["9m", "15m", "21m"]
         self.sum_usdt: float = 0
-        self.white_list = []  # ["FTM"]
-        self.asset_list = []
-        self.btc_quantity = {}
         self.locked_per_limit_usdtperp = None
         self.USDTPERP_MULTIPLY_RATIO = None
+        self.white_list = []
+        self.asset_list = []
+        self.btc_quantity = {}
         self.initialize()
 
     def reload(self) -> None:
@@ -88,11 +87,8 @@ class Config:
         self.log = self.yaml_wrapper(base_dir / "log.yaml")
         self.ALERTS = self.alerts["alerts"]
         self._initial_usdt_qty = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
-
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
-        self.base_time_duration = "9m"
-
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
 
         self.env["usdt"].percent_change_to_add = -abs(self.cfg["root"]["usdt"]["percent_change_to_add"]) + 0.01
@@ -108,10 +104,12 @@ class Config:
         self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")
         self.status_btc = self.yaml_wrapper(base_dir / "btc_pos_count.yaml")
         # usdt
+        # ====
         self.USDT_MAX_POSITION = self.cfg["root"]["usdt"]["max_pos"]
         self.BTC_MAX_POSITION = self.cfg["root"]["btc"]["max_pos"]
 
         # spot
+        # ====
         self.SPOT_TIMESTAMP = self.run_balance["root"]["timestamp"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
         self.SPOT_locked_percent_limit = self.cfg["root"]["btc"]["locked_percent_limit"]
@@ -122,11 +120,10 @@ class Config:
         # self.initialize_usdtprep()
 
     def initialize_usdtprep(self) -> None:
+        self._initial_usdt_qty_short = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["short"]["base"]
         self.initial_usdt_qty_short["1m"] = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["short"]["1m"]
         self._initial_usdt_qty_long = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
         self.initial_usdt_qty_long["1m"] = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["1m"]
-        self._initial_usdt_qty_short = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["short"]["base"]
-
         self.USDTPERP_PERCENT_CHANGE_TO_ADD = (
             -abs(self.cfg_usdtprep["root"]["usdtperp"]["percent_change_to_add"]) + 0.01
         )

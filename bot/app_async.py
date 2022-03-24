@@ -2,13 +2,12 @@
 
 import asyncio
 import logging
-from pathlib import Path
-
 import quart.flask_patch  # noqa
 from broker._utils._log import log
 from broker._utils.tools import print_tb
 from broker.errors import QuietExit
 from flask import abort, request
+from pathlib import Path
 from quart import Quart
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
@@ -54,7 +53,7 @@ async def startup():
     app.bot_trade = bot_trade.BotHelper(app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
-    print(" * s t a r t i n g | curl https://alpybot.duckdns.org", flush=True)
+    print(" * s t a r t i n g | curl -v https://alpybot.duckdns.org", flush=True)
     # margin_usdt = app.client_helper.get_balance_margin_usdt()
 
 

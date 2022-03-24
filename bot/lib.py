@@ -17,6 +17,7 @@ class LiqBase:
             "BTGUSDT",
             "BTCBUSD",
             "EGLDUSDT",
+            "DOGEUSDT",
             "ETCUSDT",
             "ETHBUSD",
             "ETHUSDT",

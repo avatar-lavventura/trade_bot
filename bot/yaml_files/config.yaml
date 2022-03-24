@@ -5,7 +5,7 @@ root:
     ignore:  # for all
       - FTM
     btc:
-        max_pos: 7
+        max_pos: 4
         initial: 0.0003  # 0.00015
         multiply_ratio: 1.075
         percent_change_to_add: 5
@@ -14,5 +14,5 @@ root:
         max_pos: 4
         initial: 11.5
         multiply_ratio: 1.075
-        percent_change_to_add: 5
+        percent_change_to_add: 4
         locked_percent_limit: 90

@@ -25,10 +25,10 @@ vwap_value = sum_vwap_source / sumVolume
 vwap_above = 0.0
 _vwap_above = 0.0
 if close > 0.001
-    vwap_above  := vwap_value * (1 + (0.75 / 100))
+    vwap_above  := vwap_value * (1 + (0.70 / 100))
     _vwap_above := vwap_value * (1 + (1.20 / 100))
 else
-    vwap_above  := vwap_value * (1 + (0.80 / 100))
+    vwap_above  := vwap_value * (1 + (0.85 / 100))
     _vwap_above := vwap_value * (1 + (1.20 / 100))
 
 long_VWMA = vwap_above <= close and close < _vwap_above
@@ -87,7 +87,17 @@ plot(alert4 ? alert4 : 0, title="alert Aggressive Filtered Entry", style=plot.st
 
 // buy alerts
 // ==========
-if close < vwap_value * (1 + (0.76/100))
+if close < vwap_value * (1 + (0.71/100))
+    msg := msg + "_0.70"
+else if close < vwap_value * (1 + (0.72/100))
+    msg := msg + "_0.71"
+else if close < vwap_value * (1 + (0.73/100))
+    msg := msg + "_0.72"
+else if close < vwap_value * (1 + (0.74/100))
+    msg := msg + "_0.73"
+else if close < vwap_value * (1 + (0.75/100))
+    msg := msg + "_0.74"
+else if close < vwap_value * (1 + (0.76/100))
     msg := msg + "_0.75"
 else if close < vwap_value * (1 + (0.77/100))
     msg := msg + "_0.76"
@@ -106,7 +116,7 @@ else if close < vwap_value * (1 + (1.1/100))
 else if close < vwap_value * (1 + (1.2/100))
     msg := msg + "_1.1"
 
-// per = (close - close[86400]) / close[86400] * 100
+per = (close - close[86400]) / close[86400] * 100
 
 if strategy.position_size[0] != 0 and bar_index > abs(strategy.position_size) + 15
     //: try 600 (10 minutes? instead 15 seconds)

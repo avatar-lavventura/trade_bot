@@ -19,7 +19,6 @@ volStop(src, atrlen, atrfactor) =>
         min    := src
         stop   := uptrend ? max - atrM : min + atrM
     [stop, uptrend]
-
 [vStop, uptrend] = volStop(src, length, factor)
 // is_trend_changed && uptrend
 plot(vStop, "Volatility Stop", style=plot.style_circles, color= uptrend ? color.lime : na, linewidth=2)

@@ -38,8 +38,8 @@ class Strategy:
             log(f"   ABORT {self.symbol}", "bold orange1", is_write=False)
             raise Exception
 
-        if self.time_duration == "":
-            self.time_duration = config.base_time_duration
+        # if self.time_duration == "":
+        #     self.time_duration = config.base_time_duration
 
     def parse_data_msg(self, data_msg):
         self.chunks = data_msg.split(",")
@@ -48,7 +48,7 @@ class Strategy:
         if self.symbol[-3:] == "BTC":
             self.market = "BTC"
             self.asset = self.symbol[:-3]  # removes BTC at the end
-            self.symbol = self.symbol.replace("BTC", "/BTC")
+            self.symbol = f"{self.symbol[:-3]}/BTC"
             self.exchange = helper.exchange.spot_btc
         else:
             if "USDTPERP" in self.symbol:
@@ -58,7 +58,7 @@ class Strategy:
                 self.exchange = helper.exchange.spot_usdt
 
             self.asset = self.symbol.replace(self.market, "")
-            self.symbol = self.symbol.replace(self.market, "/USDT")
+            self.symbol = f"{self.symbol[:-4]}/USDT"
 
         self.position_alert_msg = self.chunks[2]
         msg_list = self.position_alert_msg.rsplit("_", 1)
@@ -177,7 +177,6 @@ class BotHelper:
         if not asset:
             asset = self.strategy.asset
 
-        balances = None
         try:
             balances = await self.strategy.exchange.fetch_balance()
         except Exception as e:
@@ -319,13 +318,13 @@ class BotHelper:
 
     async def both_side_order(self) -> None:
         """Both side order for futures."""
-        _symbol = self.strategy.symbol.replace("/USDT", "USDT")
-        if await self.is_usdt_open(_symbol):
-            raise Exception(f"E: Already open position for {_symbol}")
+        symbol = self.strategy.symbol.replace("/USDT", "USDT")
+        if await self.is_usdt_open(symbol):
+            raise Exception(f"E: already open position for {symbol}")
 
         try:
             if self.strategy.size == 0:
-                raise Exception("E: Position size is less than zero")
+                raise Exception("E: position size is less than zero")
 
             await self._order(quantity=self.strategy.size)
         except Exception as e:
@@ -383,7 +382,6 @@ class BotHelper:
                         raise e
 
                 log(f"==> re-opening {side} order | ", end="")
-
                 # TODO: check is free > 10$ improve
                 if self.strategy.market.lower() == "usdt" and config.status["usdt"]["free"] < 10:
                     return

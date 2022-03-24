@@ -117,12 +117,12 @@ class BotHelperAsync:
         key = f"{cfg.TYPE.lower()}_timestamp"
         for asset_timestamp in config.timestamp[key]:
             if asset_timestamp != "base" and asset_timestamp not in config.asset_list:
-                if len(str(config.timestamp[key][asset_timestamp])) == 13:
-                    if int(config.timestamp[key][asset_timestamp]) <= config.run_balance["root"]["timestamp"] * 1000:
+                ts = int(config.timestamp[key][asset_timestamp])
+                if len(str(ts)) == 13:
+                    if ts <= config.run_balance["root"]["timestamp"] * 1000:
                         del_list.append(asset_timestamp)
-                else:
-                    if int(config.timestamp[key][asset_timestamp]) <= config.run_balance["root"]["timestamp"]:
-                        del_list.append(asset_timestamp)
+                elif ts <= config.run_balance["root"]["timestamp"]:
+                    del_list.append(asset_timestamp)
 
         for asset in del_list:
             if asset not in config.SPOT_IGNORE_LIST:
@@ -138,21 +138,21 @@ class BotHelperAsync:
                 filename=cfg.balance_fn,
             )
         if cfg.discord_message != ".\n":
-            if not cfg.discord_sent_message:
-                cfg.discord_sent_message = await self.channel.send(msg)
-            else:
+            if cfg.discord_sent_message:
                 await cfg.discord_sent_message.edit(content=msg)
+            else:
+                cfg.discord_sent_message = await self.channel.send(msg)
 
     ########
     # SPOT #
     ########
     async def spot_balance(self, is_limit=True, balance_type="usdt") -> Tuple[float, float, float]:
         """Calculate USDT balance in spot."""
-        own_usd = 0.0
-        sum_usdt = 0.0
-        sum_btc = 0.0
+        own_usd: float = 0
+        sum_usdt: float = 0
+        sum_btc: float = 0
+        only_usdt: float = 0
         count = 0
-        only_usdt = 0.0
         config.asset_list = []
         try:
             self.balances = await helper.exchange.spot.fetch_balance()
