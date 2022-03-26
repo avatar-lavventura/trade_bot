@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 from broker._utils._log import log
 from broker._utils.tools import _date, percent_change
-from contextlib import suppress
 from filelock import FileLock
 
 from bot import cfg, helper

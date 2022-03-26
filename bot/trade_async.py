@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
-from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -37,9 +38,6 @@ class Strategy:
         if "_abort" in data_msg:
             log(f"   ABORT {self.symbol}", "bold orange1", is_write=False)
             raise Exception
-
-        # if self.time_duration == "":
-        #     self.time_duration = config.base_time_duration
 
     def parse_data_msg(self, data_msg):
         self.chunks = data_msg.split(",")
@@ -109,7 +107,7 @@ class BotHelper:
     async def usdtperp_cancel_order(self):
         """Cancel if already an order is open corresponding to the given symbol."""
         open_orders = await helper.exchange.future.fetch_open_orders(self.strategy.symbol)
-        if len(open_orders) > 0:
+        if len(open_orders):
             for order in open_orders:
                 if (
                     order["status"] == "open"
@@ -194,8 +192,8 @@ class BotHelper:
         contracts = 0.0
         quantity = 0.0
         decimal = 0
-        _symbol = self.strategy.symbol.replace("/", "")
-        trades = await self.strategy.exchange.fetch_my_trades(symbol=_symbol, limit=10)
+        symbol = self.strategy.symbol.replace("/", "")
+        trades = await self.strategy.exchange.fetch_my_trades(symbol=symbol, limit=10)
         for trade in reversed(trades):
             trade = trade["info"]
             _decimal = self.get_decimal_count(trade["price"])
@@ -212,25 +210,25 @@ class BotHelper:
 
         if contracts == 0.0:
             # it may end up fill the order right away
-            raise QuietExit(f"warning: {_symbol} amount is zero")
+            raise QuietExit(f"warning: {symbol} amount is zero")
 
         entry_price = _sum / contracts
-        _entry_price = f"{entry_price:.{decimal}f}"
-        limit_price = f"{float(_entry_price) * TP.get_profit_amount():.{decimal}f}"
-        log(f"quantity={asset_balance} | entry={_entry_price} | limit={limit_price}", "bold")
-        return limit_price, _entry_price
+        entry_price = f"{entry_price:.{decimal}f}"
+        limit_price = f"{float(entry_price) * TP.get_profit_amount():.{decimal}f}"
+        log(f"quantity={asset_balance} | entry={entry_price} | limit={limit_price}", "bold")
+        return limit_price, entry_price
 
     async def spot_order_limit(self):
         try:
             log("==> attempting limit order for spot ", end="")
             limit_price, *_ = await self.get_spot_entry()
-            _symbol = self.strategy.symbol.replace("/", "")
-            open_orders = await self.strategy.exchange.fetch_open_orders(symbol=_symbol)
+            symbol = self.strategy.symbol.replace("/", "")
+            open_orders = await self.strategy.exchange.fetch_open_orders(symbol=symbol)
             for order in open_orders:
-                await self.strategy.exchange.cancel_order(order["info"]["orderId"], _symbol)
+                await self.strategy.exchange.cancel_order(order["info"]["orderId"], symbol)
 
-            _asset_balance = await self.asset_balance()
-            order = await self.strategy.exchange.create_limit_sell_order(_symbol, _asset_balance, limit_price)
+            asset_balance = await self.asset_balance()
+            order = await self.strategy.exchange.create_limit_sell_order(symbol, asset_balance, limit_price)
             order = order["info"]
             with suppress(Exception):
                 del order["type"]
@@ -276,15 +274,15 @@ class BotHelper:
                 raise e
 
     def get_future_position(self, positions):
-        for position in positions:
-            if abs(float(position["info"]["isolatedWallet"])) > 0:
+        for pos in positions:
+            if abs(float(pos["info"]["isolatedWallet"])) > 0:
                 return (
-                    float(position["entryPrice"]),
-                    float(position["info"]["positionAmt"]),
-                    abs(float(position["info"]["isolatedWallet"])),
+                    float(pos["entryPrice"]),
+                    float(pos["info"]["positionAmt"]),
+                    abs(float(pos["info"]["isolatedWallet"])),
                 )
 
-        raise Exception("E: Order related to the symbol couldn't be found.")
+        raise Exception("order related to the symbol couldn't be found")
 
     async def futures_limit_order(self) -> None:
         try:

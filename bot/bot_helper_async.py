@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+from typing import List, Tuple
+
 from broker._utils._log import _console_clear, console_ruler, log
 from broker._utils.tools import _date, decimal_count, percent_change, print_tb, round_float
-from contextlib import suppress
 from filelock import FileLock
-from typing import List, Tuple
 
 from bot import cfg, helper
 from bot.config import config
@@ -77,7 +78,7 @@ class BotHelperAsync:
         await helper.exchange.future.transfer_in(code="USDT", amount=amount)
 
     async def transfer_out(self, amount):
-        """Transfer USDT from usdtperp to spot.
+        """Transfer USDT from USDTDPERP to SPOT.
 
         __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
         """
@@ -137,16 +138,20 @@ class BotHelperAsync:
                 "bold",
                 filename=cfg.balance_fn,
             )
+
         if cfg.discord_message != ".\n":
-            if cfg.discord_sent_message:
-                await cfg.discord_sent_message.edit(content=msg)
-            else:
-                cfg.discord_sent_message = await self.channel.send(msg)
+            try:
+                if cfg.discord_sent_message:
+                    await cfg.discord_sent_message.edit(content=msg)
+                else:
+                    cfg.discord_sent_message = await self.channel.send(msg)
+            except:
+                cfg.discord_sent_message = None
 
     ########
     # SPOT #
     ########
-    async def spot_balance(self, is_limit=True, balance_type="usdt") -> Tuple[float, float, float]:
+    async def spot_balance(self, is_limit=True) -> Tuple[float, float, float]:
         """Calculate USDT balance in spot."""
         own_usd: float = 0
         sum_usdt: float = 0
@@ -257,8 +262,11 @@ class BotHelperAsync:
             if lost < -0.1:
                 await self._discord_send(msg, format(lost, ".2f"), pos_count, "$")
             else:
-                if cfg.discord_sent_message:
-                    await cfg.discord_sent_message.delete()
+                try:
+                    if cfg.discord_sent_message:
+                        await cfg.discord_sent_message.delete()
+                        cfg.discord_sent_message = None
+                except:
                     cfg.discord_sent_message = None
 
             with FileLock(config.status_usdt.fp_lock, timeout=5):

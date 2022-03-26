@@ -2,12 +2,13 @@
 
 import asyncio
 import logging
+from pathlib import Path
+
 import quart.flask_patch  # noqa
 from broker._utils._log import log
 from broker._utils.tools import print_tb
 from broker.errors import QuietExit
 from flask import abort, request
-from pathlib import Path
 from quart import Quart
 
 logging.getLogger("requests").setLevel(logging.CRITICAL)
@@ -68,7 +69,6 @@ async def webhook():
     if request.method != "POST":
         abort(400)
 
-    # TODO: Do nothing in high cpu usage
     data_msg = request.get_data(as_text=True)
     if data_msg:
         try:
@@ -76,10 +76,7 @@ async def webhook():
                 await do_trade(data_msg.replace(":00Z", "").rstrip())
 
             return "OK"
-        except QuietExit as e:
-            if e:
-                log(str(e), "bold")
-        except KeyError as e:
+        except (QuietExit, KeyError) as e:
             if e:
                 log(str(e), "bold")
         except Exception as e:

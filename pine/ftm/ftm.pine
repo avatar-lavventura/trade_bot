@@ -4,9 +4,9 @@ strategy(title="alper", shorttitle="alper", overlay=true,
      default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0,
      currency=currency.USD, commission_type=strategy.commission.percent,
      commission_value=0.1)
-fromMonth = 3
+fromMonth = 2
 fromDay   = 1
-thruMonth = 1
+thruMonth = 4
 thruDay   = 1
 fromYear  = 2022
 thruYear  = 3000

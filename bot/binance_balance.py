@@ -32,7 +32,7 @@ async def alert():
 
 async def process(unix_timestamp_ms):
     update_spot_timestamp(unix_timestamp_ms)  # first update spot timestamps
-    *_, usdt_bal, free_usdt = await bot_async.spot_balance(balance_type=cfg.TYPE)
+    *_, usdt_bal, free_usdt = await bot_async.spot_balance()
     if usdt_bal > 0.125 and not helper.is_start:
         log()
 

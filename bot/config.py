@@ -2,11 +2,12 @@
 
 import os
 import shutil
-from broker._utils.yaml import Yaml
 from contextlib import suppress
-from filelock import FileLock
 from pathlib import Path
 from typing import Dict
+
+from broker._utils.yaml import Yaml
+from filelock import FileLock
 
 from bot import cfg
 
@@ -40,11 +41,11 @@ class Config:
     def total_position_count(self) -> int:
         return self.status["futures"]["pos_count"] + self.status_usdt["count"]
 
-    def _yaml_wrapper(self, path, dirname, filename, auto_dump=True):
-        if filename[0] == ".":
-            fp_lockname = f"initialize_{filename}.lock"
+    def _yaml_wrapper(self, path, dirname, fn, auto_dump=True):
+        if fn[0] == ".":
+            fp_lockname = f"initialize_{fn}.lock"
         else:
-            fp_lockname = f".initialize_{filename}.lock"
+            fp_lockname = f".initialize_{fn}.lock"
 
         fp_lock = os.path.join(dirname, fp_lockname)
         with FileLock(fp_lock, timeout=5):
@@ -58,12 +59,12 @@ class Config:
 
     def yaml_wrapper(self, path, auto_dump=True):
         dirname = os.path.dirname(os.path.abspath(path))
-        filename = os.path.basename(path)
+        fn = os.path.basename(path)
         try:
-            return self._yaml_wrapper(path, dirname, filename, auto_dump)
+            return self._yaml_wrapper(path, dirname, fn, auto_dump)
         except:
-            shutil.copyfile(Path.home() / "bot" / "yaml_files" / filename, path)
-            return self._yaml_wrapper(path, dirname, filename)
+            shutil.copyfile(Path.home() / "bot" / "yaml_files" / fn, path)
+            return self._yaml_wrapper(path, dirname, fn)
 
     def initialize(self) -> None:
         class Env:
@@ -103,16 +104,15 @@ class Config:
         self.status_usdtperp = self.yaml_wrapper(base_dir / "usdtperp_pos_count.yaml")
         self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")
         self.status_btc = self.yaml_wrapper(base_dir / "btc_pos_count.yaml")
-        # usdt
+
+        # spot
         # ====
         self.USDT_MAX_POSITION = self.cfg["root"]["usdt"]["max_pos"]
         self.BTC_MAX_POSITION = self.cfg["root"]["btc"]["max_pos"]
 
-        # spot
-        # ====
         self.SPOT_TIMESTAMP = self.run_balance["root"]["timestamp"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
-        self.SPOT_locked_percent_limit = self.cfg["root"]["btc"]["locked_percent_limit"]
+        self.SPOT_locked_percent_limit = self.cfg["root"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
         self.initial_btc_quantity = self.cfg["root"]["btc"]["initial"]
 
@@ -127,7 +127,7 @@ class Config:
         self.USDTPERP_PERCENT_CHANGE_TO_ADD = (
             -abs(self.cfg_usdtprep["root"]["usdtperp"]["percent_change_to_add"]) + 0.01
         )
-        self.locked_per_limit_usdtperp = self.cfg_usdtprep["root"]["usdtperp"]["locked_percent_limit"]
+        self.locked_per_limit_usdtperp = self.cfg_usdtprep["root"]["locked_percent_limit"]
         self.USDTPERP_MULTIPLY_RATIO = self.cfg_usdtprep["root"]["usdtperp"]["multiply_ratio"]
         self.USDTPERP_MAX_POSITION["9m"] = self.cfg_usdtprep["root"]["usdtperp"]["max_pos"]
         self.USDTPERP_MAX_POSITION["1m"] = self.cfg_usdtprep["root"]["usdtperp"]["max_pos"]

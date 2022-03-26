@@ -150,16 +150,10 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         cfg.locked_balance += float(per)
         if self.channel and _sum > config.discord_msg_above_usdt and (_percent_change < -0.5 or profit < -0.5):
-            cfg.discord_message += (
-                f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%)"
-                f" `{round(_sum)}`\n"
-            )
+            cfg.discord_message += f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
 
         if self.channel:
-            cfg.discord_message_full += (
-                f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%)"
-                f" `{round(_sum)}`\n"
-            )
+            cfg.discord_message_full += f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
 
         if asset in config.SPOT_IGNORE_LIST:
             log()
