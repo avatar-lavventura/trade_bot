@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import asyncio
-from contextlib import suppress
-
 from broker._utils._async import _sleep
 from broker._utils._log import log
 from broker._utils.tools import _exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
 from ccxt.base.errors import RequestTimeout  # NOQA
+from contextlib import suppress
 from filelock import FileLock
 
 from bot import cfg, helper
@@ -50,7 +49,7 @@ async def process(unix_timestamp_ms):
                 config.status["root"][cfg.TYPE]["free"] = free_usdt
 
     for idx in range(1, 6):
-        config.risk[cfg.TYPE][f"{idx}_per"] = _percent(config.status["root"][cfg.TYPE]["balance"], idx)
+        config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.status["root"][cfg.TYPE]["balance"], idx)
 
     if RUN_FUTURES:
         positions = await helper.exchange.future.fetch_positions()
@@ -88,7 +87,7 @@ async def process_main(obj):
         _exit("KeyError")
     except Exception as e:
         if "quantity is zero" in str(e):
-            log(f"warning: {e}, [green]don't worry")
+            log(f"warning: {e}; [green]don't worry")
         elif "Timestamp for this request is outside of the recvWindow" in str(e):
             log("E: Timestamp for this request is outside of the recvWindow")
         else:

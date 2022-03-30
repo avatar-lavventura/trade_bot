@@ -1,9 +1,10 @@
 root:
     usdt:
-        balance: 775.08
-        free: 730.31395044
+        balance: 942.69
+        free: 919.94436344
     btc:
-        balance: 0.013996314
+        balance: 0.015838829999999998
         free: 0.0
 
 
+ee: 0.0

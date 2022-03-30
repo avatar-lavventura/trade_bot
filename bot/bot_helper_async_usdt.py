@@ -29,7 +29,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         log()
         return False
 
-    async def check_is_limit_order_exist(self, asset, limit_price):
+    async def is_limit_order_exist(self, asset, limit_price):
         open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/{cfg.TYPE.upper()}")
         if not open_orders:
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
@@ -149,17 +149,20 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ([yellow]{per}%[/yellow]) ", end="")
 
         cfg.locked_balance += float(per)
+        msg = (
+            f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
+        )
         if self.channel and _sum > config.discord_msg_above_usdt and (_percent_change < -0.5 or profit < -0.5):
-            cfg.discord_message += f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
+            cfg.discord_message += msg
 
         if self.channel:
-            cfg.discord_message_full += f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
+            cfg.discord_message_full += msg
 
         if asset in config.SPOT_IGNORE_LIST:
             log()
             return profit
         elif not await self.check_position_to_pass(asset, _sum, is_limit, per):
-            if _percent_change <= -1.99 and _percent_change <= config.env[cfg.TYPE].percent_change_to_add:
+            if _percent_change <= -2 and _percent_change <= config.env[cfg.TYPE].percent_change_to_add:
                 new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio
                 if new_order_size * asset_price < 10:
                     # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
@@ -173,5 +176,5 @@ class BotHelperSpotAsync(BotHelperAsync):
                     log(order["info"])
                     await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
 
-        await self.check_is_limit_order_exist(asset, limit_price)
+        await self.is_limit_order_exist(asset, limit_price)
         return profit

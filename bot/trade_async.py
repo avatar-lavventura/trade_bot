@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
+from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -32,8 +31,12 @@ class Strategy:
             if not data_msg.endswith(","):
                 log(",", "bold magenta", end="")
 
-        with suppress(Exception):
+        try:
             self.parse_data_msg(data_msg)
+        except QuietExit as e:
+            raise e
+        except Exception:
+            pass
 
         if "_abort" in data_msg:
             log(f"   ABORT {self.symbol}", "bold orange1", is_write=False)
@@ -46,7 +49,7 @@ class Strategy:
         if self.symbol[-3:] == "BTC":
             self.market = "BTC"
             self.asset = self.symbol[:-3]  # removes BTC at the end
-            self.symbol = f"{self.symbol[:-3]}/BTC"
+            self.symbol = f"{self.asset}/BTC"
             self.exchange = helper.exchange.spot_btc
         else:
             if "USDTPERP" in self.symbol:
@@ -55,8 +58,11 @@ class Strategy:
                 self.market = "USDT"  # spot
                 self.exchange = helper.exchange.spot_usdt
 
-            self.asset = self.symbol.replace(self.market, "")
-            self.symbol = f"{self.symbol[:-4]}/USDT"
+            self.asset = self.symbol[: -len(self.market)]  # removes USDT* at the end
+            self.symbol = f"{self.asset}/USDT"
+
+        if self.asset in config.SPOT_IGNORE_LIST:
+            raise QuietExit("ignore_list PASS")
 
         self.position_alert_msg = self.chunks[2]
         msg_list = self.position_alert_msg.rsplit("_", 1)
@@ -131,7 +137,7 @@ class BotHelper:
         self.get_exchange_future_timestamp()
         for position in positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
-            if initial_margin > 0.0 and symbol.replace("/", "") == position["symbol"].replace("/", ""):
+            if initial_margin > 0 and symbol.replace("/", "") == position["symbol"].replace("/", ""):
                 return True
 
         return False
@@ -147,7 +153,7 @@ class BotHelper:
         count = 0
         for position in positions:
             initial_margin = abs(float(position["info"]["isolatedWallet"]))
-            if initial_margin > 0.0:
+            if initial_margin > 0:
                 count += 1
                 if is_print:
                     log(position, "bold blue")
@@ -188,9 +194,9 @@ class BotHelper:
 
     async def get_spot_entry(self):
         asset_balance = await self.asset_balance()
-        _sum = 0.0
-        contracts = 0.0
-        quantity = 0.0
+        _sum = 0
+        contracts = 0
+        quantity = 0
         decimal = 0
         symbol = self.strategy.symbol.replace("/", "")
         trades = await self.strategy.exchange.fetch_my_trades(symbol=symbol, limit=10)
@@ -208,7 +214,7 @@ class BotHelper:
                 _sum += float(trade["qty"]) * float(trade["price"])
                 contracts += float(trade["qty"])
 
-        if contracts == 0.0:
+        if contracts == 0:
             # it may end up fill the order right away
             raise QuietExit(f"warning: {symbol} amount is zero")
 
@@ -258,7 +264,7 @@ class BotHelper:
                 decimal = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening sell order with new quantity={_quantity}")
-                if float(_quantity) > 0.0:
+                if float(_quantity) > 0:
                     return await self._order(_quantity)
                 else:
                     if self.strategy.size >= 0.5 and self.strategy.size < 1:
@@ -357,10 +363,10 @@ class BotHelper:
                 del order["origQty"]
                 del order["executedQty"]
 
-            if self.strategy.asset in config.log["root"]:
-                config.log["root"][self.strategy.asset] += 1
+            if self.strategy.asset in config.env[self.strategy.market.lower()].hit:
+                config.env[self.strategy.market.lower()].hit[self.strategy.asset] += 1
             else:
-                config.log["root"][self.strategy.asset] = 1
+                config.env[self.strategy.market.lower()].hit[self.strategy.asset] = 1
 
             return order
         except Exception as e:
@@ -549,7 +555,7 @@ class BotHelper:
         elif self.strategy.market in ["BTC", "USDT"]:
             balances = await self._fetch_balance()
             for balance in balances["info"]["balances"]:
-                if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0.0:
+                if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
                     is_open = True
                     break
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-from typing import List, Tuple
-
 from broker._utils._log import _console_clear, console_ruler, log
 from broker._utils.tools import _date, decimal_count, percent_change, print_tb, round_float
+from contextlib import suppress
 from filelock import FileLock
+from typing import List, Tuple
 
 from bot import cfg, helper
 from bot.config import config
@@ -132,11 +131,11 @@ class BotHelperAsync:
     async def _discord_send(self, msg, _lost, count, name):
         cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
         if cfg.locked_balance > 0:
-            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", filename=cfg.balance_fn)
+            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", fn=cfg.balance_fn)
             log(
-                f"[red]{_lost}{name}[/red] locked=([yellow]{cfg.locked_balance}%[/yellow]) [blue]{count}[/blue] pos",
+                f"[red]{_lost}{name}[/red] locked={cfg.locked_balance}% [blue]{count}[/blue] pos",
                 "bold",
-                filename=cfg.balance_fn,
+                fn=cfg.balance_fn,
             )
 
         if cfg.discord_message != ".\n":
@@ -146,7 +145,7 @@ class BotHelperAsync:
                 else:
                     cfg.discord_sent_message = await self.channel.send(msg)
             except:
-                cfg.discord_sent_message = None
+                cfg.discord_sent_message = ".\n"
 
     ########
     # SPOT #
@@ -172,7 +171,8 @@ class BotHelperAsync:
                 if asset == "BTC":
                     sum_btc += quantity
                 else:
-                    if asset not in ["USDT", "BNB", "ETH", "PAX", "PAXG", "BUSD", "TUSD", "USDC"]:
+
+                    if asset not in cfg.STABLE_COINS:
                         # price = await self.spot_fetch_ticker(asset)
                         price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
                         if cfg.TYPE == "usdt":
@@ -200,8 +200,8 @@ class BotHelperAsync:
         if sum_btc > 0.00002:
             own_usd = sum_btc * btcusdt_price
             log(
-                f" * btc=%.8f [blue]==[/blue] [cyan]%.2f$[/cyan] | [blue]{_date(_type='hour')}[/blue]"
-                % (sum_btc, own_usd)
+                f" * btc=%.8f [blue]==[/blue] [cyan]%.2f$[/cyan] | [magenta]{int(btcusdt_price)}[/magenta]"
+                f" [blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usd)
             )
 
         sum_usdt = float(format(sum_usdt, ".2f"))

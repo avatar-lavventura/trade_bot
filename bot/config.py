@@ -71,9 +71,11 @@ class Config:
             def __init__(self):
                 self.percent_change_to_add = None
                 self.usdt_multiply_ratio = None
+                self.hit = None
+                self.risk = None
+                self.multiply_ratio = 1
 
         base_dir = Path.home() / ".bot"
-        self.risk = {}
         self.env = {}  # type: Dict[str, Env]
         self.env["usdt"] = Env()
         self.env["btc"] = Env()
@@ -85,7 +87,7 @@ class Config:
         self.goal = self.yaml_wrapper(base_dir / "goal.yaml")
         self.status = self.yaml_wrapper(base_dir / "status.yaml")
         self.stats = self.yaml_wrapper(base_dir / "stats.yaml")
-        self.log = self.yaml_wrapper(base_dir / "log.yaml")
+
         self.ALERTS = self.alerts["alerts"]
         self._initial_usdt_qty = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
@@ -93,13 +95,14 @@ class Config:
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
 
         self.env["usdt"].percent_change_to_add = -abs(self.cfg["root"]["usdt"]["percent_change_to_add"]) + 0.01
-        self.env["btc"].percent_change_to_add = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
-
+        self.env["usdt"].hit = self.yaml_wrapper(base_dir / "hit_usdt.yaml")["root"]
         self.env["usdt"].multiply_ratio = self.cfg["root"]["usdt"]["multiply_ratio"]
-        self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
+        self.env["usdt"].risk = self.yaml_wrapper(base_dir / "risk_usdt.yaml")["root"]
 
-        self.risk["usdt"] = self.yaml_wrapper(base_dir / "risk_usdt.yaml")["root"]
-        self.risk["btc"] = self.yaml_wrapper(base_dir / "risk_btc.yaml")["root"]
+        self.env["btc"].percent_change_to_add = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
+        self.env["btc"].hit = self.yaml_wrapper(base_dir / "hit_btc.yaml")["root"]
+        self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
+        self.env["btc"].risk = self.yaml_wrapper(base_dir / "risk_btc.yaml")["root"]
 
         self.status_usdtperp = self.yaml_wrapper(base_dir / "usdtperp_pos_count.yaml")
         self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")

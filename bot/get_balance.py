@@ -2,6 +2,7 @@
 
 from broker._utils.tools import log
 
+from bot import cfg
 from bot.client_helper import ClientHelper
 from bot.trade_async import BotHelper, Strategy
 from bot.user_setup import check_binance_obj
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     balances = client_helper.client.get_account()
     for _balance in balances["balances"]:
         asset = _balance["asset"]
-        if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in ["BTC", "BNB", "USDT"]:
+        if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in cfg.STABLE_COINS:
             bot.strategy.symbol = asset + "BTC"
             bot.strategy.asset = asset
             log(f"==> {asset} ", end="")
