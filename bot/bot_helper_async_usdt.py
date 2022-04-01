@@ -18,7 +18,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             log("PASS_1", "bold")
             return True
 
-        if float(_per) > 80.0:
+        if float(_per) > 80:
             log("PASS_2", "bold")
             return True
 
@@ -46,8 +46,8 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     def calculate_entry(self, timestamp_list, ordering, all_trades, is_return=False):
         decimal = 0
-        quantity = 0.0
-        _sum = 0.0
+        quantity = 0
+        _sum = 0
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
                 trade = all_trades[inner_index]
@@ -83,7 +83,6 @@ class BotHelperSpotAsync(BotHelperAsync):
             since = since * 1000
 
         trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{cfg.TYPE.upper()}", since=since)
-        # all_trades = trades + trades_usdt  # merge SPOT transactions
         all_trades = trades
         ordering = {}
         for idx, trade in enumerate(all_trades):

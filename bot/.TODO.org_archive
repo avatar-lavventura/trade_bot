@@ -435,3 +435,23 @@ CLOSED: [2022-03-22 Tue 16:59]
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE Script for side-by-side stats https://stackoverflow.com/questions/13341832/display-two-files-side-by-side
+CLOSED: [2022-04-01 Fri 22:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-04-01 Fri 22:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Check: BTC alerts worked in 30 for /S scripts seems like it works fine
+CLOSED: [2022-04-02 Sat 09:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-04-02 Sat 09:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

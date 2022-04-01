@@ -1,11 +1,11 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO BTCUSDT 1h kirmizi top dusuteyse do nothing?
 ** TODO Implement sell_order.py to give sell orders from the bot
 ** TODO Check: Don't open position when red wave_trend is on in 30s
 ** TODO CPU usage >70% killall python
 Do it from cpu.py script
-** TODO BTCUSDT 1h kirmizi top dusuteyse do nothing?
 ** TODO ignore pairs >30% rise during the day in 1h or 1day?
 ** TODO before order check is the give asset is not in blocked list
 ** TODO python code at home machine to add new added pairs into TV alert

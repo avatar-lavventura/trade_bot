@@ -14,9 +14,9 @@ root:
     CTXC: 7
     BURGER: 20
     WAN: 54
-    KMD: 15
-    POLS: 20
-    PYR: 16
+    KMD: 16
+    POLS: 24
+    PYR: 17
     ANY: 26
     WTC: 22
     DEXE: 14
@@ -24,7 +24,7 @@ root:
     COS: 8
     CITY: 19
     LINA: 4
-    CLV: 32
+    CLV: 36
     BADGER: 17
     SYS: 14
     LSK: 11
@@ -39,7 +39,7 @@ root:
     DOCK: 9
     TRU: 31
     FRONT: 38
-    FIS: 19
+    FIS: 22
     DF: 17
     WING: 28
     PNT: 26
@@ -59,14 +59,14 @@ root:
     SLP: 9
     RNDR: 8
     JASMY: 13
-    TRIBE: 7
+    TRIBE: 9
     COTI: 7
     RAY: 1
     FLUX: 9
     QI: 3
     ALGO: 8
     BTS: 3
-    HIGH: 27
+    HIGH: 28
     FORTH: 1
     AMP: 1
     CELO: 2
@@ -76,10 +76,10 @@ root:
     ARPA: 6
     IRIS: 10
     COCOS: 11
-    MTL: 5
+    MTL: 6
     ANKR: 3
-    GALA: 7
-    HARD: 15
+    GALA: 8
+    HARD: 16
     RAD: 4
     C98: 6
     TFUEL: 5
@@ -95,33 +95,33 @@ root:
     ANT: 5
     IOST: 4
     FIO: 15
-    VTHO: 25
+    VTHO: 26
     OOKI: 2
     FTM: 8
     EUR: 1
-    VOXEL: 13
+    VOXEL: 20
     FTT: 2
     EPS: 11
     KEEP: 6
     DYDX: 4
     NEAR: 2
-    JOE: 12
+    JOE: 13
     BAT: 2
     HBAR: 4
     BUSD: 1
     IOTA: 2
-    SKL: 6
+    SKL: 7
     BICO: 15
     CKB: 2
     FIL: 4
     FIDA: 1
     KAVA: 4
     AR: 5
-    BEAM: 14
-    1INCH: 3
+    BEAM: 15
+    1INCH: 4
     KLAY: 2
     OCEAN: 11
-    DODO: 4
+    DODO: 5
     RVN: 1
     BETA: 6
     XEC: 3
@@ -132,13 +132,13 @@ root:
     PEOPLE: 13
     IOTX: 2
     REN: 3
-    DREP: 18
+    DREP: 19
     ATOM: 2
     BLZ: 2
     ENJ: 2
     DEGO: 13
     TORN: 13
-    CELR: 7
+    CELR: 8
     IMX: 29
     VITE: 7
     ORN: 5
@@ -150,13 +150,13 @@ root:
     WRX: 5
     WNXM: 2
     KNC: 10
-    FET: 6
+    FET: 7
     VGX: 7
     REQ: 23
     JUV: 3
-    PERL: 10
-    GRT: 4
-    LOKA: 23
+    PERL: 11
+    GRT: 5
+    LOKA: 25
     MFT: 14
     BTCST: 9
     DATA: 13
@@ -176,12 +176,12 @@ root:
     MOVR: 1
     RIF: 2
     BOND: 15
-    ACA: 46
+    ACA: 58
     NKN: 2
     STORJ: 8
     STRAX: 8
     PLA: 16
-    FLM: 5
+    FLM: 6
     DOGE: 17
     MBL: 87
     KEY: 10
@@ -192,7 +192,7 @@ root:
     OXT: 23
     FLOW: 1
     AUDIO: 4
-    MBOX: 5
+    MBOX: 7
     OGN: 13
     TROY: 35
     OM: 7
@@ -202,8 +202,8 @@ root:
     BAND: 1
     THETA: 2
     MINA: 12
-    SUPER: 3
-    QTUM: 4
+    SUPER: 4
+    QTUM: 8
     CHZ: 7
     NAS: 4
     GTC: 1
@@ -213,7 +213,7 @@ root:
     FIRO: 25
     PIVX: 7
     NXS: 4
-    GLMR: 14
+    GLMR: 23
     STPT: 4
     SSV: 1
     SNM: 2
@@ -241,7 +241,7 @@ root:
     XNO: 8
     SUN: 1
     SNX: 2
-    ASTR: 14
+    ASTR: 37
     DIA: 1
     POWR: 4
     NEO: 3
@@ -258,14 +258,14 @@ root:
     AST: 1
     BNT: 1
     GAS: 1
-    WOO: 12
+    WOO: 13
     BAL: 1
-    LIT: 2
-    GMT: 8
+    LIT: 4
+    GMT: 9
     APE: 1
-    KDA: 2
+    KDA: 3
     ZIL: 1
-    BSW: 22
-    BAKE: 13
+    BSW: 53
+    BAKE: 14
     TRX: 1
     TRB: 2

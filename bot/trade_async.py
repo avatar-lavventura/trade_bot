@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
-from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -472,9 +473,9 @@ class BotHelper:
 
         log(await self.spot_order(float(self.strategy.size)))
         try:
-            config.stats["root"][self.strategy.market.lower()][_date(_type="month")] += 1
+            config.env[self.strategy.market.lower()].stats[_date(_type="month")] += 1
         except:
-            config.stats["root"][self.strategy.market.lower()][_date(_type="month")] = 1
+            config.env[self.strategy.market.lower()].stats[_date(_type="month")] = 1
 
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()

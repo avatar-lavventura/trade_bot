@@ -2,11 +2,12 @@
 
 import asyncio
 import math
+from contextlib import suppress
+
 import yfinance as yf
 from broker._utils._async import _sleep
 from broker._utils._log import log
 from broker._utils.tools import _date, print_tb
-from contextlib import suppress
 
 from bot import helper
 from bot.bot_helper_async import BotHelperAsync
