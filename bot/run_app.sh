@@ -19,9 +19,9 @@ fi
 while true
 do
     clear -x
-    hypercorn app_async:app -b 0.0.0.0:5000 # --reload
+    hypercorn app_async:app -b 0.0.0.0:5000  # --reload
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    echo "countdown for 30 seconds"
+    echo "countdown for 30 seconds  "
     countdown 30
     echo "[  ${GREEN}OK${NC}  ]"
 done

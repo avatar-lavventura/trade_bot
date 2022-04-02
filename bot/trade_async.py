@@ -43,7 +43,7 @@ class Strategy:
             log(f"   ABORT {self.symbol}", "bold orange1", is_write=False)
             raise Exception
 
-    def parse_data_msg(self, data_msg):
+    def parse_data_msg(self, data_msg) -> None:
         self.chunks = data_msg.split(",")
         self.side_original = self.side = self.chunks[1].upper()
         self.symbol = self.chunks[0]
@@ -78,10 +78,10 @@ class Strategy:
         self.current_bar_index = self.chunks[3]  # differs for each pair
         self.time = self.chunks[4]
 
-    def is_buy(self):
+    def is_buy(self) -> bool:
         return self.side == "BUY"
 
-    def is_sell(self):
+    def is_sell(self) -> bool:
         return self.side == "SELL"
 
 
@@ -325,11 +325,11 @@ class BotHelper:
         """Both side order for futures."""
         symbol = self.strategy.symbol.replace("/USDT", "USDT")
         if await self.is_usdt_open(symbol):
-            raise Exception(f"E: already open position for {symbol}")
+            raise Exception(f"already open position for {symbol}")
 
         try:
             if self.strategy.size == 0:
-                raise Exception("E: position size is less than zero")
+                raise Exception("position size is less than zero")
 
             await self._order(quantity=self.strategy.size)
         except Exception as e:
@@ -429,7 +429,7 @@ class BotHelper:
         output = await self.symbol_price(self.strategy.symbol, "future")
         last_price = output["last"]
         if last_price == 0:
-            raise Exception("E: last_price is zero")
+            raise Exception("last_price is zero")
 
         if self.strategy.is_buy():
             if self.strategy.time_duration == "1m":
@@ -523,11 +523,8 @@ class BotHelper:
         except:
             return decimal_count(value)
 
-    def check_on_going_positions(self):
+    def check_on_going_positions(self) -> None:
         if self.strategy.market == "USDTPERP":
-            if self.strategy.time_duration == "":
-                self.strategy.time_duration = "9m"
-
             pos_count = config.USDTPERP_MAX_POSITION[self.strategy.time_duration]
             if config.status_usdtperp["count"] >= pos_count:
                 raise QuietExit(f"warning: {pos_count} pos")

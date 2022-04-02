@@ -30,9 +30,9 @@ async def btc():
             "VTHO",
         ]:
             with suppress(Exception):
-                _price = await exchange.fetch_ticker(f"{asset}/BTC")
-                _price = _price["last"]
-                if float(_price) < 0.001:
+                price = await exchange.fetch_ticker(f"{asset}/BTC")
+                price = price["last"]
+                if 0 < float(price) < 0.000002:
                     count += 1
                     print(f":{asset}BTC")
 
@@ -66,9 +66,9 @@ async def usdt():
             and "UPUSDT" not in f"{asset}USDT"
         ):
             with suppress(Exception):
-                _price = await exchange.fetch_ticker(f"{asset}/USDT")
-                p = _price["previousClose"]
-                if float(p) < 0.02:
+                price = await exchange.fetch_ticker(f"{asset}/USDT")
+                price = price["previousClose"]
+                if 0 < float(price) < 0.02:
                     count += 1
                     print(f":{asset}USDT")
 
@@ -79,7 +79,8 @@ async def usdt():
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
-        # loop.run_until_complete(btc())
+        loop.run_until_complete(btc())
+        print()
         loop.run_until_complete(usdt())
     except Exception as e:
         print_tb(e)

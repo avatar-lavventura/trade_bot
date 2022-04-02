@@ -19,7 +19,7 @@ root:
     ERN: 3
     RAY: 1
     FIL: 4
-    DREP: 2
+    DREP: 3
     IOST: 4
     GTO: 24
     MITH: 12
@@ -31,11 +31,11 @@ root:
     VTHO: 11
     TFUEL: 3
     ONG: 2
-    WAXP: 1
-    SCRT: 1
-    TOMO: 2
+    WAXP: 3
+    SCRT: 2
+    TOMO: 3
     PERL: 3
-    ZRX: 3
+    ZRX: 4
     ALPHA: 5
     POWR: 5
     POLY: 2
@@ -44,7 +44,7 @@ root:
     API3: 4
     RAMP: 4
     FXS: 2
-    BAKE: 5
+    BAKE: 6
     EPS: 2
     STX: 3
     THETA: 2
@@ -54,12 +54,12 @@ root:
     POND: 2
     TVK: 1
     SYS: 3
-    1INCH: 3
+    1INCH: 4
     ATA: 2
     ALCX: 2
-    VGX: 4
-    XVS: 3
-    CHR: 6
+    VGX: 5
+    XVS: 5
+    CHR: 7
     PHA: 4
     HARD: 3
     STEEM: 2
@@ -70,11 +70,11 @@ root:
     COTI: 1
     ROSE: 1
     RVN: 2
-    UTK: 2
-    CAKE: 1
+    UTK: 3
+    CAKE: 2
     BTCST: 2
     HBAR: 5
-    CLV: 4
+    CLV: 6
     KAVA: 1
     TWT: 3
     WTC: 6
@@ -83,27 +83,27 @@ root:
     MINA: 4
     APE: 2
     BRD: 2
-    LPT: 1
+    LPT: 2
     ASTR: 5
-    UNFI: 2
-    OCEAN: 1
+    UNFI: 3
+    OCEAN: 2
     DOCK: 14
     VOXEL: 18
     PYR: 4
     OM: 3
     WAVES: 7
-    SRM: 1
+    SRM: 2
     ANC: 1
     BETA: 4
     AERGO: 1
     COMP: 4
-    AST: 1
-    XNO: 1
+    AST: 2
+    XNO: 2
     FLUX: 5
     KNC: 2
     LTO: 2
-    LOKA: 17
-    GMT: 13
+    LOKA: 18
+    GMT: 15
     DEGO: 2
     COCOS: 2
     ASR: 3
@@ -116,7 +116,7 @@ root:
     TORN: 2
     VIDT: 2
     NMR: 2
-    GLMR: 2
+    GLMR: 3
     PLA: 2
     MDA: 1
     DAR: 6
@@ -129,28 +129,40 @@ root:
     YGG: 2
     OG: 2
     NEO: 1
-    AUCTION: 1
+    AUCTION: 2
     DASH: 1
     TRB: 3
     BEL: 4
-    OXT: 2
     ENJ: 1
     POLS: 1
-    XTZ: 1
+    XTZ: 2
     LINK: 1
     IOTA: 1
     RNDR: 1
-    WOO: 1
+    WOO: 2
     SSV: 2
     ENS: 1
     LIT: 2
     INJ: 1
-    SUPER: 1
+    SUPER: 2
     WING: 1
     OMG: 1
     ONE: 1
     NXS: 1
-    GALA: 1
+    GALA: 2
     DIA: 1
     ALGO: 1
     LSK: 1
+    ALICE: 3
+    BICO: 2
+    FIS: 1
+    KDA: 2
+    ATOM: 1
+    STRAX: 1
+    CRV: 2
+    SAND: 1
+    BEAM: 1
+    GAS: 1
+    OXT: 1
+    IDEX: 1
+    FET: 1

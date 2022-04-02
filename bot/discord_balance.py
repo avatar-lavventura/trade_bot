@@ -38,7 +38,9 @@ class Discord_Alpy:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
 
-            self.client.loop.run_until_complete(cfg.discord_sent_message.delete())
+            if cfg.discord_sent_message:
+                self.client.loop.run_until_complete(cfg.discord_sent_message.delete())
+
             self.client.loop.close()
             print("## Program ended")
         except Exception as e:
@@ -53,9 +55,8 @@ class Discord_Alpy:
         - runs at 30th second: (..., second="30")
         """
         await helper.exchange.set_markets()
-
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(self._process_main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
+        scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -68,7 +69,7 @@ class Discord_Alpy:
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
 
-    async def _process_main(self):
+    async def main(self):
         await self.pre_discord_setup()
         await process_main(self)
 

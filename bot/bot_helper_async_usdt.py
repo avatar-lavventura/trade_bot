@@ -113,7 +113,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             if asset in config.SPOT_IGNORE_LIST:
                 return 0
 
-            raise Exception(f"E: quantity is zero asset={asset}")
+            raise Exception(f"quantity is zero asset={asset}")
 
         entry_price = _sum / quantity
         entry_price = float(f"{entry_price:.{decimal}f}")
@@ -132,9 +132,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         profit = (asset_price - entry_price) * quantity
         if profit != 0:
             if cfg.TYPE.lower() == "usdt":
-                log(format(profit, ".2f"), "bold green" if profit > 0 else "red", end="")
+                log(format(profit, ".2f"), "bold green" if profit > 0 else "bold red", end="")
             else:
-                log(format(profit * 1000, ".5f"), "bold green" if profit > 0 else "red", end="")
+                log(format(profit * 1000, ".5f"), "bold green" if profit > 0 else "bold red", end="")
 
             _percent_change = percent_change(
                 initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
@@ -151,11 +151,10 @@ class BotHelperSpotAsync(BotHelperAsync):
         msg = (
             f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
         )
-        if self.channel and _sum > config.discord_msg_above_usdt and (_percent_change < -0.5 or profit < -0.5):
-            cfg.discord_message += msg
-
         if self.channel:
             cfg.discord_message_full += msg
+            if _sum > config.discord_msg_above_usdt and profit < 0:  # _percent_change < -0.5
+                cfg.discord_message += msg
 
         if asset in config.SPOT_IGNORE_LIST:
             log()
