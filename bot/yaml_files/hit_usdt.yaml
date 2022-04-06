@@ -3,11 +3,11 @@ root:
     GLMR: 6
     ASTR: 4
     BAT: 1
-    ACA: 10
+    ACA: 11
     ZIL: 1
     MTL: 1
     PUNDIX: 3
-    VOXEL: 1
+    VOXEL: 2
     NKN: 1
     IDEX: 5
     OM: 2
@@ -38,7 +38,7 @@ root:
     DATA: 8
     IRIS: 1
     VIDT: 3
-    DREP: 10
+    DREP: 11
     DEXE: 2
     GMT: 1
     PNT: 7
@@ -48,12 +48,12 @@ root:
     AUDIO: 1
     WOO: 2
     LOKA: 1
-    GXS: 4
+    GXS: 5
     DOGE: 2
     INJ: 1
-    DAR: 1
+    DAR: 2
     TRU: 10
-    API3: 1
+    API3: 2
     WTC: 1
     SKL: 1
     MINA: 1
@@ -64,3 +64,4 @@ root:
     PHA: 1
     BEAM: 1
     HIVE: 1
+    HARD: 1

@@ -6,12 +6,12 @@ root:
   ignore: # for all
     - FTM
   btc:
-    max_pos: 4
+    max_pos: 6
     initial: 0.00024 # 0.00015
     multiply_ratio: 1.08
     percent_change_to_add: 4.5
   usdt:
-    max_pos: 4
+    max_pos: 5
     initial: 12
     multiply_ratio: 1.08
     percent_change_to_add: 4.5 # 4.5 works good

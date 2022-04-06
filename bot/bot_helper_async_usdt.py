@@ -13,12 +13,12 @@ class BotHelperSpotAsync(BotHelperAsync):
         self.channel = None
         self.channel_alerts = None
 
-    async def check_position_to_pass(self, asset, _sum, is_limit, _per) -> bool:
+    async def check_position_to_pass(self, asset, _sum, is_limit, per) -> bool:
         if _sum > config.isolated_wallet_limit:
             log("PASS_1", "bold")
             return True
 
-        if float(_per) > 80:
+        if float(per) > 80:
             log("PASS_2", "bold")
             return True
 
@@ -29,7 +29,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         log()
         return False
 
-    async def is_limit_order_exist(self, asset, limit_price):
+    async def is_limit_order_exist(self, asset, limit_price) -> None:
         open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/{cfg.TYPE.upper()}")
         if not open_orders:
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
@@ -136,11 +136,11 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 log(format(profit * 1000, ".5f"), "bold green" if profit > 0 else "bold red", end="")
 
-            _percent_change = percent_change(
+            per_change = percent_change(
                 initial=entry_price, change=asset_price - entry_price, end="", is_arrow_print=False
             )
         else:
-            _percent_change = 0
+            per_change = 0
 
         if cfg.TYPE.lower() == "usdt":
             log(f"| [bold magenta]{format(_sum, '.2f')} ([yellow]{per}%[/yellow]) ", end="")
@@ -148,19 +148,17 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ([yellow]{per}%[/yellow]) ", end="")
 
         cfg.locked_balance += float(per)
-        msg = (
-            f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(_percent_change, '.2f')}%) `{round(_sum)}`\n"
-        )
+        msg = f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(per_change, '.2f')}%) `{round(_sum)}$`\n"
         if self.channel:
             cfg.discord_message_full += msg
-            if _sum > config.discord_msg_above_usdt and profit < 0:  # _percent_change < -0.5
+            if _sum > config.discord_msg_above_usdt and profit < 0:
                 cfg.discord_message += msg
 
         if asset in config.SPOT_IGNORE_LIST:
             log()
             return profit
         elif not await self.check_position_to_pass(asset, _sum, is_limit, per):
-            if _percent_change <= -2 and _percent_change <= config.env[cfg.TYPE].percent_change_to_add:
+            if per_change <= -2 and per_change <= config.env[cfg.TYPE].percent_change_to_add:
                 new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio
                 if new_order_size * asset_price < 10:
                     # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
