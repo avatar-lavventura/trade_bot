@@ -2,18 +2,32 @@
 
 import os
 import shutil
+from broker._utils.yaml import Yaml
 from contextlib import suppress
+from filelock import FileLock
 from pathlib import Path
 from typing import Dict
-
-from broker._utils.yaml import Yaml
-from filelock import FileLock
 
 from bot import cfg
 
 
 class Config:
     def __init__(self) -> None:
+        class Env:
+            def __init__(self):
+                self.percent_change_to_add = None
+                self.usdt_multiply_ratio = None
+                self.hit = None
+                self.risk = None
+                self.stats = None
+                self.status = None
+                self.multiply_ratio = 1
+
+        self.env = {}  # type: Dict[str, Env]
+        self.env["usdt"] = Env()
+        self.env["btc"] = Env()
+
+        self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
         self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
@@ -27,6 +41,10 @@ class Config:
         self.asset_list = []
         self.btc_quantity = {}
         self.initialize()
+        self.env["usdt"].hit = self.yaml_wrapper(self.base_dir / "hit_usdt.yaml")["root"]
+        self.env["usdt"].stats = self.yaml_wrapper(self.base_dir / "stats_usdt.yaml")
+        self.env["btc"].stats = self.yaml_wrapper(self.base_dir / "stats_btc.yaml")
+        self.env["btc"].hit = self.yaml_wrapper(self.base_dir / "hit_btc.yaml")["root"]
 
     def reload(self) -> None:
         self.initialize()
@@ -38,8 +56,8 @@ class Config:
 
         return int(self.timestamp[key][asset])
 
-    def total_position_count(self) -> int:
-        return self.status["futures"]["pos_count"] + self.status_usdt["count"]
+    # def total_position_count(self) -> int:
+    #     return self.status["futures"]["pos_count"] + self.status_usdt["count"]
 
     def _yaml_wrapper(self, path, dirname, fn, auto_dump=True):
         if fn[0] == ".":
@@ -67,48 +85,31 @@ class Config:
             return self._yaml_wrapper(path, dirname, fn)
 
     def initialize(self) -> None:
-        class Env:
-            def __init__(self):
-                self.percent_change_to_add = None
-                self.usdt_multiply_ratio = None
-                self.hit = None
-                self.risk = None
-                self.stats = None
-                self.multiply_ratio = 1
-
-        base_dir = Path.home() / ".bot"
-        self.env = {}  # type: Dict[str, Env]
-        self.env["usdt"] = Env()
-        self.env["btc"] = Env()
-        self.cfg = self.yaml_wrapper(base_dir / "config.yaml", auto_dump=False)
-        self.alerts = self.yaml_wrapper(base_dir / "alerts.yaml", auto_dump=False)
-        self.cfg_usdtprep = self.yaml_wrapper(base_dir / "config_usdtprep.yaml")
-        self.timestamp = self.yaml_wrapper(base_dir / "timestamp.yaml")
-        self.run_balance = self.yaml_wrapper(base_dir / "run_balance.yaml")
-        self.goal = self.yaml_wrapper(base_dir / "goal.yaml")
-        self.status = self.yaml_wrapper(base_dir / "status.yaml")
-
+        self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
+        self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
+        self.cfg_usdtprep = self.yaml_wrapper(self.base_dir / "config_usdtprep.yaml")
+        self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
+        self.run_balance = self.yaml_wrapper(self.base_dir / "run_balance.yaml")
+        self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
         self._initial_usdt_qty = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
 
+        self.env["usdt"].status = self.yaml_wrapper(self.base_dir / "status_usdt.yaml")
         self.env["usdt"].percent_change_to_add = -abs(self.cfg["root"]["usdt"]["percent_change_to_add"]) + 0.01
-        self.env["usdt"].hit = self.yaml_wrapper(base_dir / "hit_usdt.yaml")["root"]
         self.env["usdt"].multiply_ratio = self.cfg["root"]["usdt"]["multiply_ratio"]
-        self.env["usdt"].risk = self.yaml_wrapper(base_dir / "risk_usdt.yaml")["root"]
-        self.env["usdt"].stats = self.yaml_wrapper(base_dir / "stats_usdt.yaml")
+        self.env["usdt"].risk = self.yaml_wrapper(self.base_dir / "risk_usdt.yaml")["root"]
 
+        self.env["btc"].status = self.yaml_wrapper(self.base_dir / "status_btc.yaml")
         self.env["btc"].percent_change_to_add = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
-        self.env["btc"].hit = self.yaml_wrapper(base_dir / "hit_btc.yaml")["root"]
         self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
-        self.env["btc"].risk = self.yaml_wrapper(base_dir / "risk_btc.yaml")["root"]
-        self.env["btc"].stats = self.yaml_wrapper(base_dir / "stats_btc.yaml")
+        self.env["btc"].risk = self.yaml_wrapper(self.base_dir / "risk_btc.yaml")["root"]
 
-        self.status_usdtperp = self.yaml_wrapper(base_dir / "usdtperp_pos_count.yaml")
-        self.status_usdt = self.yaml_wrapper(base_dir / "usdt_pos_count.yaml")
-        self.status_btc = self.yaml_wrapper(base_dir / "btc_pos_count.yaml")
+        self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
+        self.status_usdt = self.yaml_wrapper(self.base_dir / "usdt_pos_count.yaml")
+        self.status_btc = self.yaml_wrapper(self.base_dir / "btc_pos_count.yaml")
 
         # spot
         # ====

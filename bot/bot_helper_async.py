@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-from typing import Tuple
-
 from broker._utils._log import _console_clear, console_ruler, log
 from broker._utils.tools import _date, decimal_count, percent_change, print_tb, round_float
+from contextlib import suppress
 from filelock import FileLock
+from typing import Tuple
 
 from bot import cfg, helper
 from bot.config import config
@@ -141,7 +140,7 @@ class BotHelperAsync:
     ########
     # SPOT #
     ########
-    async def spot_balance(self, is_limit=True) -> Tuple[float, float, float]:
+    async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
         own_usd: float = 0
         sum_usdt: float = 0
@@ -154,12 +153,14 @@ class BotHelperAsync:
         except Exception as e:
             raise e
 
+        only_btc = 0
         btcusdt_price = float(await self.spot_fetch_ticker("BTC/USDT"))
         for balance in self.balances["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0 or float(balance["locked"]) != 0:
                 quantity = float(balance["free"]) + float(balance["locked"])
                 if asset == "BTC":
+                    only_btc = quantity
                     sum_btc += quantity
                 elif asset not in cfg.STABLE_COINS:
                     # price = await self.spot_fetch_ticker(asset)
@@ -216,16 +217,16 @@ class BotHelperAsync:
                 elif cfg.TYPE.lower() == "btc":
                     pos_count = config.status_btc["count"]
 
-                if pos_count == 0 and config.status["root"][cfg.TYPE]["balance"] != sum_usdt:
+                if pos_count == 0 and config.env[cfg.TYPE].status["balance"] != sum_usdt:
                     with FileLock(config.status.fp_lock, timeout=5):
-                        config.status["root"][cfg.TYPE]["balance"] = sum_usdt
+                        config.env[cfg.TYPE].status["balance"] = sum_usdt
 
             if cfg.TYPE.lower() == "btc":
                 if len(config.asset_list) == 0:
                     _console_clear()
                     log(":beer:  [bold green]spot=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usd))
 
-                config.status["root"][cfg.TYPE]["balance"] = sum_btc
+                config.env[cfg.TYPE].status["balance"] = sum_btc
 
         if cfg.TYPE.lower() == "usdt":
             _sum = sum_usdt
@@ -265,7 +266,7 @@ class BotHelperAsync:
                 config.status_btc["count"] = count
 
         self.update_timestamp_status()
-        return own_usd, sum_usdt, only_usdt
+        return own_usd, sum_usdt, only_usdt, only_btc
 
     async def spot_order(self, quantity, symbol, side):
         try:
