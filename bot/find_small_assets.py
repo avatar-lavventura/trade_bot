@@ -73,12 +73,12 @@ async def usdt():
                     print(f":{asset}USDT")
 
     print()
-    print(count)
+    print(f"count={count}")
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
     try:
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(btc())
         print()
         loop.run_until_complete(usdt())

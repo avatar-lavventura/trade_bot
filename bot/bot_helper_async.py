@@ -21,8 +21,9 @@ class TakeProfit:
 
     def get_profit_amount(self, amount=0) -> float:
         amount = abs(float(amount))
-        if amount > 200 and self.take_profit < 0.006:
-            return 1.000 + 0.007
+        if self.take_profit < 0.006:
+            if (cfg.TYPE == "usdt" and amount > 200) or (cfg.TYPE == "btc" and amount > 0.004):
+                return 1.000 + 0.0075  # % 0.75
 
         return 1.000 + self.take_profit
 
@@ -72,12 +73,11 @@ class BotHelperAsync:
         """
         await helper.exchange.future.transfer_out(code="USDT", amount=amount)
 
-    async def is_future_position_open(self, symbol_original) -> bool:
+    async def is_future_position_open(self, symbol) -> bool:
         futures = await helper.exchange.future.fetch_balance()
         for future in futures["info"]["positions"]:
-            if float(future["positionAmt"]) != 0:
-                if future["symbol"].replace("/", "") == symbol_original.replace("/", ""):
-                    return True
+            if future["symbol"].replace("/", "") == symbol.replace("/", "") and float(future["positionAmt"]) != 0:
+                return True
 
         return False
 

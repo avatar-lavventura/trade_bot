@@ -19,7 +19,7 @@ root:
     ERN: 3
     RAY: 1
     FIL: 4
-    DREP: 3
+    DREP: 4
     IOST: 4
     GTO: 24
     MITH: 12
@@ -110,7 +110,7 @@ root:
     ATM: 1
     ACA: 7
     QTUM: 4
-    DUSK: 5
+    DUSK: 6
     IMX: 2
     CVP: 2
     TORN: 2
@@ -150,7 +150,7 @@ root:
     ONE: 1
     NXS: 1
     GALA: 2
-    DIA: 1
+    DIA: 2
     ALGO: 1
     LSK: 1
     ALICE: 3

@@ -1,6 +1,8 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO Faster to read from mongodb than re-read from yaml have a look
+** TODO BTC 1 dakikalik dusute cross a gore posizyon kabul etme
 ** TODO BTCUSDT 1h kirmizi top dusuteyse do nothing?
 ** TODO Implement sell_order.py to give sell orders from the bot
 ** TODO Check: Don't open position when red wave_trend is on in 30s
