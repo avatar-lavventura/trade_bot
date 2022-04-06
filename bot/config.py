@@ -57,9 +57,6 @@ class Config:
 
         return int(self.timestamp[key][asset])
 
-    # def total_position_count(self) -> int:
-    #     return self.status["futures"]["pos_count"] + self.status_usdt["count"]
-
     def _yaml_wrapper(self, path, dirname, fn, auto_dump=True):
         if fn[0] == ".":
             fp_lockname = f"initialize_{fn}.lock"
@@ -99,14 +96,14 @@ class Config:
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
 
         self.env["usdt"].status = self.yaml_wrapper(self.base_dir / "status_usdt.yaml")
+        self.env["usdt"].risk = self.yaml_wrapper(self.base_dir / "risk_usdt.yaml")["root"]
         self.env["usdt"].percent_change_to_add = -abs(self.cfg["root"]["usdt"]["percent_change_to_add"]) + 0.01
         self.env["usdt"].multiply_ratio = self.cfg["root"]["usdt"]["multiply_ratio"]
-        self.env["usdt"].risk = self.yaml_wrapper(self.base_dir / "risk_usdt.yaml")["root"]
 
         self.env["btc"].status = self.yaml_wrapper(self.base_dir / "status_btc.yaml")
+        self.env["btc"].risk = self.yaml_wrapper(self.base_dir / "risk_btc.yaml")["root"]
         self.env["btc"].percent_change_to_add = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
         self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
-        self.env["btc"].risk = self.yaml_wrapper(self.base_dir / "risk_btc.yaml")["root"]
 
         self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
         self.status_usdt = self.yaml_wrapper(self.base_dir / "usdt_pos_count.yaml")

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-from broker._utils._log import log
-from broker.errors import QuietExit
 from contextlib import suppress
 from typing import Dict
+
+from broker._utils._log import log
+from broker.errors import QuietExit
 
 from bot import helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync

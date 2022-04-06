@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
-from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 

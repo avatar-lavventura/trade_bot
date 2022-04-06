@@ -23,7 +23,7 @@ class TakeProfit:
         amount = abs(float(amount))
         if self.take_profit < 0.006:
             if (cfg.TYPE == "usdt" and amount > 200) or (cfg.TYPE == "btc" and amount > 0.004):
-                return 1.000 + 0.0075  # % 0.75
+                return 1.000 + 0.0076  # % 0.76
 
         return 1.000 + self.take_profit
 
@@ -147,6 +147,7 @@ class BotHelperAsync:
         sum_usdt: float = 0
         sum_btc: float = 0
         only_usdt: float = 0
+        only_btc: float = 0
         count: int = 0
         config.asset_list = []
         try:
@@ -154,7 +155,6 @@ class BotHelperAsync:
         except Exception as e:
             raise e
 
-        only_btc = 0
         btcusdt_price = float(await self.spot_fetch_ticker("BTC/USDT"))
         for balance in self.balances["info"]["balances"]:
             asset = balance["asset"]
@@ -168,7 +168,7 @@ class BotHelperAsync:
                     price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
                     if cfg.TYPE == "usdt":
                         usdt_to_added = quantity * float(price)
-                        if usdt_to_added > 10:  # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
+                        if usdt_to_added > 10:
                             # below 10$ would not count as open position
                             config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
                             config.asset_list.append(asset)
@@ -197,7 +197,7 @@ class BotHelperAsync:
 
         pos_count = 0
         sum_usdt = float(format(sum_usdt, ".2f"))
-        if helper.is_start or config.total_position_count() > 0:
+        if helper.is_start > 0:
             if not helper.is_start and sum_usdt > 0.01:
                 console_ruler(character="-=")
 
@@ -219,8 +219,7 @@ class BotHelperAsync:
                     pos_count = config.status_btc["count"]
 
                 if pos_count == 0 and config.env[cfg.TYPE].status["balance"] != sum_usdt:
-                    with FileLock(config.status.fp_lock, timeout=5):
-                        config.env[cfg.TYPE].status["balance"] = sum_usdt
+                    config.env[cfg.TYPE].status["balance"] = sum_usdt
 
             if cfg.TYPE.lower() == "btc":
                 if len(config.asset_list) == 0:
