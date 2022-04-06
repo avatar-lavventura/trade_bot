@@ -32,25 +32,28 @@ async def alert():
 
 async def process(unix_timestamp_ms):
     update_spot_timestamp(unix_timestamp_ms)  # first update spot timestamps
-    *_, usdt_bal, free_usdt = await bot_async.spot_balance()
+    *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
     if usdt_bal > 0.125 and not helper.is_start:
         log()
 
     if RUN_FUTURES:
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
-        with FileLock(config.status.fp_lock, timeout=5):
+        with FileLock(config.env[cfg.TYPE].status.fp_lock, timeout=5):
             config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
 
         usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
     else:
-        with FileLock(config.status.fp_lock, timeout=5):
-            if cfg.TYPE == "usdt":
-                config.status["root"][cfg.TYPE]["balance"] = usdt_bal
-                config.status["root"][cfg.TYPE]["free"] = free_usdt
+        with FileLock(config.env[cfg.TYPE].status.fp_lock, timeout=5):
+            if cfg.TYPE.lower() == "usdt":
+                config.env[cfg.TYPE].status["balance"] = usdt_bal
+                config.env[cfg.TYPE].status["free"] = free_usdt
+
+            if cfg.TYPE.lower() == "btc":
+                config.env[cfg.TYPE].status["free"] = "{:.8f}".format(free_btc)
 
     for idx in range(1, 6):
-        config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.status["root"][cfg.TYPE]["balance"], idx)
+        config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
     if RUN_FUTURES:
         positions = await helper.exchange.future.fetch_positions()

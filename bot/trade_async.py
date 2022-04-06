@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
+from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -387,9 +386,11 @@ class BotHelper:
                         raise e
 
                 log(f"==> re-opening {side} order | ", end="")
-                # TODO: check is free > 10$ improve
-                if self.strategy.market.lower() == "usdt" and config.status["usdt"]["free"] < 10:
-                    return
+                if self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15:
+                    raise QuietExit("not enough balance") from None
+
+                if self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003:
+                    raise QuietExit("not enough balance") from None
 
                 if float(_quantity) > 0:
                     return await self.spot_order(float(_quantity))
@@ -547,6 +548,12 @@ class BotHelper:
         raise Exception("timestamp error")
 
     async def _trade(self):
+        if self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15:
+            raise QuietExit("not enough balance")
+
+        if self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003:
+            raise QuietExit("not enough balance")
+
         is_open = False
         if self.strategy.market == "USDTPERP":
             is_open = await self.is_usdt_open(self.strategy.symbol)
@@ -591,7 +598,7 @@ class BotHelper:
         """
         config.reload()
         self.check_on_going_positions()
-        free_balance = config.status["root"][self.strategy.market.lower()]["free"]
+        free_balance = config.env[self.strategy.market.lower()].status["free"]
         raise_msg = f"not enough free usdt({free_balance}),side={self.strategy.side}"
         if self.strategy.market.lower() == "usdt" and free_balance < 15.0:
             raise QuietExit(raise_msg)
@@ -634,7 +641,7 @@ class BotHelper:
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")
 
-        self.pre_check()
+        self.pre_check()  # TODO SLOW FIND ALTERNATIVE FASTER SOLUTION
         if "enter" not in self.strategy.position_alert_msg:
             return
         elif self.strategy.market == "BTC" and self.strategy.is_sell():

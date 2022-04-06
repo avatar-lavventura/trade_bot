@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-from typing import Dict
-
 from broker._utils._log import log
 from broker.errors import QuietExit
+from contextlib import suppress
+from typing import Dict
 
 from bot import helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
@@ -51,7 +50,7 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
         if config.status["root"]["free_usdt"] > abs(new_amount_margin):
             await create_market_order(symbol, new_amount, side)
         else:
-            raise QuietExit(f"warning: Not enough free USDT, amount={new_amount} margin={new_amount_margin}")
+            raise QuietExit(f"warning: not enough free USDT, amount={new_amount} margin={new_amount_margin}")
     else:
         if _per < 100:
             log(f"warning: Total locked amount is {_per}%", end="")
