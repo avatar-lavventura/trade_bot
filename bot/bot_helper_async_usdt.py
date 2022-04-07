@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
 
@@ -69,6 +71,22 @@ class BotHelperSpotAsync(BotHelperAsync):
                     return (quantity, _sum, decimal)
 
         return (quantity, _sum, decimal)
+
+    async def is_cut_loss(self, asset, profit, asset_balance):
+        """Close trade with accepted loss."""
+        if cfg.TYPE.lower() == "usdt" and profit < -15:
+            order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", asset_balance)
+            order = order["info"]
+            with suppress(Exception):
+                del order["timeInForce"]
+                del order["orderListId"]
+                del order["price"]
+                del order["status"]
+                del order["type"]
+                del order["origQty"]
+                del order["executedQty"]
+
+            log(order)
 
     async def spot_limit(self, asset, asset_balance, sum_bal, is_limit=True):
         """Spot limit for SPOT."""
@@ -148,15 +166,20 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ([yellow]{per}%[/yellow]) ", end="")
 
         cfg.locked_balance += float(per)
-        msg = f"**{asset}** e={entry_price} {format(profit, '.1f')} ({format(per_change, '.2f')}%) `{round(_sum)}$`\n"
+        msg = f"**{asset}** e={entry_price} `{format(profit, '.1f')}` ({format(per_change, '.2f')}%) `{round(_sum)}$`\n"
         if self.channel:
             cfg.discord_message_full += msg
             if _sum > config.discord_msg_above_usdt and profit < 0:
                 cfg.discord_message += msg
 
+        # self.is_cut_loss(asset, profit, asset_balance)
         if asset in config.SPOT_IGNORE_LIST:
             log()
             return profit
+        elif (cfg.TYPE.lower() == "usdt" and config.env["usdt"].status["free"] < 15) or (
+            cfg.TYPE.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003
+        ):
+            log()
         elif not await self.check_position_to_pass(asset, _sum, is_limit, per):
             if per_change <= -2 and per_change <= config.env[cfg.TYPE].percent_change_to_add:
                 new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio

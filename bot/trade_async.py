@@ -452,8 +452,7 @@ class BotHelper:
             await self.both_side_order()
             await self.futures_limit_order()
             return
-
-        if self.strategy.market == "BTC":
+        elif self.strategy.market == "BTC":
             output = await self.symbol_price(self.strategy.symbol, "spot")
             initial_amount = config.initial_btc_quantity / output["last"]
             self.strategy.size = self.get_initial_amount(initial_amount, "BTC")
@@ -578,8 +577,8 @@ class BotHelper:
                         config.status_btc["count"] += 1
             except Exception as e:
                 print_tb(e)
-        else:
-            log("PASS", "bold")  # already open position
+        else:  # already open position
+            log("PASS", "bold")
 
     async def trade(self) -> None:
         try:

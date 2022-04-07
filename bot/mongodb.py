@@ -10,6 +10,11 @@ class Mongo(BaseMongoClass):
         res = self.collection.replace_one({"symbol": symbol, "timestamp": timestamp}, item, True)
         return res.acknowledged
 
+    def hit_count(self, symbol, item):
+        """Add symbol along with its portfolio into mongo_db."""
+        res = self.collection.replace_one({"symbol": symbol}, item, True)
+        return res.acknowledged
+
 
 if __name__ == "__main__":
     mc = MongoClient()

@@ -1,6 +1,7 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO consider closing each trade if there is 1% loss (~12$)
 ** TODO Faster to read from mongodb than re-read from yaml have a look
 ** TODO BTC 1 dakikalik dusute cross a gore posizyon kabul etme
 ** TODO BTCUSDT 1h kirmizi top dusuteyse do nothing?

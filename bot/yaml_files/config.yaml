@@ -5,6 +5,7 @@ root:
   locked_percent_limit: 90
   ignore: # for all
     - FTM
+    - SRM
   btc:
     max_pos: 6
     initial: 0.00024 # 0.00015

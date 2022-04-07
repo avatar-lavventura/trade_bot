@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 import asyncio
-from contextlib import suppress
-
 from broker._utils.tools import print_tb
+from contextlib import suppress
 
 from bot import helper
 
@@ -37,6 +36,7 @@ async def btc():
                     print(f":{asset}BTC")
 
     print(count)
+    await exchange.close()
 
 
 async def usdt():
@@ -68,12 +68,13 @@ async def usdt():
             with suppress(Exception):
                 price = await exchange.fetch_ticker(f"{asset}/USDT")
                 price = price["previousClose"]
-                if 0 < float(price) < 0.02:
+                if 0 < float(price) < 0.06:  # was: 0.02
                     count += 1
                     print(f":{asset}USDT")
 
     print()
     print(f"count={count}")
+    await exchange.close()
 
 
 if __name__ == "__main__":

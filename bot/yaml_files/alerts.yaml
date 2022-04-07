@@ -1,6 +1,7 @@
-
 alerts:
-    a1:
-        pair: FTMUSDT
-        price: 1.70
-
+  a1:
+    pair: FTMUSDT
+    price: 1.70
+  a2:
+    pair: SRMBTC
+    price: 0.000062

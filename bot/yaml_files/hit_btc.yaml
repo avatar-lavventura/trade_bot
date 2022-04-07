@@ -2,28 +2,23 @@ root:
     HIGH: 8
     ZIL: 10
     RARE: 4
-    FIO: 1
     ARK: 2
     REQ: 3
     PHB: 2
     BADGER: 6
     ORN: 3
-    SNM: 1
     KMD: 4
-    RLC: 1
     MTL: 3
     SKL: 7
     STORJ: 2
     CHESS: 2
     ANT: 2
     ERN: 3
-    RAY: 1
     FIL: 4
     DREP: 4
     IOST: 4
     GTO: 24
     MITH: 12
-    GRS: 1
     TRU: 4
     ONT: 2
     AION: 2
@@ -40,7 +35,6 @@ root:
     POWR: 5
     POLY: 2
     ELF: 2
-    CTSI: 1
     API3: 4
     RAMP: 4
     FXS: 2
@@ -52,7 +46,6 @@ root:
     BAT: 2
     DODO: 3
     POND: 2
-    TVK: 1
     SYS: 3
     1INCH: 4
     ATA: 2
@@ -63,19 +56,15 @@ root:
     PHA: 4
     HARD: 3
     STEEM: 2
-    JST: 1
     BLZ: 3
     PNT: 3
     MDX: 3
-    COTI: 1
-    ROSE: 1
     RVN: 2
     UTK: 3
     CAKE: 2
     BTCST: 2
     HBAR: 5
     CLV: 6
-    KAVA: 1
     TWT: 3
     WTC: 6
     CHZ: 4
@@ -92,9 +81,7 @@ root:
     PYR: 4
     OM: 3
     WAVES: 7
-    ANC: 1
     BETA: 4
-    AERGO: 1
     COMP: 4
     AST: 2
     XNO: 2
@@ -106,7 +93,6 @@ root:
     DEGO: 2
     COCOS: 2
     ASR: 3
-    ATM: 1
     ACA: 7
     QTUM: 4
     DUSK: 6
@@ -117,51 +103,24 @@ root:
     NMR: 2
     GLMR: 3
     PLA: 2
-    MDA: 1
     DAR: 6
     MBOX: 4
     AGLD: 3
     REN: 2
-    TRIBE: 1
     OGN: 3
-    CVC: 1
     YGG: 2
     OG: 2
-    NEO: 1
     AUCTION: 2
-    DASH: 1
     TRB: 3
     BEL: 4
-    ENJ: 1
-    POLS: 1
     XTZ: 2
-    LINK: 1
-    IOTA: 1
-    RNDR: 1
     WOO: 2
     SSV: 2
-    ENS: 1
     LIT: 2
-    INJ: 1
     SUPER: 2
-    WING: 1
-    OMG: 1
-    ONE: 1
-    NXS: 1
     GALA: 2
     DIA: 2
-    ALGO: 1
-    LSK: 1
     ALICE: 3
     BICO: 2
-    FIS: 1
     KDA: 2
-    ATOM: 1
-    STRAX: 1
     CRV: 2
-    SAND: 1
-    BEAM: 1
-    GAS: 1
-    OXT: 1
-    IDEX: 1
-    FET: 1
