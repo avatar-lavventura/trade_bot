@@ -6,7 +6,7 @@ from typing import Dict
 from broker._utils._log import log
 from broker.errors import QuietExit
 
-from bot import helper
+from bot import cfg, helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
 
@@ -58,11 +58,11 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
 
 
 def update_spot_timestamp(unix_timestamp_ms: int):
-    if not isinstance(config.run_balance["root"]["timestamp"], int):
-        config.run_balance["root"]["timestamp"] = 0
+    if not isinstance(config.env[cfg.TYPE].status["timestamp"], int):
+        config.env[cfg.TYPE].status["timestamp"] = 0
 
-    if unix_timestamp_ms > config.run_balance["root"]["timestamp"]:
-        config.run_balance["root"]["timestamp"] = unix_timestamp_ms
+    if unix_timestamp_ms > config.env[cfg.TYPE].status["timestamp"]:
+        config.env[cfg.TYPE].status["timestamp"] = unix_timestamp_ms
 
 
 async def create_limit_order(symbol, position_amt, limit_price, side) -> None:

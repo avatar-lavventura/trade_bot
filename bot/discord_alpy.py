@@ -24,7 +24,7 @@ class Discord_Alpy:
             pass
         except KeyboardInterrupt:
             self.client.loop.close()
-            print("Program ended.")
+            print("program ended")
 
     async def task(self):
         """Add task in order to schedule discord to send messages.

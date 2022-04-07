@@ -8,7 +8,7 @@ from broker._utils._log import log
 from broker._utils.tools import _exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
-from ccxt.base.errors import RequestTimeout  # NOQA
+from ccxt.base.errors import RequestTimeout  # noqa
 
 from bot import cfg, helper
 from bot.binance_futures import future_stats, futures_bal, process_future_positions
@@ -39,15 +39,12 @@ async def process(unix_timestamp_ms):
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
         config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
-
         usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
-    else:
-        if cfg.TYPE.lower() == "usdt":
-            config.env[cfg.TYPE].status["balance"] = usdt_bal
-            config.env[cfg.TYPE].status["free"] = free_usdt
-
-        if cfg.TYPE.lower() == "btc":
-            config.env[cfg.TYPE].status["free"] = "{:.8f}".format(free_btc)
+    elif cfg.TYPE.lower() == "usdt":
+        config.env[cfg.TYPE].status["balance"] = usdt_bal
+        config.env[cfg.TYPE].status["free"] = free_usdt
+    elif cfg.TYPE.lower() == "btc":
+        config.env[cfg.TYPE].status["free"] = "{:.8f}".format(free_btc)
 
     for idx in range(1, 6):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)

@@ -1,6 +1,6 @@
 root:
-    GXS: 39
-    NULS: 32
+    GXS: 40
+    NULS: 33
     DUSK: 26
     ELF: 17
     GTO: 42
@@ -31,17 +31,17 @@ root:
     AVA: 4
     CVP: 34
     QNT: 8
-    RAMP: 13
+    RAMP: 18
     LPT: 4
     MITH: 16
     TCT: 28
     NBS: 20
     DOCK: 9
-    TRU: 31
-    FRONT: 38
+    TRU: 32
+    FRONT: 40
     FIS: 22
     DF: 17
-    WING: 28
+    WING: 29
     PNT: 26
     POND: 7
     PHA: 27
@@ -79,7 +79,7 @@ root:
     HARD: 16
     RAD: 4
     C98: 6
-    TFUEL: 5
+    TFUEL: 6
     FXS: 16
     UNFI: 2
     RARE: 48
@@ -91,17 +91,17 @@ root:
     ONE: 3
     ANT: 5
     IOST: 4
-    FIO: 15
+    FIO: 16
     VTHO: 26
     OOKI: 2
     FTM: 8
     EUR: 1
     VOXEL: 20
     FTT: 2
-    EPS: 11
+    EPS: 13
     KEEP: 6
     DYDX: 4
-    NEAR: 2
+    NEAR: 3
     JOE: 13
     BAT: 2
     HBAR: 4
@@ -122,13 +122,13 @@ root:
     BETA: 6
     XEC: 3
     CHR: 2
-    MDX: 29
+    MDX: 30
     AION: 10
     SXP: 4
     PEOPLE: 13
     IOTX: 2
     REN: 3
-    DREP: 19
+    DREP: 26
     ATOM: 2
     BLZ: 2
     ENJ: 2
@@ -137,7 +137,7 @@ root:
     CELR: 8
     IMX: 29
     VITE: 7
-    ORN: 5
+    ORN: 8
     UTK: 7
     FUN: 5
     STX: 13
@@ -145,12 +145,11 @@ root:
     NANO: 3
     WRX: 5
     WNXM: 2
-    KNC: 10
+    KNC: 12
     FET: 7
     VGX: 7
     REQ: 23
     JUV: 3
-    PERL: 11
     GRT: 5
     LOKA: 25
     MFT: 14
@@ -172,13 +171,13 @@ root:
     MOVR: 1
     RIF: 2
     BOND: 15
-    ACA: 58
+    ACA: 62
     NKN: 2
     STORJ: 8
     STRAX: 8
     PLA: 16
     FLM: 6
-    DOGE: 17
+    DOGE: 18
     MBL: 87
     KEY: 10
     ENS: 4
@@ -209,7 +208,7 @@ root:
     FIRO: 25
     PIVX: 7
     NXS: 4
-    GLMR: 23
+    GLMR: 24
     STPT: 4
     SNM: 2
     PROM: 2
@@ -232,15 +231,14 @@ root:
     XNO: 8
     SNX: 2
     ASTR: 37
-    DIA: 1
     POWR: 4
     NEO: 3
     RLC: 2
     MKR: 3
     RUNE: 5
-    TWT: 8
+    TWT: 9
     ZEC: 2
-    WOO: 13
+    WOO: 19
     LIT: 4
     GMT: 9
     KDA: 3

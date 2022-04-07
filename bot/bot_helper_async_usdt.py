@@ -46,13 +46,13 @@ class BotHelperSpotAsync(BotHelperAsync):
         except:
             return decimal_count(value)
 
-    def calculate_entry(self, timestamp_list, ordering, all_trades, is_return=False):
+    def calculate_entry(self, timestamp_list, ordering, trades, is_return=False):
         decimal = 0
         quantity = 0
         _sum = 0
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
-                trade = all_trades[inner_index]
+                trade = trades[inner_index]
                 decimal = self.get_decimal_count(trade["symbol"], trade["price"])
                 qty = float(trade["info"]["qty"])
                 trade_cost = trade["cost"]  # ignoring fees
@@ -93,17 +93,16 @@ class BotHelperSpotAsync(BotHelperAsync):
         try:
             since = config.get_spot_timestamp(asset)
             if not since:
-                since = config.SPOT_TIMESTAMP
+                since = config.env[cfg.TYPE].status["timestamp"]
         except:
-            since = config.SPOT_TIMESTAMP
+            since = config.env[cfg.TYPE].status["timestamp"]
 
         if len(str(since)) == 10:
             since = since * 1000
 
         trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{cfg.TYPE.upper()}", since=since)
-        all_trades = trades
         ordering = {}
-        for idx, trade in enumerate(all_trades):
+        for idx, trade in enumerate(trades):
             try:
                 # In case orders occur in the same timestamp
                 ordering[trade["timestamp"]].append(idx)
@@ -113,19 +112,18 @@ class BotHelperSpotAsync(BotHelperAsync):
         # iterate transactions based on their timestamp
         timestamp_list = sorted(ordering, reverse=True)
         if timestamp_list:
-            quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, all_trades)
+            quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades)
         else:
             trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{cfg.TYPE.upper()}")
-            all_trades = trades
             ordering = {}
-            for idx, trade in enumerate(all_trades):
+            for idx, trade in enumerate(trades):
                 try:
                     ordering[trade["timestamp"]].append(idx)
                 except Exception:
                     ordering[trade["timestamp"]] = [idx]
 
             timestamp_list = sorted(ordering, reverse=True)
-            quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, all_trades, is_return=True)
+            quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, is_return=True)
 
         if quantity == 0:
             if asset in config.SPOT_IGNORE_LIST:

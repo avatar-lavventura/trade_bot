@@ -108,9 +108,9 @@ class BotHelperAsync:
             if asset_timestamp != "base" and asset_timestamp not in config.asset_list:
                 ts = int(config.timestamp[key][asset_timestamp])
                 if len(str(ts)) == 13:
-                    if ts <= config.run_balance["root"]["timestamp"] * 1000:
+                    if ts <= config.env[cfg.TYPE].status["timestamp"] * 1000:
                         del_list.append(asset_timestamp)
-                elif ts <= config.run_balance["root"]["timestamp"]:
+                elif ts <= config.env[cfg.TYPE].status["timestamp"]:
                     del_list.append(asset_timestamp)
 
         for asset in del_list:
@@ -122,10 +122,12 @@ class BotHelperAsync:
         if float(lost) < 0 < cfg.locked_balance:
             log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", fn=cfg.balance_fn)
             log(
-                f"[red]{lost}{name}[/red] locked=[cyan]{cfg.locked_balance}%[/cyan] [blue]{count}[/blue] pos",
-                "bold",
-                fn=cfg.balance_fn,
+                f"[red]{lost}{name}[/red] locked=[cyan]{cfg.locked_balance}%[/cyan] ", "bold", end="", fn=cfg.balance_fn
             )
+            if count > 1:
+                log(f"[blue]{count}[/blue] pos", "bold", fn=cfg.balance_fn)
+            else:
+                log()
 
         if cfg.discord_message and cfg.discord_message != ".\n":
             try:
@@ -203,7 +205,7 @@ class BotHelperAsync:
 
             if len(config.asset_list) == 0:
                 #: cleans timestamp.yaml
-                config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(base=config.run_balance["root"]["timestamp"])
+                config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(base=config.env[cfg.TYPE].status["timestamp"])
                 _console_clear()
                 if cfg.TYPE.lower() == "usdt":
                     log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
@@ -350,9 +352,9 @@ class BotHelperAsync:
         try:
             _since = config.get_spot_timestamp(asset)
             if not _since:
-                _since = config.SPOT_TIMESTAMP
+                _since = config.env[cfg.TYPE].status["timestamp"]
         except:
-            _since = config.SPOT_TIMESTAMP
+            _since = config.env[cfg.TYPE].status["timestamp"]
 
         trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=_since)
         ordering = {}

@@ -9,5 +9,5 @@ TYPE: str = ""
 discord_message: str = ".\n"
 discord_message_full: str = ".\n"
 discord_print: bool = False
-locked_balance = 0
+locked_balance = 0.0
 discord_sent_message = None

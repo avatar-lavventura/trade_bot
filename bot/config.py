@@ -12,22 +12,22 @@ from filelock import FileLock
 from bot import cfg
 
 
+class Env:
+    def __init__(self):
+        self.percent_change_to_add = None
+        self.usdt_multiply_ratio = None
+        self.hit = None
+        self.risk = None
+        self.stats = None
+        self.status = None
+        self.multiply_ratio = 1.0
+
+
 class Config:
     def __init__(self) -> None:
-        class Env:
-            def __init__(self):
-                self.percent_change_to_add = None
-                self.usdt_multiply_ratio = None
-                self.hit = None
-                self.risk = None
-                self.stats = None
-                self.status = None
-                self.multiply_ratio = 1
-
         self.env = {}  # type: Dict[str, Env]
         self.env["usdt"] = Env()
         self.env["btc"] = Env()
-
         self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
@@ -35,7 +35,7 @@ class Config:
         self.new_day = "03:00:00"
         self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.base_durations = ["9m", "15m", "21m"]
-        self.sum_usdt: float = 0
+        self.sum_usdt: float = 0.0
         self.locked_per_limit_usdtperp = None
         self.USDTPERP_MULTIPLY_RATIO = None
         self.white_list = []
@@ -53,7 +53,7 @@ class Config:
     def get_spot_timestamp(self, asset):
         key = f"{cfg.TYPE.lower()}_timestamp"
         if self.timestamp[key][asset] == {}:
-            self.timestamp[key][asset] = self.run_balance["root"]["timestamp"]
+            self.timestamp[key][asset] = config.env[cfg.TYPE].status["timestamp"]
 
         return int(self.timestamp[key][asset])
 
@@ -87,7 +87,6 @@ class Config:
         self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
         self.cfg_usdtprep = self.yaml_wrapper(self.base_dir / "config_usdtprep.yaml")
         self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
-        self.run_balance = self.yaml_wrapper(self.base_dir / "run_balance.yaml")
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
         self._initial_usdt_qty = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
@@ -111,16 +110,13 @@ class Config:
 
         # spot
         # ====
+        self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.USDT_MAX_POSITION = self.cfg["root"]["usdt"]["max_pos"]
         self.BTC_MAX_POSITION = self.cfg["root"]["btc"]["max_pos"]
-
-        self.SPOT_TIMESTAMP = self.run_balance["root"]["timestamp"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
         self.SPOT_locked_percent_limit = self.cfg["root"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
         self.initial_btc_quantity = self.cfg["root"]["btc"]["initial"]
-
-        self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         # self.initialize_usdtprep()
 
     def initialize_usdtprep(self) -> None:

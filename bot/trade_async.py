@@ -473,10 +473,11 @@ class BotHelper:
                     return
 
         log(await self.spot_order(float(self.strategy.size)))
-        try:
-            config.env[self.strategy.market.lower()].stats[_date(_type="month")] += 1
-        except:
-            config.env[self.strategy.market.lower()].stats[_date(_type="month")] = 1
+        current_date = _date(_type="month")
+        if current_date in config.env[self.strategy.market.lower()].stats:
+            config.env[self.strategy.market.lower()].stats[current_date] += 1
+        else:
+            config.env[self.strategy.market.lower()].stats[current_date] = 1
 
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()
@@ -493,10 +494,11 @@ class BotHelper:
         try:
             if self.strategy.market == "USDTPERP":
                 await self.calculate_futures_size()
-            else:
-                output = await self.symbol_price(self.strategy.symbol, "spot")
-                log(f"last_price={output['last']}", "bold")
 
+            # if self.strategy.market in ["BTC", "USDT"]:
+            #     output = await self.symbol_price(self.strategy.symbol, "spot")
+            #     log(f"last_price={output['last']}", "bold")
+            log()
             side_color = "green" if self.strategy.side == "BUY" else "red"
             log(
                 f"==> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
@@ -536,9 +538,8 @@ class BotHelper:
             if self.strategy.asset in config.white_list:
                 if config.status_usdt["count"] >= config.USDT_MAX_POSITION + 1:
                     raise QuietExit(f"warning: {config.USDT_MAX_POSITION + 1} pos")
-            else:
-                if config.status_usdt["count"] >= config.USDT_MAX_POSITION:
-                    raise QuietExit(f"warning: {config.USDT_MAX_POSITION} pos")
+            elif config.status_usdt["count"] >= config.USDT_MAX_POSITION:
+                raise QuietExit(f"warning: {config.USDT_MAX_POSITION} pos")
 
     async def _fetch_balance(self):
         for _ in range(5):
@@ -567,7 +568,7 @@ class BotHelper:
         if not is_open:
             try:
                 await self.trade_async()
-                with FileLock(config.status.fp_lock, timeout=5):
+                with FileLock(config.env[self.strategy.market.lower()].status.fp_lock, timeout=5):
                     #: in case many alerts come in same minute
                     if self.strategy.market.lower() == "usdtperp":
                         config.status_usdtperp["count"] += 1
@@ -644,7 +645,7 @@ class BotHelper:
         self.pre_check()  # TODO SLOW FIND ALTERNATIVE FASTER SOLUTION
         if "enter" not in self.strategy.position_alert_msg:
             return
-        elif self.strategy.market == "BTC" and self.strategy.is_sell():
+        elif self.strategy.market.lower() == "btc" and self.strategy.is_sell():
             log("warning: ignore BTC pair, no need to sell.")
 
         await self._trade()

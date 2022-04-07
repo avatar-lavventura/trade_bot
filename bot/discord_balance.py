@@ -42,7 +42,7 @@ class Discord_Alpy:
                 self.client.loop.run_until_complete(cfg.discord_sent_message.delete())
 
             self.client.loop.close()
-            print("## Program ended")
+            print("## program is ended")
         except Exception as e:
             print_tb(e)
             breakpoint()  # DEBUG

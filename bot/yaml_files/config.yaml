@@ -12,7 +12,7 @@ root:
     multiply_ratio: 1.08
     percent_change_to_add: 4.5
   usdt:
-    max_pos: 5
+    max_pos: 4
     initial: 12
     multiply_ratio: 1.08
     percent_change_to_add: 4.5 # 4.5 works good

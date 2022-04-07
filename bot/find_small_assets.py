@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import asyncio
-from broker._utils.tools import print_tb
 from contextlib import suppress
+
+from broker._utils.tools import print_tb
 
 from bot import helper
 
