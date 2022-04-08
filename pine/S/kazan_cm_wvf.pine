@@ -15,6 +15,8 @@ start           = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish          = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish ? true : false
 msg = timeframe.period + "_enter"
+msg_aggr = msg + "_aggr"
+
 // hunter
 vwap_period = input(title="Period", defval=5)
 vwap_source = hlc3
@@ -130,7 +132,10 @@ else
 if strategy.position_size[0] != 0 and bar_index > abs(strategy.position_size) + SLEEP_BAR
     strategy.close_all(when=window())
 
-if col[1] == color.lime and col == color.gray and long_VWMA  // buy signal
+if col_aggressive == color.orange
+    msg := msg_aggr
+
+if (col_aggressive == color.orange or (col[1] == color.lime and col == color.gray)) and long_VWMA  // buy signal
     if strategy.opentrades[0] == 0 or strategy.position_size < 0
         strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
     else if bar_index > abs(strategy.position_size)

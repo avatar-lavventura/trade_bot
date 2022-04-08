@@ -5,10 +5,9 @@ root:
   locked_percent_limit: 90
   ignore: # for all
     - FTM
-    - SRM
   btc:
     max_pos: 6
-    initial: 0.00024 # 0.00015
+    initial: 0.00020 # 0.00015
     multiply_ratio: 1.08
     percent_change_to_add: 4.5
   usdt:

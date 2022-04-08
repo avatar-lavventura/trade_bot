@@ -1,8 +1,8 @@
 root:
-    GXS: 40
-    NULS: 33
+    GXS: 42
+    NULS: 36
     DUSK: 26
-    ELF: 17
+    ELF: 18
     GTO: 42
     CHESS: 27
     VIDT: 28
@@ -15,7 +15,7 @@ root:
     BURGER: 20
     WAN: 54
     KMD: 16
-    POLS: 24
+    POLS: 25
     PYR: 17
     ANY: 26
     WTC: 22
@@ -31,20 +31,20 @@ root:
     AVA: 4
     CVP: 34
     QNT: 8
-    RAMP: 18
+    RAMP: 19
     LPT: 4
     MITH: 16
     TCT: 28
     NBS: 20
     DOCK: 9
     TRU: 32
-    FRONT: 40
+    FRONT: 41
     FIS: 22
     DF: 17
     WING: 29
     PNT: 26
     POND: 7
-    PHA: 27
+    PHA: 29
     RGT: 9
     YGG: 5
     MC: 3
@@ -59,13 +59,13 @@ root:
     SLP: 9
     RNDR: 8
     JASMY: 13
-    TRIBE: 9
+    TRIBE: 10
     COTI: 7
     FLUX: 9
     QI: 3
     ALGO: 8
     BTS: 3
-    HIGH: 28
+    HIGH: 29
     CELO: 2
     CRV: 8
     AGLD: 48
@@ -128,17 +128,17 @@ root:
     PEOPLE: 13
     IOTX: 2
     REN: 3
-    DREP: 26
+    DREP: 37
     ATOM: 2
     BLZ: 2
     ENJ: 2
     DEGO: 13
-    TORN: 13
+    TORN: 14
     CELR: 8
     IMX: 29
     VITE: 7
     ORN: 8
-    UTK: 7
+    UTK: 9
     FUN: 5
     STX: 13
     ACH: 17
@@ -148,14 +148,14 @@ root:
     KNC: 12
     FET: 7
     VGX: 7
-    REQ: 23
+    REQ: 24
     JUV: 3
     GRT: 5
     LOKA: 25
     MFT: 14
     BTCST: 9
     DATA: 13
-    INJ: 14
+    INJ: 15
     DAR: 12
     BTTC: 3
     NMR: 22
@@ -175,7 +175,7 @@ root:
     NKN: 2
     STORJ: 8
     STRAX: 8
-    PLA: 16
+    PLA: 17
     FLM: 6
     DOGE: 18
     MBL: 87
@@ -220,7 +220,7 @@ root:
     BRD: 2
     CVC: 2
     ALPINE: 39
-    JST: 10
+    JST: 11
     TOMO: 2
     T: 9
     DASH: 3
@@ -230,7 +230,7 @@ root:
     GLM: 3
     XNO: 8
     SNX: 2
-    ASTR: 37
+    ASTR: 39
     POWR: 4
     NEO: 3
     RLC: 2

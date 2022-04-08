@@ -10,11 +10,12 @@ from filelock import FileLock
 from pymongo import MongoClient
 
 from bot import helper
-from bot.bot_helper_async import TP, BotHelperAsync, TP_calculate
+from bot.bot_helper_async import TP, BotHelperAsync
 from bot.client_helper import DiscordClient
 from bot.config import config
 from bot.mongodb import Mongo
 from bot.spot_lib import create_limit_order, create_market_order
+from bot.take_profit import TP_calculate
 
 
 class Strategy:
@@ -245,6 +246,9 @@ class BotHelper:
                 del order["cummulativeQuoteQty"]
                 del order["orderListId"]
                 del order["fills"]
+                del order["orderId"]
+                del order["clientOrderId"]
+                del order["transactTime"]
 
             log(f"order={order}", "bold")
         except QuietExit as e:
@@ -498,12 +502,12 @@ class BotHelper:
             # if self.strategy.market in ["BTC", "USDT"]:
             #     output = await self.symbol_price(self.strategy.symbol, "spot")
             #     log(f"last_price={output['last']}", "bold")
-            log()
             side_color = "green" if self.strategy.side == "BUY" else "red"
+            log()
             log(
                 f"==> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
-                f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue]"
-                f" {self.strategy.symbol} ",
+                f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue] "
+                f"{self.strategy.symbol} ",
                 end="",
             )
             if self.strategy.size != 0:
@@ -514,7 +518,7 @@ class BotHelper:
             elif self.strategy.is_sell():
                 await self.sell()
         except Exception as e:
-            log(str(e), "bold yellow")
+            log(f"E: {e}")
 
     def get_decimal_count(self, value) -> int:
         try:
@@ -549,10 +553,9 @@ class BotHelper:
         raise Exception("timestamp error")
 
     async def _trade(self):
-        if self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15:
-            raise QuietExit("not enough balance")
-
-        if self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003:
+        if (self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15) or (
+            self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003
+        ):
             raise QuietExit("not enough balance")
 
         is_open = False

@@ -7,6 +7,21 @@ from broker._utils.tools import print_tb
 
 from bot import helper
 
+ignore_list = [
+    "BTC",
+    "info",
+    "LTC",
+    "ETH",
+    "timestamp",
+    "datetime",
+    "free",
+    "used",
+    "total",
+    "USDT",
+    "IQ",
+    "VTHO",
+]
+
 
 async def btc():
     """List smaller BTC assets than 0.000004 for blacklist."""
@@ -15,20 +30,7 @@ async def btc():
     assets = await exchange.fetch_balance()
     count = 0
     for asset in assets:
-        if asset not in [
-            "BTC",
-            "info",
-            "LTC",
-            "ETH",
-            "timestamp",
-            "datetime",
-            "free",
-            "used",
-            "total",
-            "USDT",
-            "IQ",
-            "VTHO",
-        ]:
+        if asset not in ignore_list:
             with suppress(Exception):
                 price = await exchange.fetch_ticker(f"{asset}/BTC")
                 price = price["last"]
@@ -41,31 +43,13 @@ async def btc():
 
 
 async def usdt():
-    """List smaller USDT assets than 0.001 for blacklist."""
+    """List smaller USDT assets than 0.06 for blacklist.txt."""
     helper.exchange.init_both()
     exchange = helper.exchange.spot_usdt
     assets = await exchange.fetch_balance()
     count = 0
     for asset in assets:
-        if (
-            asset
-            not in [
-                "BTC",
-                "info",
-                "LTC",
-                "ETH",
-                "timestamp",
-                "datetime",
-                "free",
-                "used",
-                "total",
-                "USDT",
-                "IQ",
-                "VTHO",
-            ]
-            and "DOWNUSDT" not in f"{asset}USDT"
-            and "UPUSDT" not in f"{asset}USDT"
-        ):
+        if asset not in ignore_list and "DOWNUSDT" not in f"{asset}USDT" and "UPUSDT" not in f"{asset}USDT":
             with suppress(Exception):
                 price = await exchange.fetch_ticker(f"{asset}/USDT")
                 price = price["previousClose"]

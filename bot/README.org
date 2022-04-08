@@ -95,6 +95,7 @@ curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.94
 *** localhost
 
 #+begin_src bash
+curl -v https://alpybot.duckdns.org
 curl -v 127.0.0.1:5000
 curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
 curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
