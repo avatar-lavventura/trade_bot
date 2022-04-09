@@ -1,13 +1,13 @@
 // @author LazyBear
 //@version=4
 study(title="WaveTrend [LazyBear]", shorttitle="WT_LB", overlay=false)
-// https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT/
+// __ https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT/
 n1 = 10  //Channel Length
 n2 = 21  //Average Length
-obLevel1 = 60  // Over Bought Level 1
-obLevel2 = 53  // Over Bought Level 2
-osLevel2 = -53  // Over Sold Level 2
-osLevel1 = -60  // Over Sold Level 1
+obLevel1 = 60  // over bought Level 1
+obLevel2 = 53  // over bought Level 2
+osLevel2 = -53  // over sold Level 2
+osLevel1 = -60  // over sold Level 1
 // wave_trend_time = input("60", title = "WaveTrend Time")
 // src = security(syminfo.tickerid, wave_trend_time, hlc3)
 src = hlc3
@@ -17,8 +17,6 @@ ci = (src - esa) / (0.015 * d)
 tci = ema(ci, n2)
 wt1 = tci  // green-line
 wt2 = sma(wt1, 4)  // red-line
-is_div_long  = wt1 > wt2 and wt1 <= 0
-is_div_short = wt1 < wt2 and wt2 >= 0
 plot(obLevel1, color=color.red)
 plot(osLevel1, color=color.green)
 plot(obLevel2, color=color.red, style=3)
@@ -29,6 +27,13 @@ plot(wt1-wt2, color=color.new(color.blue, 70), style=plot.style_area)
 plot(cross(wt1, wt2) ? wt2 : na, color=color.black , style=plot.style_circles, linewidth=3)
 plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 > wt1 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
 plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth = 2)
+
+alertcondition(condition=wt1 >= wt2, title="green", message="green")
+alertcondition(condition=wt2 > wt1, title="red", message="red")
+
+// is_div_long  = wt1 > wt2 and wt1 <= 0
+// is_div_short = wt1 < wt2 and wt2 >= 0
+
 // barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? color.aqua : color.yellow) : na)
 // if is_div_long
 //    label.new(bar_index, na, "↑", color=color.aqua, textcolor=color.black, style=label.style_label_up, size=size.small, yloc=yloc.belowbar)

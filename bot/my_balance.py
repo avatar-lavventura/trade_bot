@@ -9,7 +9,7 @@ from broker._utils._async import _sleep
 from broker._utils._log import log
 from broker._utils.tools import _date, print_tb
 
-from bot import helper
+from bot import cfg, helper
 from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 from bot.trade_async import BotHelper
@@ -18,6 +18,7 @@ from bot.user_setup import check_binance_obj
 client, _ = check_binance_obj()
 bot = BotHelper(client)
 bot_async = BotHelperAsync()
+cfg.IGNORE_SOLD_QUANTITY = False
 
 
 def get_gold(gold_gr: float) -> float:

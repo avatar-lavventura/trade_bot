@@ -1,71 +1,71 @@
 root:
-    HIGH: 8
     ZIL: 10
-    RARE: 4
-    ARK: 2
+    HIGH: 8
+    RARE: 5
+    ARK: 3
     REQ: 3
     PHB: 2
-    BADGER: 6
-    ORN: 3
+    BADGER: 9
+    ORN: 4
     KMD: 4
     MTL: 3
     SKL: 7
-    STORJ: 2
-    CHESS: 2
+    STORJ: 4
+    CHESS: 6
     ANT: 3
     ERN: 3
     FIL: 4
-    DREP: 5
+    DREP: 6
     IOST: 4
     GTO: 24
     MITH: 12
-    TRU: 4
+    TRU: 6
     ONT: 2
     AION: 2
     HIVE: 5
     VTHO: 11
-    TFUEL: 3
+    TFUEL: 5
     ONG: 2
     WAXP: 3
-    SCRT: 2
+    SCRT: 4
     TOMO: 3
     ZRX: 4
     ALPHA: 5
-    POWR: 5
-    POLY: 2
-    ELF: 2
-    API3: 4
+    POWR: 7
+    POLY: 3
+    ELF: 4
+    API3: 5
     RAMP: 4
-    FXS: 2
-    BAKE: 7
-    EPS: 2
+    FXS: 7
+    BAKE: 8
+    EPS: 3
     STX: 3
     THETA: 4
     GLM: 2
-    BAT: 2
+    BAT: 3
     DODO: 3
     POND: 2
-    SYS: 3
+    SYS: 5
     1INCH: 4
     ATA: 2
     ALCX: 2
-    VGX: 5
+    VGX: 6
     XVS: 5
     CHR: 7
     PHA: 4
-    HARD: 3
-    STEEM: 3
+    HARD: 4
+    STEEM: 5
     BLZ: 3
-    PNT: 3
-    MDX: 3
+    PNT: 4
+    MDX: 4
     RVN: 2
-    UTK: 4
-    CAKE: 2
-    BTCST: 2
+    UTK: 6
+    CAKE: 3
+    BTCST: 3
     HBAR: 5
-    CLV: 7
-    TWT: 3
-    WTC: 6
+    CLV: 10
+    TWT: 4
+    WTC: 8
     CHZ: 4
     JOE: 4
     MINA: 4
@@ -77,62 +77,81 @@ root:
     OCEAN: 2
     DOCK: 14
     VOXEL: 18
-    PYR: 5
+    PYR: 6
     OM: 3
     WAVES: 7
-    BETA: 4
+    BETA: 5
     COMP: 4
     AST: 2
     XNO: 2
     FLUX: 5
     KNC: 7
-    LTO: 2
-    LOKA: 18
+    LTO: 3
+    LOKA: 19
     GMT: 15
-    DEGO: 2
+    DEGO: 4
     COCOS: 2
     ASR: 5
     ACA: 7
-    QTUM: 4
-    DUSK: 6
-    IMX: 2
+    QTUM: 5
+    DUSK: 9
+    IMX: 3
     CVP: 2
     TORN: 3
-    VIDT: 2
+    VIDT: 3
     NMR: 2
     GLMR: 3
     PLA: 3
     DAR: 6
-    MBOX: 4
+    MBOX: 5
     AGLD: 3
     REN: 3
-    OGN: 3
+    OGN: 5
     YGG: 3
     OG: 2
-    AUCTION: 2
+    AUCTION: 3
     TRB: 3
     BEL: 4
-    XTZ: 2
-    WOO: 2
+    WOO: 3
     SSV: 2
     LIT: 2
-    SUPER: 3
-    GALA: 2
+    SUPER: 5
+    GALA: 4
     DIA: 2
     ALICE: 3
-    BICO: 3
+    BICO: 4
     KDA: 2
-    CRV: 2
-    AUDIO: 1
+    CRV: 4
+    AUDIO: 2
     ENJ: 3
-    GXS: 1
-    FRONT: 1
+    GXS: 3
+    FRONT: 2
     INJ: 3
-    NEAR: 3
+    NEAR: 4
     GTC: 1
-    AR: 1
+    AR: 2
     SNM: 1
     BAND: 1
-    UMA: 1
+    UMA: 3
     DASH: 1
     TRIBE: 1
+    NXS: 1
+    ATM: 1
+    PROM: 2
+    GRS: 1
+    BAL: 1
+    CVC: 2
+    LSK: 1
+    FLM: 2
+    CTSI: 1
+    FET: 1
+    STRAX: 1
+    GAS: 4
+    AERGO: 1
+    MDA: 2
+    OMG: 2
+    LINK: 1
+    FIS: 1
+    IDEX: 1
+    SAND: 1
+    BNT: 1

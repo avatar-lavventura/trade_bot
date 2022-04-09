@@ -117,7 +117,7 @@ else if close < vwap_value * (1 + (1.1/100))
 else if close < vwap_value * (1 + (1.2/100))
     msg := msg + "_1.1"
 
-daily_per_change = (close - close[86400]) / close[86400] * 100
+dailyPerChange = (close - close[86400]) / close[86400] * 100
 
 //: try 600 (10 minutes? instead 15 seconds)
 // close position for alpy-bot new incoming alerts
@@ -132,10 +132,19 @@ else
 if strategy.position_size[0] != 0 and bar_index > abs(strategy.position_size) + SLEEP_BAR
     strategy.close_all(when=window())
 
-if col_aggressive == color.orange
-    msg := msg_aggr
+buy_flag = false
+if timeframe.isseconds
+    if ((col[1] == color.gray and col == color.lime) or (col[1] == color.lime and col == color.gray)) and long_VWMA
+        buy_flag := true
+else
+    if col_aggressive == color.orange
+        msg := msg_aggr
 
-if (col_aggressive == color.orange or (col[1] == color.lime and col == color.gray)) and long_VWMA  // buy signal
+    // if (col_aggressive == color.orange or (col[1] == color.lime and col == color.gray)) and long_VWMA
+    if (col_aggressive == color.orange or (col[1] == color.gray and col == color.lime)) and long_VWMA
+        buy_flag := true
+
+if buy_flag
     if strategy.opentrades[0] == 0 or strategy.position_size < 0
         strategy.entry("long", strategy.long, qty=bar_index, when=window(), alert_message=msg)
     else if bar_index > abs(strategy.position_size)

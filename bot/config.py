@@ -2,12 +2,11 @@
 
 import os
 import shutil
+from broker._utils.yaml import Yaml
 from contextlib import suppress
+from filelock import FileLock
 from pathlib import Path
 from typing import Dict
-
-from broker._utils.yaml import Yaml
-from filelock import FileLock
 
 from bot import cfg
 
@@ -38,7 +37,6 @@ class Config:
         self.sum_usdt: float = 0.0
         self.locked_per_limit_usdtperp = None
         self.USDTPERP_MULTIPLY_RATIO = None
-        self.white_list = []
         self.asset_list = []
         self.btc_quantity = {}
         self.initialize()
@@ -87,6 +85,7 @@ class Config:
         self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
         self.cfg_usdtprep = self.yaml_wrapper(self.base_dir / "config_usdtprep.yaml")
         self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
+        self.btc_wavetrend = self.yaml_wrapper(self.base_dir / "btc_wavetrend.yaml")
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
         self._initial_usdt_qty = self.cfg_usdtprep["root"]["usdtperp"]["pos"]["long"]["base"]
@@ -111,8 +110,8 @@ class Config:
         # spot
         # ====
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
-        self.USDT_MAX_POSITION = self.cfg["root"]["usdt"]["max_pos"]
-        self.BTC_MAX_POSITION = self.cfg["root"]["btc"]["max_pos"]
+        self.USDT_MAX_POS = self.cfg["root"]["usdt"]["max_pos"]
+        self.BTC_MAX_POS = self.cfg["root"]["btc"]["max_pos"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
         self.SPOT_locked_percent_limit = self.cfg["root"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]

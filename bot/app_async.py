@@ -10,11 +10,16 @@ from flask import abort, request
 from pathlib import Path
 from quart import Quart
 
-logging.getLogger("requests").setLevel(logging.CRITICAL)
 logging.disable(logging.CRITICAL)
+logging.getLogger("requests").setLevel(logging.CRITICAL)
 
 
 app = Quart(__name__)
+
+
+async def do_alert(msg):
+    async with app.alertlock:
+        await app.bot_trade.alert_main(msg)
 
 
 async def do_trade(msg):
@@ -54,6 +59,7 @@ async def startup():
     app.bot_trade = bot_trade.BotHelper(app.discord_client)
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
+    app.alertlock = asyncio.Lock()
     print(" * s t a r t i n g", flush=True)
     # margin_usdt = app.client_helper.get_balance_margin_usdt()
 
@@ -74,6 +80,9 @@ async def webhook():
         try:
             if any(x in data_msg for x in ["enter", "alert"]):
                 await do_trade(data_msg.replace(":00Z", "").rstrip())
+
+            if "alert:wavetrend" in data_msg:
+                await do_alert(data_msg)
 
             return "OK"
         except (QuietExit, KeyError) as e:

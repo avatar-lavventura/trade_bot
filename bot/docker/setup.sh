@@ -9,14 +9,12 @@ docker-compose up -d
 docker ps
 
 # ports
-sudo firewall-cmd --add-port=5000/tcp --permanent --zone=docker
-sudo firewall-cmd --reload
-sudo firewall-cmd --list-all --zone=docker
-sudo ufw allow 5000/tcp
-sudo ufw allow 80/tcp
+sudo systemctl enable ufw && sudo ufw enable
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
 sudo ufw allow 81/tcp
 sudo ufw allow 443/tcp
-sudo ufw enable
-sudo systemctl enable ufw
+sudo ufw allow 4001/tcp
+sudo ufw allow 5000/tcp
 sudo ufw status verbose
 sudo nmap localhost

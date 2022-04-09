@@ -25,51 +25,6 @@ class BotHelperAsync:
         """
         await helper.exchange.close()
 
-    ############
-    # USDTPERP #
-    ############
-    async def _load_markets(self):
-        await helper.exchange.future.load_markets()
-
-    async def transfer_in(self, amount):
-        """Transfer usdt from spot to usdtperp."""
-        await helper.exchange.future.transfer_in(code="USDT", amount=amount)
-
-    async def transfer_out(self, amount):
-        """Transfer USDT from USDTDPERP to SPOT.
-
-        __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
-        """
-        await helper.exchange.future.transfer_out(code="USDT", amount=amount)
-
-    async def is_future_position_open(self, symbol) -> bool:
-        futures = await helper.exchange.future.fetch_balance()
-        for future in futures["info"]["positions"]:
-            if future["symbol"].replace("/", "") == symbol.replace("/", "") and float(future["positionAmt"]) != 0:
-                return True
-
-        return False
-
-    async def set_leverage(self, symbol, leverage=1):
-        """Set leverage for futures."""
-        try:
-            market = helper.exchange.future.market(symbol)
-            response = await helper.exchange.future.fapiPrivate_post_leverage(
-                {"symbol": market["id"], "leverage": leverage}
-            )
-            log(response, "bold cyan")
-            response = await helper.exchange.future.fapiPrivate_post_margintype(
-                {"symbol": market["id"], "marginType": "ISOLATED"}
-            )
-            log(response, "bold cyan")
-        except Exception as e:
-            if "No need to change margin type" not in str(e):
-                print_tb(e)
-
-    async def futures_fetch_ticker(self, asset) -> float:
-        price = await helper.exchange.future.fetch_ticker(asset)
-        return float(price["last"])
-
     def update_timestamp_status(self) -> None:
         del_list = []
         key = f"{cfg.TYPE.lower()}_timestamp"
@@ -89,14 +44,21 @@ class BotHelperAsync:
     async def _discord_send(self, msg, lost, count, name):
         cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
         if float(lost) < 0 < cfg.locked_balance:
-            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", fn=cfg.balance_fn)
-            log(
-                f"[red]{lost}{name}[/red] locked=[cyan]{cfg.locked_balance}%[/cyan] ", "bold", end="", fn=cfg.balance_fn
-            )
-            if count > 1:
-                log(f"[blue]{count}[/blue] pos", "bold", fn=cfg.balance_fn)
-            else:
-                log()
+            color = "red"
+        else:
+            color = "green"
+
+        log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", fn=cfg.balance_fn)
+        log(
+            f"[{color}]{lost}{name}[/{color}] locked=[cyan]{cfg.locked_balance}%[/cyan] ",
+            "bold",
+            end="",
+            fn=cfg.balance_fn,
+        )
+        if count > 1:
+            log(f"[blue]{count}[/blue] pos", "bold", fn=cfg.balance_fn)
+        else:
+            log()
 
         if cfg.discord_message and cfg.discord_message != ".\n":
             try:
@@ -204,20 +166,24 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
-        lost = 0
+        lost: float = 0.0
         cfg.locked_balance = 0.0
         cfg.discord_message = ".\n"
         cfg.discord_message_full = ".\n"
         open(cfg.balance_fn, "w").close()
         for asset in config.asset_list:
-            lost += await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
+            lost += float(await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit))
 
-        if abs(lost) < 5:
-            msg = f"{cfg.discord_message}lost=`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}`"
+        if lost < -5.0:
+            _msg = cfg.discord_message
         else:
-            msg = f"{cfg.discord_message_full}lost=`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}`"
+            _msg = cfg.discord_message_full
 
-        msg = f"{msg}\n`{_date(_type='hour')}`"
+        free = format(float(config.env["usdt"].status["free"]), ".2f")
+        msg = (
+            f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | free=`{free}` | "
+            f"total=`{round(abs(lost) + sum_usdt)}$`\n`{_date(_type='hour')}`"
+        )
         if cfg.TYPE.lower() == "usdt":
             if lost < -0.1:
                 await self._discord_send(msg, format(lost, ".2f"), pos_count, "$")
@@ -319,13 +285,13 @@ class BotHelperAsync:
         _sum = 0
         quantity = 0
         try:
-            _since = config.get_spot_timestamp(asset)
-            if not _since:
-                _since = config.env[cfg.TYPE].status["timestamp"]
+            since = config.get_spot_timestamp(asset)
+            if not since:
+                since = config.env[cfg.TYPE].status["timestamp"]
         except:
-            _since = config.env[cfg.TYPE].status["timestamp"]
+            since = config.env[cfg.TYPE].status["timestamp"]
 
-        trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=_since)
+        trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=since)
         ordering = {}
         for idx, trade in enumerate(trades):
             try:
@@ -396,3 +362,48 @@ class BotHelperAsync:
                     await self.new_limit_order(asset, limit_price)
         else:
             await self.new_limit_order(asset, limit_price)
+
+    ############
+    # USDTPERP #
+    ############
+    async def _load_markets(self) -> None:
+        await helper.exchange.future.load_markets()
+
+    async def transfer_in(self, amount) -> None:
+        """Transfer usdt from spot to usdtperp."""
+        await helper.exchange.future.transfer_in(code="USDT", amount=amount)
+
+    async def transfer_out(self, amount):
+        """Transfer USDT from USDTDPERP to SPOT.
+
+        __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
+        """
+        await helper.exchange.future.transfer_out(code="USDT", amount=amount)
+
+    async def is_future_position_open(self, symbol) -> bool:
+        futures = await helper.exchange.future.fetch_balance()
+        for future in futures["info"]["positions"]:
+            if future["symbol"].replace("/", "") == symbol.replace("/", "") and float(future["positionAmt"]) != 0:
+                return True
+
+        return False
+
+    async def set_leverage(self, symbol, leverage=1):
+        """Set leverage for futures."""
+        try:
+            market = helper.exchange.future.market(symbol)
+            response = await helper.exchange.future.fapiPrivate_post_leverage(
+                {"symbol": market["id"], "leverage": leverage}
+            )
+            log(response, "bold cyan")
+            response = await helper.exchange.future.fapiPrivate_post_margintype(
+                {"symbol": market["id"], "marginType": "ISOLATED"}
+            )
+            log(response, "bold cyan")
+        except Exception as e:
+            if "No need to change margin type" not in str(e):
+                print_tb(e)
+
+    async def futures_fetch_ticker(self, asset) -> float:
+        price = await helper.exchange.future.fetch_ticker(asset)
+        return float(price["last"])

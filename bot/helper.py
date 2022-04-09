@@ -37,7 +37,6 @@ class Exchange:
             raise Exception("apiKey or secret is {}")
 
         self.spot_usdt = ccxt.binance(ops)
-        #
         ops = {
             "apiKey": str(helper_cfg["anne_b"]["key"]),
             "secret": str(helper_cfg["anne_b"]["secret"]),

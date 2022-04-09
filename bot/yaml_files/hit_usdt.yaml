@@ -1,11 +1,11 @@
 root:
-    GXS: 42
-    NULS: 36
+    GXS: 43
+    NULS: 39
     DUSK: 26
     ELF: 18
     GTO: 42
-    CHESS: 27
-    VIDT: 28
+    CHESS: 30
+    VIDT: 29
     KP3R: 6
     PUNDIX: 9
     WAVES: 13
@@ -16,20 +16,20 @@ root:
     WAN: 54
     KMD: 16
     POLS: 25
-    PYR: 17
+    PYR: 19
     ANY: 26
     WTC: 22
-    DEXE: 14
+    DEXE: 15
     WAXP: 4
     COS: 8
     CITY: 19
     LINA: 4
     CLV: 36
-    BADGER: 17
+    BADGER: 21
     SYS: 14
     LSK: 11
     AVA: 4
-    CVP: 34
+    CVP: 35
     QNT: 8
     RAMP: 19
     LPT: 4
@@ -44,7 +44,7 @@ root:
     WING: 29
     PNT: 26
     POND: 7
-    PHA: 29
+    PHA: 31
     RGT: 9
     YGG: 5
     MC: 3
@@ -61,14 +61,14 @@ root:
     JASMY: 13
     TRIBE: 10
     COTI: 7
-    FLUX: 9
+    FLUX: 11
     QI: 3
     ALGO: 8
     BTS: 3
-    HIGH: 29
+    HIGH: 30
     CELO: 2
     CRV: 8
-    AGLD: 48
+    AGLD: 49
     CAKE: 2
     ARPA: 6
     IRIS: 10
@@ -91,14 +91,14 @@ root:
     ONE: 3
     ANT: 5
     IOST: 4
-    FIO: 16
+    FIO: 17
     VTHO: 26
     OOKI: 2
     FTM: 8
     EUR: 1
     VOXEL: 20
     FTT: 2
-    EPS: 13
+    EPS: 14
     KEEP: 6
     DYDX: 4
     NEAR: 3
@@ -128,16 +128,16 @@ root:
     PEOPLE: 13
     IOTX: 2
     REN: 3
-    DREP: 37
+    DREP: 40
     ATOM: 2
     BLZ: 2
     ENJ: 2
     DEGO: 13
-    TORN: 14
+    TORN: 15
     CELR: 8
     IMX: 29
     VITE: 7
-    ORN: 8
+    ORN: 9
     UTK: 9
     FUN: 5
     STX: 13
@@ -145,18 +145,18 @@ root:
     NANO: 3
     WRX: 5
     WNXM: 2
-    KNC: 12
+    KNC: 13
     FET: 7
     VGX: 7
     REQ: 24
     JUV: 3
     GRT: 5
-    LOKA: 25
+    LOKA: 26
     MFT: 14
     BTCST: 9
     DATA: 13
     INJ: 15
-    DAR: 12
+    DAR: 16
     BTTC: 3
     NMR: 22
     IDEX: 11
@@ -171,7 +171,7 @@ root:
     MOVR: 1
     RIF: 2
     BOND: 15
-    ACA: 62
+    ACA: 63
     NKN: 2
     STORJ: 8
     STRAX: 8
@@ -190,7 +190,7 @@ root:
     MBOX: 7
     OGN: 13
     TROY: 35
-    OM: 7
+    OM: 12
     ANC: 8
     ROSE: 3
     ONG: 5
@@ -208,7 +208,7 @@ root:
     FIRO: 25
     PIVX: 7
     NXS: 4
-    GLMR: 24
+    GLMR: 25
     STPT: 4
     SNM: 2
     PROM: 2
@@ -220,7 +220,7 @@ root:
     BRD: 2
     CVC: 2
     ALPINE: 39
-    JST: 11
+    JST: 12
     TOMO: 2
     T: 9
     DASH: 3
@@ -230,7 +230,7 @@ root:
     GLM: 3
     XNO: 8
     SNX: 2
-    ASTR: 39
+    ASTR: 43
     POWR: 4
     NEO: 3
     RLC: 2
@@ -245,3 +245,4 @@ root:
     BSW: 53
     BAKE: 14
     TRB: 2
+    MULTI: 1

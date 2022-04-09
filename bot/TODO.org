@@ -1,6 +1,8 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO ignore sell positions to affect ortalama
+** TODO BTC 30 dakikalik yesil cross a gore ekleme iznini ver
 ** TODO consider closing each trade if there is 1% loss (~12$)
 ** TODO Faster to read from mongodb than re-read from yaml have a look
 ** TODO BTC 1 dakikalik dusute cross a gore posizyon kabul etme

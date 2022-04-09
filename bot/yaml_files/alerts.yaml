@@ -1,7 +1,10 @@
 alerts:
   a1:
     pair: FTMUSDT
-    price: 1.4
+    price: 1.35
   a2:
     pair: PNTUSDT
-    price: 0.6
+    price: 0.60
+  a3:
+    pair: ORNBTC
+    price: 0.000087

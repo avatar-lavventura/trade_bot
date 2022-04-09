@@ -49,7 +49,6 @@ class Discord_Alpy:
                 msg = f"Tick! The time is: {get_dt_time().strftime('%Y-%m-%d %H:%M:%S')}"
                 print(msg)
                 await channel.send(msg)
-        # await binance_balance.process_main(channel)
 
 
 _discord = Discord_Alpy()

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
+from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
@@ -29,6 +28,9 @@ class Strategy:
         self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_date()} ", end="")
+            if ", (" in data_msg:
+                data_msg = data_msg.split(", (", 1)[0]
+
             log(data_msg, "bold magenta", end="")
             if not data_msg.endswith(","):
                 log(",", "bold magenta", end="")
@@ -41,7 +43,7 @@ class Strategy:
             pass
 
         if "_abort" in data_msg:
-            log(f"   ABORT {self.symbol}", "bold orange1", is_write=False)
+            log(f" ABORT {self.symbol}", "bold orange1", is_write=False)
             raise Exception
 
     def parse_data_msg(self, data_msg) -> None:
@@ -145,7 +147,10 @@ class BotHelper:
         return False
 
     async def get_futures_open_position_count(self, is_print=False) -> int:
-        """Return number of open positions."""
+        """Return number of open positions.
+
+        initial_margin is considered as `isolatedWallet`.
+        """
         try:
             positions = await helper.exchange.future.fetch_positions()
         except Exception as e:
@@ -154,8 +159,7 @@ class BotHelper:
 
         count = 0
         for position in positions:
-            initial_margin = abs(float(position["info"]["isolatedWallet"]))
-            if initial_margin > 0:
+            if abs(float(position["info"]["isolatedWallet"])) > 0:
                 count += 1
                 if is_print:
                     log(position, "bold blue")
@@ -166,7 +170,7 @@ class BotHelper:
         try:
             if self.opposite_side() == "SELL":
                 limit_price = TP.get_long_tp(entry_price, isolated_wallet, decimal)
-            else:  # opposite_side() == "BUY":
+            else:
                 limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal)
 
             quantity = abs(float(amount))
@@ -482,6 +486,11 @@ class BotHelper:
             config.env[self.strategy.market.lower()].stats[current_date] += 1
         else:
             config.env[self.strategy.market.lower()].stats[current_date] = 1
+            if current_date not in config.env["usdt"].stats:
+                config.env["usdt"].stats[current_date] = 0
+
+            if current_date not in config.env["btc"].stats:
+                config.env["btc"].stats[current_date] = 0
 
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()
@@ -536,14 +545,10 @@ class BotHelper:
             if config.status_usdtperp["count"] >= pos_count:
                 raise QuietExit(f"warning: {pos_count} pos")
         elif self.strategy.market == "BTC":
-            if config.status_btc["count"] >= config.BTC_MAX_POSITION:
-                raise QuietExit(f"warning: {config.BTC_MAX_POSITION} pos")
-        elif self.strategy.market == "USDT":
-            if self.strategy.asset in config.white_list:
-                if config.status_usdt["count"] >= config.USDT_MAX_POSITION + 1:
-                    raise QuietExit(f"warning: {config.USDT_MAX_POSITION + 1} pos")
-            elif config.status_usdt["count"] >= config.USDT_MAX_POSITION:
-                raise QuietExit(f"warning: {config.USDT_MAX_POSITION} pos")
+            if config.status_btc["count"] >= config.BTC_MAX_POS:
+                raise QuietExit(f"warning: {config.BTC_MAX_POS} pos")
+        elif self.strategy.market == "USDT" and config.status_usdt["count"] >= config.USDT_MAX_POS:
+            raise QuietExit(f"warning: {config.USDT_MAX_POS} pos")
 
     async def _fetch_balance(self):
         for _ in range(5):
@@ -568,7 +573,9 @@ class BotHelper:
                     is_open = True
                     break
 
-        if not is_open:
+        if is_open:
+            log("PASS", "bold")
+        else:
             try:
                 await self.trade_async()
                 with FileLock(config.env[self.strategy.market.lower()].status.fp_lock, timeout=5):
@@ -581,8 +588,6 @@ class BotHelper:
                         config.status_btc["count"] += 1
             except Exception as e:
                 print_tb(e)
-        else:  # already open position
-            log("PASS", "bold")
 
     async def trade(self) -> None:
         try:
@@ -600,14 +605,15 @@ class BotHelper:
         Faster to read from status.yaml file. Positions counts are read from
         the yaml file that is updated from binance_balance.py.
         """
-        config.reload()
+        config.reload()  # TODO COULD SLOW learn its run-time
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
         raise_msg = f"not enough free usdt({free_balance}),side={self.strategy.side}"
         if self.strategy.market.lower() == "usdt" and free_balance < 15.0:
             raise QuietExit(raise_msg)
 
-        # self.pre_check_usdtperp(free_balance, raise_msg)
+        if self.strategy.market == "USDTPERP":
+            self.pre_check_usdtperp(free_balance, raise_msg)
 
     def pre_check_usdtperp(self, free_balance, raise_msg) -> None:
         # futures_locked_percent = config.status["futures"]["locked_per"]
@@ -621,8 +627,7 @@ class BotHelper:
 
             if duration in config.base_durations and free_balance < config._initial_usdt_qty:
                 raise QuietExit(raise_msg)
-
-        if self.strategy.side == "SELL":
+        elif self.strategy.side == "SELL":
             if free_balance < config.initial_usdt_qty_short[duration]:
                 raise QuietExit(raise_msg)
 
@@ -630,7 +635,10 @@ class BotHelper:
                 raise QuietExit(raise_msg)
 
     async def trade_main(self, data_msg) -> None:
-        if "alert" in data_msg:
+        if config.btc_wavetrend["30m"] == "red":
+            log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
+            return
+        elif "alert" in data_msg:
             if "abort" in data_msg:
                 log(f"   ABORT {data_msg}", "bold orange1")
             elif "_bist" in data_msg:
@@ -645,10 +653,13 @@ class BotHelper:
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")
 
-        self.pre_check()  # TODO SLOW FIND ALTERNATIVE FASTER SOLUTION
+        self.pre_check()
         if "enter" not in self.strategy.position_alert_msg:
             return
         elif self.strategy.market.lower() == "btc" and self.strategy.is_sell():
             log("warning: ignore BTC pair, no need to sell.")
 
         await self._trade()
+
+    async def alert_main(self, data_msg) -> None:
+        pass
