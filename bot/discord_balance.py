@@ -14,6 +14,8 @@ from broker._utils.yaml import Yaml
 from bot import binance_balance, cfg, helper
 from bot.binance_balance import process_main
 
+logging.disable(logging.CRITICAL)
+logging.getLogger("requests").setLevel(logging.CRITICAL)
 logging.getLogger("apscheduler.executors.default").propagate = False
 
 
@@ -25,24 +27,24 @@ class Discord_Alpy:
             print(f" * bot_type={_type}")
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
+            self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
-            self.client = discord.Client()
             self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
             self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
-        except SystemExit:
-            pass
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
 
-            if cfg.discord_sent_message:
-                self.client.loop.run_until_complete(cfg.discord_sent_message.delete())
+            if cfg.discord_sent_msg:
+                self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
 
             self.client.loop.close()
             print("## program is ended")
+        except SystemExit:
+            pass
         except Exception as e:
             print_tb(e)
             breakpoint()  # DEBUG

@@ -7,28 +7,29 @@ from bot.client_helper import ClientHelper
 from bot.trade_async import BotHelper, Strategy
 from bot.user_setup import check_binance_obj
 
+client, balances = check_binance_obj()
+client_helper = ClientHelper(client)
+
 
 def get_balance(client_helper):
+    balances = client_helper.client.get_account()
     for balance in balances["balances"]:
         if balance["asset"] == "USDT":
             usdt_balance = balance["free"]
             break
 
-    margin_usdt = client_helper.get_balance_margin_usdt()
-    futures_usd = client_helper._get_futures_usdt()
-    futures_usd = client_helper._get_futures_usdt()
-    log(f" * futures={futures_usd} USDT | spot={client_helper._format(usdt_balance)} USD | margin={margin_usdt}")
+    # margin_usdt = client_helper.get_balance_margin_usdt()
+    futures_usdt = client_helper._get_futures_usdtt()
+    futures_usdt = client_helper._get_futures_usdtt()
+    log(f" * futures={futures_usdt} USDT | spot={client_helper._format(usdt_balance)} USD")
     client_helper.spot_balance()
 
 
-if __name__ == "__main__":
-    client, balances = check_binance_obj()
-    client_helper = ClientHelper(client)
+def main():
     get_balance(client_helper)
     bot = BotHelper(client_helper.client)
+    # balances = client.get_account()
     bot.strategy = Strategy()
-    balances = client.get_account()
-    balances = client_helper.client.get_account()
     for _balance in balances["balances"]:
         asset = _balance["asset"]
         if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in cfg.STABLE_COINS:
@@ -44,3 +45,7 @@ if __name__ == "__main__":
                 symbol=bot.strategy.symbol, price=str(limit_price), quantity=bot.asset_balance()
             )
             log(order)
+
+
+if __name__ == "__main__":
+    main()

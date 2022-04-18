@@ -2,13 +2,16 @@
 
 import asyncio
 import logging
+from pathlib import Path
+
 import quart.flask_patch  # noqa
 from broker._utils._log import log
-from broker._utils.tools import print_tb
+from broker._utils.tools import _date, print_tb
 from broker.errors import QuietExit
 from flask import abort, request
-from pathlib import Path
 from quart import Quart
+
+from bot.config import config
 
 logging.disable(logging.CRITICAL)
 logging.getLogger("requests").setLevel(logging.CRITICAL)
@@ -22,7 +25,7 @@ async def do_alert(msg):
         await app.bot_trade.alert_main(msg)
 
 
-async def do_trade(msg):
+async def trade(msg):
     """Trade based on the given arguments.
 
     asyncio.Lock() is required to protect following critical section trade
@@ -39,7 +42,7 @@ async def do_trade(msg):
 
 @app.before_serving
 async def startup():
-    """Run before serving quart server.
+    """Run right before serving the quart server.
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
@@ -60,8 +63,13 @@ async def startup():
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
     app.alertlock = asyncio.Lock()
-    print(" * s t a r t i n g", flush=True)
+    print(" * s t a r t i n g")
     # margin_usdt = app.client_helper.get_balance_margin_usdt()
+
+
+@app.after_serving
+async def _finally():
+    config.btc_wavetrend["30m"] = "none"
 
 
 @app.route("/")
@@ -71,26 +79,26 @@ async def notify():
 
 @app.route("/webhook", methods=["POST"])
 async def webhook():
-    """Receive webhook from tradingview alerts."""
+    """Receive webhook message from the tradingview alerts."""
     if request.method != "POST":
         abort(400)
 
     data_msg = request.get_data(as_text=True)
     if data_msg:
-        try:
-            if any(x in data_msg for x in ["enter", "alert"]):
-                await do_trade(data_msg.replace(":00Z", "").rstrip())
+        if data_msg in ["red", "green"]:  # "alert_wavetrend"
+            await do_alert(data_msg)
+            print(f"{data_msg} {_date(_type='hour')}", end="\r")
+        else:
+            try:
+                if any(x in data_msg for x in ["enter", "alert"]):
+                    await trade(data_msg.replace(":00Z", "").rstrip())
 
-            if "alert:wavetrend" in data_msg:
-                await do_alert(data_msg)
-
-            return "OK"
-        except (QuietExit, KeyError) as e:
-            if e:
-                log(str(e), "bold")
-        except Exception as e:
-            print_tb(e)
-
+                return "OK"
+            except (QuietExit, KeyError) as e:
+                if e:
+                    log(str(e), "bold")
+            except Exception as e:
+                print_tb(e)
         return "", 200
     else:
         abort(403)

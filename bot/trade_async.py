@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
+import time
+from contextlib import suppress
+
 from broker._utils._async import _sleep
 from broker._utils._log import br, log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
-from contextlib import suppress
 from filelock import FileLock
 from pymongo import MongoClient
 
-from bot import helper
+from bot import cfg, helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.client_helper import DiscordClient
 from bot.config import config
@@ -24,7 +26,7 @@ class Strategy:
         self.symbol: str = ""
         self.market: str = ""
         self.time_duration: str = ""
-        self.size: int = 0
+        self.size: float = 0
         self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
             log(f" * {_date()} ", end="")
@@ -36,7 +38,7 @@ class Strategy:
                 log(",", "bold magenta", end="")
 
         try:
-            self.parse_data_msg(data_msg)
+            self.parse_msg(data_msg)
         except QuietExit as e:
             raise e
         except Exception:
@@ -46,7 +48,7 @@ class Strategy:
             log(f" ABORT {self.symbol}", "bold orange1", is_write=False)
             raise Exception
 
-    def parse_data_msg(self, data_msg) -> None:
+    def parse_msg(self, data_msg) -> None:
         self.chunks = data_msg.split(",")
         self.side_original = self.side = self.chunks[1].upper()
         self.symbol = self.chunks[0]
@@ -62,11 +64,11 @@ class Strategy:
                 self.market = "USDT"  # spot
                 self.exchange = helper.exchange.spot_usdt
 
-            self.asset = self.symbol[: -len(self.market)]  # removes USDT* at the end
+            self.asset = self.symbol[: -len(self.market)]  # removes "USDT" at the end
             self.symbol = f"{self.asset}/USDT"
 
         if self.asset in config.SPOT_IGNORE_LIST:
-            raise QuietExit("ignore_list PASS")
+            raise QuietExit("ignore list PASS")
 
         self.position_alert_msg = self.chunks[2]
         msg_list = self.position_alert_msg.rsplit("_", 1)
@@ -94,8 +96,8 @@ class BotHelper:
         self.mongoDB = Mongo(mc, mc["trader_bot"]["order"])
         self.unix_timestamp_ms: int = 0
         self.current_bar_index_local: int = 0
-        self.strategy = Strategy()
         self.bot_async = BotHelperAsync()
+        self.strategy = Strategy()
         if discord_client:
             self.discord_client: "DiscordClient" = discord_client
 
@@ -276,10 +278,9 @@ class BotHelper:
                 if float(_quantity) > 0:
                     return await self._order(_quantity)
                 else:
+                    log("E: Quantity less than zero, nothing to do.")
                     if self.strategy.size >= 0.5 and self.strategy.size < 1:
                         self.strategy.size = 1
-
-                    log("E: Quantity less than zero, nothing to do.")
             else:
                 if self.strategy.size >= 0.5 and self.strategy.size < 1:
                     log("==> re-opening sell order with new quantity=1")
@@ -395,10 +396,9 @@ class BotHelper:
                         raise e
 
                 log(f"==> re-opening {side} order | ", end="")
-                if self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15:
-                    raise QuietExit("not enough balance") from None
-
-                if self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003:
+                if (self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15) or (
+                    self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003
+                ):
                     raise QuietExit("not enough balance") from None
 
                 if float(_quantity) > 0:
@@ -427,14 +427,14 @@ class BotHelper:
         else:
             return float(format(initial_amount, ".4f"))
 
-    def futues_size_check(self, last_price, size=5.0):
+    def futues_size_check(self, last_price, size=5.0) -> None:
         """Handle order's notional must be no smaller than 5 USDT."""
         log(f"p={last_price}", "bold")
         if self.strategy.size >= 1.0 and self.strategy.size * last_price < size:
             self.strategy.size += 1
             log(f"==> size_check: last_price={last_price} size={self.strategy.size}", "bold")
 
-    async def calculate_futures_size(self):
+    async def calculate_futures_size(self) -> None:
         self.strategy.size = 0
         output = await self.symbol_price(self.strategy.symbol, "future")
         last_price = output["last"]
@@ -552,12 +552,15 @@ class BotHelper:
 
     async def _fetch_balance(self):
         for _ in range(5):
-            with suppress(Exception):
+            try:
                 return await self.strategy.exchange.fetch_balance()
+            except:
+                time.sleep(1)
 
         raise Exception("timestamp error")
 
     async def _trade(self):
+        self.pre_check()
         if (self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15) or (
             self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003
         ):
@@ -571,11 +574,10 @@ class BotHelper:
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
                     is_open = True
+                    log("PASS", "bold")
                     break
 
-        if is_open:
-            log("PASS", "bold")
-        else:
+        if not is_open:
             try:
                 await self.trade_async()
                 with FileLock(config.env[self.strategy.market.lower()].status.fp_lock, timeout=5):
@@ -605,15 +607,16 @@ class BotHelper:
         Faster to read from status.yaml file. Positions counts are read from
         the yaml file that is updated from binance_balance.py.
         """
-        config.reload()  # TODO COULD SLOW learn its run-time
+        config._reload()  # TODO could be *SLOW* learn its run-time
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
-        raise_msg = f"not enough free usdt({free_balance}),side={self.strategy.side}"
         if self.strategy.market.lower() == "usdt" and free_balance < 15.0:
-            raise QuietExit(raise_msg)
+            raise QuietExit(f"not enough free usdt([cyan]{round(free_balance)}$[/cyan])")
 
         if self.strategy.market == "USDTPERP":
-            self.pre_check_usdtperp(free_balance, raise_msg)
+            self.pre_check_usdtperp(
+                free_balance, f"not enough free usdt([cyan]{round(free_balance)}$[cyan]),side={self.strategy.side}"
+            )
 
     def pre_check_usdtperp(self, free_balance, raise_msg) -> None:
         # futures_locked_percent = config.status["futures"]["locked_per"]
@@ -635,10 +638,7 @@ class BotHelper:
                 raise QuietExit(raise_msg)
 
     async def trade_main(self, data_msg) -> None:
-        if config.btc_wavetrend["30m"] == "red":
-            log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
-            return
-        elif "alert" in data_msg:
+        if "alert" in data_msg:
             if "abort" in data_msg:
                 log(f"   ABORT {data_msg}", "bold orange1")
             elif "_bist" in data_msg:
@@ -650,16 +650,19 @@ class BotHelper:
             return
 
         self.strategy = Strategy(data_msg)
+        if self.strategy.market == "USDT" and config.btc_wavetrend["30m"] == "red":
+            log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
+            return
+
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")
 
-        self.pre_check()
         if "enter" not in self.strategy.position_alert_msg:
             return
         elif self.strategy.market.lower() == "btc" and self.strategy.is_sell():
-            log("warning: ignore BTC pair, no need to sell.")
+            log("warning: ignore BTC pair, no need to sell")
 
         await self._trade()
 
     async def alert_main(self, data_msg) -> None:
-        pass
+        config.btc_wavetrend["30m"] = data_msg

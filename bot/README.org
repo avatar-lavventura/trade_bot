@@ -75,6 +75,11 @@ Request new SSLcertificate
 [SAVE]
 #+end_src,
 
+*** update
+#+begin_src bash
+./update.sh && ./filter.sh
+#+end_src
+
 ** nginx full setup instructions
 
 - [[http://IP/webhook][IP_example]]
@@ -85,7 +90,6 @@ https://askubuntu.com/a/1046217/660555
 - https://nginxproxymanager.com/setup/
 
 *** public
-
 #+begin_src bash
 curl https://alpybot.duckdns.org
 curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
@@ -93,15 +97,13 @@ curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.94
 #+end_src
 
 *** localhost
-
 #+begin_src bash
 curl -v https://alpybot.duckdns.org
 curl -v 127.0.0.1:5000
 curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
-curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
 #+end_src
 
--------------------
+---------------------
 
 ** Tradingview alerts some links
 
@@ -142,7 +144,6 @@ that will do it for you.
 - https://askubuntu.com/a/254846/660555
 
 https://askubuntu.com/a/854880/660555
-
 
 #+begin_src bash
 sudo apt install systemd-timesyncd

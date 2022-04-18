@@ -86,9 +86,24 @@ class BotHelperSpotAsync(BotHelperAsync):
                 del order["origQty"]
                 del order["executedQty"]
 
+            log(f"## CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
 
-    async def spot_limit(self, asset, asset_balance, sum_bal, is_limit=True):
+    async def add_to_position(self, asset, asset_balance, asset_price, sum_bal, limit_price) -> None:
+        new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio
+        if new_order_size * asset_price < 10:
+            # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
+            new_order_size = asset_balance * 1.05
+
+        log(f"new_order_size={new_order_size}", "bold")
+        per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_bal
+        log(f"==> {format(float(per), '.2f')}% => {format(float(per), '.2f')}% of the total asset value")
+        order = await self.spot_order(new_order_size, f"{asset}/{cfg.TYPE.upper()}", "BUY")
+        if order:
+            log(order["info"])
+            await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
+
+    async def spot_limit(self, asset, asset_balance, sum_bal, is_limit=True) -> float:
         """Limit order for the SPOT market."""
         try:
             since = config.get_spot_timestamp(asset)
@@ -125,9 +140,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             timestamp_list = sorted(ordering, reverse=True)
             quantity, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, is_return=True)
 
-        if quantity == 0:
-            if asset in config.SPOT_IGNORE_LIST:
-                return 0
+        if quantity == 0 and asset in config.SPOT_IGNORE_LIST:
+            return 0
 
             raise Exception(f"quantity is zero asset={asset}")
 
@@ -164,16 +178,30 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ([yellow]{per}%[/yellow]) ", end="")
 
         cfg.locked_balance += float(per)
-        msg = (
-            f"**{asset}** {entry_price} p={asset_price} `{format(profit, '.1f')}` "
-            f"({format(per_change, '.2f')}%) `{round(_sum)}$`\n"
-        )
+        if cfg.TYPE.lower() == "usdt":
+            msg = (
+                f"**{asset}** {entry_price} p={asset_price} `{format(profit, '.1f')}` "
+                f"({format(per_change, '.2f')}%) `{round(_sum)}$`\n"
+            )
+        else:  # TODO: improve
+            msg = (
+                f"**{asset}** {entry_price} p={asset_price} `{format(profit * 1000, '.5')}` "
+                f"({format(per_change, '.2f')}%) | {per}% \n"
+            )
+
         if self.channel:
+            if cfg.discord_message_full == ".\n":
+                cfg.discord_message_full = f"BTCUSDT=`{int(cfg.BTCUSDT_PRICE)}` wt=[{config.btc_wavetrend['30m']}]\n"
+
             cfg.discord_message_full += msg
-            if _sum > config.discord_msg_above_usdt and profit < 0:
+
+            if cfg.TYPE.lower() == "usdt" and _sum > config.discord_msg_above_usdt and profit < 0:
+                cfg.discord_message += msg
+            elif cfg.TYPE.lower() == "btc" and profit < 0:  # TODO: improve
                 cfg.discord_message += msg
 
         # self.is_cut_loss(asset, profit, asset_balance)
+        config.reload_wavetrend()
         if asset in config.SPOT_IGNORE_LIST:
             log()
             return profit
@@ -185,19 +213,12 @@ class BotHelperSpotAsync(BotHelperAsync):
             not await self.check_position_to_pass(asset, _sum, is_limit, per)
             and per_change <= -2
             and per_change <= config.env[cfg.TYPE].percent_change_to_add
+            and config.btc_wavetrend["30m"] == "green"  # wait till wt for btc is green in 30m
         ):
-            new_order_size = asset_balance * config.env[cfg.TYPE].multiply_ratio
-            if new_order_size * asset_price < 10:
-                # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
-                new_order_size = asset_balance * 1.05
+            await self.add_to_position(asset, asset_balance, asset_price, sum_bal, limit_price)
 
-            log(f"new_order_size={new_order_size}", "bold")
-            per = (100.0 * (asset_balance + new_order_size) * asset_price) / sum_bal
-            log(f"==> {format(float(per), '.2f')}% => {format(float(per), '.2f')}% of the total asset value")
-            order = await self.spot_order(new_order_size, f"{asset}/{cfg.TYPE.upper()}", "BUY")
-            if order:
-                log(order["info"])
-                await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
+        # if config.btc_wavetrend["30m"] == "red":
+        #     log("PASS: btc_wavetrend is red nothing to do", "red")
 
         await self.is_limit_order_exist(asset, limit_price)
         return profit

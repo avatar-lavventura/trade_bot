@@ -10,7 +10,7 @@ from bot import cfg, helper
 from bot.bot_helper_async import TP
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
-from bot.spot_lib import cancel_check_orders, new_order, update_spot_timestamp
+from bot.spot_lib import cancel_check_orders, new_order, update_spot_timestamps
 
 bot_async = BotHelperSpotAsync()
 
@@ -57,7 +57,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms, chann
                 end="",
             )
             if float(entry_price) < 0 or float(limit_price) < 0:
-                update_spot_timestamp(unix_timestamp_ms)
+                update_spot_timestamps(unix_timestamp_ms)
                 return
 
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))

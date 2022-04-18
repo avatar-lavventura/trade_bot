@@ -119,9 +119,8 @@ def buy(_symbol):
     # _quantity = round(amount_to_buy, 2)
     # print("quantity=" + str(_quantity))
     order = "failed"
-    if amount_str == 0.0 or amount_str == "0.00" or amount_str == "0.0":
-        print("E: Account has insufficient balance for requested action")
-        raise
+    if amount_str in (0.0, "0.00", "0.0"):
+        raise Exception("E: Account has insufficient balance for requested action")
 
     try:
         order = client.order_limit_buy(symbol=_symbol, price=str(_val_price), quantity=amount_str)

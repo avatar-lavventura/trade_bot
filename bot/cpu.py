@@ -10,7 +10,7 @@ _remove(_log.ll.LOG_FILENAME)
 
 
 def cpu_percent():
-    """Check cpu percent changes.
+    """Check CPU percent change.
 
     __ https://stackoverflow.com/a/2468983/2402577
     """

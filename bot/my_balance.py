@@ -119,4 +119,4 @@ if __name__ == "__main__":
     except Exception as e:
         print_tb(e)
     finally:
-        log("Program finished.", "bold green")
+        log("Program finished", "bold green")

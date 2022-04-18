@@ -1,6 +1,7 @@
 // @author LazyBear
 //@version=4
 study(title="WaveTrend [LazyBear]", shorttitle="WT_LB", overlay=false)
+// 30m @BTCUSDT
 // __ https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT/
 n1 = 10  //Channel Length
 n2 = 21  //Average Length
@@ -26,10 +27,10 @@ plot(wt2, color=color.red)
 plot(wt1-wt2, color=color.new(color.blue, 70), style=plot.style_area)
 plot(cross(wt1, wt2) ? wt2 : na, color=color.black , style=plot.style_circles, linewidth=3)
 plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 > wt1 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
-plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth = 2)
+plot(cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime) , style=plot.style_circles, linewidth=2)
 
-alertcondition(condition=wt1 >= wt2, title="green", message="green")
-alertcondition(condition=wt2 > wt1, title="red", message="red")
+alertcondition(condition=wt1 >= wt2, title="Green_WaveTrend", message="green")
+alertcondition(condition=wt2 > wt1, title="Red_WaveTrend", message="red")
 
 // is_div_long  = wt1 > wt2 and wt1 <= 0
 // is_div_short = wt1 < wt2 and wt2 >= 0

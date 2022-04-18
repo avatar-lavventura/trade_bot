@@ -16,8 +16,7 @@ if [ $num -ge 1 ]; then
     exit
 fi
 
-while true
-do
+while true; do
     clear -x
     hypercorn app_async:app -b 0.0.0.0:5000  # --reload
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"

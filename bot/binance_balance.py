@@ -14,7 +14,7 @@ from bot import cfg, helper
 from bot.binance_futures import future_stats, futures_bal, process_future_positions
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
-from bot.spot_lib import update_spot_timestamp
+from bot.spot_lib import update_spot_timestamps
 
 RUN_FUTURES = False
 bot_async = BotHelperSpotAsync()
@@ -30,7 +30,7 @@ async def alert():
 
 
 async def process(unix_timestamp_ms):
-    update_spot_timestamp(unix_timestamp_ms)  # first update spot timestamps
+    update_spot_timestamps(unix_timestamp_ms)
     *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
     if usdt_bal > 0.125 and not helper.is_start:
         log()
@@ -52,13 +52,14 @@ async def process(unix_timestamp_ms):
     if RUN_FUTURES:
         positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms, bot_async.channel)
-        if not is_printed and not helper.is_start and config.status_usdt["count"] == 0:
+
+        if not is_printed and not helper.is_start and config.status_usdt["count"] == 0 and not cfg.locked_balance > 10:
             delete_multiple_lines(2)
 
         if not is_printed or helper.is_start:
             future_stats(usdt_bal, unix_timestamp_ms)
             helper.is_start = False
-    elif helper.is_start and config.status_usdt["count"] == 0:
+    elif helper.is_start and config.status_usdt["count"] == 0 and not cfg.locked_balance > 10:
         delete_multiple_lines(1)
 
     if cfg.TYPE == "usdt":
@@ -72,7 +73,7 @@ async def process_main(obj):
     """
     bot_async.channel = obj.channel
     bot_async.channel_alerts = obj.channel_alerts
-    config.reload()
+    config._reload()
     try:
         if not RUN_FUTURES:
             unix_timestamp_ms = helper.exchange.get_spot_timestamp()
@@ -87,7 +88,7 @@ async def process_main(obj):
         if "quantity is zero" in str(e):
             log(f"#> {e} [green]don't worry")
         elif "Timestamp for this request is outside of the recvWindow" in str(e):
-            log("E: Timestamp for this request is outside of the recvWindow")
+            log("warning: Timestamp for this request is outside of the recvWindow")
         else:
             print_tb(e)
             await _sleep(30)
@@ -103,7 +104,7 @@ async def main():
             break
         except Exception as e:
             if "Timestamp for this request is outside of the recvWindow" in str(e):
-                log(f"E: {e}")
+                log(f"warning: {e}")
             else:
                 print_tb(e)
 

@@ -52,12 +52,11 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
             await create_market_order(symbol, new_amount, side)
         else:
             raise QuietExit(f"warning: not enough free USDT, amount={new_amount} margin={new_amount_margin}")
-    else:
-        if _per < 100:
-            log(f"warning: Total locked amount is {_per}%", end="")
+    elif _per < 100:
+        log(f"warning: Total locked amount is {_per}%", end="")
 
 
-def update_spot_timestamp(unix_timestamp_ms: int):
+def update_spot_timestamps(unix_timestamp_ms: int) -> None:
     if not isinstance(config.env[cfg.TYPE].status["timestamp"], int):
         config.env[cfg.TYPE].status["timestamp"] = 0
 
