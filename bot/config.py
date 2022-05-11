@@ -28,6 +28,7 @@ class Config:
         self.env = {}  # type: Dict[str, Env]
         self.env["usdt"] = Env()
         self.env["btc"] = Env()
+        self.env["busd"] = Env()
         self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
@@ -46,11 +47,20 @@ class Config:
         self.env["usdt"].stats = self.yaml_wrapper(self.base_dir / "stats_usdt.yaml")
         self.env["btc"].stats = self.yaml_wrapper(self.base_dir / "stats_btc.yaml")
         self.env["btc"].hit = self.yaml_wrapper(self.base_dir / "hit_btc.yaml")["root"]
+        self.env["busd"].stats = self.yaml_wrapper(self.base_dir / "stats_busd.yaml")
+        self.env["busd"].hit = self.yaml_wrapper(self.base_dir / "hit_busd.yaml")["root"]
 
     def get_spot_timestamp(self, asset):
         key = f"{cfg.TYPE.lower()}_timestamp"
         if self.timestamp[key][asset] == {}:
             self.timestamp[key][asset] = config.env[cfg.TYPE].status["timestamp"]
+
+        return int(self.timestamp[key][asset])
+
+    def get_spot_timestamp_busd(self, asset):
+        key = "busd_timestamp"
+        if self.timestamp[key][asset] == {}:
+            self.timestamp[key][asset] = config.env["busd"].status["timestamp"]
 
         return int(self.timestamp[key][asset])
 
@@ -99,11 +109,19 @@ class Config:
         self.env["usdt"].risk = self.yaml_wrapper(self.base_dir / "risk_usdt.yaml")["root"]
         self.env["usdt"].percent_change_to_add = -abs(self.cfg["root"]["usdt"]["percent_change_to_add"]) + 0.01
         self.env["usdt"].multiply_ratio = self.cfg["root"]["usdt"]["multiply_ratio"]
+        self.env["usdt"].positions_alert = self.yaml_wrapper(self.base_dir / "positions_alert_usdt.yaml")
+
+        self.env["busd"].status = self.yaml_wrapper(self.base_dir / "status_busd.yaml")
+        self.env["busd"].risk = self.yaml_wrapper(self.base_dir / "risk_busd.yaml")["root"]
+        self.env["busd"].percent_change_to_add = -abs(self.cfg["root"]["busd"]["percent_change_to_add"]) + 0.01
+        self.env["busd"].multiply_ratio = self.cfg["root"]["busd"]["multiply_ratio"]
+        self.env["busd"].positions_alert = self.yaml_wrapper(self.base_dir / "positions_alert_busd.yaml")
 
         self.env["btc"].status = self.yaml_wrapper(self.base_dir / "status_btc.yaml")
         self.env["btc"].risk = self.yaml_wrapper(self.base_dir / "risk_btc.yaml")["root"]
         self.env["btc"].percent_change_to_add = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
         self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
+        self.env["btc"].positions_alert = self.yaml_wrapper(self.base_dir / "positions_alert_btc")
 
         self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
         self.status_usdt = self.yaml_wrapper(self.base_dir / "usdt_pos_count.yaml")

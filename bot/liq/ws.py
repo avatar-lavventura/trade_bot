@@ -31,7 +31,7 @@ class Liq(LiqBase):
 
     def log_result(self):
         amount = int(self.order_quantity * self.average_price)
-        if amount > 1000:
+        if amount > 2000:
             item = {
                 "symbol": self.symbol,
                 "side": self.side,

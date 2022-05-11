@@ -10,7 +10,7 @@ from broker.errors import QuietExit
 from filelock import FileLock
 from pymongo import MongoClient
 
-from bot import cfg, helper
+from bot import helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.client_helper import DiscordClient
 from bot.config import config
@@ -63,9 +63,13 @@ class Strategy:
             elif "USDT" in self.symbol:
                 self.market = "USDT"  # spot
                 self.exchange = helper.exchange.spot_usdt
-
-            self.asset = self.symbol[: -len(self.market)]  # removes "USDT" at the end
-            self.symbol = f"{self.asset}/USDT"
+                self.asset = self.symbol[: -len(self.market)]  # removes "USDT" at the end
+                self.symbol = f"{self.asset}/USDT"
+            elif "BUSD" in self.symbol:
+                self.market = "BUSD"  # spot
+                self.exchange = helper.exchange.spot_usdt
+                self.asset = self.symbol[: -len(self.market)]  # removes "BUSD" at the end
+                self.symbol = f"{self.asset}/BUSD"
 
         if self.asset in config.SPOT_IGNORE_LIST:
             raise QuietExit("ignore list PASS")
@@ -176,7 +180,7 @@ class BotHelper:
                 limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal)
 
             quantity = abs(float(amount))
-            log(f"| limit_price={limit_price} | quantity={quantity}", "bold")
+            log(f"| limit_price={limit_price} | qty={quantity}", "bold")
             await create_limit_order(self.strategy.symbol, quantity, limit_price, self.strategy.side)
         except TP_calculate as e:
             print_tb(e)
@@ -229,12 +233,12 @@ class BotHelper:
         entry_price = _sum / contracts
         entry_price = f"{entry_price:.{decimal}f}"
         limit_price = f"{float(entry_price) * TP.get_profit_amount():.{decimal}f}"
-        log(f"quantity={asset_balance} | entry={entry_price} | limit={limit_price}", "bold")
+        log(f"qty={asset_balance} | entry={entry_price} | limit={limit_price}", "bold")
         return limit_price, entry_price
 
     async def spot_order_limit(self):
         try:
-            log("==> attempting limit order for spot ", end="")
+            log("==> attempting limit order in spot ", end="")
             limit_price, *_ = await self.get_spot_entry()
             symbol = self.strategy.symbol.replace("/", "")
             open_orders = await self.strategy.exchange.fetch_open_orders(symbol=symbol)
@@ -258,8 +262,10 @@ class BotHelper:
 
             log(f"order={order}", "bold")
         except QuietExit as e:
+            breakpoint()  # DEBUG
             raise e
         except Exception as e:
+            breakpoint()  # DEBUG
             if "PRICE_FILTER" not in str(e):
                 # position may close right away, not a BinanceAPIException error
                 print_tb(e)
@@ -271,10 +277,10 @@ class BotHelper:
             await create_market_order(self.strategy.symbol, quantity, self.strategy.side)
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e):
-                log(f"E: {e} quantity={quantity}")
+                log(f"E: {e} qty={quantity}")
                 decimal = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
-                log(f"==> re-opening sell order with new quantity={_quantity}")
+                log(f"==> re-opening sell order with new qty={_quantity}")
                 if float(_quantity) > 0:
                     return await self._order(_quantity)
                 else:
@@ -283,7 +289,7 @@ class BotHelper:
                         self.strategy.size = 1
             else:
                 if self.strategy.size >= 0.5 and self.strategy.size < 1:
-                    log("==> re-opening sell order with new quantity=1")
+                    log("==> re-opening sell order with new qty=1")
                     self.strategy.size = 1
                     return await self._order(self.strategy.size)
 
@@ -323,7 +329,7 @@ class BotHelper:
                 await _sleep(2)
 
         try:
-            log("==> opening a limit order: ", end="")
+            log("#> opening limit order: ", end="")
             log(f"entry_price={entry_price} ", "bold", end="")
             decimal = self.get_decimal_count(entry_price)
             await self._limit(amount, entry_price, isolated_wallet, decimal)
@@ -346,7 +352,7 @@ class BotHelper:
             raise e
 
     async def spot_order(self, quantity: float, symbol=None, side=None):
-        log(f"order_quantity={quantity}", "bold")
+        log(f"order_qty={quantity}", "bold")
         if symbol:
             self.strategy.symbol = symbol
         else:
@@ -372,6 +378,8 @@ class BotHelper:
                 del order["type"]
                 del order["origQty"]
                 del order["executedQty"]
+                del order["clientOrderId"]
+                del order["orderId"]
 
             if self.strategy.asset in config.env[self.strategy.market.lower()].hit:
                 config.env[self.strategy.market.lower()].hit[self.strategy.asset] += 1
@@ -466,11 +474,11 @@ class BotHelper:
             self.strategy.size = self.get_initial_amount(initial_amount, "BTC")
             decimal = self.get_decimal_count(self.strategy.size)
             self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
-        elif self.strategy.market == "USDT":
+        elif self.strategy.market in ["USDT", "BUSD"]:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             last_price = output["last"]
             initial_amount = config.cfg["root"]["usdt"]["initial"] / last_price
-            self.strategy.size = self.get_initial_amount(initial_amount, "USDT")
+            self.strategy.size = self.get_initial_amount(initial_amount, self.strategy.market)
             decimal = self.get_decimal_count(self.strategy.size)
             self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
             if float(self.strategy.size) == 0:
@@ -486,11 +494,9 @@ class BotHelper:
             config.env[self.strategy.market.lower()].stats[current_date] += 1
         else:
             config.env[self.strategy.market.lower()].stats[current_date] = 1
-            if current_date not in config.env["usdt"].stats:
-                config.env["usdt"].stats[current_date] = 0
-
-            if current_date not in config.env["btc"].stats:
-                config.env["btc"].stats[current_date] = 0
+            for pair in ["usdt", "btc", "busd"]:
+                if current_date not in config.env[pair].stats:
+                    config.env[pair].stats[current_date] = 0
 
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()
@@ -569,7 +575,7 @@ class BotHelper:
         is_open = False
         if self.strategy.market == "USDTPERP":
             is_open = await self.is_usdt_open(self.strategy.symbol)
-        elif self.strategy.market in ["BTC", "USDT"]:
+        elif self.strategy.market.lower() in ["btc", "usdt"]:
             balances = await self._fetch_balance()
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
@@ -590,6 +596,11 @@ class BotHelper:
                         config.status_btc["count"] += 1
             except Exception as e:
                 print_tb(e)
+        else:  # TODO: binance_balance should buy it if its in 5 min range and remove it from the yaml
+            self.env[self.strategy.market.lower()].positions_alert[
+                self.strategy.asset
+            ] = self.strategy.unix_timestamp_ms
+            log("warning: already open position")
 
     async def trade(self) -> None:
         try:

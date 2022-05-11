@@ -26,3 +26,7 @@ guncellendi.  0.50% kar gozukurken maliyet dustugu icin o anki fiyatta kar
 gostergesi 1.0% oldu, daha ucuza satis emri verme durumu olabilir emirler guncellenirse
 """
 IGNORE_SOLD_QUANTITY = True
+
+_IGNORE_SOLD_QUANTITY = {}
+_IGNORE_SOLD_QUANTITY["PNT/USDT"] = False
+_IGNORE_SOLD_QUANTITY["IOTA/BTC"] = False

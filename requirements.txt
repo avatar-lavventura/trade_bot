@@ -15,7 +15,7 @@ black==22.3.0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==1.81.40
+ccxt==1.82.59
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -41,7 +41,7 @@ greenlet==1.1.1
 h11==0.12.0
 h2==4.0.0
 hpack==4.0.0
-Hypercorn==0.11.2
+hypercorn==0.13.2
 hyperframe==6.0.1
 identify==2.2.13
 idna==3.2
@@ -92,7 +92,7 @@ python-lsp-jsonrpc==1.0.0
 python-lsp-server==1.4.1
 pytz==2021.1
 PyYAML==5.4.1
-Quart==0.17.0
+quart==0.17.0
 regex==2021.8.21
 requests==2.26.0
 rich==12.2.0

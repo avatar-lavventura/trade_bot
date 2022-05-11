@@ -1,8 +1,13 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO lower than 5m candle maybe cut of the trade,check ?/
+#+begin_src python
+response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
+#+end_src
 ** TODO ilk 5% dususte maliyet kadar ekleme yap diger eklemeler:
-  %5 zarar varsa ve 45 dakikalikdan sinyal gelirse ekleme yap
+  %5 zarar varsa ve 45 dakikalikdan + 2 hr sinyal gelirse ekleme yap.
+  10% default zararda ekleme yap
 ** TODO 4hr turuncu or magenta open positions and lock for that bar
 ** TODO ignore sell positions to affect ortalama
 ** TODO consider closing each trade if there is 1% loss (~12$)
@@ -13,5 +18,4 @@
 ** TODO ignore pairs >30% rise during the day in 1h or 1day?
 ** TODO before order check is the give asset is not in blocked list
 ** TODO buy BNB when its < 1$ worth
-** TODO add color to discord messages
 ** TODO appy take_profit for both btc and USDT

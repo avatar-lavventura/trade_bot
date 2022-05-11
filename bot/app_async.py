@@ -29,10 +29,10 @@ async def trade(msg):
     """Trade based on the given arguments.
 
     asyncio.Lock() is required to protect following critical section trade
-    orders may take action based on previously received alert's order. While one
-    coroutine is inside app.bot_trade.trade_main(), making the `aiohttp` call,
-    and another waits on app.lock. Any coroutine that calls into get_stuff will
-    have to wait for the app.lock.
+    orders may take action based on previously received alert's order.  While
+    one coroutine is inside app.bot_trade.trade_main(), making the `aiohttp`
+    call, and another waits on app.lock. Any coroutine that calls into
+    get_stuff will have to wait for the app.lock.
 
     __ https://stackoverflow.com/a/25799871/2402577
     """
@@ -42,7 +42,7 @@ async def trade(msg):
 
 @app.before_serving
 async def startup():
-    """Run right before serving the quart server.
+    """Launch right before serving the quart server.
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
@@ -69,7 +69,8 @@ async def startup():
 
 @app.after_serving
 async def _finally():
-    config.btc_wavetrend["30m"] = "none"
+    for key in config.btc_wavetrend:
+        config.btc_wavetrend[key] = "none"
 
 
 @app.route("/")
@@ -89,6 +90,11 @@ async def webhook():
             await do_alert(data_msg)
             print(f"{data_msg} {_date(_type='hour')}", end="\r")
         else:
+            for asset in ["BTC", "USDT", "BUSD"]:
+                if asset in data_msg:
+                    if config.cfg["root"][asset.lower()]["status"] == "off":
+                        return "OK"
+
             try:
                 if any(x in data_msg for x in ["enter", "alert"]):
                     await trade(data_msg.replace(":00Z", "").rstrip())

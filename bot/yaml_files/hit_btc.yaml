@@ -1,7 +1,7 @@
 root:
     ZIL: 10
     HIGH: 11
-    RARE: 6
+    RARE: 7
     ARK: 5
     REQ: 3
     PHB: 3
@@ -54,7 +54,7 @@ root:
     CHR: 8
     PHA: 9
     HARD: 5
-    STEEM: 7
+    STEEM: 8
     BLZ: 4
     PNT: 4
     MDX: 5
@@ -85,11 +85,11 @@ root:
     AST: 2
     XNO: 3
     FLUX: 5
-    KNC: 7
+    KNC: 8
     LTO: 6
     LOKA: 20
     GMT: 15
-    DEGO: 4
+    DEGO: 5
     COCOS: 2
     ASR: 7
     ACA: 8
@@ -120,7 +120,7 @@ root:
     DIA: 2
     ALICE: 3
     BICO: 4
-    KDA: 2
+    KDA: 3
     CRV: 4
     AUDIO: 3
     ENJ: 4
@@ -129,7 +129,7 @@ root:
     INJ: 5
     NEAR: 4
     GTC: 1
-    AR: 2
+    AR: 3
     SNM: 3
     BAND: 1
     UMA: 3
@@ -137,14 +137,14 @@ root:
     TRIBE: 2
     NXS: 1
     ATM: 3
-    PROM: 3
+    PROM: 4
     GRS: 3
     BAL: 1
-    CVC: 2
+    CVC: 3
     LSK: 1
-    FLM: 3
+    FLM: 6
     CTSI: 2
-    FET: 3
+    FET: 4
     STRAX: 1
     GAS: 4
     AERGO: 1
@@ -161,14 +161,19 @@ root:
     CELO: 1
     EZ: 3
     KAVA: 1
-    ILV: 2
+    ILV: 3
     ROSE: 2
-    FTT: 1
+    FTT: 2
     DYDX: 1
     NULS: 2
     C98: 1
     SNX: 1
     WRX: 1
     ALGO: 1
-    ENS: 1
+    ENS: 2
     NEBL: 2
+    QNT: 2
+    RNDR: 1
+    DOGE: 2
+    FTM: 1
+    NEXO: 1

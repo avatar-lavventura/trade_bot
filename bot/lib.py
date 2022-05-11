@@ -26,7 +26,6 @@ class LiqBase:
             "ICPUSDT",
             "KSMUSDT",
             "LTCUSDT",
-            "LUNAUSDT",
             "MANAUSDT",
             "SOLUSDT",
             "XLMUSDT",
