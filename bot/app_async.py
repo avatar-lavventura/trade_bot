@@ -91,9 +91,8 @@ async def webhook():
             print(f"{data_msg} {_date(_type='hour')}", end="\r")
         else:
             for asset in ["BTC", "USDT", "BUSD"]:
-                if asset in data_msg:
-                    if config.cfg["root"][asset.lower()]["status"] == "off":
-                        return "OK"
+                if asset in data_msg and config.cfg["root"][asset.lower()]["status"] == "off":
+                    return "OK"
 
             try:
                 if any(x in data_msg for x in ["enter", "alert"]):

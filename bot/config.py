@@ -51,7 +51,7 @@ class Config:
         self.env["busd"].hit = self.yaml_wrapper(self.base_dir / "hit_busd.yaml")["root"]
 
     def get_spot_timestamp(self, asset):
-        key = f"{cfg.TYPE.lower()}_timestamp"
+        key = f"{cfg.TYPE}_timestamp"
         if self.timestamp[key][asset] == {}:
             self.timestamp[key][asset] = config.env[cfg.TYPE].status["timestamp"]
 
@@ -95,11 +95,13 @@ class Config:
     def _reload(self) -> None:
         self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
         self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
+        self.watchlist = self.yaml_wrapper(self.base_dir / "watchlist.yaml", auto_dump=False)
         self.cfg_usdtperp = self.yaml_wrapper(self.base_dir / "config_usdtperp.yaml")
         self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
         self.reload_wavetrend()
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
+        self.WATCHLIST = self.watchlist["watchlist"]
         self._initial_usdt_qty = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["long"]["base"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]

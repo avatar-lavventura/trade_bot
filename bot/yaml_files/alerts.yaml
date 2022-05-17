@@ -5,9 +5,3 @@ alerts:
   a2:
     pair: ORNUSDT
     price: 3
-  a3:
-    pair: AGLDBTC
-    price: 0.000028
-  a4:
-    pair: IOTABTC
-    price: 0.000014

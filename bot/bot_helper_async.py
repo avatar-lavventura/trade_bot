@@ -28,7 +28,7 @@ class BotHelperAsync:
 
     def update_timestamp_status(self) -> None:
         del_list = []
-        key = f"{cfg.TYPE.lower()}_timestamp"
+        key = f"{cfg.TYPE}_timestamp"
         for asset_timestamp in config.timestamp[key]:
             if asset_timestamp != "base" and asset_timestamp not in config.asset_list:
                 ts = int(config.timestamp[key][asset_timestamp])
@@ -42,7 +42,7 @@ class BotHelperAsync:
             if asset not in config.SPOT_IGNORE_LIST:
                 del config.timestamp[key][asset]
 
-        if cfg.TYPE.lower() == "usdt" and config.cfg["root"]["busd"]["status"] == "on":
+        if cfg.TYPE == "usdt" and config.cfg["root"]["busd"]["status"] == "on":
             # check to delete LUNA input
             key = "busd_timestamp"
             for asset_timestamp in config.timestamp[key]:
@@ -77,8 +77,14 @@ class BotHelperAsync:
         if (
             cfg.discord_message
             and cfg.discord_message != ".\n"
-            or (cfg.TYPE.lower() == "btc" and cfg.discord_message_full and cfg.discord_message_full != ".\n")
+            or (cfg.TYPE == "btc" and cfg.discord_message_full and cfg.discord_message_full != ".\n")
         ):
+            if cfg.TYPE == "usdt":
+                for symbol in config.WATCHLIST:
+                    _asset_price = await self.spot_fetch_ticker(symbol)
+                    msg = f"{msg}\n - {symbol}={_asset_price}"
+                    # log(f"[cyan]**[/cyan] {symbol}={_asset_price}", "bold")
+
             try:
                 if cfg.discord_sent_msg:
                     await cfg.discord_sent_msg.edit(content=msg)
@@ -136,7 +142,7 @@ class BotHelperAsync:
                                 count += 1
 
                     sum_usdt += usdt_to_added
-                elif asset.lower() == cfg.TYPE.lower():
+                elif asset.lower() == cfg.TYPE:
                     only_usdt = quantity
                     sum_usdt += quantity
                 elif asset.lower() == "busd":
@@ -158,31 +164,31 @@ class BotHelperAsync:
 
             if len(config.asset_list) == 0:
                 #: cleans timestamp.yaml
-                config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(base=config.env[cfg.TYPE].status["timestamp"])
+                config.timestamp[f"{cfg.TYPE}_timestamp"] = dict(base=config.env[cfg.TYPE].status["timestamp"])
                 _console_clear()
-                if cfg.TYPE.lower() == "usdt":
+                if cfg.TYPE == "usdt":
                     log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
-            elif cfg.TYPE.lower() == "usdt":
+            elif cfg.TYPE == "usdt":
                 log(f" * usdt={sum_usdt} | busd={sum_busd} | [blue]{_date(_type='hour')}[/blue]")
 
             config.sum_usdt = sum_usdt
             if sum_usdt > 1.0:
-                if cfg.TYPE.lower() == "usdt":
+                if cfg.TYPE == "usdt":
                     pos_count = config.status_usdt["count"]
-                elif cfg.TYPE.lower() == "btc":
+                elif cfg.TYPE == "btc":
                     pos_count = config.status_btc["count"]
 
                 if pos_count == 0 and config.env[cfg.TYPE].status["balance"] != sum_usdt:
                     config.env[cfg.TYPE].status["balance"] = sum_usdt
 
-            if cfg.TYPE.lower() == "btc":
+            if cfg.TYPE == "btc":
                 if len(config.asset_list) == 0:
                     _console_clear()
                     log(":beer:  [bold green]spot=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usd))
 
                 config.env[cfg.TYPE].status["balance"] = sum_btc
 
-        if cfg.TYPE.lower() == "usdt":
+        if cfg.TYPE == "usdt":
             _sum = sum_usdt
         else:
             _sum = sum_btc
@@ -196,7 +202,7 @@ class BotHelperAsync:
             output = await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
             lost += float(output)
 
-        if cfg.TYPE.lower() == "usdt":
+        if cfg.TYPE == "usdt":
             free = format(float(config.env["usdt"].status["free"]), ".2f")
             if lost > -5.0:
                 _msg = cfg.discord_message
@@ -210,7 +216,7 @@ class BotHelperAsync:
                 _msg = cfg.discord_message_full
 
         locked_per = f"locked={format(cfg.locked_balance, '.2f')}%"
-        if cfg.TYPE.lower() == "usdt":
+        if cfg.TYPE == "usdt":
             msg = (
                 f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` | free=`{free}` | "
                 f"total=`{round(abs(lost) + sum_usdt)}$`\n`{locked_per}` | `{_date(_type='hour')}`"
@@ -220,9 +226,9 @@ class BotHelperAsync:
             if float(free) > 0:
                 msg = f"{msg} free=`{free}` |"
 
-            msg = f"{msg} total=`{round(abs(lost) + sum_usdt)}$` (btc=`{format(sum_btc, '.4f')}`)\n`{locked_per}` | `{_date(_type='hour')}`"
+            msg = f"{msg} total=`{format(own_usd, '.2f')}$` (btc=`{format(sum_btc, '.4f')}`)\n`{locked_per}` | `{_date(_type='hour')}`"
 
-        if cfg.TYPE.lower() == "usdt":
+        if cfg.TYPE == "usdt":
             if lost < -0.1:
                 await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", float(free))
             else:
@@ -313,7 +319,7 @@ class BotHelperAsync:
             log(response, "bold cyan")
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
-                log(f"E: Failed to create order with {type(e).__name__} {e}")
+                log(f"E: Failed to create order with {symbol} [cyan]{type(e).__name__}[/cyan] {e}")
 
     async def fetch_balance(self, code) -> float:
         balance = await helper.exchange.spot.fetch_balance()

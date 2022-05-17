@@ -262,10 +262,8 @@ class BotHelper:
 
             log(f"order={order}", "bold")
         except QuietExit as e:
-            breakpoint()  # DEBUG
             raise e
         except Exception as e:
-            breakpoint()  # DEBUG
             if "PRICE_FILTER" not in str(e):
                 # position may close right away, not a BinanceAPIException error
                 print_tb(e)
@@ -575,12 +573,12 @@ class BotHelper:
         is_open = False
         if self.strategy.market == "USDTPERP":
             is_open = await self.is_usdt_open(self.strategy.symbol)
-        elif self.strategy.market.lower() in ["btc", "usdt"]:
+        elif self.strategy.market.lower() in ["btc", "usdt", "busd"]:
             balances = await self._fetch_balance()
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
                     is_open = True
-                    log("PASS", "bold")
+                    log("open position PASS", "bold")
                     break
 
         if not is_open:
@@ -596,11 +594,6 @@ class BotHelper:
                         config.status_btc["count"] += 1
             except Exception as e:
                 print_tb(e)
-        else:  # TODO: binance_balance should buy it if its in 5 min range and remove it from the yaml
-            self.env[self.strategy.market.lower()].positions_alert[
-                self.strategy.asset
-            ] = self.strategy.unix_timestamp_ms
-            log("warning: already open position")
 
     async def trade(self) -> None:
         try:
@@ -608,9 +601,9 @@ class BotHelper:
         except Exception as e:
             log(str(e))
         finally:
-            await helper.exchange.future.close()
             await helper.exchange.spot_usdt.close()
             await helper.exchange.spot_btc.close()
+            await helper.exchange.future.close()
 
     def pre_check(self) -> None:
         """Check count of open positions.

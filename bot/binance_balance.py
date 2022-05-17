@@ -21,12 +21,13 @@ bot_async = BotHelperSpotAsync()
 
 
 async def alert():
+    asset_price_dict = {}
     for alert in config.ALERTS:
         _alert = config.ALERTS[alert]
         if _alert:
-            asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
-            if float(asset_price) > _alert["price"]:
-                await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=cfg.SLEEP_INTERVAL)
+            asset_price_dict[_alert["pair"]] = _asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
+            if float(_asset_price) > _alert["price"]:
+                await bot_async.channel_alerts.send(f"{_alert['pair']}={_asset_price}", delete_after=cfg.SLEEP_INTERVAL)
 
 
 async def process(unix_timestamp_ms):
@@ -40,10 +41,10 @@ async def process(unix_timestamp_ms):
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
         config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
         usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
-    elif cfg.TYPE.lower() == "usdt":
+    elif cfg.TYPE == "usdt":
         config.env[cfg.TYPE].status["balance"] = usdt_bal
         config.env[cfg.TYPE].status["free"] = free_usdt
-    elif cfg.TYPE.lower() == "btc":
+    elif cfg.TYPE == "btc":
         config.env[cfg.TYPE].status["free"] = "{:.8f}".format(free_btc)
 
     for idx in range(1, 6):

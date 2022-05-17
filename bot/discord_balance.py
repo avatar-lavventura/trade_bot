@@ -22,7 +22,7 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 class Discord_Alpy:
     def __init__(self, _type):
         try:
-            self._type = cfg.TYPE = _type
+            self._type = cfg.TYPE = _type.lower()
             _log.ll.LOG_FILENAME = Path.home() / ".bot" / f"program_{_type}.log"
             print(f" * bot_type={_type}")
             helper.exchange.init(_type)

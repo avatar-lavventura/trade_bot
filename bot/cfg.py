@@ -3,7 +3,7 @@
 from os import path
 
 STABLE_COINS = ["USDT", "BNB", "ETH", "PAXG", "BUSD", "TUSD", "USDC"]
-SLEEP_INTERVAL: int = 30  # seconds to sleep for next balance check
+SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 balance_fn = path.expanduser("~/.bot/balance.log")
 TYPE: str = ""
 discord_message: str = ".\n"
@@ -29,4 +29,3 @@ IGNORE_SOLD_QUANTITY = True
 
 _IGNORE_SOLD_QUANTITY = {}
 _IGNORE_SOLD_QUANTITY["PNT/USDT"] = False
-_IGNORE_SOLD_QUANTITY["IOTA/BTC"] = False
