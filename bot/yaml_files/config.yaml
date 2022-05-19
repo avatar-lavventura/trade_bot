@@ -1,20 +1,28 @@
 root:
-    isolated_wallet_limit: 150
-    discord_msg_above_usdt: 100
-    take_profit: 0.0055 # 0.0049
-    ignore: # for all
-      - FTM
-    btc:
-        max_pos: 3
-        initial: 0.00025 # 0.00015
-        multiply_ratio: 1.07
-        percent_change_to_add: 5
-        locked_percent_limit: 95
-        take_profit: 0.005
-    usdt:
-        max_pos: 4
-        initial: 12
-        multiply_ratio: 1.08
-        percent_change_to_add: 4
-        locked_percent_limit: 90
-        take_profit: 0.0055
+  isolated_wallet_limit: 75
+  discord_msg_above_usdt: 150
+  take_profit: 0.0052
+  locked_percent_limit: 100
+  ignore: # for all
+    - PAIR
+  btc:
+    status: "on"
+    max_pos: 5
+    initial: 0.00025 # 0.00015
+    multiply_ratio: 1.10
+    percent_change_to_add: 4.5
+    stop_trade_wt_30m_red: True
+  usdt:
+    status: "off"
+    max_pos: 1
+    initial: 12
+    multiply_ratio: 1.10
+    percent_change_to_add: 5
+    stop_trade_wt_30m_red: True
+  busd:
+    status: "on"
+    max_pos: 1
+    initial: 12
+    multiply_ratio: 1.10
+    percent_change_to_add: 20
+    stop_trade_wt_30m_red: True

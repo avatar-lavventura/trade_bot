@@ -1,4 +1,7 @@
 alerts:
-    a1:
-        pair: FTMUSDT
-        price: 1.40
+  a1:
+    pair: PNTUSDT
+    price: 0.50
+  a2:
+    pair: ORNUSDT
+    price: 3

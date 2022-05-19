@@ -10,14 +10,13 @@ _remove(_log.ll.LOG_FILENAME)
 
 
 def cpu_percent():
-    """Check cpu percent changes.
+    """Check CPU percent change.
 
     __ https://stackoverflow.com/a/2468983/2402577
     """
     while True:
-        # gives a single float value
-        cpu_avg = psutil.cpu_percent(20)  # 4
-        if cpu_avg > 10:
+        cpu_avg = psutil.cpu_percent(20)  # psutil.cpu_percent(4)
+        if cpu_avg > 20:
             log(f"The CPU usage is: [cyan]{cpu_avg}%[/cyan]    [blue]{_date(_type='hour')}[/blue]")
 
 

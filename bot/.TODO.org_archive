@@ -236,7 +236,7 @@ CLOSED: [2021-12-05 Sun 12:56]
 :ARCHIVE_TODO: DONE
 :END:
 
-* DONE 1 saniyelikte SELL sinyali gelirse ve USDTPERP de varsa kagit usdt-spot ta buy yerine usdtprep de sell yap
+* DONE 1 saniyelikte SELL sinyali gelirse ve USDTPERP de varsa kagit usdt-spot ta buy yerine usdtperp de sell yap
 CLOSED: [2021-12-05 Sun 12:56]
 :PROPERTIES:
 :ARCHIVE_TIME: 2021-12-17 Fri 17:28
@@ -412,6 +412,124 @@ CLOSED: [2022-03-15 Tue 15:49]
 :ARCHIVE_TIME: 2022-03-15 Tue 15:49
 :ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
 :ARCHIVE_OLPATH: ALPY-BOT/carry google instance to ~Taiwan: asia-east1~
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE carry google instance to ~Taiwan: asia-east1~
+CLOSED: [2022-03-20 Sun 12:50]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-20 Sun 12:50
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE if >200$ is locked changed profit to %1
+CLOSED: [2022-03-22 Tue 16:59]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-22 Tue 16:59
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Script for side-by-side stats https://stackoverflow.com/questions/13341832/display-two-files-side-by-side
+CLOSED: [2022-04-01 Fri 22:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-04-01 Fri 22:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Check: BTC alerts worked in 30 for /S scripts seems like it works fine
+CLOSED: [2022-04-02 Sat 09:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-04-02 Sat 09:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE BTC 30 dakikalik yesil cross a gore ekleme iznini ver
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE BTC 1 dakikalik dusute cross a gore posizyon kabul etme
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE BTCUSDT 1h kirmizi top dusuteyse do nothing?
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE CPU usage >70% killall python
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+Do it from cpu.py script
+
+* DONE trade_async log alert stuff don't write to disk
+CLOSED: [2022-05-08 Sun 18:33]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:33
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+- YAML might consume memory while reading file try to make it efficient, if required remove writing
+  into ".yaml~" file this may add extra memory usage
+- post count: do as: usdt_<_pair>.yaml it will only contains its count
+#+begin_src python
+# file name contains the asset like: hit/firousdt.yaml
+count: 10
+#+end_src
+
+* DONE python code at home machine to add new added pairs into TV alert
+CLOSED: [2022-05-08 Sun 18:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE add color to discord messages
+CLOSED: [2022-05-15 Sun 11:35]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-15 Sun 11:35
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:

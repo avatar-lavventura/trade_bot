@@ -1,20 +1,21 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
-** TODO carry google instance to ~Taiwan: asia-east1~
-** TODO if >200$ is locked changed profit to %1
-** TODO before order check is the give asset is not in blocked list
-** TODO python code at home machine to add new added pairs into TV alert
-** TODO buy BNB when its < 1$ worth
-** TODO add color to discord messages
-** TODO appy take_profit for both btc and USDT
-** TODO trade_async log alert stuff don't write to disk
-- YAML might consume memory while reading file try to make it efficient, if required remove writing
-  into ".yaml~" file this may add extra memory usage
-- post count: do as: usdt_<_pair>.yaml it will only contains its count
+** TODO lower than 5m candle maybe cut of the trade,check ?/
 #+begin_src python
-# file name contains the asset like: hit/firousdt.yaml
-count: 10
+response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 #+end_src
-
+** TODO ilk 5% dususte maliyet kadar ekleme yap diger eklemeler:
+  %5 zarar varsa ve 45 dakikalikdan + 2 hr sinyal gelirse ekleme yap.
+  10% default zararda ekleme yap
+** TODO 4hr turuncu or magenta open positions and lock for that bar
+** TODO ignore sell positions to affect ortalama
+** TODO consider closing each trade if there is 1% loss (~12$)
+** TODO Faster to read from mongodb than re-read from yaml have a look
 - search mongoDB write to a file fast or slow?
+** TODO Implement sell_order.py to give sell orders from the bot
+** TODO Check: Don't open position when red wave_trend is on in 30s
+** TODO ignore pairs >30% rise during the day in 1h or 1day?
+** TODO before order check is the give asset is not in blocked list
+** TODO buy BNB when its < 1$ worth
+** TODO appy take_profit for both btc and USDT

@@ -31,7 +31,7 @@ countdown () {  # https://superuser.com/a/611582/723632
 
 num=$(ps aux | grep -E "[p]ython3 discord_balance.py $1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
 if [ $num -ge 1 ]; then
-    echo "warning: run_balance is already running, count="$num
+    echo "warning: `discord_balance.py` is already running, count="$num
     exit
 fi
 
@@ -41,7 +41,7 @@ while true
 do
     python3 discord_balance.py $1
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    printf "countdown for 30 seconds "
+    printf "countdown for 30 seconds  "
     countdown 30
     echo "[  ${GREEN}OK${NC}  ]"
 done

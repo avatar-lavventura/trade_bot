@@ -32,16 +32,16 @@ Open port ~443~, ~81~, and ~5000~ in Google Instance, under ~default-allow-http~
 – sudo service network-manager restart or reboot in case
 
 #+begin_src bash
-sudo firewall-cmd --add-port=5000/tcp --permanent --zone=docker
-sudo firewall-cmd --reload
-sudo firewall-cmd --list-all --zone=docker
-
-sudo ufw allow 5000/tcp
+# sudo firewall-cmd --add-port=5000/tcp --permanent --zone=docker
+# sudo firewall-cmd --reload
+# sudo firewall-cmd --list-all --zone=docker
+sudo systemctl enable ufw && sudo ufw enable
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
 sudo ufw allow 80/tcp
 sudo ufw allow 81/tcp
 sudo ufw allow 443/tcp
-sudo ufw enable
-sudo systemctl enable ufw
+sudo ufw allow 5000/tcp
 sudo ufw status verbose
 sudo nmap localhost
 #+end_src
@@ -62,7 +62,7 @@ Forward: 81                        | 5000
 [X] Block Comman Exploits
 [X] Websockets Support
 
-Save
+[SAVE
 #+end_src
 
 *** SSL
@@ -72,17 +72,15 @@ Request new SSLcertificate
 [X] Force SSL
 [X] HSTS Enables
 
-Save
+[SAVE]
 #+end_src,
 
-** Nginx Full Setup Instructions
-
+*** update
 #+begin_src bash
-cp docker ~/docker
-sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-sudo systemctl start docker.service
+./update.sh && ./filter.sh
 #+end_src
+
+** nginx full setup instructions
 
 - [[http://IP/webhook][IP_example]]
 
@@ -92,7 +90,6 @@ https://askubuntu.com/a/1046217/660555
 - https://nginxproxymanager.com/setup/
 
 *** public
-
 #+begin_src bash
 curl https://alpybot.duckdns.org
 curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
@@ -100,14 +97,13 @@ curl -X POST https://alpybot.duckdns.org/webhook -d "DOGEUSDTPERP,buy,enter,1.94
 #+end_src
 
 *** localhost
-
 #+begin_src bash
+curl -v https://alpybot.duckdns.org
 curl -v 127.0.0.1:5000
 curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
-curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDTPERP,buy,alert,1.943,"
 #+end_src
 
--------------------
+---------------------
 
 ** Tradingview alerts some links
 
@@ -148,7 +144,6 @@ that will do it for you.
 - https://askubuntu.com/a/254846/660555
 
 https://askubuntu.com/a/854880/660555
-
 
 #+begin_src bash
 sudo apt install systemd-timesyncd

@@ -22,8 +22,8 @@ initial_btc_quantity = float(os.getenv("initial_btc_quantity"))
 TP = float(os.getenv("TP"))
 TAKE_PROFIT_LONG = 1.000 + TP
 TAKE_PROFIT_SHORT = 1.000 - TP
-BTC_MAX_POSITION_NUMBER = int(os.getenv("BTC_MAX_POSITION_NUMBER"))
-USDT_MAX_POSITION_NUMBER = int(os.getenv("USDT_MAX_POSITION_NUMBER"))
+BTC_MAX_POS_NUMBER = int(os.getenv("BTC_MAX_POS_NUMBER"))
+USDT_MAX_POS_NUMBER = int(os.getenv("USDT_MAX_POS_NUMBER"))
 is_trade = True
 data_msg_temp = None
 
@@ -479,13 +479,13 @@ class BotHelper:
     def check_on_going_positions(self, strategy) -> bool:
         if strategy.market == "USDTPERP":
             usdt_open_position_size = self.get_futures_open_position_count()
-            if usdt_open_position_size >= USDT_MAX_POSITION_NUMBER:
-                # log(f"warning: There is already ongoing {USDT_MAX_POSITION_NUMBER} of positions.")
+            if usdt_open_position_size >= USDT_MAX_POS_NUMBER:
+                # log(f"warning: There is already ongoing {USDT_MAX_POS_NUMBER} of positions.")
                 return True
         elif strategy.market == "BTC":
             btc_open_position_size = self.get_btc_open_positions()
-            if btc_open_position_size >= BTC_MAX_POSITION_NUMBER:
-                # log(f"warning: There is already ongoing {BTC_MAX_POSITION_NUMBER} of positions")
+            if btc_open_position_size >= BTC_MAX_POS_NUMBER:
+                # log(f"warning: There is already ongoing {BTC_MAX_POS_NUMBER} of positions")
                 return True
         return False
 

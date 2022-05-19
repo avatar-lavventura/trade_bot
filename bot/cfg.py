@@ -2,11 +2,30 @@
 
 from os import path
 
+STABLE_COINS = ["USDT", "BNB", "ETH", "PAXG", "BUSD", "TUSD", "USDC"]
+SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 balance_fn = path.expanduser("~/.bot/balance.log")
-#: seconds to sleep for next balance check
-SLEEP_INTERVAL = 20
-TYPE = None
-discord_message = ""
+TYPE: str = ""
+discord_message: str = ".\n"
+discord_message_full: str = ".\n"
+discord_print: bool = False
 locked_balance = 0.0
-discord_message_full = ""
-discord_sent_message = None
+discord_sent_msg = None
+BTCUSDT_PRICE: float = 0.0
+
+"""
+- IGNORE_SOLD_QUANTITY:
+
+sold quantity affects the average price make it smaller showing your are in
+gain, which may cause to update your sell limit order in much small price,
+causing to sell right away.  // kar yaptiysan 20%'sini satip maliyetini dusuyuor
+genel kar gostergesi bir anda artiyor onceki kari dikkate aldigi icin
+
+* 8.79 de 400$ alim gerceklesti, 100$ kara satisi oldu, maliyet 8.75 olarak
+guncellendi.  0.50% kar gozukurken maliyet dustugu icin o anki fiyatta kar
+gostergesi 1.0% oldu, daha ucuza satis emri verme durumu olabilir emirler guncellenirse
+"""
+IGNORE_SOLD_QUANTITY = True
+
+_IGNORE_SOLD_QUANTITY = {}
+_IGNORE_SOLD_QUANTITY["PNT/USDT"] = False

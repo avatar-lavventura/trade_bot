@@ -2,8 +2,8 @@
 
 import asyncio
 
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _timestamp, print_tb
+from broker._utils._log import log
+from broker._utils.tools import _timestamp, print_tb
 from pymongo import MongoClient
 
 from bot.config import config

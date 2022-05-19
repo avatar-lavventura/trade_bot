@@ -6,8 +6,8 @@ from email.utils import parsedate
 from pathlib import Path
 
 import ccxt.async_support as ccxt
-from ebloc_broker.broker._utils.tools import unix_time_millis
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.tools import unix_time_millis
+from broker._utils.yaml import Yaml
 
 from bot import cfg
 
@@ -37,7 +37,6 @@ class Exchange:
             raise Exception("apiKey or secret is {}")
 
         self.spot_usdt = ccxt.binance(ops)
-        #
         ops = {
             "apiKey": str(helper_cfg["anne_b"]["key"]),
             "secret": str(helper_cfg["anne_b"]["secret"]),

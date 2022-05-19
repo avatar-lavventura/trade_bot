@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 from binance.client import Client
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.yaml import Yaml
 
 client = None
 HOME = Path.home()

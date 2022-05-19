@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ebloc_broker.broker.libs.mongodb import BaseMongoClass
+from broker.libs.mongodb import BaseMongoClass
 from pymongo import MongoClient
 
 
@@ -8,6 +8,11 @@ class Mongo(BaseMongoClass):
     def add_item(self, symbol, timestamp, item):
         """Add symbol along with its portfolio into mongo_db."""
         res = self.collection.replace_one({"symbol": symbol, "timestamp": timestamp}, item, True)
+        return res.acknowledged
+
+    def hit_count(self, symbol, item):
+        """Add symbol along with its portfolio into mongo_db."""
+        res = self.collection.replace_one({"symbol": symbol}, item, True)
         return res.acknowledged
 
 

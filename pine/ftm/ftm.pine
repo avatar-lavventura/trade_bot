@@ -1,0 +1,43 @@
+//@version=5
+strategy(title="alper", shorttitle="alper", overlay=true,
+     calc_on_order_fills=false, default_qty_type=strategy.percent_of_equity, default_qty_value=1000, initial_capital=1000,
+     default_qty_type=strategy.cash, calc_on_every_tick=false, pyramiding=0,
+     currency=currency.USD, commission_type=strategy.commission.percent,
+     commission_value=0.1)
+fromMonth = 2
+fromDay   = 1
+thruMonth = 4
+thruDay   = 1
+fromYear  = 2022
+thruYear  = 3000
+start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+window() => time >= start and time <= finish ? true : false
+
+length = 5
+src = close
+factor = 2.0
+volStop(src, atrlen, atrfactor) =>
+    var max     = src
+    var min     = src
+    var uptrend = true
+    var stop    = 0.0
+    atrM        = nz(ta.atr(atrlen) * atrfactor, ta.tr)
+    max         := math.max(max, src)
+    min         := math.min(min, src)
+    stop        := nz(uptrend ? math.max(stop, max - atrM) : math.min(stop, min + atrM), src)
+    uptrend     := src - stop >= 0.0
+    if uptrend != nz(uptrend[1], true)
+        max    := src
+        min    := src
+        stop   := uptrend ? max - atrM : min + atrM
+    [stop, uptrend]
+
+[vStop, uptrend] = volStop(src, length, factor)
+
+plot(vStop, "Volatility Stop", style=plot.style_circles, color= uptrend ? color.lime : na, linewidth=2)
+if uptrend == true
+    strategy.entry("long", strategy.long, when=window())
+
+if uptrend == false
+    strategy.close("long", when=window())

@@ -5,8 +5,8 @@ from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from ebloc_broker.broker._utils.tools import get_dt_time
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.tools import get_dt_time
+from broker._utils.yaml import Yaml
 
 logging.getLogger("apscheduler.executors.default").propagate = False
 
@@ -24,7 +24,7 @@ class Discord_Alpy:
             pass
         except KeyboardInterrupt:
             self.client.loop.close()
-            print("Program ended.")
+            print("program ended")
 
     async def task(self):
         """Add task in order to schedule discord to send messages.
@@ -49,12 +49,11 @@ class Discord_Alpy:
                 msg = f"Tick! The time is: {get_dt_time().strftime('%Y-%m-%d %H:%M:%S')}"
                 print(msg)
                 await channel.send(msg)
-        # await binance_balance.process_main(channel)
 
 
 _discord = Discord_Alpy()
 
-# from ebloc_broker.broker._utils._async import _sleep
+# from broker._utils._async import _sleep
 # global MESSAGE
 # await self.client.wait_until_ready()
 # while True:

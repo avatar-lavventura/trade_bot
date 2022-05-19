@@ -3,9 +3,9 @@
 import asyncio
 
 import ccxt.async_support as ccxt  # noqa: E402
-from ebloc_broker.broker._utils._async import _sleep
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import print_tb
+from broker._utils._async import _sleep
+from broker._utils._log import log
+from broker._utils.tools import print_tb
 
 
 async def main(symbol):

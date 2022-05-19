@@ -15,9 +15,9 @@ from pathlib import Path
 
 import requests
 from binance.client import Client
+from broker._utils.yaml import Yaml
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
-from ebloc_broker.broker._utils.yaml import Yaml
 from utils import log, utc_to_local
 
 HOME = Path.home()

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 import time
-
-# mark price is current value
 from contextlib import closing
 from operator import itemgetter
 
-from ebloc_broker.broker._utils.tools import log
+from broker._utils.tools import log
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
@@ -20,8 +18,8 @@ driver = webdriver.Chrome(options=options)
 
 urls = []
 names = []
-counter = dict()
-entries = dict()
+counter = {}
+entries = {}
 
 
 def get_url(url, name):
