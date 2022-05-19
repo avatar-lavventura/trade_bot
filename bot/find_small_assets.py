@@ -23,7 +23,7 @@ ignore_list = [
 ]
 
 
-async def btc():
+async def btc_search():
     """List smaller BTC assets than 0.000004 for blacklist."""
     helper.exchange.init_both()
     exchange = helper.exchange.spot_btc
@@ -32,7 +32,7 @@ async def btc():
     for asset in assets:
         if asset not in ignore_list:
             with suppress(Exception):
-                price = await exchange.fetch_ticker(f"{asset}/BTC")
+                price = await exchange.fetch_ticker(f"{asset}BTC")
                 price = price["last"]
                 if 0 < float(price) < 0.000002:
                     count += 1
@@ -42,7 +42,7 @@ async def btc():
     await exchange.close()
 
 
-async def usdt():
+async def usdt_search():
     """List smaller USDT assets than 0.06 for blacklist.txt."""
     helper.exchange.init_both()
     exchange = helper.exchange.spot_usdt
@@ -51,22 +51,21 @@ async def usdt():
     for asset in assets:
         if asset not in ignore_list and "DOWNUSDT" not in f"{asset}USDT" and "UPUSDT" not in f"{asset}USDT":
             with suppress(Exception):
-                price = await exchange.fetch_ticker(f"{asset}/USDT")
+                price = await exchange.fetch_ticker(f"{asset}USDT")
                 price = price["previousClose"]
                 if 0 < float(price) < 0.06:  # was: 0.02
                     count += 1
                     print(f":{asset}USDT")
 
-    print()
-    print(f"count={count}")
+    # print(f"count={count}")
     await exchange.close()
 
 
 if __name__ == "__main__":
     try:
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(btc())
+        loop.run_until_complete(btc_search())
         print()
-        loop.run_until_complete(usdt())
+        loop.run_until_complete(usdt_search())
     except Exception as e:
         print_tb(e)

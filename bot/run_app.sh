@@ -22,7 +22,7 @@ while true; do
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
     echo "countdown for 30 seconds  "
     countdown 30
-    echo "[  ${GREEN}OK${NC}  ]"
+    echo "[  OK  ]"
 done
 
 # LOG_FILE=trade.log

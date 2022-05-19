@@ -138,15 +138,16 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{_type.upper()}", since=since)
         if _type == "btc" and asset != "LUNA":
-            _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT", since=since)
             with suppress(Exception):
-                for idx, trade in enumerate(_trades):
-                    if not trade["info"]["isBuyer"]:
-                        ts = int(trade["info"]["time"])
-                        response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
-                        trade["cost"] = trade["cost"] / float(response[0][1])
-                        trade["ignore_sold"] = True
-                        trades.append(trade)
+                _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT", since=since)
+                with suppress(Exception):
+                    for idx, trade in enumerate(_trades):
+                        if not trade["info"]["isBuyer"]:
+                            ts = int(trade["info"]["time"])
+                            response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
+                            trade["cost"] = trade["cost"] / float(response[0][1])
+                            trade["ignore_sold"] = True
+                            trades.append(trade)
         # else:
         #     _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/BTC", since=since)
         #     with suppress(Exception):
@@ -236,12 +237,19 @@ class BotHelperSpotAsync(BotHelperAsync):
                 special_char = ""
                 if config.btc_wavetrend["30m"] == "green":
                     special_char = "+"
-                else:
+                elif config.btc_wavetrend["30m"] == "red":
                     special_char = "-"
+                else:
+                    special_char = ""
 
-                cfg.discord_message_full = (
-                    f"```diff\n{special_char} BTCUSDT={int(cfg.BTCUSDT_PRICE)} wt=[{config.btc_wavetrend['30m']}]\n```"
-                )
+                asset_price, percent = await self.fetch_symbol_percent_change("BTCUSDT", int(cfg.BTCUSDT_PRICE))
+                per_str = ""
+                if percent < 0:
+                    per_str = f"({percent}%)"
+                else:
+                    per_str = f"(+{percent}%)"
+
+                cfg.discord_message_full = f"``diff\nBTCUSDT={int(cfg.BTCUSDT_PRICE)} {per_str}\n{special_char} wt_30m=[  {config.btc_wavetrend['30m'].upper()}  ]\n```"
 
             cfg.discord_message_full += msg
             if _type in ["usdt", "busd"] and _sum > config.discord_msg_above_usdt and profit < 0:

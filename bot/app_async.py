@@ -63,8 +63,8 @@ async def startup():
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
     app.alertlock = asyncio.Lock()
-    print(" * s t a r t i n g")
     # margin_usdt = app.client_helper.get_balance_margin_usdt()
+    print(" * s t a r t i n g")
 
 
 @app.after_serving
@@ -88,7 +88,7 @@ async def webhook():
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
             await do_alert(data_msg)
-            print(f"{data_msg} {_date(_type='hour')}", end="\r")
+            print(f"  wt_30m=[  {data_msg.upper()}  ]  {_date(_type='hour')}", end="\r")
         else:
             for asset in ["BTC", "USDT", "BUSD"]:
                 if asset in data_msg and config.cfg["root"][asset.lower()]["status"] == "off":

@@ -5,13 +5,6 @@ root:
   locked_percent_limit: 100
   ignore: # for all
     - PAIR
-  btc:
-    status: "on"
-    max_pos: 5
-    initial: 0.00025 # 0.00015
-    multiply_ratio: 1.10
-    percent_change_to_add: 4.5
-    stop_trade_wt_30m_red: True
   usdt:
     status: "off"
     max_pos: 1
@@ -25,4 +18,11 @@ root:
     initial: 12
     multiply_ratio: 1.10
     percent_change_to_add: 20
+    stop_trade_wt_30m_red: True
+  btc:
+    status: "on"
+    max_pos: 10
+    initial: 0.00025 # 0.00015
+    multiply_ratio: 1.10
+    percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True

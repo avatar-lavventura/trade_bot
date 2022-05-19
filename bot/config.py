@@ -33,8 +33,6 @@ class Config:
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
         self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
-        self.new_day = "03:00:00"
-        self.fund_times = ["19:00:00", self.new_day, "11:00:00"]
         self.base_durations = ["9m", "15m", "21m"]
         self.sum_usdt: float = 0.0
         self.locked_per_limit_usdtperp = None

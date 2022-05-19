@@ -5,9 +5,9 @@ from pymongo import MongoClient
 
 
 class Mongo(BaseMongoClass):
-    def add_item(self, symbol, timestamp, item):
+    def add_item(self, symbol, ts, item):
         """Add symbol along with its portfolio into mongo_db."""
-        res = self.collection.replace_one({"symbol": symbol, "timestamp": timestamp}, item, True)
+        res = self.collection.replace_one({"symbol": symbol, "timestamp": ts}, item, True)
         return res.acknowledged
 
     def hit_count(self, symbol, item):

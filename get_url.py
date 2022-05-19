@@ -104,7 +104,7 @@ def get_url(url, name):
                 log(position + " => " + str(res) + " " + side, "bold red")
 
 
-if __name__ == "__main__":
+def main():
     base_url = "https://www.binance.com/en/futures-activity/leaderboard/user?uid="
     with open("urls.txt") as f:
         urls = [line.rstrip() for line in f]
@@ -125,3 +125,7 @@ if __name__ == "__main__":
 
     for k, v in counter_dict.items():
         print(f"{k} => {v} {entries[k]}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 from contextlib import suppress
 from typing import Tuple
 
@@ -10,9 +9,11 @@ from filelock import FileLock
 
 from bot import cfg, helper
 from bot.config import config
+from bot.fund_time import Fund
 from bot.take_profit import TakeProfit
 
 TP = TakeProfit()
+fund = Fund()
 
 
 class BotHelperAsync:
@@ -57,6 +58,18 @@ class BotHelperAsync:
             for asset in del_list:
                 del config.timestamp[key][asset]
 
+    async def fetch_symbol_percent_change(self, symbol, price=None):
+        bar_price = fund.percent_change_since_day_start(symbol)
+        # Time, Open, High, Low, Close, Volume
+        bar_price = bar_price[0][1]
+        if price:
+            asset_price = price
+        else:
+            asset_price = await self.spot_fetch_ticker(symbol)
+
+        percent = ((asset_price - bar_price) / bar_price) * 100
+        return asset_price, float(format(percent, ".2f"))
+
     async def _discord_send(self, msg, lost, count, name, free=0):
         cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
         if cfg.locked_balance > 99.9:
@@ -64,7 +77,12 @@ class BotHelperAsync:
 
         c = "red" if float(lost) < 0 < cfg.locked_balance else "green"
         log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", fn=cfg.balance_fn)
-        _str = f"[{c}]{lost}{name}[/{c}] locked=[cyan]{cfg.locked_balance}%[/cyan] "
+        if name.replace(" ", "") == "mBTC":
+            lost_usdt = float(lost) / 1000 * cfg.BTCUSDT_PRICE
+            _str = f"[{c}]{lost}{name} ({format(lost_usdt, '.2f')}$)[/{c}] locked=[cyan]{cfg.locked_balance}%[/cyan] "
+        else:
+            _str = f"[{c}]{lost}{name}[/{c}] locked=[cyan]{cfg.locked_balance}%[/cyan] "
+
         if free > 0:
             _str = f"{_str}free=[cyan]{free}{name}[/cyan] "
 
@@ -80,10 +98,21 @@ class BotHelperAsync:
             or (cfg.TYPE == "btc" and cfg.discord_message_full and cfg.discord_message_full != ".\n")
         ):
             if cfg.TYPE == "usdt":
+                flag = False
                 for symbol in config.WATCHLIST:
-                    _asset_price = await self.spot_fetch_ticker(symbol)
-                    msg = f"{msg}\n - {symbol}={_asset_price}"
-                    # log(f"[cyan]**[/cyan] {symbol}={_asset_price}", "bold")
+                    if not flag:
+                        flag = True
+                        msg = f"`{msg}\n```"
+
+                    asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+                    if percent < 0:
+                        per_str = f"({percent}%)"
+                    else:
+                        per_str = f"(+{percent}%)"
+
+                    msg = f"{msg}\n{symbol}={asset_price} {per_str}"
+                if flag:
+                    msg = f"{msg}\n```"
 
             try:
                 if cfg.discord_sent_msg:
@@ -219,14 +248,14 @@ class BotHelperAsync:
         if cfg.TYPE == "usdt":
             msg = (
                 f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` | free=`{free}` | "
-                f"total=`{round(abs(lost) + sum_usdt)}$`\n`{locked_per}` | `{_date(_type='hour')}`"
+                f"total=`{round(abs(lost) + sum_usdt)}$`\n`{locked_per}` | `{_date(_type='hour')}` (**{pos_count}** pos)"
             )
         else:
             msg = _msg
             if float(free) > 0:
                 msg = f"{msg} free=`{free}` |"
 
-            msg = f"{msg} total=`{format(own_usd, '.2f')}$` (btc=`{format(sum_btc, '.4f')}`)\n`{locked_per}` | `{_date(_type='hour')}`"
+            msg = f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usd, '.2f')}$`\n`{locked_per}` | `{_date(_type='hour')}` (**{pos_count}** pos)"
 
         if cfg.TYPE == "usdt":
             if lost < -0.1:

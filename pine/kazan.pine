@@ -10,10 +10,10 @@ testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
 start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
-window() =>
-    time >= start and time <= finish ? true : false
 msg = timeframe.period + '_enter'
 msg_aggr = msg + '_aggr'
+window() =>
+    time >= start and time <= finish ? true : false
 
 // hunter
 vwap_period = input(title='Period', defval=5)
@@ -43,12 +43,12 @@ sbc = input(false, title='show Highlight Bar if WVF WAS True and IS Now False')
 sbcc = input(false, title='show highlight bar if WVF is True')
 sgb = input(false, title='check box to turn bars gray?')
 // Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
-ltLB = input.int(40, minval=25, maxval=99, title='long-term look back current bar has to close below this value OR Medium Term--Default=40')
-mtLB = input.int(14, minval=10, maxval=20, title='medium-term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14')
+ltLB = input.int(40, minval=25, maxval=99, title='long-term look back current bar has to close below this value or medium term-default=40')
+mtLB = input.int(14, minval=10, maxval=20, title='medium-term look back current bar has to close below this value or long term-default=14')
 str = input.int(3, minval=1, maxval=9, title='entry price action strength-close > n bars back-default=3')
 sa1 = input(false, title='show alert WVF = True?')
-sa2 = input(false, title='show alert WVF Was True Now False?')
-sa3 = input(false, title='show alert WVF Filtered?')
+sa2 = input(false, title='show alert WVF was True now False?')
+sa3 = input(false, title='show alert WVF filtered?')
 
 // williams vix fix formula
 wvf = (ta.highest(close, pd) - low) / ta.highest(close, pd) * 100

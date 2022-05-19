@@ -43,7 +43,7 @@ do
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
     printf "countdown for 30 seconds  "
     countdown 30
-    echo "[  ${GREEN}OK${NC}  ]"
+    echo "[  OK  ]"
 done
 
 # LOG_FILE=_binance_balance.log

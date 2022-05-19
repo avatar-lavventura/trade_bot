@@ -12,14 +12,14 @@ root:
     SKL: 7
     STORJ: 5
     CHESS: 7
-    ANT: 3
+    ANT: 4
     ERN: 3
     FIL: 5
     DREP: 6
     IOST: 4
     GTO: 24
     MITH: 12
-    TRU: 8
+    TRU: 10
     ONT: 2
     AION: 2
     HIVE: 6
@@ -27,33 +27,33 @@ root:
     TFUEL: 8
     ONG: 3
     WAXP: 4
-    SCRT: 5
+    SCRT: 6
     TOMO: 4
-    ZRX: 6
+    ZRX: 7
     ALPHA: 5
     POWR: 9
-    POLY: 3
+    POLY: 5
     ELF: 5
-    API3: 5
+    API3: 6
     RAMP: 4
     FXS: 9
-    BAKE: 8
+    BAKE: 9
     EPS: 6
-    STX: 5
+    STX: 6
     THETA: 6
     GLM: 2
-    BAT: 3
+    BAT: 6
     DODO: 4
     POND: 2
-    SYS: 5
+    SYS: 6
     1INCH: 5
     ATA: 2
-    ALCX: 2
+    ALCX: 3
     VGX: 10
-    XVS: 7
+    XVS: 8
     CHR: 8
     PHA: 9
-    HARD: 5
+    HARD: 8
     STEEM: 8
     BLZ: 4
     PNT: 4
@@ -61,33 +61,33 @@ root:
     RVN: 2
     UTK: 10
     CAKE: 4
-    BTCST: 4
+    BTCST: 5
     HBAR: 5
     CLV: 10
     TWT: 7
-    WTC: 9
+    WTC: 11
     CHZ: 4
     JOE: 4
     MINA: 4
     APE: 3
-    BRD: 3
+    BRD: 5
     LPT: 4
     ASTR: 5
     UNFI: 4
     OCEAN: 3
     DOCK: 14
-    VOXEL: 19
+    VOXEL: 20
     PYR: 7
     OM: 3
     WAVES: 7
-    BETA: 7
+    BETA: 8
     COMP: 4
     AST: 2
-    XNO: 4
+    XNO: 5
     FLUX: 5
-    KNC: 8
+    KNC: 10
     LTO: 7
-    LOKA: 20
+    LOKA: 22
     GMT: 15
     DEGO: 5
     COCOS: 2
@@ -95,27 +95,27 @@ root:
     ACA: 9
     QTUM: 6
     DUSK: 9
-    IMX: 3
+    IMX: 4
     CVP: 2
-    TORN: 5
+    TORN: 6
     VIDT: 5
-    NMR: 5
-    GLMR: 4
+    NMR: 6
+    GLMR: 5
     PLA: 3
     DAR: 8
-    MBOX: 6
+    MBOX: 7
     AGLD: 4
     REN: 4
     OGN: 6
     YGG: 4
     OG: 3
     AUCTION: 5
-    TRB: 3
+    TRB: 4
     BEL: 6
     WOO: 3
-    SSV: 4
-    LIT: 2
-    SUPER: 5
+    SSV: 5
+    LIT: 3
+    SUPER: 6
     GALA: 4
     DIA: 2
     ALICE: 4
@@ -125,22 +125,22 @@ root:
     AUDIO: 4
     ENJ: 4
     GXS: 3
-    FRONT: 2
-    INJ: 5
+    FRONT: 3
+    INJ: 8
     NEAR: 6
     GTC: 1
-    AR: 3
-    SNM: 4
+    AR: 4
+    SNM: 11
     BAND: 1
     UMA: 3
-    DASH: 2
-    TRIBE: 3
-    NXS: 1
+    DASH: 4
+    TRIBE: 4
+    NXS: 2
     ATM: 4
     PROM: 4
     GRS: 3
     BAL: 1
-    CVC: 3
+    CVC: 5
     LSK: 1
     FLM: 6
     CTSI: 2
@@ -148,18 +148,18 @@ root:
     STRAX: 1
     GAS: 4
     AERGO: 1
-    MDA: 2
+    MDA: 4
     OMG: 2
     LINK: 1
     FIS: 2
-    IDEX: 3
-    SAND: 1
+    IDEX: 4
+    SAND: 2
     BNT: 2
     BEAM: 2
     WAN: 2
     RUNE: 1
     CELO: 2
-    EZ: 3
+    EZ: 4
     KAVA: 1
     ILV: 3
     ROSE: 2
@@ -170,12 +170,17 @@ root:
     SNX: 1
     WRX: 1
     ALGO: 1
-    ENS: 2
+    ENS: 3
     NEBL: 2
     QNT: 4
     RNDR: 1
     DOGE: 2
     FTM: 1
     NEXO: 1
-    MOB: 1
-    WING: 1
+    MOB: 3
+    WING: 2
+    FIRO: 1
+    KLAY: 1
+    ATOM: 1
+    FLOW: 1
+    ANC: 1
