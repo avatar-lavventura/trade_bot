@@ -559,7 +559,7 @@ class BotHelper:
             try:
                 return await self.strategy.exchange.fetch_balance()
             except:
-                time.sleep(1)
+                time.sleep(2)
 
         raise Exception("timestamp error")
 
@@ -578,7 +578,7 @@ class BotHelper:
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
                     is_open = True
-                    log("open position PASS", "bold")
+                    log("PASS", "bold")
                     break
 
         if not is_open:
@@ -654,7 +654,7 @@ class BotHelper:
             return
 
         self.strategy = Strategy(data_msg)
-        if self.strategy.market == "USDT" and config.btc_wavetrend["30m"] == "red":
+        if self.strategy.market.lower() == "usdt" and config.btc_wavetrend["30m"] == "red":
             log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
             return
 

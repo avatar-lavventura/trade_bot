@@ -10,10 +10,10 @@ testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
 start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
-window() =>
-    time >= start and time <= finish ? true : false
 msg = timeframe.period + '_enter'
 msg_aggr = msg + '_aggr'
+window() =>
+    time >= start and time <= finish ? true : false
 
 // hunter
 vwap_period = input(title='Period', defval=5)
@@ -24,13 +24,8 @@ sumVolume = math.sum(volume, vwap_period)
 vwap_value = sum_vwap_source / sumVolume
 vwap_above = 0.0
 vwap_above_limit = 0.0
-if close > 0.01
-    vwap_above := vwap_value * (1 + 0.70 / 100)
-    vwap_above_limit := vwap_value * (1 + 1.20 / 100)
-else
-    vwap_above := vwap_value * (1 + 0.80 / 100)
-    vwap_above_limit := vwap_value * (1 + 1.20 / 100)
-
+vwap_above := vwap_value * (1 + 0.70 / 100)
+vwap_above_limit := vwap_value * (1 + 1.20 / 100)
 long_VWMA = vwap_above <= close and close < vwap_above_limit
 
 // cm_williams vix fix formula

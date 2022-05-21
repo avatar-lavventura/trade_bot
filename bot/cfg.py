@@ -12,6 +12,7 @@ discord_print: bool = False
 locked_balance = 0.0
 discord_sent_msg = None
 BTCUSDT_PRICE: float = 0.0
+CURRENT_DATE = None
 
 """
 - IGNORE_SOLD_QUANTITY:

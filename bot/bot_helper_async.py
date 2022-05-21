@@ -72,7 +72,7 @@ class BotHelperAsync:
 
     async def _discord_send(self, msg, lost, count, name, free=0):
         cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
-        if cfg.locked_balance > 99.9:
+        if cfg.locked_balance > 99.8:
             cfg.locked_balance = 100
 
         c = "red" if float(lost) < 0 < cfg.locked_balance else "green"
@@ -156,7 +156,7 @@ class BotHelperAsync:
                     price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
                     if cfg.TYPE == "usdt":
                         usdt_to_added = quantity * float(price)
-                        if usdt_to_added > 1.0:  # below 1.0$ would not count as open position
+                        if usdt_to_added > 1.0:  # below 1.0$ would not be count as open position
                             config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
                             config.asset_list.append(asset)
                             if asset not in config.SPOT_IGNORE_LIST:
@@ -184,7 +184,7 @@ class BotHelperAsync:
                 f" [blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usd)
             )
 
-        pos_count = 0
+        pos_count: int = 0
         sum_busd = float(format(sum_busd, ".2f"))
         sum_usdt = float(format(sum_usdt, ".2f"))
         if helper.is_start > 0:
@@ -256,6 +256,15 @@ class BotHelperAsync:
                 msg = f"{msg} free=`{free}` |"
 
             msg = f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usd, '.2f')}$`\n`{locked_per}` | `{_date(_type='hour')}` (**{pos_count}** pos)"
+
+        try:
+            stats = int(config.env[cfg.TYPE].stats[cfg.CURRENT_DATE])
+        except:
+            config.env[cfg.TYPE].stats[cfg.CURRENT_DATE] = 0
+            stats = 0
+
+        if stats > 0:
+            msg = f"{msg} | perf=**{stats}**"
 
         if cfg.TYPE == "usdt":
             if lost < -0.1:

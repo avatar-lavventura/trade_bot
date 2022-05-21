@@ -8,7 +8,7 @@ from pathlib import Path
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
-from broker._utils.tools import print_tb
+from broker._utils.tools import _date, print_tb
 from broker._utils.yaml import Yaml
 
 from bot import binance_balance, cfg, helper
@@ -56,9 +56,12 @@ class Discord_Alpy:
         - runs every 30 seconds: (..., second="*/30")
         - runs at 30th second: (..., second="30")
         """
+        cfg.CURRENT_DATE = _date(_type="month")
         await helper.exchange.set_markets()
+        await self.main()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
+        scheduler.add_job(self.update_current_date, "cron", hour="*", timezone="Europe/Istanbul")
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -70,6 +73,9 @@ class Discord_Alpy:
 
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
+
+    async def update_current_date(self):
+        cfg.CURRENT_DATE = _date(_type="month")
 
     async def main(self):
         await self.pre_discord_setup()
