@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from bot.mongodb import Mongo
 import os
 import shutil
 from contextlib import suppress
@@ -10,6 +11,9 @@ from broker._utils.yaml import Yaml
 from filelock import FileLock
 
 from bot import cfg
+from pymongo import MongoClient
+
+mc = MongoClient()
 
 
 class Env:
@@ -41,12 +45,15 @@ class Config:
         self.asset_list = []
         self.btc_quantity = {}
         self._reload()
-        self.env["usdt"].hit = self.yaml_wrapper(self.base_dir / "hit_usdt.yaml")["root"]
+
+        self.env["usdt"].hit = Mongo(mc, mc["usdt"]["stats"])
         self.env["usdt"].stats = self.yaml_wrapper(self.base_dir / "stats_usdt.yaml")
+
+        self.env["btc"].hit = Mongo(mc, mc["btc"]["stats"])
         self.env["btc"].stats = self.yaml_wrapper(self.base_dir / "stats_btc.yaml")
-        self.env["btc"].hit = self.yaml_wrapper(self.base_dir / "hit_btc.yaml")["root"]
+
+        self.env["busd"].hit = Mongo(mc, mc["busd"]["stats"])
         self.env["busd"].stats = self.yaml_wrapper(self.base_dir / "stats_busd.yaml")
-        self.env["busd"].hit = self.yaml_wrapper(self.base_dir / "hit_busd.yaml")["root"]
 
     def get_spot_timestamp(self, asset):
         key = f"{cfg.TYPE}_timestamp"
@@ -100,7 +107,6 @@ class Config:
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
         self.WATCHLIST = self.watchlist["watchlist"]
-        self._initial_usdt_qty = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["long"]["base"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]

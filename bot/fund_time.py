@@ -18,11 +18,11 @@ class Fund:
         now = datetime.utcnow()
         self.base_durations_ts = []
         for d in self.fund_times:
-            _ts = int(datetime.strptime(f"{now.strftime('%Y-%m-%d')} {d}", "%Y-%m-%d %H:%M:%S%z").timestamp() * 1000)
+            ts = int(datetime.strptime(f"{now.strftime('%Y-%m-%d')} {d}", "%Y-%m-%d %H:%M:%S%z").timestamp() * 1000)
             if d == "00:00:00+00:00":
-                self.midnight = _ts
+                self.midnight = ts
 
-            self.fund_times_ts.append(_ts)
+            self.fund_times_ts.append(ts)
 
         return now
 
@@ -31,10 +31,9 @@ class Fund:
         times_ts = int(
             datetime.strptime(f"{now.strftime('%Y-%m-%d')} 00:00:00+00:00", "%Y-%m-%d %H:%M:%S%z").timestamp() * 1000
         )
-        _since = times_ts
         if (symbol, times_ts) not in self.fund_prices:
             self.fund_prices[(symbol, times_ts)] = self.binance.fetch_ohlcv(
-                symbol=symbol, timeframe="1h", since=_since, limit=1
+                symbol=symbol, timeframe="1h", since=times_ts, limit=1
             )
 
         return self.fund_prices[(symbol, times_ts)]

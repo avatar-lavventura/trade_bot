@@ -21,7 +21,7 @@ root:
     stop_trade_wt_30m_red: True
   btc:
     status: "on"
-    max_pos: 10
+    max_pos: 11
     initial: 0.00025 # 0.00015
     multiply_ratio: 1.10
     percent_change_to_add: 4.5

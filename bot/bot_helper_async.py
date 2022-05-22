@@ -61,7 +61,12 @@ class BotHelperAsync:
     async def fetch_symbol_percent_change(self, symbol, price=None):
         bar_price = fund.percent_change_since_day_start(symbol)
         # Time, Open, High, Low, Close, Volume
-        bar_price = bar_price[0][1]
+        try:
+            bar_price = bar_price[0][1]
+        except Exception as e:
+            log(bar_price)
+            raise e
+
         if price:
             asset_price = price
         else:
@@ -104,7 +109,12 @@ class BotHelperAsync:
                         flag = True
                         msg = f"`{msg}\n```"
 
-                    asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+                    try:
+                        asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+                    except Exception as e:
+                        log(f"{symbol} {e}")
+                        print_tb(e)
+
                     if percent < 0:
                         per_str = f"({percent}%)"
                     else:
