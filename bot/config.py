@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from bot.mongodb import Mongo
 import os
 import shutil
 from contextlib import suppress
@@ -9,9 +8,10 @@ from typing import Dict
 
 from broker._utils.yaml import Yaml
 from filelock import FileLock
+from pymongo import MongoClient
 
 from bot import cfg
-from pymongo import MongoClient
+from bot.mongodb import Mongo
 
 mc = MongoClient()
 
@@ -45,15 +45,9 @@ class Config:
         self.asset_list = []
         self.btc_quantity = {}
         self._reload()
-
-        self.env["usdt"].hit = Mongo(mc, mc["usdt"]["stats"])
-        self.env["usdt"].stats = self.yaml_wrapper(self.base_dir / "stats_usdt.yaml")
-
-        self.env["btc"].hit = Mongo(mc, mc["btc"]["stats"])
-        self.env["btc"].stats = self.yaml_wrapper(self.base_dir / "stats_btc.yaml")
-
-        self.env["busd"].hit = Mongo(mc, mc["busd"]["stats"])
-        self.env["busd"].stats = self.yaml_wrapper(self.base_dir / "stats_busd.yaml")
+        for asset in ["usdt", "btc", "busd"]:
+            self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
+            self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
 
     def get_spot_timestamp(self, asset):
         key = f"{cfg.TYPE}_timestamp"

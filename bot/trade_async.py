@@ -2,6 +2,7 @@
 
 import time
 from contextlib import suppress
+
 from broker._utils._log import log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
@@ -381,14 +382,7 @@ class BotHelper:
 
         log(await self.spot_order(float(self.strategy.size)))
         current_date = _date(_type="month")
-        if current_date in config.env[self.strategy.market.lower()].stats:
-            config.env[self.strategy.market.lower()].stats[current_date] += 1
-        else:
-            config.env[self.strategy.market.lower()].stats[current_date] = 1
-            for pair in ["usdt", "btc", "busd"]:
-                if current_date not in config.env[pair].stats:
-                    config.env[pair].stats[current_date] = 0
-
+        config.env[self.strategy.market.lower()].stats._inc(current_date)
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()
 

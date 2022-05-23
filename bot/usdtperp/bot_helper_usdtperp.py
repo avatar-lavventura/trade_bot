@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 from broker._utils._async import _sleep
-from broker.errors import QuietExit
-from bot import helper
+from broker._utils._log import br, log
 from broker._utils.tools import print_tb
-from broker._utils._log import log
+from broker.errors import QuietExit
+
+from bot import helper
 from bot.config import config
 from bot.trade_async import BotHelper
-from broker._utils._log import br
 
 
 class BotHelperUsdtperp(BotHelper):

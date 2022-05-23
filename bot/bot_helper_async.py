@@ -267,14 +267,9 @@ class BotHelperAsync:
 
             msg = f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usd, '.2f')}$`\n`{locked_per}` | `{_date(_type='hour')}` (**{pos_count}** pos)"
 
-        try:
-            stats = int(config.env[cfg.TYPE].stats[cfg.CURRENT_DATE])
-        except:
-            config.env[cfg.TYPE].stats[cfg.CURRENT_DATE] = 0
-            stats = 0
-
-        if stats > 0:
-            msg = f"{msg} | perf=**{stats}**"
+        output = config.env[cfg.TYPE].stats.find_one(cfg.CURRENT_DATE)
+        if output:
+            msg = f"{msg} | perf=**{output['value']}**"
 
         if cfg.TYPE == "usdt":
             if lost < -0.1:
