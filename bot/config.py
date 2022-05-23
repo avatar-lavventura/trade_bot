@@ -36,11 +36,9 @@ class Config:
         self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
-        self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
         self.base_durations = ["9m", "15m", "21m"]
         self.sum_usdt: float = 0.0
         self.locked_per_limit_usdtperp = None
-        self.USDTPERP_MULTIPLY_RATIO = None
         self.btc_wavetrend = {}  # type: Dict[str, str]
         self.asset_list = []
         self.btc_quantity = {}
@@ -123,12 +121,9 @@ class Config:
         self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
         self.env["btc"].positions_alert = self.yaml_wrapper(self.base_dir / "positions_alert_btc")
 
-        self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
         self.status_usdt = self.yaml_wrapper(self.base_dir / "usdt_pos_count.yaml")
         self.status_btc = self.yaml_wrapper(self.base_dir / "btc_pos_count.yaml")
 
-        # spot
-        # ====
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.USDT_MAX_POS = self.cfg["root"]["usdt"]["max_pos"]
         self.BTC_MAX_POS = self.cfg["root"]["btc"]["max_pos"]
@@ -136,9 +131,16 @@ class Config:
         self.SPOT_locked_percent_limit = self.cfg["root"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
         self.initial_btc_quantity = self.cfg["root"]["btc"]["initial"]
-        # self.initialize_usdtperp()
+
+    # USDTPERP
+    # ========
+    def _reload_usdtperp(self) -> None:
+        self.initialize_usdtperp()
 
     def initialize_usdtperp(self) -> None:
+        # self.USDTPERP_MULTIPLY_RATIO = None
+        # self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
+        self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
         self._initial_usdt_qty_short = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["short"]["base"]
         self.initial_usdt_qty_short["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["short"]["1m"]
         self._initial_usdt_qty_long = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["long"]["base"]

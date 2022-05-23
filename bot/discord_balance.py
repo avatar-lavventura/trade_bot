@@ -4,7 +4,7 @@ import logging
 import sys
 from contextlib import suppress
 from pathlib import Path
-
+from bot.config import config
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
@@ -61,6 +61,7 @@ class Discord_Alpy:
         await self.main()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
+        scheduler.add_job(self._fetch_balance, "cron", second="*/5", timezone="Europe/Istanbul")
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone="Europe/Istanbul")
         scheduler.start()
 
@@ -73,6 +74,28 @@ class Discord_Alpy:
 
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
+
+    async def _fetch_balance(self):
+        try:
+            ongoing_positions = []
+            cfg.BALANCES = await helper.exchange.spot.fetch_balance()
+            for symbol in cfg.BALANCES:
+                if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
+                    if cfg.BALANCES[symbol]["total"] > 0.0:
+                        ongoing_positions.append(symbol)
+
+            del_list = []
+            key = f"{cfg.TYPE}_timestamp"
+            for asset_timestamp in config.timestamp[key]:
+                if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
+                    del_list.append(asset_timestamp)
+
+            for asset in del_list:
+                if asset not in config.SPOT_IGNORE_LIST:
+                    del config.timestamp[key][asset]
+                    print(f"#> TIMESTAMP DELETED for {asset}")
+        except Exception as e:
+            print(f"E: {e}")
 
     async def update_current_date(self):
         cfg.CURRENT_DATE = _date(_type="month")

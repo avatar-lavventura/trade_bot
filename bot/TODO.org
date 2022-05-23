@@ -1,6 +1,7 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO print BNB balance
 ** TODO lower than 5m candle maybe cut of the trade,check ?/
 #+begin_src python
 response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)

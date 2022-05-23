@@ -17,9 +17,6 @@ fund = Fund()
 
 
 class BotHelperAsync:
-    def __init__(self):
-        self.balances = []
-
     async def close(self):
         """Close async function.
 
@@ -60,12 +57,11 @@ class BotHelperAsync:
 
     async def fetch_symbol_percent_change(self, symbol, price=None):
         bar_price = fund.percent_change_since_day_start(symbol)
-        # Time, Open, High, Low, Close, Volume
         try:
+            # Time, Open, High, Low, Close, Volume
             bar_price = bar_price[0][1]
-        except Exception as e:
-            log(bar_price)
-            raise e
+        except:
+            raise KeyboardInterrupt
 
         if price:
             asset_price = price
@@ -112,7 +108,7 @@ class BotHelperAsync:
                     try:
                         asset_price, percent = await self.fetch_symbol_percent_change(symbol)
                     except Exception as e:
-                        log(f"{symbol} {e}")
+                        log(f"E: {symbol} {e}")
                         print_tb(e)
 
                     if percent < 0:
@@ -150,12 +146,12 @@ class BotHelperAsync:
         count: int = 0
         config.asset_list = []
         try:
-            self.balances = await helper.exchange.spot.fetch_balance()
+            _balances_list = await helper.exchange.spot.fetch_balance()
         except Exception as e:
             raise e
 
         cfg.BTCUSDT_PRICE = float(await self.spot_fetch_ticker("BTC/USDT"))
-        for balance in self.balances["info"]["balances"]:
+        for balance in _balances_list["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0 or float(balance["locked"]) != 0:
                 quantity = float(balance["free"]) + float(balance["locked"])
@@ -238,8 +234,16 @@ class BotHelperAsync:
         cfg.discord_message_full = ".\n"
         open(cfg.balance_fn, "w").close()
         for asset in config.asset_list:
-            output = await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
-            lost += float(output)
+            if cfg.BALANCES:
+                bal = cfg.BALANCES[asset]["total"]
+                if bal > 0:
+                    output = await self.spot_limit(asset, cfg.BALANCES[asset]["total"], _sum, is_limit)
+                    lost += float(output)
+                else:
+                    log(f"{asset} balance is zero")
+            else:
+                output = await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
+                lost += float(output)
 
         if cfg.TYPE == "usdt":
             free = format(float(config.env["usdt"].status["free"]), ".2f")
