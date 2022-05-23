@@ -232,6 +232,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             msg = f"{msg}`{format(profit * 1000, '.5')}` ({format(per_change, '.2f')}%) | {per}% \n"
 
+        if _type == "btc":
+            _sum = _sum * cfg.BTCUSDT_PRICE  # total usdt if type is btc will be used for addition check
+
         if self.channel:
             if cfg.discord_message_full == ".\n" and _type in ["usdt", "busd"]:
                 special_char = ""

@@ -18,13 +18,13 @@ mc = MongoClient()
 
 class Env:
     def __init__(self):
+        self.multiply_ratio = 1.0
         self.percent_change_to_add = None
         self.usdt_multiply_ratio = None
         self.hit = None
         self.risk = None
         self.stats = None
         self.status = None
-        self.multiply_ratio = 1.0
 
 
 class Config:

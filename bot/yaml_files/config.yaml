@@ -1,5 +1,5 @@
 root:
-  isolated_wallet_limit: 75
+  isolated_wallet_limit: 100
   discord_msg_above_usdt: 150
   take_profit: 0.0052
   locked_percent_limit: 100
