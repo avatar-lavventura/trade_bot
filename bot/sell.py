@@ -23,7 +23,7 @@ bot_async = BotHelperAsync()
 async def sell_order():
     total_balance = 0.0
     try:
-        own_usd, future_balance = await bot_async.spot_balance(is_limit=False)
+        own_usdt, future_balance = await bot_async.spot_balance(is_limit=False)
     except Exception as e:
         print_tb(e)
     finally:

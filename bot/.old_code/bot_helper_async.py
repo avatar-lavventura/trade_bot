@@ -29,11 +29,7 @@ class BotHelperAsync:
         except:
             since = config.env[cfg.TYPE].status["timestamp"]
 
-        if asset == "LUNA":
-            trades = await helper.exchange.spot.fetch_my_trades(asset + "/BUSD", since=since)
-        else:
-            trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=since)
-
+        trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=since)
         ordering = {}
         for idx, trade in enumerate(trades):
             if trade["timestamp"] in ordering:

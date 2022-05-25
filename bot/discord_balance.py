@@ -4,15 +4,17 @@ import logging
 import sys
 from contextlib import suppress
 from pathlib import Path
-from bot.config import config
+
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
+from broker._utils._log import log
 from broker._utils.tools import _date, print_tb
 from broker._utils.yaml import Yaml
 
 from bot import binance_balance, cfg, helper
 from bot.binance_balance import process_main
+from bot.config import config
 
 logging.disable(logging.CRITICAL)
 logging.getLogger("requests").setLevel(logging.CRITICAL)
@@ -21,10 +23,10 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self, _type):
+        log(f" * bot_type={_type}", is_write=False)
         try:
             self._type = cfg.TYPE = _type.lower()
             _log.ll.LOG_FILENAME = Path.home() / ".bot" / f"program_{_type}.log"
-            print(f" * bot_type={_type}")
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
             self.client = discord.Client()
@@ -42,7 +44,7 @@ class Discord_Alpy:
                 self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
 
             self.client.loop.close()
-            print("## program is ended")
+            log("## program is ended", is_write=False)
         except SystemExit:
             pass
         except Exception as e:
@@ -56,13 +58,20 @@ class Discord_Alpy:
         - runs every 30 seconds: (..., second="*/30")
         - runs at 30th second: (..., second="30")
         """
-        cfg.CURRENT_DATE = _date(_type="month")
+        await self.update_current_date()
         await helper.exchange.set_markets()
         await self.main()
+        await self.record_balance()
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
-        scheduler.add_job(self._fetch_balance, "cron", second="*/10", timezone="Europe/Istanbul")
-        scheduler.add_job(self.update_current_date, "cron", hour="*", timezone="Europe/Istanbul")
+        tz = "Europe/Istanbul"
+        # second
+        scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
+        if cfg.TYPE == "btc":  # currently usdt is waiting to recover the lost
+            scheduler.add_job(self._fetch_balance, "cron", second="*/10", timezone=tz)
+
+        # hour
+        scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
+        scheduler.add_job(self.record_balance, "cron", hour="*", timezone=tz)
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -77,12 +86,15 @@ class Discord_Alpy:
 
     async def _fetch_balance(self):
         try:
+            position_count = 0
             ongoing_positions = []
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
             for symbol in cfg.BALANCES:
                 if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
                     if cfg.BALANCES[symbol]["total"] > 0.0:
                         ongoing_positions.append(symbol)
+                        if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
+                            position_count += 1
 
             del_list = []
             key = f"{cfg.TYPE}_timestamp"
@@ -91,24 +103,32 @@ class Discord_Alpy:
                     del_list.append(asset_timestamp)
 
             for asset in del_list:
-                if asset not in config.SPOT_IGNORE_LIST:
-                    del config.timestamp[key][asset]
-                    print(f"#> TIMESTAMP DELETED for {asset}")
+                del config.timestamp[key][asset]
+                # log(f"#> TIMESTAMP DELETED for [blue]{asset}[/blue]", is_write=False)
+
+            config.env[cfg.TYPE]._status.add_single_key("count", position_count)
         except Exception as e:
-            print(f"E: {e}")
+            log(f"E: {e}")
 
     async def update_current_date(self):
-        cfg.CURRENT_DATE = _date(_type="month")
+        cfg.CURRENT_DATE = _date(_type="year")
+
+    async def record_balance(self):
+        config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
 
     async def main(self):
         await self.pre_discord_setup()
         await process_main(self)
 
 
-if __name__ == "__main__":
+def main():
     try:
         _type = sys.argv[1:][0]
     except:
         _type = "usdt"
 
     Discord_Alpy(_type)
+
+
+if __name__ == "__main__":
+    main()

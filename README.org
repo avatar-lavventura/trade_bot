@@ -1,1 +1,1 @@
-README
+* Trading Bot for Binance Spot

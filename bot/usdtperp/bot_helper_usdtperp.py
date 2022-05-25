@@ -129,7 +129,6 @@ class BotHelperUsdtperp(BotHelper):
                     _attempt = br(f"attempt={idx + 1}")
                     log(f"Fetch future positions {_attempt}", "bold cyan")
 
-                # at funding times like 3:00 am nearyly 16 seconds binance may hang
                 positions = await helper.exchange.future.fetch_positions(symbols=self.strategy.symbol)
                 entry_price, amount, isolated_wallet = self.get_future_position(positions)
                 break

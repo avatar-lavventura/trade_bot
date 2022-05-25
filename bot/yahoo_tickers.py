@@ -8,7 +8,7 @@ from pymongo import MongoClient
 
 from bot.config import config
 from bot.mongodb import Mongo
-from bot.my_balance import fetch_balance, get_gold, get_silver
+from bot.usdtperp.my_balance import fetch_balance, get_gold, get_silver
 
 mc = MongoClient()
 mongo_db = Mongo(mc, mc["trader_bot"]["timestamp"])
@@ -28,7 +28,7 @@ async def main():
     if gold_gr > 0.0:
         gold_usdt = float(format(get_gold(gold_gr), ".2f"))
         config.goal["portfolio"]["GOLD"]["troy_ounce"] = float(format(gold_gr * 0.032151, ".4f"))
-        log(f" * Gold => {gold_usdt}")
+        log(f" * [yellow]gold[/yellow] => {gold_usdt}")
         config.goal["portfolio"]["GOLD"]["USD"] = gold_usdt
 
     # total_balance = total_balance + silver_usdt

@@ -497,8 +497,8 @@ def trade_cont(client, balances):
     current_btc_price_USD = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
     # current_btc_price_TRY = client.get_symbol_ticker(symbol="BTCTRY")["price"]
     # current_btc_price = client.get_symbol_ticker(symbol="BTCUSDT")["price"]
-    own_usd = sum_btc * float(current_btc_price_USD)
-    log(f"own_usd={own_usd}")
+    own_usdt = sum_btc * float(current_btc_price_USD)
+    log(f"own_usdt={own_usdt}")
     try:
         global org_symbols
         org_symbols = load_obj("symbols")

@@ -1,7 +1,7 @@
 alerts:
   a1:
     pair: PNTUSDT
-    price: 0.50
+    price: 0.35
   a2:
     pair: ORNUSDT
-    price: 3
+    price: 1.70

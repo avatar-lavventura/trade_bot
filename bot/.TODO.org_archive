@@ -533,3 +533,44 @@ CLOSED: [2022-05-15 Sun 11:35]
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE print BNB balance
+CLOSED: [2022-05-25 Wed 17:59]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-25 Wed 17:59
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Faster to read from mongodb than re-read from yaml have a look
+CLOSED: [2022-05-28 Sat 13:27]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-28 Sat 13:27
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+- search mongoDB write to a file fast or slow?
+
+* DONE convert .status into _status read from mongodb
+CLOSED: [2022-05-28 Sat 13:27]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-28 Sat 13:27
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Check: Don't open position when red wave_trend is on in 30m
+CLOSED: [2022-05-28 Sat 23:21]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-28 Sat 23:21
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

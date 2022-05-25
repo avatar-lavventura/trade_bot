@@ -6,17 +6,16 @@ import subprocess
 import requests
 
 
-"""
-currency='OOKI'
-curl -X 'GET' \
-  'https://api.coingecko.com/api/v3/simple/price?ids='$currency'&vs_currencies=btc' \
-  -H 'accept: application/json'
+def fetch_coingecko_api(_id, _type="btc") -> float:
+    """Fetch price from coingecko API.
 
-__ https://www.coingecko.com/en/api/documentation?
-"""
+    currency='OOKI'
+    curl -X 'GET' \
+      'https://api.coingecko.com/api/v3/simple/price?ids='$currency'&vs_currencies=btc' \
+      -H 'accept: application/json'
 
-
-def get_coingecko_api(_id, _type="btc") -> float:
+    __ https://www.coingecko.com/en/api/documentation?
+    """
     cmd = [
         "curl",
         "-sX",
@@ -35,10 +34,10 @@ def get_coingecko_api(_id, _type="btc") -> float:
         btc_price = float(data["bpi"]["USD"]["rate"].split(".")[0].replace(",", ""))
         return btc_price * asst_in_btc
 
-    return 0.0
+    return 0
 
 
 if __name__ == "__main__":
     currency_id = "ooki"
-    asset_usdt_price = get_coingecko_api(currency_id, "usdt")
+    asset_usdt_price = fetch_coingecko_api(currency_id, "usdt")
     print(asset_usdt_price)

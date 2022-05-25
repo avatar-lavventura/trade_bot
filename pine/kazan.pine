@@ -1,5 +1,6 @@
 //@version=5
-strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', calc_on_order_fills=true, process_orders_on_close=true, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)  // 45m seems safer , but check 30m as well
+// 45m is used and safer , but in future check 30m as well
+strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', calc_on_order_fills=true, process_orders_on_close=true, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
 fromMonth = 3
 fromDay = 1
 thruMonth = 1
@@ -14,6 +15,17 @@ msg = timeframe.period + '_enter'
 msg_aggr = msg + '_aggr'
 window() =>
     time >= start and time <= finish ? true : false
+
+// wave_trend: https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT
+n1 = 10  // channel Length
+n2 = 21  // average Length
+src = hlc3
+esa = ta.ema(src, n1)
+d = ta.ema(math.abs(src - esa), n1)
+ci = (src - esa) / (0.015 * d)
+tci = ta.ema(ci, n2)
+wt1 = tci  // green-line
+wt2 = ta.sma(wt1, 4)  // red-line
 
 // hunter
 vwap_period = input(title='Period', defval=5)
@@ -42,7 +54,7 @@ ph = input(.85, title='highest percentile - 0.90=90%, 0.95=95%, 0.99=99%')
 sbc = input(false, title='show Highlight Bar if WVF WAS True and IS Now False')
 sbcc = input(false, title='show highlight bar if WVF is True')
 sgb = input(false, title='check box to turn bars gray?')
-// Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
+// criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
 ltLB = input.int(40, minval=25, maxval=99, title='long-term look back current bar has to close below this value or medium term-default=40')
 mtLB = input.int(14, minval=10, maxval=20, title='medium-term look back current bar has to close below this value or long term-default=14')
 str = input.int(3, minval=1, maxval=9, title='entry price action strength-close > n bars back-default=3')
@@ -137,7 +149,7 @@ if timeframe.isseconds
 else
     count = 0
     ITERATIVE_LIME_BAR_COUNT = 9
-    for i = 1 to ITERATIVE_LIME_BAR_COUNT  // 9 lime/green lines could be 1 gray in between
+    for i = 1 to ITERATIVE_LIME_BAR_COUNT  // 9 lime(green) lines could be 1 gray in between
         if col[i] == color.lime
             count += 1
 
@@ -150,15 +162,24 @@ else
     if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
         buy_flag := true
 
-    if timeframe.period == "30"
+    if timeframe.period == "30"  // 30m
         if col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and close > close[1] and close < close[3] and close < close[4]
             buy_flag := true
 
-    if  timeframe.period == "45"
+    if  timeframe.period == "45"  // 45m
         if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
             buy_flag := true
 
-    if timeframe.period == "240"  // 4h == 60 * 4
+        if wt1 > 53
+            buy_flag := false
+
+        if (wt2 < wt1 and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray
+            buy_flag := true
+
+        if (wt2 < wt1 and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray
+            buy_flag := true
+
+    if timeframe.period == "240"  // 4hr (60 * 4)
         if col_aggressive == color.orange
             buy_flag := true
 

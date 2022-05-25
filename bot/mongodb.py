@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-from broker._utils.tools import _date
+# from broker._utils.tools import _date
 from broker.libs.mongodb import BaseMongoClass
 from pymongo import MongoClient
 
 
 class Mongo(BaseMongoClass):
-    def add_single_key(self, key, item):
+    def add_single_key(self, key, value):
         """Add key along with its portfolio into mongo_db."""
+        item = {"key": key, "value": value}
         res = self.collection.replace_one({"key": key}, item, True)
         return res.acknowledged
 
@@ -18,7 +19,7 @@ class Mongo(BaseMongoClass):
         """Add key along with its portfolio into mongo_db."""
         output = self.collection.find_one({"key": key})
         if not output:
-            self.add_single_key("doo", {"key": key, "value": value})
+            self.add_single_key(key, value)
             return True
         else:
             res = self.collection.update_one({"_id": output["_id"]}, {"$inc": {"value": 1}}, True)
@@ -51,8 +52,15 @@ if __name__ == "__main__":
     # output = mongo.find_one("DOGE")
     # print(output["value"])
 
-    # # mongo.add_single_key("doo", {"key": "doo", "stats": 1})
-    mongo = Mongo(mc, mc["btc"]["stats"])
-    current_date = _date(_type="month")
-    mongo._inc(current_date)
+    # # mongo.add_single_key("doo", {"key": "doo", "value": 1})
+    # mongo = Mongo(mc, mc["btc"]["value"])
+    # current_date = _date(_type="month")
+    # mongo._inc(current_date)
+    # mongo.find_all(sort_str="timestamp")
+
+    mongo = Mongo(mc, mc["btc"]["status"])
+    # output = mongo.add_single_key("count", 3)
+    # mongo._inc("count")
+    # output = mongo.find_one("count")
+    # print(output["value"])
     mongo.find_all(sort_str="timestamp")

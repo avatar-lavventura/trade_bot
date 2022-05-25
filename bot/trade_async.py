@@ -6,7 +6,6 @@ from contextlib import suppress
 from broker._utils._log import log
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
-from filelock import FileLock
 from pymongo import MongoClient
 
 from bot import helper
@@ -381,8 +380,7 @@ class BotHelper:
                     return
 
         log(await self.spot_order(float(self.strategy.size)))
-        current_date = _date(_type="month")
-        config.env[self.strategy.market.lower()].stats._inc(current_date)
+        config.env[self.strategy.market.lower()].stats._inc(_date(_type="year"))
         if self.strategy.asset not in config.SPOT_IGNORE_LIST:
             await self.spot_order_limit()
 
@@ -391,9 +389,6 @@ class BotHelper:
             if self.strategy.market == "USDTPERP":
                 await self.calculate_futures_size()
 
-            # if self.strategy.market in ["BTC", "USDT"]:
-            #     output = await self.symbol_price(self.strategy.symbol, "spot")
-            #     log(f"last_price={output['last']}", "bold")
             side_color = "green" if self.strategy.side == "BUY" else "red"
             log()
             log(
@@ -409,6 +404,8 @@ class BotHelper:
                 await self.buy()
             elif self.strategy.is_sell():
                 await self.sell()
+
+            time.sleep(0.2)  # helps to wait belence show up for the limit order
         except Exception as e:
             log(f"E: {e}")
 
@@ -423,14 +420,11 @@ class BotHelper:
             return decimal_count(value)
 
     def check_on_going_positions(self) -> None:
-        if self.strategy.market == "USDTPERP":
-            pos_count = config.USDTPERP_MAX_POSITION[self.strategy.time_duration]
-            if config.status_usdtperp["count"] >= pos_count:
-                raise QuietExit(f"warning: {pos_count} pos")
-        elif self.strategy.market == "BTC":
-            if config.status_btc["count"] >= config.BTC_MAX_POS:
-                raise QuietExit(f"warning: {config.BTC_MAX_POS} pos")
-        elif self.strategy.market == "USDT" and config.status_usdt["count"] >= config.USDT_MAX_POS:
+        pos_count = config.env[self.strategy.market.lower()]._status.find_one("count")["value"]
+        if self.strategy.market.lower() == "btc" and pos_count >= config.BTC_MAX_POS:
+            raise QuietExit(f"warning: {config.BTC_MAX_POS} pos")
+
+        if self.strategy.market.lower() == "usdt" and pos_count >= config.USDT_MAX_POS:
             raise QuietExit(f"warning: {config.USDT_MAX_POS} pos")
 
     async def _fetch_balance(self):
@@ -463,14 +457,7 @@ class BotHelper:
         if not is_open:
             try:
                 await self.trade_async()
-                with FileLock(config.env[self.strategy.market.lower()].status.fp_lock, timeout=5):
-                    #: in case many alerts come in same minute
-                    if self.strategy.market.lower() == "usdtperp":
-                        config.status_usdtperp["count"] += 1
-                    elif self.strategy.market.lower() == "usdt":
-                        config.status_usdt["count"] += 1
-                    elif self.strategy.market.lower() == "btc":
-                        config.status_btc["count"] += 1
+                config.env[self.strategy.market.lower()]._status._inc("count")
             except Exception as e:
                 print_tb(e)
 
@@ -496,10 +483,10 @@ class BotHelper:
         if self.strategy.market.lower() == "usdt" and free_balance < 15.0:
             raise QuietExit(f"not enough free usdt([cyan]{round(free_balance)}$[/cyan])")
 
-        if self.strategy.market == "USDTPERP":
-            self.pre_check_usdtperp(
-                free_balance, f"not enough free usdt([cyan]{round(free_balance)}$[cyan]),side={self.strategy.side}"
-            )
+        # if self.strategy.market == "USDTPERP":
+        #     self.pre_check_usdtperp(
+        #         free_balance, f"not enough free usdt([cyan]{round(free_balance)}$[cyan]),side={self.strategy.side}"
+        #     )
 
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:

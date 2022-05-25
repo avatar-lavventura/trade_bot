@@ -64,7 +64,6 @@ def futures_history(client, _symbol=None):
         history_log = client.futures_income_history(limit=1000, incomeType="REALIZED_PNL")
         history_log_comms = client.futures_income_history(limit=1000, incomeType="COMMISSION")
         history_log_fundings = client.futures_income_history(limit=1000, incomeType="FUNDING_FEE")
-
         for history_log_comm in history_log_comms:
             comm_dict[history_log_comm["tradeId"]] = abs(float(history_log_comm["income"]))
 

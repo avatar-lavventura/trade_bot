@@ -41,7 +41,7 @@ while true
 do
     python3 discord_balance.py $1
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    printf "countdown for 30 seconds  "
+    printf "countdown for 30 seconds                                                         "
     countdown 30
     echo "[  OK  ]"
 done

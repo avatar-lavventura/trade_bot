@@ -5,7 +5,6 @@ from os import path
 STABLE_COINS = ["USDT", "BNB", "ETH", "PAXG", "BUSD", "TUSD", "USDC"]
 SLEEP_INTERVAL: int = 30  # seconds to sleep for next balance check
 balance_fn = path.expanduser("~/.bot/balance.log")
-TYPE: str = ""
 discord_message: str = ".\n"
 discord_message_full: str = ".\n"
 discord_print: bool = False
@@ -14,9 +13,10 @@ discord_sent_msg = None
 BTCUSDT_PRICE: float = 0.0
 CURRENT_DATE = None
 BALANCES = None
-
+SUM_BTC = None
 BNB_QTY: float = 0.0
 BNB_BALANCE: float = 0.0
+TYPE: str = ""
 """
 - IGNORE_SOLD_QUANTITY:
 
@@ -30,6 +30,5 @@ guncellendi.  0.50% kar gozukurken maliyet dustugu icin o anki fiyatta kar
 gostergesi 1.0% oldu, daha ucuza satis emri verme durumu olabilir emirler guncellenirse
 """
 IGNORE_SOLD_QUANTITY = True
-
 _IGNORE_SOLD_QUANTITY = {}
 _IGNORE_SOLD_QUANTITY["PNT/USDT"] = False

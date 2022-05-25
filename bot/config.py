@@ -17,14 +17,17 @@ mc = MongoClient()
 
 
 class Env:
-    def __init__(self):
-        self.multiply_ratio = 1.0
+    def __init__(self) -> None:
+        self.multiply_ratio: float = 1.0
         self.percent_change_to_add = None
         self.usdt_multiply_ratio = None
+        self.positions_alert = None
+        self.balance = None
         self.hit = None
         self.risk = None
         self.stats = None
         self.status = None
+        self._status = None
 
 
 class Config:
@@ -37,20 +40,27 @@ class Config:
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
         self.btc_wavetrend = {}  # type: Dict[str, str]
-        self.base_durations = ["9m", "15m", "21m"]
+        # self.base_durations = ["9m", "15m", "21m"]
         self.sum_usdt: float = 0.0
         self.locked_per_limit_usdtperp = None
         self.asset_list = []
         self.btc_quantity = {}
         self._reload()
+        # self.watchlist_mb = Mongo(mc, mc["watchlist"])
         for asset in ["usdt", "btc", "busd"]:
+            self.env[asset].balance = Mongo(mc, mc[asset]["balance"])
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
+            self.env[asset]._status = Mongo(mc, mc[asset]["status"])
 
-    def get_spot_timestamp(self, asset):
+        for asset in ["usdt", "btc", "busd"]:
+            if not self.env[asset]._status.find_one("count"):
+                self.env[asset]._status.add_single_key("count", 0)
+
+    def get_spot_timestamp(self, asset) -> int:
         key = f"{cfg.TYPE}_timestamp"
         if self.timestamp[key][asset] == {}:
-            self.timestamp[key][asset] = config.env[cfg.TYPE].status["timestamp"]
+            self.timestamp[key][asset] = int(config.env[cfg.TYPE].status["timestamp"])
 
         return int(self.timestamp[key][asset])
 
@@ -121,9 +131,6 @@ class Config:
         self.env["btc"].multiply_ratio = self.cfg["root"]["btc"]["multiply_ratio"]
         self.env["btc"].positions_alert = self.yaml_wrapper(self.base_dir / "positions_alert_btc")
 
-        self.status_usdt = self.yaml_wrapper(self.base_dir / "usdt_pos_count.yaml")
-        self.status_btc = self.yaml_wrapper(self.base_dir / "btc_pos_count.yaml")
-
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.USDT_MAX_POS = self.cfg["root"]["usdt"]["max_pos"]
         self.BTC_MAX_POS = self.cfg["root"]["btc"]["max_pos"]
@@ -138,8 +145,8 @@ class Config:
         self.initialize_usdtperp()
 
     def initialize_usdtperp(self) -> None:
-        # self.USDTPERP_MULTIPLY_RATIO = None
-        # self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
+        self.USDTPERP_MULTIPLY_RATIO = None
+        self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
         self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
         self._initial_usdt_qty_short = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["short"]["base"]
         self.initial_usdt_qty_short["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["short"]["1m"]

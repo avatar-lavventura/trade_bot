@@ -60,8 +60,8 @@ async def fetch_balance() -> float:  # noqa
     total_balance = 0.0
     print_flag = False
     try:
-        own_usd, future_balance = await bot_async.spot_balance(is_limit=False)
-        total_balance = float(own_usd)
+        own_usdt, future_balance = await bot_async.spot_balance(is_limit=False)
+        total_balance = float(own_usdt)
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         future_balance += float(bot_async.futures_balance["total"]["USDT"])
         total_balance += future_balance
