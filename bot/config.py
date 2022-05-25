@@ -36,10 +36,10 @@ class Config:
         self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
+        self.btc_wavetrend = {}  # type: Dict[str, str]
         self.base_durations = ["9m", "15m", "21m"]
         self.sum_usdt: float = 0.0
         self.locked_per_limit_usdtperp = None
-        self.btc_wavetrend = {}  # type: Dict[str, str]
         self.asset_list = []
         self.btc_quantity = {}
         self._reload()

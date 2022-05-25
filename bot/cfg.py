@@ -15,6 +15,8 @@ BTCUSDT_PRICE: float = 0.0
 CURRENT_DATE = None
 BALANCES = None
 
+BNB_QTY: float = 0.0
+BNB_BALANCE: float = 0.0
 """
 - IGNORE_SOLD_QUANTITY:
 

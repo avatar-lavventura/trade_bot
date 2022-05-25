@@ -182,14 +182,18 @@ class BotHelperAsync:
                     sum_usdt += quantity
                 elif asset.lower() == "busd":
                     sum_busd += quantity
+                if asset.lower() == "bnb":
+                    cfg.BNB_QTY = quantity
+                    cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
 
         if sum_btc > 0.00002:
             own_usd = sum_btc * cfg.BTCUSDT_PRICE
             log(
-                f" * btc=%.8f [blue]==[/blue] [cyan]%.2f$[/cyan] | [magenta]{int(cfg.BTCUSDT_PRICE)}[/magenta]"
-                f" [blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usd)
+                f" * btc=%.8f [blue]==[/blue] [cyan]%.2f$[/cyan] | bnb=[cyan]%.2f$[/cyan] | [magenta]{int(cfg.BTCUSDT_PRICE)}[/magenta]"
+                f" [blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usd, cfg.BNB_BALANCE)
             )
 
+        # TODO: if cfg.BNB_BALANCE < 1.00 buy 5$ worth of BNB
         pos_count: int = 0
         sum_busd = float(format(sum_busd, ".2f"))
         sum_usdt = float(format(sum_usdt, ".2f"))
@@ -204,7 +208,9 @@ class BotHelperAsync:
                 if cfg.TYPE == "usdt":
                     log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
             elif cfg.TYPE == "usdt":
-                log(f" * usdt={sum_usdt} | busd={sum_busd} | [blue]{_date(_type='hour')}[/blue]")
+                log(
+                    f" * usdt={sum_usdt} | busd={sum_busd} | bnb=[cyan]{format(cfg.BNB_BALANCE, '.2f')}$[/cyan] | [blue]{_date(_type='hour')}[/blue]"
+                )
 
             config.sum_usdt = sum_usdt
             if sum_usdt > 1.0:
@@ -330,9 +336,9 @@ class BotHelperAsync:
                 raise e
 
     async def spot_fetch_ticker(self, asset) -> float:
-        if "BUSD" in asset:
+        if "USDT" != asset[-4:] and "BUSD" == asset[-4:]:
             asset = asset.replace("BUSD", "") + "/BUSD"
-        elif "USDT" not in asset and "BTC" not in asset:
+        elif "USDT" != asset[-4:] and "BTC" != asset[-3:]:
             asset = f"{asset}/BTC"
 
         price = await helper.exchange.spot.fetch_ticker(asset)

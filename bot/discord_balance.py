@@ -61,7 +61,7 @@ class Discord_Alpy:
         await self.main()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone="Europe/Istanbul")
-        scheduler.add_job(self._fetch_balance, "cron", second="*/5", timezone="Europe/Istanbul")
+        scheduler.add_job(self._fetch_balance, "cron", second="*/10", timezone="Europe/Istanbul")
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone="Europe/Istanbul")
         scheduler.start()
 
