@@ -2,7 +2,7 @@ files:
   input: pairs_usdt.csv
 tradingview:
   chartUrl: https://www.tradingview.com/chart/vJo45W0J/
-  interval: 45m
+  interval: 1h
 alert:
   condition:
     primaryLeft: alpy_vix

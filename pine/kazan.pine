@@ -1,5 +1,5 @@
 //@version=5
-// 45m is used and safer , but in future check 30m as well
+// 1h will be used ; 45m is used in the past but 1h seems safer
 strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', calc_on_order_fills=true, process_orders_on_close=true, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
 fromMonth = 3
 fromDay = 1
@@ -26,7 +26,7 @@ ci = (src - esa) / (0.015 * d)
 tci = ta.ema(ci, n2)
 wt1 = tci  // green-line
 wt2 = ta.sma(wt1, 4)  // red-line
-
+is_wt_cross_green = wt2 < wt1 and wt2[1] > wt1[1]
 // hunter
 vwap_period = input(title='Period', defval=5)
 vwap_source = hlc3
@@ -142,46 +142,75 @@ else
 if strategy.position_size[0] != 0 and bar_index > math.abs(strategy.position_size) + SLEEP_BAR
     strategy.close_all(when=window())
 
-buy_flag = false
+is_buy = false
 if timeframe.isseconds
     if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA
-        buy_flag := true
+        is_buy := true
 else
     count = 0
     ITERATIVE_LIME_BAR_COUNT = 9
+    lowest_value = low[1]
     for i = 1 to ITERATIVE_LIME_BAR_COUNT  // 9 lime(green) lines could be 1 gray in between
+        if low[i] < lowest_value
+            lowest_value := low[i]
+
         if col[i] == color.lime
             count += 1
 
     if col_aggressive == color.orange and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray
-        buy_flag := true
+        is_buy := true
 
-    if col == color.gray and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray
-        buy_flag := true
+    if col == color.gray and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray and low < lowest_value
+        is_buy := true
 
     if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
-        buy_flag := true
+        is_buy := true
 
     if timeframe.period == "30"  // 30m
         if col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and close > close[1] and close < close[3] and close < close[4]
-            buy_flag := true
-
-    if  timeframe.period == "45"  // 45m
+            is_buy := true
+    else if  timeframe.period == "45"  // 45m
         if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
-            buy_flag := true
+            is_buy := true
 
         if wt1 > 53
-            buy_flag := false
+            is_buy := false
 
-        if (wt2 < wt1 and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray
-            buy_flag := true
+        if col == color.gray // and is_wt_cross_green
+            for i = 2 to 30
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+                    if low < low[i] and low < low[i + 1]// close < low[i]
+                        is_buy := true
 
-        if (wt2 < wt1 and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray
-            buy_flag := true
+                if col[i] == color.gray and col[i + 1] == color.lime
+                    break
+    else if  timeframe.period == "60"  // 1h
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+            is_buy := true
 
-    if timeframe.period == "240"  // 4hr (60 * 4)
+        if wt1 > 53
+            is_buy := false
+
+        // if (is_wt_cross_green and wt2 <= -53) and col == color.gray and col[1] == color.gray and col[2] == color.lime
+        //     is_buy := true
+
+        // if (is_wt_cross_green and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray
+        //     is_buy := true
+
+        // if (is_wt_cross_green and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray
+        //     is_buy := true
+
+        if col == color.gray // and is_wt_cross_green
+            for i = 2 to 24
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+                    if low < low[i] and low < low[i + 1] // close < low[i]
+                        is_buy := true
+
+                if col[i] == color.gray and col[i + 1] == color.lime
+                    break
+    else if timeframe.period == "240"  // 4hr (60 * 4)
         if col_aggressive == color.orange
-            buy_flag := true
+            is_buy := true
 
     // if col_aggressive == color.orange
     //     msg := msg_aggr
@@ -189,11 +218,11 @@ else
     // (col[1] == color.lime and col == color.gray)
     // col_aggressive == color.orange
 
-if buy_flag
+if is_buy // "l": "long"
     if strategy.opentrades[0] == 0 or strategy.position_size < 0
-        strategy.entry('long', strategy.long, qty=bar_index, when=window(), alert_message=msg)
+        strategy.entry('l', strategy.long, qty=bar_index, when=window(), alert_message=msg)
     else if bar_index > math.abs(strategy.position_size)
         if strategy.position_size[0] != 0
             strategy.close_all(when=window())
         else
-            strategy.entry('long', strategy.long, qty=bar_index, when=window(), alert_message=msg)
+            strategy.entry('l', strategy.long, qty=bar_index, when=window(), alert_message=msg)

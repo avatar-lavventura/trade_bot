@@ -96,7 +96,6 @@ quart==0.17.0
 regex==2021.8.21
 requests==2.26.0
 rich==12.2.0
-rope==0.22.0
 ruamel.yaml==0.17.13
 ruamel.yaml.clib==0.2.6
 selenium==3.141.0

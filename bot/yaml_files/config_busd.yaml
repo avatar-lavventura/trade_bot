@@ -1,0 +1,8 @@
+root:
+  busd:
+    status: "off"
+    max_pos: 1
+    initial: 12
+    multiply_ratio: 1.10
+    percent_change_to_add: 20
+    stop_trade_wt_30m_red: True

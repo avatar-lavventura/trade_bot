@@ -122,7 +122,8 @@ class BotHelperAsync:
                     await cfg.discord_sent_msg.edit(content=msg)
                 else:
                     cfg.discord_sent_msg = await self.channel.send(msg)
-            except:
+            except Exception as e:
+                print_tb(e)
                 with suppress(Exception):
                     await cfg.discord_sent_msg.delete()
 
@@ -190,7 +191,12 @@ class BotHelperAsync:
                 f"[blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
             )
 
-        # TODO: if cfg.BNB_BALANCE < 1.00 buy 5$ worth of BNB
+        if cfg.BNB_BALANCE < 1.0:
+            try:
+                await self.buy_bnb()
+            except Exception as e:
+                print_tb(e)
+
         pos_count: int = 0
         sum_busd = float(format(sum_busd, ".2f"))
         sum_usdt = float(format(sum_usdt, ".2f"))
@@ -229,13 +235,6 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
-        if cfg.BNB_BALANCE < 1.0:
-            log("warning: BUY MORE BNB")
-            if cfg.TYPE == "btc":
-                pass
-            else:
-                pass
-
         lost: float = 0.0
         cfg.locked_balance = 0.0
         cfg.discord_message = ".\n"
@@ -269,10 +268,19 @@ class BotHelperAsync:
 
         locked_per = f"locked={format(cfg.locked_balance, '.2f')}%"
         if cfg.TYPE == "usdt":
-            msg = (
-                f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` | free=`{free}` | "
-                f"total=`{round(abs(lost) + sum_usdt)}$`\n`{locked_per}` | `{_date(_type='hour')}` (**{pos_count}** pos)"
-            )
+            if sum_busd > 0:
+                msg = (
+                    f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` | free=`{free}` | "
+                    f"total=`{round(abs(lost) + sum_usdt)}$`\n`{locked_per}` | `{_date(_type='hour')}` "
+                    f"(**{pos_count}** pos)"
+                )
+            else:
+                msg = (
+                    f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | free=`{free}` | "
+                    f"total=`{round(abs(lost) + sum_usdt)}$`\n`{locked_per}` | `{_date(_type='hour')}` "
+                    f"(**{pos_count}** pos)"
+                )
+
             cfg.SUM_BTC = 0
             cfg.SUM_USDT = format(sum_usdt, ".2f")
         else:
@@ -280,7 +288,10 @@ class BotHelperAsync:
             if float(free) > 0:
                 msg = f"{msg} free=`{free}` |"
 
-            msg = f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usdt, '.2f')}$`\n`{locked_per}` | `{_date(_type='hour')}` | pos=**{pos_count}**"
+            msg = (
+                f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usdt, '.2f')}$`\n`{locked_per}` | "
+                f"`{_date(_type='hour')}` | pos=**{pos_count}**"
+            )
             cfg.SUM_BTC = format(sum_btc, ".8f")
             cfg.SUM_USDT = format(own_usdt, ".2f")
 
@@ -289,13 +300,46 @@ class BotHelperAsync:
             msg = f"{msg} | perf=**{output['value']}**"
 
         if cfg.TYPE == "btc":
-            await self._discord_send(msg, format(lost * 1000, ".5f"), pos_count, " mBTC", 0, is_message=False)
+            is_message = True
+            if "is_discord" in config.cfg["root"][cfg.TYPE] and config.cfg["root"][cfg.TYPE]["is_discord"] == "off":
+                is_message = False
+
+            await self._discord_send(msg, format(lost * 1000, ".5f"), pos_count, " mBTC", 0, is_message=is_message)
         else:
             await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", float(free))
 
         config.env[cfg.TYPE]._status.add_single_key("count", count)
         self.update_timestamp_status()
         return own_usdt, sum_usdt, only_usdt, only_btc
+
+    async def buy_bnb(self):
+        log("warning: BUYING MINIMUM AMOUNT OF BNB", is_write=False)
+        if cfg.TYPE == "btc":
+            if float(config.env["btc"].status["free"]) < 0.0002:
+                return
+
+            output = await helper.exchange.spot.fetch_ticker("BNBBTC")
+            qty = float(format(0.00015 / output["last"], ".3f"))
+            order = await helper.exchange.spot.create_market_buy_order("BNBBTC", qty)
+        else:
+            if config.env["usdt"].status["free"] < 15:
+                return
+
+            output = await helper.exchange.spot.fetch_ticker("BNBUSDT")
+            qty = float(format(11.0 / output["last"], ".3f"))
+            order = await helper.exchange.spot.create_market_buy_order("BNBUSDT", qty)
+
+        order = order["info"]
+        with suppress(Exception):
+            del order["timeInForce"]
+            del order["orderListId"]
+            del order["price"]
+            del order["status"]
+            del order["type"]
+            del order["origQty"]
+            del order["executedQty"]
+
+        log(order, is_write=False)
 
     async def spot_order(self, quantity, symbol, side, is_return=False):
         try:

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from broker._utils import _log
 from broker._utils._log import log
 from broker._utils.tools import _date, print_tb
@@ -67,11 +68,14 @@ class Discord_Alpy:
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if cfg.TYPE == "btc":  # currently usdt is waiting to recover the lost
-            scheduler.add_job(self._fetch_balance, "cron", second="*/10", timezone=tz)
+            scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
 
         # hour
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(self.record_balance, "cron", hour="*", timezone=tz)
+
+        trigger = CronTrigger(year="*", month="*", day="*", hour="3", minute="1", second="0")
+        scheduler.add_job(self.raise_KeyboardInterrupt, trigger=trigger, timezone=tz)
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -84,7 +88,7 @@ class Discord_Alpy:
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
 
-    async def _fetch_balance(self):
+    async def fetch_balance(self):
         try:
             position_count = 0
             ongoing_positions = []
@@ -104,7 +108,6 @@ class Discord_Alpy:
 
             for asset in del_list:
                 del config.timestamp[key][asset]
-                # log(f"#> TIMESTAMP DELETED for [blue]{asset}[/blue]", is_write=False)
 
             config.env[cfg.TYPE]._status.add_single_key("count", position_count)
         except Exception as e:
@@ -115,6 +118,9 @@ class Discord_Alpy:
 
     async def record_balance(self):
         config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
+
+    async def raise_KeyboardInterrupt(self):
+        raise KeyboardInterrupt
 
     async def main(self):
         await self.pre_discord_setup()

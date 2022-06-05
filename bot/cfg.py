@@ -2,7 +2,7 @@
 
 from os import path
 
-STABLE_COINS = ["USDT", "BNB", "ETH", "PAXG", "BUSD", "TUSD", "USDC"]
+STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG"]
 SLEEP_INTERVAL: int = 30  # seconds to sleep for next balance check
 balance_fn = path.expanduser("~/.bot/balance.log")
 discord_message: str = ".\n"
@@ -18,14 +18,14 @@ BNB_QTY: float = 0.0
 BNB_BALANCE: float = 0.0
 TYPE: str = ""
 """
-- IGNORE_SOLD_QUANTITY:
+* IGNORE_SOLD_QUANTITY
 
-sold quantity affects the average price make it smaller showing your are in
+Sold quantity affects the average price make it smaller showing your are in
 gain, which may cause to update your sell limit order in much small price,
 causing to sell right away.  // kar yaptiysan 20%'sini satip maliyetini dusuyuor
 genel kar gostergesi bir anda artiyor onceki kari dikkate aldigi icin
 
-* 8.79 de 400$ alim gerceklesti, 100$ kara satisi oldu, maliyet 8.75 olarak
+- 8.79 de 400$ alim gerceklesti, 100$ kara satisi oldu, maliyet 8.75 olarak
 guncellendi.  0.50% kar gozukurken maliyet dustugu icin o anki fiyatta kar
 gostergesi 1.0% oldu, daha ucuza satis emri verme durumu olabilir emirler guncellenirse
 """

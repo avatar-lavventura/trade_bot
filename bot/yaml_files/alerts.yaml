@@ -5,3 +5,6 @@ alerts:
   a2:
     pair: ORNUSDT
     price: 1.70
+  a3:
+    pair: UNFIBTC
+    price: 0.00036

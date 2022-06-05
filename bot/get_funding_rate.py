@@ -22,7 +22,10 @@ def main():
             funding[symbol] = response[symbol]["info"]
             funding[symbol]["lastFundingRate"] = float(funding[symbol]["lastFundingRate"]) * 100
 
-    log(funding, is_write=False)
+    if funding:
+        log(funding, is_write=False)
+    else:
+        log("#> [white]no funding rate > 0.75%", is_write=False)
 
 
 if __name__ == "__main__":

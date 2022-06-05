@@ -5,9 +5,9 @@ root:
   locked_percent_limit: 100
   ignore: # for all
     - PAIR
-    - BEL
+    - UNFI
   usdt:
-    status: "on"
+    status: "on" # "on" or "off"
     max_pos: 3
     initial: 12
     multiply_ratio: 1.10
@@ -15,14 +15,8 @@ root:
     stop_trade_wt_30m_red: True
     ignore:
       - PAIR
-  busd:
-    status: "off"
-    max_pos: 1
-    initial: 12
-    multiply_ratio: 1.10
-    percent_change_to_add: 20
-    stop_trade_wt_30m_red: True
   btc:
+    is_discord: "on"
     status: "on"
     max_pos: 10
     initial: 0.00023
