@@ -224,20 +224,24 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             log(f"| [bold magenta]{format(_sum * 1000, '.4f')} ", end="")
             if float(per) > 0:
+                if float(per) > 100:
+                    per = "100"
+
                 log(f"([yellow]{per}%[/yellow]) ", end="")
 
         cfg.locked_balance += float(per)
         msg = f"**{asset}** {entry_price} p={asset_price} "
+        _per_change = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit, '.1f')}` ({format(per_change, '.2f')}%) `{round(_sum)}$`\n"
+                msg = f"{msg}`{format(profit, '.1f')}` ({_per_change}%) `{round(_sum)}$`\n"
             else:
-                msg = f"{msg}`{format(profit, '.1f')}` ({format(per_change, '.2f')}%) (↑ {per_change_r}%) `{round(_sum)}$`\n"
+                msg = f"{msg}`{format(profit, '.1f')}` ({_per_change}%) (↑ {per_change_r}%) `{round(_sum)}$`\n"
         else:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({format(per_change, '.2f')}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({_per_change}%) | {per}% \n"
             else:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({format(per_change, '.2f')}%) (↑ {per_change_r}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({_per_change}%) (↑ {per_change_r}%) | {per}% \n"
 
         if _type == "btc":
             _sum = _sum * cfg.BTCUSDT_PRICE  # total usdt if type is btc will be used for addition check

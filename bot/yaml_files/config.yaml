@@ -6,6 +6,7 @@ root:
   ignore: # for all
     - PAIR
     - UNFI
+    - ORN
   usdt:
     status: "on" # "on" or "off"
     max_pos: 3

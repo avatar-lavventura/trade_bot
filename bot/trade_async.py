@@ -443,7 +443,8 @@ class BotHelper:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
                 log(f" * {_date()} [bold magenta]{data_msg}")
-                await self.discord_client.send_msg(data_msg, "alpy")
+                if "strategy.order.action" not in data_msg:
+                    await self.discord_client.send_msg(data_msg, "alpy")
 
             return
 

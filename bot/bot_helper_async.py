@@ -17,7 +17,7 @@ fund = Fund()
 
 class BotHelperAsync:
     async def close(self):
-        """Close async function.
+        """Close the async function.
 
         __ https://stackoverflow.com/a/54528397/2402577
         """
@@ -40,8 +40,8 @@ class BotHelperAsync:
 
     def update_timestamp_status(self) -> None:
         self._update_timestamp_status(f"{cfg.TYPE}_timestamp")
-        if cfg.TYPE == "usdt" and config.cfg["root"]["busd"]["status"] == "on":
-            self._update_timestamp_status("busd_timestamp")
+        # if cfg.TYPE == "usdt" and config.cfg["root"]["busd"]["status"] == "on":
+        #     self._update_timestamp_status("busd_timestamp")
 
     async def fetch_symbol_percent_change(self, symbol, price=None):
         bar_price = fund.percent_change_since_day_start(symbol)
@@ -123,7 +123,9 @@ class BotHelperAsync:
                 else:
                     cfg.discord_sent_msg = await self.channel.send(msg)
             except Exception as e:
-                print_tb(e)
+                if "Not Found" not in str(e):
+                    print_tb(e)
+
                 with suppress(Exception):
                     await cfg.discord_sent_msg.delete()
 
@@ -205,7 +207,7 @@ class BotHelperAsync:
                 console_ruler(character="-=")
 
             if len(config.asset_list) == 0:
-                #: cleans timestamp.yaml
+                #: cleans timestamp.yaml file
                 config.timestamp[f"{cfg.TYPE}_timestamp"] = dict(base=config.env[cfg.TYPE].status["timestamp"])
                 _console_clear()
                 if cfg.TYPE == "usdt":
@@ -266,6 +268,7 @@ class BotHelperAsync:
             else:
                 _msg = cfg.discord_message_full
 
+        cfg.locked_balance = min(cfg.locked_balance, 100)
         locked_per = f"locked={format(cfg.locked_balance, '.2f')}%"
         if cfg.TYPE == "usdt":
             if sum_busd > 0:
@@ -288,9 +291,10 @@ class BotHelperAsync:
             if float(free) > 0:
                 msg = f"{msg} free=`{free}` |"
 
+            lost_usdt = format(float(lost) * cfg.BTCUSDT_PRICE, ".2f")
             msg = (
-                f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usdt, '.2f')}$`\n`{locked_per}` | "
-                f"`{_date(_type='hour')}` | pos=**{pos_count}**"
+                f"{msg} btc=`{format(sum_btc, '.5f')}` == `{format(own_usdt, '.2f')}$`\n"
+                f"**lost_usdt={lost_usdt}** | `{locked_per}` | `{_date(_type='hour')}` | pos=**{pos_count}**"
             )
             cfg.SUM_BTC = format(sum_btc, ".8f")
             cfg.SUM_USDT = format(own_usdt, ".2f")

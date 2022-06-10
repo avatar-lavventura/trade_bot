@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 import sys
 from contextlib import suppress
 from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 from broker._utils import _log
 from broker._utils._log import log
 from broker._utils.tools import _date, print_tb
@@ -74,8 +74,10 @@ class Discord_Alpy:
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(self.record_balance, "cron", hour="*", timezone=tz)
 
-        trigger = CronTrigger(year="*", month="*", day="*", hour="3", minute="1", second="0")
-        scheduler.add_job(self.raise_KeyboardInterrupt, trigger=trigger, timezone=tz)
+        # daily
+        scheduler.add_job(
+            self.restart_itself, "cron", year="*", month="*", day="*", hour="03", minute="01", second="0", timezone=tz
+        )
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -119,8 +121,10 @@ class Discord_Alpy:
     async def record_balance(self):
         config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
 
-    async def raise_KeyboardInterrupt(self):
-        raise KeyboardInterrupt
+    async def restart_itself(self):
+        log()
+        log("#> -=-=-=-=-=-=-=-=-=-=-=- RESTARTING ITSELF -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
         await self.pre_discord_setup()
