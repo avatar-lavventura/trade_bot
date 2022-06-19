@@ -256,9 +256,12 @@ class BotHelperSpotAsync(BotHelperAsync):
                 else:
                     special_char = ""
 
-                cfg.discord_message_full = (
-                    f"``diff\n{special_char} wt_30m=[  {config.btc_wavetrend['30m'].upper()}  ]\n```"
-                )
+                if config.btc_wavetrend["30m"] == "none":
+                    cfg.discord_message_full = "\n`"
+                else:
+                    cfg.discord_message_full = (
+                        f"``diff\n{special_char} wt_30m=[  {config.btc_wavetrend['30m'].upper()}  ]\n```"
+                    )
 
             cfg.discord_message_full += msg
             if _type in ["usdt", "busd"] and _sum > config.discord_msg_above_usdt and profit < 0:

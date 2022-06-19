@@ -63,6 +63,9 @@ async def startup():
     app._bot_trade = bot_trade
     app.lock = asyncio.Lock()
     app.alertlock = asyncio.Lock()
+    if not config.cfg["root"]["is_write"]:
+        _log.IS_WRITE = False
+
     # margin_usdt = app.client_helper.get_balance_margin_usdt()
     print(" * s t a r t i n g")
 

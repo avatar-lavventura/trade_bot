@@ -1,10 +1,11 @@
 //@version=5
-// PREPARED F0R "1m" //
 //: order immediate action
 strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', calc_on_order_fills=true, process_orders_on_close=true, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
 //
 //: order fills at the next bar’s open
 // strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', process_orders_on_close=false, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
+//
+// 1h will be used ; 45m is used in the past but 1h seems safer
 IS_BROWSER = false
 fromMonth = 3
 fromDay = 1
@@ -52,19 +53,19 @@ else
 long_VWMA = vwap_above <= close and close < vwap_above_limit
 
 // cm_williams vix fix formula
-pd = input(900, title='lookback period standard deviation high')
-// if timeframe.period == "5"
-//    pd := 100
+pd = input(22, title='lookback period standard deviation high')
+if timeframe.period == "5"
+    pd := 40
 
 bbl = input(20, title='bolinger band length')
 mult = input.float(2.0, minval=1, maxval=5, title='Bollinger Band Standard Devaition Up')
 lb = input(50, title='look back period percentile high')
-ph = input(1, title='highest percentile - 0.90=90%, 0.95=95%, 0.99=99%')
+ph = input(.85, title='highest percentile - 0.90=90%, 0.95=95%, 0.99=99%')
 sbc = input(false, title='show Highlight Bar if WVF WAS True and IS Now False')
 sbcc = input(false, title='show highlight bar if WVF is True')
 sgb = input(false, title='check box to turn bars gray?')
 // criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
-ltLB = input.int(40, minval=1, maxval=99, title='long-term look back current bar has to close below this value or medium term-default=40')
+ltLB = input.int(40, minval=25, maxval=99, title='long-term look back current bar has to close below this value or medium term-default=40')
 mtLB = input.int(14, minval=10, maxval=20, title='medium-term look back current bar has to close below this value or long term-default=14')
 str = input.int(3, minval=1, maxval=9, title='entry price action strength-close > n bars back-default=3')
 sa1 = input(false, title='show alert WVF = True?')
@@ -86,7 +87,7 @@ filtered_aggr = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and not(wvf 
 // alerts criteria
 alert1 = wvf >= upper_band or wvf >= rangeHigh ? 1 : 0
 alert2 = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and wvf < upper_band and wvf < rangeHigh ? 1 : 0
-alert3 = upRange and close > close[str] and (close < close[ltLB]) and filtered ? 1 : 0
+alert3 = upRange and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered ? 1 : 0
 alert4 = upRange_aggr and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered_aggr ? 1 : 0
 // highlight bar criteria
 barcolor(alert3 ? color.fuchsia : na)  // **
@@ -107,6 +108,35 @@ plot(alert4 ? alert4 : 0, title='alert aggressive filtered entry', style=plot.st
 
 // buy alerts
 // ==========
+if close < vwap_value * (1 + 0.71 / 100)
+    msg += '_0.70'
+else if close < vwap_value * (1 + 0.72 / 100)
+    msg += '_0.71'
+else if close < vwap_value * (1 + 0.73 / 100)
+    msg += '_0.72'
+else if close < vwap_value * (1 + 0.74 / 100)
+    msg += '_0.73'
+else if close < vwap_value * (1 + 0.75 / 100)
+    msg += '_0.74'
+else if close < vwap_value * (1 + 0.76 / 100)
+    msg += '_0.75'
+else if close < vwap_value * (1 + 0.77 / 100)
+    msg += '_0.76'
+else if close < vwap_value * (1 + 0.78 / 100)
+    msg += '_0.77'
+else if close < vwap_value * (1 + 0.79 / 100)
+    msg += '_0.78'
+else if close < vwap_value * (1 + 0.8 / 100)
+    msg += '_0.79'
+else if close < vwap_value * (1 + 0.9 / 100)
+    msg += '_0.8'
+else if close < vwap_value * (1 + 1.0 / 100)
+    msg += '_0.9'
+else if close < vwap_value * (1 + 1.1 / 100)
+    msg += '_1.0'
+else if close < vwap_value * (1 + 1.2 / 100)
+    msg += '_1.1'
+
 daily_per_change = (close - close[86400]) / close[86400] * 100
 
 //: try 600 (10 minutes? instead 15 seconds)

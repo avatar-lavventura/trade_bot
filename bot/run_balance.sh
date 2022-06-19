@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RED="\033[1;31m"; GREEN='\033[0;32m'; NC='\033[0m'
+RED="\033[1;31m"; GREEN='\033[0;32m'; NC='\033[0m';
 if [ "$#" -ne 1 ]; then
     echo "Illegal number of parameters provide <usdt or btc>"
     exit 1
@@ -10,6 +10,14 @@ if ! [[ $1 == "usdt" || $1 == "btc" ]] ; then
     echo "Illegal argument value should be: 'usdt' or 'btc'"
     exit 1
 fi
+
+countdown () {  # https://superuser.com/a/611582/723632
+    _date=$((`date +%s` + $(expr $1 - 1)))
+    while [ "$_date" -ge `date +%s` ]; do
+        echo -ne "$(date -u --date @$(($_date - `date +%s`)) +%H:%M:%S)                                             \r"
+        sleep 0.1
+    done
+}
 
 check_app () {
     printf "curl https://alpybot.duckdns.org  [  "
@@ -21,13 +29,12 @@ check_app () {
     fi
 }
 
-countdown () {  # https://superuser.com/a/611582/723632
-   date1=$((`date +%s` + $(expr $1 - 1)))
-   while [ "$date1" -ge `date +%s` ]; do
-     echo -ne "$(date -u --date @$(($date1 - `date +%s`)) +%H:%M:%S)\r"
-     sleep 0.1
-   done
-}
+num=$(ps aux | grep -E "[m]ongodb" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
+if [ $num -eq 0 ]; then
+    echo "warning: mongodb is not running please do:\n"
+    echo "systemctl enable mongod.service\nsudo systemctl start mongod"
+    exit
+fi
 
 num=$(ps aux | grep -E "[p]ython3 discord_balance.py $1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
 if [ $num -ge 1 ]; then
@@ -43,7 +50,7 @@ do
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
     printf "countdown for 30 seconds                                                         "
     countdown 30
-    echo "[  OK  ]"
+    echo "[  OK  ]                                                                           "
 done
 
 # LOG_FILE=_binance_balance.log

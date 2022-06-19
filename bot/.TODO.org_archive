@@ -1,7 +1,7 @@
 #    -*- mode: org -*-
 
 
-Archived entries from file /home/alper/trade_bot/bot/TODO.org
+Archived entries from file ~/trade_bot/bot/TODO.org
 
 * DONE PULL already open positions from yaml that is written by binance_balance.py
 CLOSED: [2021-09-12 Sun 03:20]
@@ -277,23 +277,23 @@ CLOSED: [2022-02-24 Thu 11:54]
 :END:
 #+begin_src python
 Traceback (most recent call last):
-  File "/home/tomasina_alim/trade_bot/bot/trade_async.py", line 352, in spot_order
-  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 2723,
+  File "~/trade_bot/bot/trade_async.py", line 352, in spot_order
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 2723,
 in create_order
     response = await getattr(self, method)(self.extend(request, params))
-  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4952,
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4952,
 in request
-  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
 104, in fetch2
     return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
-  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
 169, in fetch
     self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response,
 json_response, request_headers, request_body)
-  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4908,
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4908,
 in handle_errors
     message = self.safe_string(response, 'msg')
-  File "/home/tomasina_alim/venv/lib/python3.8/site-packages/ccxt/base/exchange.py", line 566, in
+  File "~/venv/lib/python3.8/site-packages/ccxt/base/exchange.py", line 566, in
 throw_exactly_matched_exception
     raise exact(message)
 ccxt.base.errors.InsufficientFunds: binance Account has insufficient balance for requested action.
@@ -579,6 +579,26 @@ CLOSED: [2022-05-28 Sat 23:21]
 CLOSED: [2022-06-06 Mon 22:11]
 :PROPERTIES:
 :ARCHIVE_TIME: 2022-06-06 Mon 22:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE on btc-side show free btc as usdt at bottom
+CLOSED: [2022-06-20 Mon 17:31]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-06-20 Mon 17:31
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE pine-alert comes 5m at the end of bar
+CLOSED: [2022-06-20 Mon 18:21]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-06-20 Mon 18:21
 :ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
 :ARCHIVE_OLPATH: ALPY-BOT
 :ARCHIVE_CATEGORY: TODO

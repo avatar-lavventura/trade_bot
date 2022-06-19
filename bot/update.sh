@@ -8,3 +8,4 @@ cp -a ~/.bot/history_progress ~/trade_bot/bot/yaml_files/
 cd ~/trade_bot/tradingview-alerts/tv_lists
 cd $current_dir
 ./filter.sh
+# ~/personalize/bin/cleanup.sh >/dev/null 2>&1

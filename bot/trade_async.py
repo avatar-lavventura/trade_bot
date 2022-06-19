@@ -184,7 +184,7 @@ class BotHelper:
 
     async def spot_order_limit(self):
         try:
-            log("==> attempting limit order in spot ", end="")
+            log("==> attempting limit order ", end="")
             limit_price, *_ = await self.get_spot_entry()
             symbol = self.strategy.symbol.replace("/", "")
             open_orders = await self.strategy.exchange.fetch_open_orders(symbol=symbol)
@@ -243,6 +243,7 @@ class BotHelper:
                 del order["executedQty"]
                 del order["clientOrderId"]
                 del order["orderId"]
+                del order["side"]
 
             config.env[self.strategy.market.lower()].hit._inc(self.strategy.asset)
             return order

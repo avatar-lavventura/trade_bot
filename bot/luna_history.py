@@ -3,6 +3,7 @@
 import ccxt
 
 exchange = ccxt.binance()
+exchange.load_markets()
 
 
 def table(values):
@@ -14,10 +15,9 @@ def table(values):
 
 
 def main():
-    markets = exchange.load_markets()
     symbol = "LUNA/BTC"
     since = exchange.parse8601("2022-05-01T00:00:00Z")
-    ohlcvs = exchange.fetch_ohlcv(symbol, "1h", since)
+    ohlcvs = exchange.fetch_ohlcv(symbol, "1h", since, limit=1500)
     print(table([[exchange.iso8601(int(o[0]))] + o[1:] for o in ohlcvs]))
 
 

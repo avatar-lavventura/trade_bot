@@ -24,10 +24,9 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self, _type):
-        log(f" * bot_type={_type}", is_write=False)
+        log(f" * bot_type={_type}")
         try:
             self._type = cfg.TYPE = _type.lower()
-            _log.ll.LOG_FILENAME = Path.home() / ".bot" / f"program_{_type}.log"
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
             self.client = discord.Client()
@@ -37,6 +36,10 @@ class Discord_Alpy:
             self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
+            if not config.cfg["root"]["is_write"]:
+                _log.IS_WRITE = False
+            else:
+                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
@@ -67,7 +70,7 @@ class Discord_Alpy:
         tz = "Europe/Istanbul"
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
-        if cfg.TYPE == "btc":  # currently usdt is waiting to recover the lost
+        if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost
             scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
 
         # hour
@@ -76,7 +79,7 @@ class Discord_Alpy:
 
         # daily
         scheduler.add_job(
-            self.restart_itself, "cron", year="*", month="*", day="*", hour="03", minute="01", second="0", timezone=tz
+            self.restart, "cron", year="*", month="*", day="*", hour="03", minute="01", second="0", timezone=tz
         )
         scheduler.start()
 
@@ -121,7 +124,7 @@ class Discord_Alpy:
     async def record_balance(self):
         config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
 
-    async def restart_itself(self):
+    async def restart(self):
         log()
         log("#> -=-=-=-=-=-=-=-=-=-=-=- RESTARTING ITSELF -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
