@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 import sys
 from contextlib import suppress
 from pathlib import Path
@@ -23,10 +24,9 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self, _type):
-        log(f" * bot_type={_type}", is_write=False)
+        log(f" * bot_type={_type}")
         try:
             self._type = cfg.TYPE = _type.lower()
-            _log.ll.LOG_FILENAME = Path.home() / ".bot" / f"program_{_type}.log"
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
             self.client = discord.Client()
@@ -36,6 +36,10 @@ class Discord_Alpy:
             self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
+            if not config.cfg["root"]["is_write"]:
+                _log.IS_WRITE = False
+            else:
+                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
@@ -66,12 +70,17 @@ class Discord_Alpy:
         tz = "Europe/Istanbul"
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
-        if cfg.TYPE == "btc":  # currently usdt is waiting to recover the lost
-            scheduler.add_job(self._fetch_balance, "cron", second="*/10", timezone=tz)
+        if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost
+            scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
 
         # hour
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(self.record_balance, "cron", hour="*", timezone=tz)
+
+        # daily
+        scheduler.add_job(
+            self.restart, "cron", year="*", month="*", day="*", hour="03", minute="01", second="0", timezone=tz
+        )
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -84,7 +93,7 @@ class Discord_Alpy:
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
 
-    async def _fetch_balance(self):
+    async def fetch_balance(self):
         try:
             position_count = 0
             ongoing_positions = []
@@ -104,7 +113,6 @@ class Discord_Alpy:
 
             for asset in del_list:
                 del config.timestamp[key][asset]
-                # log(f"#> TIMESTAMP DELETED for [blue]{asset}[/blue]", is_write=False)
 
             config.env[cfg.TYPE]._status.add_single_key("count", position_count)
         except Exception as e:
@@ -115,6 +123,11 @@ class Discord_Alpy:
 
     async def record_balance(self):
         config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
+
+    async def restart(self):
+        log()
+        log("#> -=-=-=-=-=-=-=-=-=-=-=- RESTARTING ITSELF -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
         await self.pre_discord_setup()

@@ -34,7 +34,7 @@ def one_hr(symbol, _since=60):
     binance = ccxt.binance()
     now = datetime.utcnow()
     unixtime = calendar.timegm(now.utctimetuple())
-    since = (unixtime - _since * 60) * 1000  # UTC timestamp in milliseconds
+    since = (unixtime - _since * _since) * 1000  # UTC timestamp in milliseconds
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="5m", since=since, limit=12)
     pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
     df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
@@ -48,7 +48,7 @@ def one_hr(symbol, _since=60):
 def main():
     symbol = "BTCUSDT"
     binance = ccxt.binance()
-    now = datetime.utcnow()
+    # now = datetime.utcnow()
     # _since = 0
     # print(fund.fund_times_ts)
     # for times_ts in fund.fund_times_ts:
@@ -79,4 +79,4 @@ if __name__ == "__main__":
     # output = percent_change_since_fund(symbol)
     # print(output)
     # main()
-    one_hr("BELBTC")
+    one_hr("LUNAUSDT", _since=600)

@@ -118,19 +118,6 @@ class BotHelper:
         else:
             return "BUY"
 
-    async def is_usdt_open(self, symbol=None) -> bool:
-        if not symbol:
-            return False
-
-        positions = await helper.exchange.future.fetch_positions()
-        self.get_exchange_future_timestamp()
-        for position in positions:
-            initial_margin = abs(float(position["info"]["isolatedWallet"]))
-            if initial_margin > 0 and symbol.replace("/", "") == position["symbol"].replace("/", ""):
-                return True
-
-        return False
-
     async def _limit(self, amount, entry_price, isolated_wallet, decimal) -> None:
         try:
             if self.opposite_side() == "SELL":
@@ -197,7 +184,7 @@ class BotHelper:
 
     async def spot_order_limit(self):
         try:
-            log("==> attempting limit order in spot ", end="")
+            log("==> attempting limit order ", end="")
             limit_price, *_ = await self.get_spot_entry()
             symbol = self.strategy.symbol.replace("/", "")
             open_orders = await self.strategy.exchange.fetch_open_orders(symbol=symbol)
@@ -226,46 +213,6 @@ class BotHelper:
             if "PRICE_FILTER" not in str(e):
                 # position may close right away, not a BinanceAPIException error
                 print_tb(e)
-
-    async def _order(self, quantity, _type="MARKET"):
-        """Open futures orders in given direction."""
-        try:
-            # await self.bot_async.set_leverage(self.strategy.symbol, 1)  # consumes time
-            await create_market_order(self.strategy.symbol, quantity, self.strategy.side)
-        except Exception as e:
-            if "Precision is over the maximum defined for this asset" in str(e):
-                log(f"E: {e} qty={quantity}")
-                decimal = self.get_decimal_count(quantity)
-                _quantity = f"{float(quantity):.{decimal - 1}f}"
-                log(f"==> re-opening sell order with new qty={_quantity}")
-                if float(_quantity) > 0:
-                    return await self._order(_quantity)
-                else:
-                    log("E: Quantity less than zero, nothing to do.")
-                    if self.strategy.size >= 0.5 and self.strategy.size < 1:
-                        self.strategy.size = 1
-            else:
-                if self.strategy.size >= 0.5 and self.strategy.size < 1:
-                    log("==> re-opening sell order with new qty=1")
-                    self.strategy.size = 1
-                    return await self._order(self.strategy.size)
-
-                raise e
-
-    async def both_side_order(self) -> None:
-        """Both side order for futures."""
-        symbol = self.strategy.symbol.replace("/USDT", "USDT")
-        if await self.is_usdt_open(symbol):
-            raise Exception(f"already open position for {symbol}")
-
-        try:
-            if self.strategy.size == 0:
-                raise Exception("position size is less than zero")
-
-            await self._order(quantity=self.strategy.size)
-        except Exception as e:
-            print_tb(str(e))
-            raise e
 
     async def spot_order(self, quantity: float, symbol=None, side=None):
         log(f"order_qty={quantity}", "bold")
@@ -296,6 +243,7 @@ class BotHelper:
                 del order["executedQty"]
                 del order["clientOrderId"]
                 del order["orderId"]
+                del order["side"]
 
             config.env[self.strategy.market.lower()].hit._inc(self.strategy.asset)
             return order
@@ -496,7 +444,8 @@ class BotHelper:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
                 log(f" * {_date()} [bold magenta]{data_msg}")
-                await self.discord_client.send_msg(data_msg, "alpy")
+                if "strategy.order.action" not in data_msg:
+                    await self.discord_client.send_msg(data_msg, "alpy")
 
             return
 
@@ -517,3 +466,57 @@ class BotHelper:
 
     async def alert_main(self, data_msg) -> None:
         config.btc_wavetrend["30m"] = data_msg
+
+    # FUTURES #
+    async def _order(self, quantity, _type="MARKET"):
+        """Open futures orders in given direction."""
+        try:
+            # await self.bot_async.set_leverage(self.strategy.symbol, 1)  # consumes time
+            await create_market_order(self.strategy.symbol, quantity, self.strategy.side)
+        except Exception as e:
+            if "Precision is over the maximum defined for this asset" in str(e):
+                log(f"E: {e} qty={quantity}")
+                decimal = self.get_decimal_count(quantity)
+                _quantity = f"{float(quantity):.{decimal - 1}f}"
+                log(f"==> re-opening sell order with new qty={_quantity}")
+                if float(_quantity) > 0:
+                    return await self._order(_quantity)
+                else:
+                    log("E: Quantity less than zero, nothing to do.")
+                    if self.strategy.size >= 0.5 and self.strategy.size < 1:
+                        self.strategy.size = 1
+            else:
+                if self.strategy.size >= 0.5 and self.strategy.size < 1:
+                    log("==> re-opening sell order with new qty=1")
+                    self.strategy.size = 1
+                    return await self._order(self.strategy.size)
+
+                raise e
+
+    async def both_side_order(self) -> None:
+        """Both side order for futures."""
+        symbol = self.strategy.symbol.replace("/USDT", "USDT")
+        if await self.is_usdt_open(symbol):
+            raise Exception(f"already open position for {symbol}")
+
+        try:
+            if self.strategy.size == 0:
+                raise Exception("position size is less than zero")
+
+            await self._order(quantity=self.strategy.size)
+        except Exception as e:
+            print_tb(str(e))
+            raise e
+
+    # async def is_usdt_open(self, symbol=None) -> bool:
+    #     if not symbol:
+    #         return False
+
+    #     positions = await helper.exchange.future.fetch_positions()
+    #     self.get_exchange_future_timestamp()
+    #     for position in positions:
+    #         initial_margin = abs(float(position["info"]["isolatedWallet"]))
+    #         if initial_margin > 0 and symbol.replace("/", "") == position["symbol"].replace("/", ""):
+    #             return True
+
+    #     return False

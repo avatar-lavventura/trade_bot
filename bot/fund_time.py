@@ -8,10 +8,10 @@ import ccxt
 class Fund:
     def __init__(self) -> None:
         self.midnight = None
-        self.fund_times = ["00:00:00+00:00", "09:00:00+00:00", "16:00:00+00:00"]
         self.fund_times_ts = []
-        self.init()
         self.fund_prices = {}
+        self.fund_times = ["00:00:00+00:00", "09:00:00+00:00", "16:00:00+00:00"]
+        self.init()
         self.binance = ccxt.binance()
 
     def init(self):
@@ -38,8 +38,11 @@ class Fund:
 
         return self.fund_prices[(symbol, times_ts)]
 
-    def percent_change_since_last_fund(self, symbol):
+    def percent_change_since_last_fund(self, symbol):  # TODO: check this function?
         now = self.init()
+        times_ts = int(  # ?
+            datetime.strptime(f"{now.strftime('%Y-%m-%d')} 00:00:00+00:00", "%Y-%m-%d %H:%M:%S%z").timestamp() * 1000
+        )
         # now = datetime.utcnow()
         _since = 0
         for times_ts in self.fund_times_ts:
@@ -47,7 +50,9 @@ class Fund:
                 _since = times_ts
             else:
                 break
-        _since = times_ts
+
+            _since = times_ts
+
         if (symbol, times_ts) not in self.fund_prices:
             self.fund_prices[(symbol, times_ts)] = self.binance.fetch_ohlcv(
                 symbol=symbol, timeframe="1h", since=_since, limit=1

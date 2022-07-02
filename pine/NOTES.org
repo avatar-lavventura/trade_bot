@@ -1,0 +1,10 @@
+* ~FTMUSDT~ has nice pump and dumps from, good back-testing duration starting 2022 May
+
+#+begin_src pine
+fromMonth = 3
+fromDay = 1
+thruMonth = 1
+thruDay = 1
+fromYear = 2022
+thruYear = 3000
+#+end_src
