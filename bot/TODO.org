@@ -18,3 +18,4 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO funding -0.0075% olan coin leri listele ve long yap, insanlari patlatmak icin pump oluyor BUSD icin de bak
     - ~binanceusdm.fetchFundingRate~
 ** TODO BTC-spot volume 10.0 dan kucukse hic bulasma
+** TODO re-start TV at July 6th

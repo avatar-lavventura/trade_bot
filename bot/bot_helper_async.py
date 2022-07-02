@@ -286,14 +286,14 @@ class BotHelperAsync:
         else:
             locked_per = f"locked={format(cfg.locked_balance, '.2f')}%"
 
+        pos_str = ""
+        if pos_count > 2:
+            pos_str = f"| pos=**{pos_count}**"
+
         if cfg.TYPE == "usdt":
             _free = ""
             if float(free) > 0:
                 _free = f"free=`{free}` | "
-
-            pos_str = ""
-            if pos_count > 2:
-                pos_str = f"| pos=**{pos_count}**"
 
             if sum_busd > 0.1:
                 msg = (
@@ -316,7 +316,7 @@ class BotHelperAsync:
             lost_usdt = format(float(lost) * cfg.BTCUSDT_PRICE, ".2f")
             msg = (
                 f"{msg} btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
-                f"**lost=`{lost_usdt}$`** | `{locked_per}` | `{_date(_type='hour')}` | pos=**{pos_count}**"
+                f"**lost=`{lost_usdt}$`** | `{locked_per}` | `{_date(_type='hour')}` {pos_str}"
             )
             cfg.SUM_BTC = format(sum_btc, ".8f")
             cfg.SUM_USDT = format(own_usdt, ".2f")

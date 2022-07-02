@@ -1,10 +1,9 @@
 * Setup
 
-# git clone https://github.com/alleyway/add-tradingview-alerts-tool.git
+~git clone https://github.com/alleyway/add-tradingview-alerts-tool.git~
 
 #+begin_src bash
-cd ~/trade_bot/tradingview-alerts/
+cd ~/trade_bot/tradingview-alerts/tradingview-alerts-home
 npx @alleyway/create-tradingview-alerts-home
-npm install
-# npm install @alleyway/add-tradingview-alerts-tool@1.8.7
+# npm install
 #+end_src

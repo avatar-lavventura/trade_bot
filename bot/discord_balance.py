@@ -24,8 +24,13 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self, _type):
-        log(f" * bot_type={_type}")
         try:
+            if not config.cfg["root"]["is_write"]:
+                _log.IS_WRITE = False
+            else:
+                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
+
+            log(f" * bot_type={_type}")
             self._type = cfg.TYPE = _type.lower()
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
@@ -36,10 +41,6 @@ class Discord_Alpy:
             self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
-            if not config.cfg["root"]["is_write"]:
-                _log.IS_WRITE = False
-            else:
-                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())

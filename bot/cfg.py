@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
+SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG"]
-SLEEP_INTERVAL: int = 30  # seconds to sleep for next balance check
 discord_message: str = ".\n"
 discord_message_full: str = ".\n"
 discord_print: bool = False
 locked_balance: float = 0.0
 discord_sent_msg = None
 BTCUSDT_PRICE: float = 0.0
-CURRENT_DATE = None
-BALANCES = None
-SUM_BTC = None
 BNB_QTY: float = 0.0
 BNB_BALANCE: float = 0.0
 TYPE: str = ""
+BALANCES = None
+SUM_BTC = None
+CURRENT_DATE = None
 
 """
 * IGNORE_SOLD_QUANTITY

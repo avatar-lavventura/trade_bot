@@ -8,7 +8,7 @@ from broker._utils._log import log
 from broker._utils.tools import _exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
-from ccxt.base.errors import RequestTimeout  # noqa
+from ccxt.base.errors import RequestTimeout
 
 from bot import cfg, helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
@@ -20,14 +20,13 @@ RUN_FUTURES = False
 bot_async = BotHelperSpotAsync()
 
 
-async def alert():
+async def discord_send_alert():
     asset_price_dict = {}
-    for alert in config.ALERTS:
-        _alert = config.ALERTS[alert]
-        if _alert:
-            asset_price_dict[_alert["pair"]] = _asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
-            if float(_asset_price) > _alert["price"]:
-                await bot_async.channel_alerts.send(f"{_alert['pair']}={_asset_price}", delete_after=cfg.SLEEP_INTERVAL)
+    for idx in config.ALERTS:
+        alert = config.ALERTS[idx]
+        asset_price_dict[alert["pair"]] = _asset_price = await bot_async.spot_fetch_ticker(alert["pair"])
+        if float(_asset_price) > alert["price"]:
+            await bot_async.channel_alerts.send(f"{alert['pair']}={_asset_price}", delete_after=cfg.SLEEP_INTERVAL)
 
 
 async def process(unix_timestamp_ms):
@@ -65,7 +64,7 @@ async def process(unix_timestamp_ms):
         delete_multiple_lines(1)
 
     if cfg.TYPE == "usdt":
-        await alert()
+        await discord_send_alert()
 
 
 async def process_main(obj):
