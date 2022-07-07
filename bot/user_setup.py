@@ -17,8 +17,7 @@ def save_obj(fname, client=None):
     if client is None:
         syms = {}
         balances = client.get_account()
-        _balances = balances["balances"]
-        for balance in _balances:
+        for balance in balances["balances"]:
             syms[balance["asset"]] = True
 
         with open(fname, "wb") as f:
@@ -49,7 +48,7 @@ def check_binance_obj():
     try:
         return client, client.get_account()
     except requests.exceptions.ConnectionError:
-        print("ConnectionError")
+        print("E: ConnectionError")
         sys.exit()
 
 

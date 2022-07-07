@@ -1,12 +1,13 @@
 root:
+  goal: 4600
   is_write: False
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
-  take_profit: 0.0052
+  take_profit: 0.005
   locked_percent_limit: 100
   ignore: # for all
-    - UNFI
     - ORN
+    - PNT
   usdt:
     status: "off" # "on" or "off"
     max_pos: 3
@@ -19,7 +20,7 @@ root:
   btc:
     status: "on"
     max_pos: 3
-    initial: 0.00023
+    initial: 0.00011 # 0.00023
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True

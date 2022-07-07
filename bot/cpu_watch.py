@@ -20,5 +20,9 @@ def cpu_percent():
             log(f"The CPU usage is: [cyan]{cpu_avg}%[/cyan]    [blue]{_date(_type='hour')}[/blue]")
 
 
-if __name__ == "__main__":
+def main():
     cpu_percent()
+
+
+if __name__ == "__main__":
+    main()

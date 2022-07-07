@@ -9,7 +9,7 @@ IP: [[https://alpybot.duckdns.org/webhook]]
 - [[https://bigpara.hurriyet.com.tr/borsa/canli-borsa/]]
 - [[https://nginxproxymanager.com/setup/#configuration-file]]
 
-First: ([[<ip_address>:81/login]])
+First: [[<ip_address>:81/login]]
 
 - [[https://console.cloud.google.com/networking/firewalls][Firewall setup]]
 
@@ -103,8 +103,6 @@ curl -v 127.0.0.1:5000
 curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,75454,2022-02-06T18:01:51Z,"
 #+end_src
 
----------------------
-
 ** Tradingview alerts some links
 
 1. [[https://liquidation.atsutane.net/calc][Binance Minimum Trading Rules for Futures]]
@@ -166,4 +164,4 @@ npm install
 – 1 non-preemptible e2-micro VM instance per month in one of the following
 US regions: ~Oregon: us-west1~, ~Iowa: us-central1~, ~South Carolina: us-east1~
 
-- TV: alperalperalper123  // used_card ykb bank virtual card:4525
+- expired TV: alperalperalper123  // used_card ykb bank virtual card:4525

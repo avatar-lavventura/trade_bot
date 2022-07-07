@@ -25,10 +25,10 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 class Discord_Alpy:
     def __init__(self, _type):
         try:
-            if not config.cfg["root"]["is_write"]:
-                _log.IS_WRITE = False
-            else:
+            if config.cfg["root"]["is_write"]:
                 _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
+            else:
+                _log.IS_WRITE = False
 
             log(f" * bot_type={_type}")
             self._type = cfg.TYPE = _type.lower()
@@ -56,19 +56,18 @@ class Discord_Alpy:
             print_tb(e)
             breakpoint()  # DEBUG
 
-    async def task(self):
+    async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
 
-        - runs every minute, 10th second: (..., minute="*", second="10")
-        - runs every 30 seconds: (..., second="*/30")
-        - runs at 30th second: (..., second="30")
+        - runs every minute: 10th second (..., minute="*", second="10")
+        - runs every 30 seconds (..., second="*/30")
+        - runs at the 30th second (..., second="30")
         """
         await self.update_current_date()
         await helper.exchange.set_markets()
         await self.main()
         await self.record_balance()
         scheduler = AsyncIOScheduler()
-        tz = "Europe/Istanbul"
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost

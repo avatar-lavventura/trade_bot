@@ -1,4 +1,5 @@
 * Experiences and Ideas
+
 1. Higher than 3x is very high risk with large amount of money. You won’t
    realize how big would be the loss.
 2. Case lets say you have long position and you close it by short on the right
