@@ -44,7 +44,7 @@ async def process(unix_timestamp_ms):
         config.env[cfg.TYPE].status["balance"] = usdt_bal
         config.env[cfg.TYPE].status["free"] = free_usdt
     elif cfg.TYPE == "btc":
-        config.env[cfg.TYPE].status["free"] = "{:.8f}".format(free_btc)
+        config.env[cfg.TYPE].status["free"] = float(format(free_btc, ".8f"))
 
     for idx in range(1, 6):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)

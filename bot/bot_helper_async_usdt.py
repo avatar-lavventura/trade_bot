@@ -37,8 +37,11 @@ class BotHelperSpotAsync(BotHelperAsync):
         open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/{market}")
         if open_orders:
             for order in open_orders:
-                if order["info"]["side"] == "SELL" and float(limit_price) < float(order["price"]):
-                    await self.new_limit_order(asset, limit_price, market)
+                if order["info"]["side"] == "SELL":
+                    if float(limit_price) < float(order["price"]) or cfg.BALANCES[asset]["total"] > float(
+                        order["amount"]
+                    ):
+                        await self.new_limit_order(asset, limit_price, market)
         else:
             await self.new_limit_order(asset, limit_price, market)
 
@@ -48,44 +51,64 @@ class BotHelperSpotAsync(BotHelperAsync):
         except:
             return decimal_count(value)
 
-    def calculate_entry(self, timestamp_list, ordering, trades, asset, is_return=False) -> Tuple[float, float, int]:
+    def trade_debug_print(self, trade):
+        log(trade)
+
+    def calculate_entry(
+        self, timestamp_list, ordering, trades, asset, asset_qty, is_return=False
+    ) -> Tuple[float, float, int]:
         _sum = 0
         decimal = 0
         quantity = 0.0
+        first_sell_flag = False
+        latest_buy_trade_idx = 0
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
                 trade = trades[inner_index]
+                # self.trade_debug_print(trade["info"])  # debug purposes
                 if float(trade["info"]["commission"]) > 0:
                     decimal = self.get_decimal_count(trade["symbol"], trade["price"])
                     qty = float(trade["info"]["qty"])
                     if trade["info"]["isBuyer"]:
                         quantity += qty
                         _sum += trade["cost"]
-                    elif (
-                        not cfg.IGNORE_SOLD_QUANTITY
-                        or "ignore_sold" in trade
-                        or trade["symbol"] in cfg._IGNORE_SOLD_QUANTITY
-                    ):
-                        quantity -= qty
-                        _sum -= trade["cost"]
+                        latest_buy_trade_idx = inner_index
+                        latest_ts = trade["timestamp"]
+                    else:
+                        if not first_sell_flag and quantity == asset_qty:
+                            # latest trade is buyer and equat to current asset number
+                            _trade = trades[latest_buy_trade_idx]
+                            latest_ts = _trade["timestamp"]
+                            if latest_ts != 0:
+                                config.timestamp[f"{cfg.TYPE}_timestamp"][asset] = latest_ts
+
+                            return (quantity, _sum, decimal)
+
+                        first_sell_flag = True
+                        if (
+                            not cfg.IGNORE_SOLD_QUANTITY
+                            or "ignore_sold" in trade
+                            or trade["symbol"] in cfg._IGNORE_SOLD_QUANTITY
+                        ):
+                            quantity -= qty
+                            _sum -= trade["cost"]
 
                     quantity = round_float(quantity, 8)
                     _sum = round_float(_sum, 8)
-                    if is_return:
-                        # TODO: calcualted wrong for the UNFI
-                        key = f"{cfg.TYPE}_timestamp"
-                        ts = trade["timestamp"]
-                        log(f"#> ts={ts} set for [blue]{asset}[/blue] in the timestamp yaml file")
-                        log("#> found_trade=", end="")
-                        del trade["info"]
-                        del trade["type"]
-                        del trade["fee"]
-                        del trade["fees"]
-                        del trade["takerOrMaker"]
-                        log(trade)
-                        _symbol = trade["symbol"].replace(f"/{cfg.TYPE.upper()}", "")
-                        config.timestamp[key][_symbol] = ts
-                        return (quantity, _sum, decimal)
+                    # if is_return:
+                    #     key = f"{cfg.TYPE}_timestamp"
+                    #     ts = trade["timestamp"]
+                    #     log(f"#> ts={ts} set for [blue]{asset}[/blue] in the timestamp yaml file")
+                    #     log("#> found_trade=", end="")
+                    #     del trade["info"]
+                    #     del trade["type"]
+                    #     del trade["fee"]
+                    #     del trade["fees"]
+                    #     del trade["takerOrMaker"]
+                    #     log(trade)
+                    #     _symbol = trade["symbol"].replace(f"/{cfg.TYPE.upper()}", "")
+                    #     config.timestamp[key][_symbol] = ts
+                    #     return (quantity, _sum, decimal)
 
         return (quantity, _sum, decimal)
 
@@ -171,7 +194,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         # iterate transactions based on their timestamp
         timestamp_list = sorted(ordering, reverse=True)
         if timestamp_list:
-            qty, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, asset)
+            qty, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
         else:
             trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/{_type.upper()}")
             ordering = {}
@@ -182,7 +205,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                     ordering[trade["timestamp"]] = [idx]
 
             timestamp_list = sorted(ordering, reverse=True)
-            qty, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, asset, is_return=True)
+            qty, _sum, decimal = self.calculate_entry(
+                timestamp_list, ordering, trades, asset, asset_qty, is_return=True
+            )
 
         if asset_qty == 0:
             log(f"E: float division by zero asset={asset}")

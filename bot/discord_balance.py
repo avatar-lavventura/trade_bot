@@ -67,6 +67,7 @@ class Discord_Alpy:
         await helper.exchange.set_markets()
         await self.main()
         await self.record_balance()
+        await self.fetch_balance()
         scheduler = AsyncIOScheduler()
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
@@ -95,7 +96,7 @@ class Discord_Alpy:
 
     async def fetch_balance(self):
         try:
-            position_count = 0
+            pos_count = 0
             ongoing_positions = []
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
             for symbol in cfg.BALANCES:
@@ -103,7 +104,7 @@ class Discord_Alpy:
                     if cfg.BALANCES[symbol]["total"] > 0.0:
                         ongoing_positions.append(symbol)
                         if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
-                            position_count += 1
+                            pos_count += 1
 
             del_list = []
             key = f"{cfg.TYPE}_timestamp"
@@ -114,7 +115,7 @@ class Discord_Alpy:
             for asset in del_list:
                 del config.timestamp[key][asset]
 
-            config.env[cfg.TYPE]._status.add_single_key("count", position_count)
+            config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
         except Exception as e:
             log(f"E: {e}")
 
