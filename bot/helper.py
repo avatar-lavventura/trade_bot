@@ -72,8 +72,8 @@ class Exchange:
             self.future = ccxt.binanceusdm(ops)
 
         self.spot = ccxt.binance(ops)
-        ops = None
         helper_cfg = None
+        ops = None
 
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])

@@ -264,8 +264,12 @@ class BotHelper:
                         raise e
 
                 log(f"==> re-opening {side} order | ", end="")
-                if (self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15) or (
-                    self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003
+                if (
+                    self.strategy.market.lower() == "usdt"
+                    and config.env["usdt"].status["free"] < config.cfg["root"]["usdt"]["initial"]
+                ) or (
+                    self.strategy.market.lower() == "btc"
+                    and float(config.env["btc"].status["free"]) < config.cfg["root"]["btc"]["initial"]
                 ):
                     raise QuietExit("not enough balance") from None
 
@@ -276,7 +280,7 @@ class BotHelper:
             elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
                 quantity += 0.1
                 quantity = float("{:.1f}".format(quantity))  # sometimes overround 1.2000000000000002
-                log(f"==> re-opening {side} order | ", end="")
+                log(f" *  re-opening {side} order ", end="")
                 return await self.spot_order(float(quantity))
             else:
                 if "Filter failure: LOT_SIZE" in str(e):
@@ -386,8 +390,12 @@ class BotHelper:
 
     async def _trade(self):
         self.pre_check()
-        if (self.strategy.market.lower() == "usdt" and config.env["usdt"].status["free"] < 15) or (
-            self.strategy.market.lower() == "btc" and float(config.env["btc"].status["free"]) < 0.0003
+        if (
+            self.strategy.market.lower() == "usdt"
+            and config.env["usdt"].status["free"] < config.cfg["root"]["usdt"]["initial"]
+        ) or (
+            self.strategy.market.lower() == "btc"
+            and float(config.env["btc"].status["free"]) < config.cfg["root"]["btc"]["initial"]
         ):
             raise QuietExit("not enough balance")
 
@@ -428,7 +436,7 @@ class BotHelper:
         config._reload()  # TODO could be *SLOW* learn its run-time
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
-        if self.strategy.market.lower() == "usdt" and free_balance < 15.0:
+        if self.strategy.market.lower() == "usdt" and free_balance < config.cfg["root"]["usdt"]["initial"]:
             raise QuietExit(f"not enough free usdt([cyan]{round(free_balance)}$[/cyan])")
 
         # if self.strategy.market == "USDTPERP":

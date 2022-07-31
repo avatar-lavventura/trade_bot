@@ -28,8 +28,8 @@ def get_balance(client_helper):
 def main():
     get_balance(client_helper)
     bot = BotHelper(client_helper.client)
-    # balances = client.get_account()
     bot.strategy = Strategy()
+    # balances = client.get_account()
     for _balance in balances["balances"]:
         asset = _balance["asset"]
         if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in cfg.STABLE_COINS:

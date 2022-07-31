@@ -6,6 +6,7 @@ class LiqBase:
         self.ignore_list = [
             "1000XECUSDT",
             "1000SHIBUSDT",
+            "1000LUNCBUSD",
             "SHIBUSDT",
             "AAVEUSDT",
             "AVAXUSDT",
@@ -26,6 +27,7 @@ class LiqBase:
             "ICPUSDT",
             "KSMUSDT",
             "LTCUSDT",
+            "LUNA2BUSD",
             "MANAUSDT",
             "SOLUSDT",
             "XLMUSDT",

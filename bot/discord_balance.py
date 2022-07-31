@@ -24,8 +24,13 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self, _type):
-        log(f" * bot_type={_type}")
         try:
+            if config.cfg["root"]["is_write"]:
+                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
+            else:
+                _log.IS_WRITE = False
+
+            log(f" * bot_type={_type}", end="")
             self._type = cfg.TYPE = _type.lower()
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
@@ -36,10 +41,6 @@ class Discord_Alpy:
             self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
-            if not config.cfg["root"]["is_write"]:
-                _log.IS_WRITE = False
-            else:
-                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
@@ -55,19 +56,19 @@ class Discord_Alpy:
             print_tb(e)
             breakpoint()  # DEBUG
 
-    async def task(self):
+    async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
 
-        - runs every minute, 10th second: (..., minute="*", second="10")
-        - runs every 30 seconds: (..., second="*/30")
-        - runs at 30th second: (..., second="30")
+        - runs every minute: 10th second (..., minute="*", second="10")
+        - runs every 30 seconds (..., second="*/30")
+        - runs at the 30th second (..., second="30")
         """
         await self.update_current_date()
         await helper.exchange.set_markets()
         await self.main()
         await self.record_balance()
+        await self.fetch_balance()
         scheduler = AsyncIOScheduler()
-        tz = "Europe/Istanbul"
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost
@@ -95,18 +96,19 @@ class Discord_Alpy:
 
     async def fetch_balance(self):
         try:
-            position_count = 0
+            key = f"{cfg.TYPE}_timestamp"
+            pos_count = 0
+            del_list = []
             ongoing_positions = []
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
+            # output = await helper.exchange.spot.fetch_balance(params={"type": "margin", "currency": "btc"})
             for symbol in cfg.BALANCES:
                 if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
                     if cfg.BALANCES[symbol]["total"] > 0.0:
                         ongoing_positions.append(symbol)
                         if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
-                            position_count += 1
+                            pos_count += 1
 
-            del_list = []
-            key = f"{cfg.TYPE}_timestamp"
             for asset_timestamp in config.timestamp[key]:
                 if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
                     del_list.append(asset_timestamp)
@@ -114,7 +116,7 @@ class Discord_Alpy:
             for asset in del_list:
                 del config.timestamp[key][asset]
 
-            config.env[cfg.TYPE]._status.add_single_key("count", position_count)
+            config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
         except Exception as e:
             log(f"E: {e}")
 

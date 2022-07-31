@@ -39,9 +39,13 @@ async def main():
     log("SUCCESS")
 
 
-if __name__ == "__main__":
+def main():
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(main())
     except Exception as e:
         print_tb(e)
+
+
+if __name__ == "__main__":
+    main()

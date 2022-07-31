@@ -20,25 +20,27 @@ countdown () {  # https://superuser.com/a/611582/723632
 }
 
 check_app () {
-    printf "curl https://alpybot.duckdns.org  [  "
+    printf "curl https://alpybot.duckdns.org  "
     if curl -sL --fail https://alpybot.duckdns.org -o /dev/null; then
-        echo -e "${GREEN}OK${NC}  ]"
+        echo -e "[  ${GREEN}OK${NC}  ]"
     else
-        echo -e "${RED}FAIL${NC}  ]"
+        echo -e "[  ${RED}FAIL${NC}  ]"
         exit 1
     fi
 }
 
-num=$(ps aux | grep -E "[m]ongodb" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
-if [ $num -eq 0 ]; then
-    echo "warning: mongodb is not running please do:\n"
+is_running () {
+    ps auxww | grep -E "$1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l
+}
+
+if [ $(is_running "[m]ongodb") -eq 0 ]; then
+    echo "warning: mongodb is not running in the background. Do:\n"
     echo "systemctl enable mongod.service\nsudo systemctl start mongod"
     exit
 fi
 
-num=$(ps aux | grep -E "[p]ython3 discord_balance.py $1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
-if [ $num -ge 1 ]; then
-    echo "warning: `discord_balance.py` is already running, count="$num
+if [ $(is_running "[p]ython3 discord_balance.py $1") -ge 1 ]; then
+    echo "warning: discord_balance.py for $1 is already running"
     exit
 fi
 

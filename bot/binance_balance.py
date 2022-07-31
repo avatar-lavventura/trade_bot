@@ -8,7 +8,7 @@ from broker._utils._log import log
 from broker._utils.tools import _exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
-from ccxt.base.errors import RequestTimeout  # noqa
+from ccxt.base.errors import RequestTimeout
 
 from bot import cfg, helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
@@ -16,18 +16,23 @@ from bot.config import config
 from bot.futures.binance_futures import future_stats, futures_bal, process_future_positions
 from bot.spot_lib import update_spot_timestamps
 
-RUN_FUTURES = False
+IS_FUTURES = False
 bot_async = BotHelperSpotAsync()
 
 
-async def alert():
+async def discord_send_alert():
     asset_price_dict = {}
-    for alert in config.ALERTS:
-        _alert = config.ALERTS[alert]
-        if _alert:
-            asset_price_dict[_alert["pair"]] = _asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
-            if float(_asset_price) > _alert["price"]:
-                await bot_async.channel_alerts.send(f"{_alert['pair']}={_asset_price}", delete_after=cfg.SLEEP_INTERVAL)
+    for idx in config.ALERTS["greater_than"]:
+        alert = config.ALERTS["greater_than"][idx]
+        asset_price_dict[alert["pair"]] = _asset_price = await bot_async.spot_fetch_ticker(alert["pair"])
+        if float(_asset_price) >= alert["price"]:
+            await bot_async.channel_alerts.send(f"{alert['pair']}={_asset_price}", delete_after=cfg.SLEEP_INTERVAL)
+
+    for idx in config.ALERTS["less_than"]:
+        alert = config.ALERTS["less_than"][idx]
+        asset_price_dict[alert["pair"]] = _asset_price = await bot_async.spot_fetch_ticker(alert["pair"])
+        if float(_asset_price) <= alert["price"]:
+            await bot_async.channel_alerts.send(f"{alert['pair']}={_asset_price}", delete_after=cfg.SLEEP_INTERVAL)
 
 
 async def process(unix_timestamp_ms):
@@ -36,7 +41,7 @@ async def process(unix_timestamp_ms):
     if usdt_bal > 0.125 and not helper.is_start:
         log()
 
-    if RUN_FUTURES:
+    if IS_FUTURES:
         bot_async.futures_balance = await helper.exchange.future.fetch_balance()
         unix_timestamp_ms = helper.exchange.get_future_timestamp()
         config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
@@ -45,13 +50,13 @@ async def process(unix_timestamp_ms):
         config.env[cfg.TYPE].status["balance"] = usdt_bal
         config.env[cfg.TYPE].status["free"] = free_usdt
     elif cfg.TYPE == "btc":
-        config.env[cfg.TYPE].status["free"] = "{:.8f}".format(free_btc)
+        config.env[cfg.TYPE].status["free"] = float(format(free_btc, ".8f"))
 
     for idx in range(1, 6):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
     usdt_pos_count = config.env["usdt"]._status.find_one("count")["value"]
-    if RUN_FUTURES:
+    if IS_FUTURES:
         positions = await helper.exchange.future.fetch_positions()
         is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms, bot_async.channel)
 
@@ -65,7 +70,7 @@ async def process(unix_timestamp_ms):
         delete_multiple_lines(1)
 
     if cfg.TYPE == "usdt":
-        await alert()
+        await discord_send_alert()
 
 
 async def process_main(obj):
@@ -77,7 +82,7 @@ async def process_main(obj):
     bot_async.channel_alerts = obj.channel_alerts
     config._reload()
     try:
-        if not RUN_FUTURES:
+        if not IS_FUTURES:
             unix_timestamp_ms = helper.exchange.get_spot_timestamp()
 
         await process(unix_timestamp_ms)

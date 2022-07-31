@@ -63,7 +63,7 @@ async def process_future_positions(positions, usdt_bal, unix_timestamp_ms, chann
             unrealized_profit = float(format(float(position["info"]["unrealizedProfit"]), ".2f"))
             log(f" {unrealized_profit}", "red" if unrealized_profit < 0 else "green", end="")
             total_lost -= unrealized_profit
-            asset_percent_change = percent_change(entry_price, change, is_arrow_print=False, end="")
+            asset_percent_change = percent_change(entry_price, change, is_arrow=False, end="")
             per = format((100.0 * initial_margin) / usdt_bal, ".2f")
             log("| ", end="")
             log(f"{format(isolated_wallet, '.2f')}", "bold magenta", end="")
