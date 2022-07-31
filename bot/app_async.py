@@ -61,8 +61,8 @@ async def startup():
     await helper.exchange.set_markets()
     app.bot_trade = bot_trade.BotHelper(app.discord_client)
     app._bot_trade = bot_trade
-    app.lock = asyncio.Lock()
     app.alertlock = asyncio.Lock()
+    app.lock = asyncio.Lock()
     if not config.cfg["root"]["is_write"]:
         _log.IS_WRITE = False
 

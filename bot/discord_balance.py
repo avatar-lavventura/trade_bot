@@ -30,7 +30,7 @@ class Discord_Alpy:
             else:
                 _log.IS_WRITE = False
 
-            log(f" * bot_type={_type}", end="")
+            log(f"[cyan]**[/cyan] bot_type={_type} mode started [cyan]**", "bold")
             self._type = cfg.TYPE = _type.lower()
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")

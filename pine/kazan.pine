@@ -1,5 +1,5 @@
 //@version=5
-// PREPARED F0R "1m" //
+// PREPARED F0R "1m" or "3m" //
 //: order immediate action
 strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', calc_on_order_fills=true, process_orders_on_close=true, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
 //
@@ -24,7 +24,7 @@ window() =>
 //: wave_trend: https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT
 n1 = 10  // channel Length
 n2 = 21  // average Length
-src = hlc3
+src=hlc3
 esa = ta.ema(src, n1)
 d = ta.ema(math.abs(src - esa), n1)
 ci = (src - esa) / (0.015 * d)
@@ -50,6 +50,53 @@ else
     vwap_above_limit := vwap_value * (1 + 1.20 / 100)
 
 long_VWMA = vwap_above <= close and close < vwap_above_limit
+
+// https://www.tradingview.com/script/OQs2lVvr-Ultimate-Moving-Average-Multi-TimeFrame-7-MA-Types
+_src = close
+len = input(20, title="Moving Average Length - LookBack Period")
+atype = 1 // input(1,minval=1,maxval=7,title="1=SMA, 2=EMA, 3=WMA, 4=HullMA, 5=VWMA, 6=RMA, 7=TEMA")
+cc = input(true,title="Change Color Based On Direction?")
+smoothe = 2 // input(2, minval=1, maxval=10, title="Color Smoothing - 1 = No Smoothing")
+doma2 = input(false, title="Optional 2nd Moving Average")
+len2 = input(50, title="Moving Average Length - Optional 2nd MA")
+atype2 = 1 // input(1,minval=1,maxval=7,title="1=SMA, 2=EMA, 3=WMA, 4=HullMA, 5=VWMA, 6=RMA, 7=TEMA")
+cc2 = input(true,title="Change Color Based On Direction 2nd MA?")
+warn = input(false, title="***You Can Turn On The Show Dots Parameter Below Without Plotting 2nd MA to See Crosses***")
+warn2 = input(false, title="***If Using Cross Feature W/O Plotting 2ndMA - Make Sure 2ndMA Parameters are Set Correctly***")
+sd = input(false, title="Show Dots on Cross of Both MA's")
+
+res = timeframe.period
+//hull ma definition
+hullma = ta.wma(2*ta.wma(_src, len/2)-ta.wma(_src, len), math.round(math.sqrt(len)))
+//TEMA definition
+ema1 = ta.ema(_src, len)
+ema2 = ta.ema(ema1, len)
+ema3 = ta.ema(ema2, len)
+tema = 3 * (ema1 - ema2) + ema3
+
+avg = atype == 1 ? ta.sma(_src,len) : atype == 2 ? ta.ema(_src,len) : atype == 3 ? ta.wma(_src,len) : atype == 4 ? hullma : atype == 5 ? ta.vwma(_src, len) : atype == 6 ? ta.rma(_src,len) : tema
+//2nd Ma - hull ma definition
+hullma2 = ta.wma(2*ta.wma(_src, len2/2)-ta.wma(_src, len2), math.round(math.sqrt(len2)))
+//2nd MA TEMA definition
+sema1 = ta.ema(_src, len2)
+sema2 = ta.ema(sema1, len2)
+sema3 = ta.ema(sema2, len2)
+stema = 3 * (sema1 - sema2) + sema3
+
+avg2 = atype2 == 1 ? ta.sma(src,len2) : atype2 == 2 ? ta.ema(src,len2) : atype2 == 3 ? ta.wma(src,len2) : atype2 == 4 ? hullma2 : atype2 == 5 ? ta.vwma(src, len2) : atype2 == 6 ? ta.rma(src,len2) : tema
+
+out = avg
+out_two = avg2
+
+out1 = request.security(syminfo.tickerid, res, out)
+out2 = request.security(syminfo.tickerid, res, out_two)
+
+ma_up = out1 >= out1[smoothe]
+ma_down = out1 < out1[smoothe]
+
+col1 = cc ? ma_up ? color.lime : ma_down ? color.red : color.aqua : color.aqua
+col2 = cc2 ? ma_up ? color.lime : ma_down ? color.red : color.aqua : color.aqua
+// plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
 
 // cm_williams vix fix formula
 // pd = 900
@@ -165,7 +212,7 @@ else
         if col_aggressive[1] == color.orange and alert3
             is_buy := true
 
-        if wt1 > 53
+        if wt1 > 53 or close[1] > out1[1] or low[1] == high[1]
             is_buy := false
 
         // if wt1 < -65

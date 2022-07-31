@@ -14,7 +14,7 @@ mc = MongoClient()
 mongo_db = Mongo(mc, mc["trader_bot"]["timestamp"])
 
 
-async def main():
+async def main_async():
     time_now = _timestamp()
     total_balance = await fetch_balance()
     silver_gr = float(config.goal["portfolio"]["SILVER"]["gr"])
@@ -42,7 +42,7 @@ async def main():
 def main():
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(main())
+        loop.run_until_complete(main_async())
     except Exception as e:
         print_tb(e)
 

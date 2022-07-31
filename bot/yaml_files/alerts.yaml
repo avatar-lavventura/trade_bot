@@ -1,13 +1,13 @@
 alerts:
-  less_than:
+  less_than: # <
     a1:
       pair: UNFIUSDT
       price: 7.5
       msg: ""
-  greater_than:
+  greater_than: # >
     a1:
       pair: PNTUSDT
-      price: 0.3502
+      price: 0.38
       msg: ""
     a2:
       pair: ORNUSDT

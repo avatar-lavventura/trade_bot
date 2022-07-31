@@ -11,6 +11,7 @@ root:
   usdt:
     status: "off" # "on" or "off"
     is_discord: "on"
+    binancetr_btc_balance: 0.0
     max_pos: 3
     initial: 12
     multiply_ratio: 1.10
@@ -20,9 +21,10 @@ root:
       - PAIR
   btc:
     status: "on"
-    is_discord: "off"
-    max_pos: 3
-    initial: 0.00011 # 0.00023
+    is_discord: "on"
+    binancetr_btc_balance: 0.00
+    max_pos: 15
+    initial: 0.00025
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True

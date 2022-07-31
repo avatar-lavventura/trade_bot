@@ -54,9 +54,7 @@ class BotHelperSpotAsync(BotHelperAsync):
     def trade_debug_print(self, trade):
         log(trade)
 
-    def calculate_entry(
-        self, timestamp_list, ordering, trades, asset, asset_qty, is_return=False
-    ) -> Tuple[float, float, int]:
+    def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
         _sum = 0
         decimal = 0
         quantity = 0.0
@@ -95,20 +93,6 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                     quantity = round_float(quantity, 8)
                     _sum = round_float(_sum, 8)
-                    # if is_return:
-                    #     key = f"{cfg.TYPE}_timestamp"
-                    #     ts = trade["timestamp"]
-                    #     log(f"#> ts={ts} set for [blue]{asset}[/blue] in the timestamp yaml file")
-                    #     log("#> found_trade=", end="")
-                    #     del trade["info"]
-                    #     del trade["type"]
-                    #     del trade["fee"]
-                    #     del trade["fees"]
-                    #     del trade["takerOrMaker"]
-                    #     log(trade)
-                    #     _symbol = trade["symbol"].replace(f"/{cfg.TYPE.upper()}", "")
-                    #     config.timestamp[key][_symbol] = ts
-                    #     return (quantity, _sum, decimal)
 
         return (quantity, _sum, decimal)
 
@@ -205,9 +189,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                     ordering[trade["timestamp"]] = [idx]
 
             timestamp_list = sorted(ordering, reverse=True)
-            qty, _sum, decimal = self.calculate_entry(
-                timestamp_list, ordering, trades, asset, asset_qty, is_return=True
-            )
+            qty, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
 
         if asset_qty == 0:
             log(f"E: float division by zero asset={asset}")
@@ -274,7 +256,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
-            msg = f"**{asset}** {entry_price * 1000} p={format(asset_price * 1000, '.4f')} q={qty_str} "
+            _entry_price = format(entry_price * 1000, ".4f").strip("0")
+            _price = format(asset_price * 1000, ".4f").strip("0")
+            msg = f"**{asset}** {_entry_price} p={_price} q={qty_str} "
 
         _per_change = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:

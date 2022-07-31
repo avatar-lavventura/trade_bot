@@ -46,7 +46,7 @@ class BotHelperAsync:
     async def fetch_symbol_percent_change(self, symbol, price=None):
         bar_price = fund.percent_change_since_day_start(symbol)
         try:
-            bar_price = bar_price[0][1]  # Time, Open, High, Low, Close, Volume
+            bar_price = bar_price[0][1]  # time, open, high, low, close, volume
         except Exception as e:
             raise KeyboardInterrupt from e
 
@@ -59,7 +59,7 @@ class BotHelperAsync:
         return asset_price, float(format(percent, ".2f"))
 
     async def analyze_positions(self, name, lost, pos_count, free) -> None:
-        c = "red" if float(lost) < 0 < cfg.locked_balance else "green"
+        c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
         _str = ""
         if name == "mBTC":
             _str += "-=-=-=-=-=- "
@@ -77,6 +77,7 @@ class BotHelperAsync:
 
         if name == "mBTC":
             if free > 0:
+                free += config.cfg["root"][cfg.TYPE]["binancetr_btc_balance"]
                 _free_usdt = float(free) * cfg.BTCUSDT_PRICE
                 _str = f"{_str}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
         elif free > 1:
@@ -94,8 +95,7 @@ class BotHelperAsync:
                 log()
 
     async def _discord_send(self, msg, lost, pos_count, name, free, is_message=True) -> None:
-        cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
-        cfg.locked_balance = 100 if cfg.locked_balance > 99.5 else cfg.locked_balance
+        cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.5 else format(cfg.locked_balance, ".2f")
         await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free)
         if not is_message:
             return
@@ -226,14 +226,15 @@ class BotHelperAsync:
                     cfg.BNB_QTY = quantity
                     cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
 
+        sum_btc += config.cfg["root"][cfg.TYPE]["binancetr_btc_balance"]
         if sum_btc > 0.00002:
             own_usdt = sum_btc * cfg.BTCUSDT_PRICE
             log(
-                f" * btc=%.8f [blue]==[/blue] [cy]%.2f$[/cy] | bnb=[cy]%.2f$[/cy] | "
-                f"[blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
+                f" * btc=[green]%.8f[/green] [blue]==[/blue] [green]%.2f$[/green] [blue]*[/blue] "
+                f"bnb=[cy]%.2f$[/cy] | [blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
             )
 
-        if cfg.BNB_BALANCE < 0.25 and cfg.locked_balance < 100:
+        if cfg.BNB_BALANCE < 0.25 and float(cfg.locked_balance) < 100:
             try:
                 await self.buy_bnb()
             except Exception as e:
@@ -311,7 +312,7 @@ class BotHelperAsync:
             else:
                 _msg = cfg.discord_message_full
 
-        cfg.locked_balance = min(cfg.locked_balance, 100)
+        cfg.locked_balance = min(float(cfg.locked_balance), 100)
         if cfg.locked_balance == 100:
             locked_per = "locked=`100%`"
         else:
@@ -425,13 +426,13 @@ class BotHelperAsync:
                     return
 
                 quantity = quantity / 5  # re-try with the half size position
-                log(f"==> re-opening {side} order, half-quantity={quantity}")
+                log(f"==> re-opening {side} half_quantity={quantity}")
                 return await self.spot_order(quantity, symbol, side, is_return=True)
             elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
                 log(f"E: {e} quantity={quantity}")
                 decimal = decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
-                log(f"==> re-opening {side} order, quantity={_quantity}")
+                log(f"==> re-opening {side} order_qty={_quantity}")
                 if float(_quantity) > 0:
                     return await self.spot_order(_quantity, symbol, side)
                 else:
@@ -440,20 +441,23 @@ class BotHelperAsync:
                 quantity += 0.1
                 #: Fixes if its overrounded, ex: 1.2000000000000002
                 quantity = float("{:.1f}".format(quantity))
-                log(f"==> re-opening {side} order, quantity={quantity}")
+                log(f"==> re-opening {side} order_qty={quantity}")
                 return await self.spot_order(quantity, symbol, side)
             else:
                 print_tb(e)
                 raise e
 
-    async def spot_fetch_ticker(self, asset) -> float:
+    async def spot_fetch_ticker(self, asset, is_bid_price=False) -> float:
         if "USDT" != asset[-4:] and "BUSD" == asset[-4:]:
             asset = asset.replace("BUSD", "") + "/BUSD"
         elif "USDT" != asset[-4:] and "BTC" != asset[-3:]:
             asset = f"{asset}/BTC"
 
-        price = await helper.exchange.spot.fetch_ticker(asset)
-        return price["last"]
+        price_ticker = await helper.exchange.spot.fetch_ticker(asset)
+        if is_bid_price:
+            return float(price_ticker["info"]["bidPrice"])
+        else:
+            return price_ticker["last"]
 
     async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""
@@ -461,7 +465,7 @@ class BotHelperAsync:
         open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
             with suppress(Exception):
-                # The order may already closed if there was a rapid change
+                # the order may already closed if there was a rapid change
                 await helper.exchange.spot.cancel_order(order["id"], symbol)
 
         try:

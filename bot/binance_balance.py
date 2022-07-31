@@ -13,7 +13,7 @@ from ccxt.base.errors import RequestTimeout
 from bot import cfg, helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
-from bot.futures.binance_futures import future_stats, futures_bal, process_future_positions
+from bot.futures.binance_futures import futures_bal
 from bot.spot_lib import update_spot_timestamps
 
 IS_FUTURES = False
@@ -55,20 +55,19 @@ async def process(unix_timestamp_ms):
     for idx in range(1, 6):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
-    usdt_pos_count = config.env["usdt"]._status.find_one("count")["value"]
-    if IS_FUTURES:
-        positions = await helper.exchange.future.fetch_positions()
-        is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms, bot_async.channel)
-
-        if not is_printed and not helper.is_start and usdt_pos_count == 0 and not cfg.locked_balance > 10:
-            delete_multiple_lines(2)
-
-        if not is_printed or helper.is_start:
-            future_stats(usdt_bal, unix_timestamp_ms)
-            helper.is_start = False
-    elif helper.is_start and usdt_pos_count == 0 and not cfg.locked_balance > 10:
+    pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
+    if helper.is_start and pos_count == 0 and not float(cfg.locked_balance) > 10:
         delete_multiple_lines(1)
 
+    # if IS_FUTURES:
+    #     positions = await helper.exchange.future.fetch_positions()
+    #     is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms, bot_async.channel)
+    #     if not is_printed and not helper.is_start and pos_count == 0 and not float(cfg.locked_balance) > 10:
+    #         delete_multiple_lines(2)
+
+    #     if not is_printed or helper.is_start:
+    #         future_stats(usdt_bal, unix_timestamp_ms)
+    #         helper.is_start = False
     if cfg.TYPE == "usdt":
         await discord_send_alert()
 

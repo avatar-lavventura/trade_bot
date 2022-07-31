@@ -8,8 +8,8 @@ from broker._utils.tools import print_tb
 from bot import helper
 
 ignore_list = [
-    "BTC",
     "info",
+    "BTC",
     "LTC",
     "ETH",
     "timestamp",

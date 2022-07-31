@@ -280,7 +280,7 @@ class BotHelper:
             elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
                 quantity += 0.1
                 quantity = float("{:.1f}".format(quantity))  # sometimes overround 1.2000000000000002
-                log(f" *  re-opening {side} order ", end="")
+                log(f" *  re-opening [green]{side}[/green] ", end="")
                 return await self.spot_order(float(quantity))
             else:
                 if "Filter failure: LOT_SIZE" in str(e):
