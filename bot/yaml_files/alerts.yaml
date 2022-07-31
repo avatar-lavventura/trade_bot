@@ -1,13 +1,7 @@
 alerts:
   a1:
-    pair: PNTBTC
-    price: 0.000013
+    pair: PNTUSDT
+    price: 0.37
   a2:
-    pair: ORNBTC
-    price: 0.00007
-  a3:
-    pair: UNFIBTC
-    price: 0.00026
-  a4:
-    pair: UNFIUSDT
-    price: 5.0
+    pair: ORNUSDT
+    price: 1.7

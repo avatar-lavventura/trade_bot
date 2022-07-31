@@ -52,24 +52,32 @@ else
 long_VWMA = vwap_above <= close and close < vwap_above_limit
 
 // cm_williams vix fix formula
-pd = input(900, title='lookback period standard deviation high')
-// if timeframe.period == "5"
-//    pd := 100
-
-bbl = input(20, title='bolinger band length')
-mult = input.float(2.0, minval=1, maxval=5, title='Bollinger Band Standard Devaition Up')
-lb = input(50, title='look back period percentile high')
-ph = input(1, title='highest percentile - 0.90=90%, 0.95=95%, 0.99=99%')
-sbc = input(false, title='show Highlight Bar if WVF WAS True and IS Now False')
-sbcc = input(false, title='show highlight bar if WVF is True')
-sgb = input(false, title='check box to turn bars gray?')
-// criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
-ltLB = input.int(40, minval=1, maxval=99, title='long-term look back current bar has to close below this value or medium term-default=40')
-mtLB = input.int(14, minval=10, maxval=20, title='medium-term look back current bar has to close below this value or long term-default=14')
-str = input.int(3, minval=1, maxval=9, title='entry price action strength-close > n bars back-default=3')
-sa1 = input(false, title='show alert WVF = True?')
-sa2 = input(false, title='show alert WVF was True now False?')
-sa3 = input(false, title='show alert WVF filtered?')
+// pd = 900
+pd = input(22, title="LookBack Period Standard Deviation High")
+bbl = input(20, title="Bolinger Band Length")
+mult = input.float(2.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+lb = input(50  , title="Look Back Period Percentile High")
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
+sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
+sbcc = input(false, title="Show Highlight Bar if WVF IS True")
+new2 = input(false, title="-------Highlight Bars Below Use FILTERED Criteria-------" )
+sbcFilt = input(true, title="Show Highlight Bar For Filtered Entry")
+sbcAggr = input(false, title="Show Highlight Bar For AGGRESSIVE Filtered Entry")
+new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
+sgb = input(false, title="Check Box To Turn Bars Gray?")
+//Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
+ltLB = input.int(99, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
+mtLB = input.int(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
+str = input.int(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
+//Alerts Instructions and Options Below...Inputs Tab
+new4 = input(false, title="-------------------------Turn On/Off ALERTS Below---------------------" )
+new5 = input(false, title="----To Activate Alerts You HAVE To Check The Boxes Below For Any Alert Criteria You Want----")
+new6 = input(false, title="----You Can Un Check The Box BELOW To Turn Off the WVF Histogram And Just See True/False Alert Criteria----")
+swvf = input(true, title="Show Williams Vix Fix Histogram, Uncheck to Turn Off!")
+sa1 = input(false, title="Show Alert WVF = True?")
+sa2 = input(false, title="Show Alert WVF Was True Now False?")
+sa3 = input(false, title="Show Alert WVF Filtered?")
 
 // williams vix fix formula
 wvf = (ta.highest(close, pd) - low) / ta.highest(close, pd) * 100
@@ -119,9 +127,8 @@ if timeframe.isseconds
 else
     SLEEP_BAR := 0
 
-
-if not IS_BROWSER and strategy.position_size[0] != 0 and bar_index > math.abs(strategy.position_size) + SLEEP_BAR
-    strategy.close_all(when=window())
+if not IS_BROWSER and strategy.position_size[0] != 0 and bar_index > math.abs(strategy.position_size) + SLEEP_BAR and window()
+    strategy.close_all()
 
 is_buy = false
 if timeframe.isseconds
@@ -229,7 +236,7 @@ else
         for i = 2 to 72
             if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
                 if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 and low <= low[i + 2] * 1.0025 and low * 0.999 <= low[1] // close < low[i]
-                    // when there is dump , lower than the previous bar
+                    // if there is dump , lower than the previous bar
                     is_buy := true
 
             if col[i] == color.gray and col[i + 1] == color.lime
@@ -254,14 +261,18 @@ else
     // (col[1] == color.lime and col == color.gray)
     // col_aggressive == color.orange
 
-if IS_BROWSER and is_buy
-    strategy.entry('l', strategy.long, qty=bar_index, when=window(), alert_message=msg)
+if IS_BROWSER and is_buy and window()
+    strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
 
 if not IS_BROWSER and is_buy // "l": "long"
-    if strategy.opentrades[0] == 0 or strategy.position_size < 0
-        strategy.entry('l', strategy.long, qty=bar_index, when=window(), alert_message=msg)
+    if strategy.opentrades[0] == 0 or strategy.position_size < 0 and window()
+        strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
     else if bar_index > math.abs(strategy.position_size)
-        if strategy.position_size[0] != 0
-            strategy.close_all(when=window())
-        else
-            strategy.entry('l', strategy.long, qty=bar_index, when=window(), alert_message=msg)
+        if strategy.position_size[0] != 0 and window()
+            strategy.close_all()
+        else if window()
+            strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
+
+// longExitPrice  = strategy.position_avg_price * (1 + 0.005)
+// if (strategy.position_size > 0)
+//     strategy.exit(id="XL TP", limit=longExitPrice)
