@@ -101,13 +101,14 @@ class Discord_Alpy:
             del_list = []
             ongoing_positions = []
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
-            # output = await helper.exchange.spot.fetch_balance(params={"type": "margin", "currency": "btc"})
             for symbol in cfg.BALANCES:
-                if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
-                    if cfg.BALANCES[symbol]["total"] > 0.0:
-                        ongoing_positions.append(symbol)
-                        if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
-                            pos_count += 1
+                if (
+                    symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
+                    and cfg.BALANCES[symbol]["total"] > 0
+                ):
+                    ongoing_positions.append(symbol)
+                    if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
+                        pos_count += 1
 
             for asset_timestamp in config.timestamp[key]:
                 if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
@@ -121,14 +122,14 @@ class Discord_Alpy:
             log(f"E: {e}")
 
     async def update_current_date(self):
-        cfg.CURRENT_DATE = _date(_type="year")
+        cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
 
     async def record_balance(self):
         config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
 
     async def restart(self):
         log()
-        log("#> -=-=-=-=-=-=-=-=-=-=-=- RESTARTING ITSELF -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log("#> -=-=-=-=-=-=-=-=-=-=-=- RESTARTING -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

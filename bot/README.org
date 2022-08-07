@@ -165,8 +165,9 @@ npm install
 
 * Google Instance
 
-– Create with 15 GB boot disk, ~e2-small~ // Ubuntu LTS minimal
-– 1 non-preemptible e2-micro VM instance per month in one of the following
-US regions: ~Oregon: us-west1~, ~Iowa: us-central1~, ~South Carolina: us-east1~
+– Create with 15 GB boot disk, ~e2-small~ // Ubuntu LTS minimal 1 non-preemptible e2-micro VM instance
+– per month in one of the following US regions: ~Oregon: us-west1~, ~Iowa: us-central1~, ~South Carolina:
+– us-east1~
 
+** notes
 - expired TV: alperalperalper123  // used_card ykb bank virtual card:4525

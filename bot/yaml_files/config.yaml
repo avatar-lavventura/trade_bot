@@ -17,16 +17,15 @@ root:
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
-    ignore:
-      - PAIR
+    binance_funding_usdt_balance: 0.00
+    binance_funding_btc_balance: 0.00
   btc:
     status: "on"
     is_discord: "on"
-    binancetr_btc_balance: 0.00
+    initial: 0.00013
     max_pos: 15
-    initial: 0.00025
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
-    ignore:
-      - PAIR
+    binance_funding_usdt_balance: 0.00
+    binance_funding_btc_balance: 0.00

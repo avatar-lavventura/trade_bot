@@ -104,7 +104,7 @@ pd = input(22, title="LookBack Period Standard Deviation High")
 bbl = input(20, title="Bolinger Band Length")
 mult = input.float(2.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
 lb = input(50  , title="Look Back Period Percentile High")
-ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.76
 new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
 sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
 sbcc = input(false, title="Show Highlight Bar if WVF IS True")
@@ -206,13 +206,10 @@ else
             is_buy := true
 
     if timeframe.period == "5"  // 5m
-        if high < close[1] * 1.00025
-            is_buy := false
-
         if col_aggressive[1] == color.orange and alert3
             is_buy := true
 
-        if wt1 > 53 or close[1] > out1[1] or low[1] == high[1]
+        if high < close[1] * 1.00025 or wt1 > 53 or close[1] > out1[1]  // or low[1] == high[1]
             is_buy := false
 
         // if wt1 < -65

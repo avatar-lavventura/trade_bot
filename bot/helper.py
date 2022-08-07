@@ -68,8 +68,8 @@ class Exchange:
         if not ops["apiKey"] or not ops["secret"]:
             raise Exception("apiKey or secret is {}")
 
-        if is_futures:
-            self.future = ccxt.binanceusdm(ops)
+        # if is_futures:
+        #     self.future = ccxt.binanceusdm(ops)
 
         self.spot = ccxt.binance(ops)
         helper_cfg = None
