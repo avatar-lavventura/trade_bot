@@ -2,7 +2,7 @@ alerts:
   less_than: # <
     a1:
       pair: UNFIUSDT
-      price: 7.5
+      price: 8.0
       msg: ""
   greater_than: # >
     a1:
@@ -15,5 +15,5 @@ alerts:
       msg: ""
     a3:
       pair: ORNBTC
-      price: 0.000065
+      price: 0.000066
       msg: ""

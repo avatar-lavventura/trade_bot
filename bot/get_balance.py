@@ -27,24 +27,24 @@ def get_balance(client_helper):
 
 def main():
     get_balance(client_helper)
-    bot = BotHelper(client_helper.client)
-    bot.strategy = Strategy()
-    # balances = client.get_account()
-    for _balance in balances["balances"]:
-        asset = _balance["asset"]
-        if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in cfg.STABLE_COINS:
-            bot.strategy.symbol = asset + "BTC"
-            bot.strategy.asset = asset
-            log(f"==> {asset} ", end="")
-            limit_price, *_ = bot.get_spot_entry()
-            orders = bot.client.get_open_orders(symbol=bot.strategy.symbol)
-            for order in orders:
-                bot.client.cancel_order(symbol=bot.strategy.symbol, orderId=order["orderId"])
+    # bot = BotHelper(client_helper.client)
+    # bot.strategy = Strategy()
+    # # balances = client.get_account()
+    # for _balance in balances["balances"]:
+    #     asset = _balance["asset"]
+    #     if (float(_balance["free"]) != 0.0 or float(_balance["locked"]) != 0.0) and asset not in cfg.STABLE_COINS:
+    #         bot.strategy.symbol = asset + "BTC"
+    #         bot.strategy.asset = asset
+    #         log(f"==> {asset} ", end="")
+    #         limit_price, *_ = bot.get_spot_entry()
+    #         orders = bot.client.get_open_orders(symbol=bot.strategy.symbol)
+    #         for order in orders:
+    #             bot.client.cancel_order(symbol=bot.strategy.symbol, orderId=order["orderId"])
 
-            order = bot.client.order_limit_sell(
-                symbol=bot.strategy.symbol, price=str(limit_price), quantity=bot.asset_balance()
-            )
-            log(order)
+    #         order = bot.client.order_limit_sell(
+    #             symbol=bot.strategy.symbol, price=str(limit_price), quantity=bot.asset_balance()
+    #         )
+    #         log(order)
 
 
 if __name__ == "__main__":

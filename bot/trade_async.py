@@ -216,6 +216,7 @@ class BotHelper:
 
     async def spot_order(self, quantity: float, symbol=None, side=None):
         log(f"order_qty={quantity}", "bold")
+        _type = self.strategy.market.lower()
         if symbol:
             self.strategy.symbol = symbol
         else:
@@ -230,9 +231,7 @@ class BotHelper:
             order = await self.strategy.exchange.create_market_buy_order(symbol, quantity)
             order = order["info"]
             #: creates new item or overwrites on it
-            config.timestamp[f"{self.strategy.market.lower()}_timestamp"][self.strategy.asset] = int(
-                order["transactTime"]
-            )
+            config.timestamp[f"{_type}_timestamp"][self.strategy.asset] = int(order["transactTime"])
             with suppress(Exception):
                 del order["timeInForce"]
                 del order["orderListId"]
@@ -245,7 +244,7 @@ class BotHelper:
                 del order["orderId"]
                 del order["side"]
 
-            config.env[self.strategy.market.lower()].hit._inc(self.strategy.asset)
+            config.env[_type].hit._inc(self.strategy.asset)
             return order
         except Exception as e:
             if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
@@ -264,13 +263,7 @@ class BotHelper:
                         raise e
 
                 log(f"==> re-opening {side} order | ", end="")
-                if (
-                    self.strategy.market.lower() == "usdt"
-                    and config.env["usdt"].status["free"] < config.cfg["root"]["usdt"]["initial"]
-                ) or (
-                    self.strategy.market.lower() == "btc"
-                    and float(config.env["btc"].status["free"]) < config.cfg["root"]["btc"]["initial"]
-                ):
+                if float(config.env[_type].status["free"]) < config.cfg["root"][_type]["initial"]:
                     raise QuietExit("not enough balance") from None
 
                 if float(_quantity) > 0:
@@ -283,7 +276,7 @@ class BotHelper:
                 log(f" *  re-opening [green]{side}[/green] ", end="")
                 return await self.spot_order(float(quantity))
             else:
-                if "Filter failure: LOT_SIZE" in str(e):
+                if "Filter failure: LOT_SIZE" in str(e) or "InsufficientFunds" in str(e):
                     log(str(e))
                 else:
                     print_tb(e)

@@ -8,7 +8,7 @@ from pymongo import MongoClient
 
 from bot.config import config
 from bot.mongodb import Mongo
-from bot.usdtperp.my_balance import fetch_balance, get_gold, get_silver
+from bot.usdtperp.my_balance import get_gold, get_silver
 
 mc = MongoClient()
 mongo_db = Mongo(mc, mc["trader_bot"]["timestamp"])
@@ -16,7 +16,7 @@ mongo_db = Mongo(mc, mc["trader_bot"]["timestamp"])
 
 async def main_async():
     time_now = _timestamp()
-    total_balance = await fetch_balance()
+    total_balance = 0
     silver_gr = float(config.goal["portfolio"]["SILVER"]["gr"])
     if silver_gr > 0.0:
         silver_usdt = float(format(get_silver(silver_gr), ".2f"))
@@ -36,7 +36,6 @@ async def main_async():
     config.goal["portfolio"]["_TOTAL"] = float(total_balance)
     log(f"total_balance={total_balance} | {time_now}")
     # mongo_db.add_item(time_now, config.goal["portfolio"])
-    log("SUCCESS")
 
 
 def main():

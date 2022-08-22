@@ -414,9 +414,11 @@ class BotHelperAsync:
 
         log(order, is_write=False)
 
-    async def spot_order(self, quantity, symbol, side, is_return=False):
+    async def spot_order(self, quantity, symbol, side, is_return=False, from_exception=False):
         try:
-            log(f"==> market_buy_order_quantity={quantity}", "bold")
+            if not from_exception:
+                log(f"==> market_buy_order_quantity={quantity}", "bold")
+
             return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             _e = str(e)
@@ -425,24 +427,24 @@ class BotHelperAsync:
                 if is_return:
                     return
 
-                quantity = quantity / 5  # re-try with the half size position
-                log(f"==> re-opening {side} half_quantity={quantity}")
-                return await self.spot_order(quantity, symbol, side, is_return=True)
+                quantity = quantity / 5  # re-try with much smalleer position size
+                log(f"==> re-opening {side} 1/5_of_quantity={quantity}")
+                return await self.spot_order(quantity, symbol, side, is_return=True, from_exception=True)
             elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
                 log(f"E: {e} quantity={quantity}")
                 decimal = decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
-                log(f"==> re-opening {side} order_qty={_quantity}")
+                log(f"==> re-opening [green]{side}[/green] order_qty={_quantity}")
                 if float(_quantity) > 0:
-                    return await self.spot_order(_quantity, symbol, side)
+                    return await self.spot_order(_quantity, symbol, side, from_exception=True)
                 else:
                     log("E: quantity is zero, nothing to do")
             elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.4:
                 quantity += 0.1
-                #: Fixes if its overrounded, ex: 1.2000000000000002
+                #: fixes if its overrounded, ex: 1.2000000000000002
                 quantity = float("{:.1f}".format(quantity))
-                log(f"==> re-opening {side} order_qty={quantity}")
-                return await self.spot_order(quantity, symbol, side)
+                log(f"==> re-opening [green]{side}[/green] order_qty={quantity}")
+                return await self.spot_order(quantity, symbol, side, from_exception=True)
             else:
                 print_tb(e)
                 raise e

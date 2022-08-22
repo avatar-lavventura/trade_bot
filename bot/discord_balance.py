@@ -103,7 +103,7 @@ class Discord_Alpy:
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
             for symbol in cfg.BALANCES:
                 if (
-                    symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
+                    symbol not in ["BTC", "BNB", "USDT", "info", "timestamp", "datetime", "free", "used", "total"]
                     and cfg.BALANCES[symbol]["total"] > 0
                 ):
                     ongoing_positions.append(symbol)

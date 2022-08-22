@@ -1,7 +1,7 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
-** TODO lower than 5m candle maybe cut of the trade,check ?/
+** TODO lower than 5m candle maybe cut of the trade, check
 #+begin_src python
 response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 #+end_src
@@ -18,7 +18,6 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO funding -0.0075% olan coin leri listele ve long yap, insanlari patlatmak icin pump oluyor BUSD icin de bak
     - ~binanceusdm.fetchFundingRate~
 ** TODO BTC-spot volume 10.0 dan kucukse hic bulasma
-** TODO re-start TV at July 6th
 ** TODO stop-loss @tolga
   > 5$ la poz ac
   > 5% dusunce birinci eklemeyi yap (+10$)

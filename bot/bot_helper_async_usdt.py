@@ -114,15 +114,14 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(order)
 
     async def add_to_position(self, asset, qty, asset_price, sum_bal, limit_price) -> None:
-        new_order_size = qty * config.env[cfg.TYPE].multiply_ratio
-        if new_order_size * asset_price < 10:
+        new_qty = qty * config.env[cfg.TYPE].multiply_ratio
+        if new_qty * asset_price < 10:
             # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
-            new_order_size = qty * 1.05
+            new_qty = qty * 1.05
 
-        log(f"new_order_size={new_order_size}", "bold")
-        per = (100.0 * (qty + new_order_size) * asset_price) / sum_bal
-        log(f"==> {format(float(per), '.2f')}% => {format(float(per), '.2f')}% of the total asset value")
-        order = await self.spot_order(new_order_size, f"{asset}/{cfg.TYPE.upper()}", "BUY")
+        per = (100.0 * new_qty * asset_price) / sum_bal
+        log(f"==> new_order_qty={new_qty} | {format(float(per), '.2f')}% of the total asset")
+        order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
             log(order["info"])
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
@@ -208,6 +207,10 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         entry_price = _sum / qty_to_consider
         entry_price = float(f"{entry_price:.{decimal}f}")
+        with suppress(Exception):
+            if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
+                entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
+
         limit_price = f"{entry_price * TP.get_profit_amount(_sum):.{decimal}f}"
         if _type in ["usdt", "busd"]:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".2f"))
