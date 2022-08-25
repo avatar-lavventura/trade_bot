@@ -366,11 +366,9 @@ class BotHelper:
 
     def check_on_going_positions(self) -> None:
         pos_count = config.env[self.strategy.market.lower()]._status.find_one("count")["value"]
-        if self.strategy.market.lower() == "btc" and pos_count >= config.BTC_MAX_POS:
-            raise QuietExit(f"warning: {config.BTC_MAX_POS} pos")
-
-        if self.strategy.market.lower() == "usdt" and pos_count >= config.USDT_MAX_POS:
-            raise QuietExit(f"warning: {config.USDT_MAX_POS} pos")
+        defined_pos_count = config.env[self.strategy.market.lower()].max_pos
+        if pos_count >= defined_pos_count:
+            raise QuietExit(f"warning: {defined_pos_count} pos")
 
     async def _fetch_balance(self):
         for _ in range(5):

@@ -151,6 +151,7 @@ class BotHelperAsync:
     ########
     async def _fetch_balance(self):
         try:
+            # margin_balance = await helper.exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
             pos_count = 0
             ongoing_positions = []
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
@@ -282,7 +283,7 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
-        lost: float = 0.0
+        lost: float = 0
         cfg.locked_balance = 0.0
         cfg.discord_message = f"`{_date(_type='hour')}`\n"
         cfg.discord_message_full = f"`{_date(_type='hour')}`\n"
@@ -348,14 +349,14 @@ class BotHelperAsync:
             lost_usdt = format(float(lost) * cfg.BTCUSDT_PRICE, ".2f")
             if float(lost_usdt) < 0:
                 msg = (
-                    f"{msg} btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"{msg}btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
                     f"**lost=`{lost_usdt}$`** | {locked_per} {pos_str}"
                 )
             elif float(lost_usdt) == 0:
                 msg = f"btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**) @binance_{cfg.TYPE}"
             else:
                 msg = (
-                    f"{msg} btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"{msg}btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
                     f"**gain=`+{lost_usdt}$`** | {locked_per} {pos_str}"
                 )
 
@@ -417,18 +418,22 @@ class BotHelperAsync:
     async def spot_order(self, quantity, symbol, side, is_return=False, from_exception=False):
         try:
             if not from_exception:
-                log(f"==> market_buy_order_quantity={quantity}", "bold")
+                log(f"==> market_buy_order_quantity={quantity}")
 
             return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             _e = str(e)
             if "Account has insufficient balance" in _e:
                 log("E: Account has insufficient balance for requested action")
-                if is_return:
+                if (
+                    is_return
+                    or from_exception
+                    or config.env[cfg.TYPE].status["free"] < cfg.MINIMUM_POSITION[cfg.TYPE] * 4
+                ):
                     return
 
-                quantity = quantity / 5  # re-try with much smalleer position size
-                log(f"==> re-opening {side} 1/5_of_quantity={quantity}")
+                quantity = quantity / 4  # re-try with much smalleer position size
+                log(f"==> re-opening [green]{side}[/green] 1/4_of_quantity={quantity} for {symbol}")
                 return await self.spot_order(quantity, symbol, side, is_return=True, from_exception=True)
             elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
                 log(f"E: {e} quantity={quantity}")

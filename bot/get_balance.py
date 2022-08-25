@@ -2,10 +2,11 @@
 
 from broker._utils.tools import log
 
-from bot import cfg
 from bot.client_helper import ClientHelper
-from bot.trade_async import BotHelper, Strategy
 from bot.user_setup import check_binance_obj
+
+# from bot import cfg
+# from bot.trade_async import BotHelper, Strategy
 
 client, balances = check_binance_obj()
 client_helper = ClientHelper(client)

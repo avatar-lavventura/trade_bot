@@ -209,6 +209,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         entry_price = float(f"{entry_price:.{decimal}f}")
         with suppress(Exception):
             if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
+                #: sets entry price with the value read from the config.yaml file
                 entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
 
         limit_price = f"{entry_price * TP.get_profit_amount(_sum):.{decimal}f}"

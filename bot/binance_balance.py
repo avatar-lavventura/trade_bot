@@ -5,7 +5,7 @@ from contextlib import suppress
 
 from broker._utils._async import _sleep
 from broker._utils._log import log
-from broker._utils.tools import _exit, delete_multiple_lines, print_tb
+from broker._utils.tools import _sys_exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
 from ccxt.base.errors import RequestTimeout
@@ -86,10 +86,10 @@ async def process_main(obj):
 
         await process(unix_timestamp_ms)
     except RequestTimeout:
-        _exit("Timestamp for this request is outside of the recieve_window=5000")
+        _sys_exit("Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
         print_tb(e)
-        _exit("KeyError")
+        _sys_exit("KeyError")
     except Exception as e:
         if "quantity is zero" in str(e):
             log(f"#> {e} [green]don't worry")

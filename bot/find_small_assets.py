@@ -6,21 +6,7 @@ from contextlib import suppress
 from broker._utils.tools import print_tb
 
 from bot import helper
-
-ignore_list = [
-    "info",
-    "BTC",
-    "LTC",
-    "ETH",
-    "timestamp",
-    "datetime",
-    "free",
-    "used",
-    "total",
-    "USDT",
-    "IQ",
-    "VTHO",
-]
+from bot.lib import ignore_list
 
 
 async def btc_search():
@@ -61,7 +47,7 @@ async def usdt_search():
     await exchange.close()
 
 
-if __name__ == "__main__":
+def main():
     try:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(btc_search())
@@ -69,3 +55,7 @@ if __name__ == "__main__":
         loop.run_until_complete(usdt_search())
     except Exception as e:
         print_tb(e)
+
+
+if __name__ == "__main__":
+    main()

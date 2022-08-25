@@ -28,6 +28,7 @@ class Env:
         self.stats = None
         self.status = None
         self._status = None
+        self.max_pos = None
 
 
 class Config:
@@ -108,10 +109,9 @@ class Config:
             self.env[_type].percent_change_to_add = -abs(self.cfg["root"][_type]["percent_change_to_add"]) + 0.01
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
             self.env[_type].positions_alert = self.yaml_wrapper(self.base_dir / f"positions_alert_{_type}.yaml")
+            self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
-        self.USDT_MAX_POS = self.cfg["root"]["usdt"]["max_pos"]
-        self.BTC_MAX_POS = self.cfg["root"]["btc"]["max_pos"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
         self.SPOT_locked_percent_limit = self.cfg["root"]["locked_percent_limit"]
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
@@ -119,7 +119,7 @@ class Config:
 
     # BUSD
     # ====
-    def get_spot_timestamp_busd(self, asset):
+    def get_spot_timestamp_busd(self, asset) -> int:
         key = "busd_timestamp"
         if self.timestamp[key][asset] == {}:
             self.timestamp[key][asset] = config.env["busd"].status["timestamp"]

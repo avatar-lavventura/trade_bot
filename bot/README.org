@@ -2,6 +2,7 @@
 
 ** tradingview new account
 
+- restart internet and open new session at Google Chrome
 - at macOS open [[mail.com]] and [[tradingview.comman]] on *brave* and click the link from the mail
   for authentication, DO NOT COPY THE LINK and PASTE TO URL it does not accept payment.
 
@@ -170,4 +171,4 @@ npm install
 – us-east1~
 
 ** notes
-- expired TV: alperalperalper123  // used_card ykb bank virtual card:4525
+- expired TV: alpertrade3  // used_card YKB virtual credit-card:6884

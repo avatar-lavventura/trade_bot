@@ -614,3 +614,20 @@ CLOSED: [2022-08-23 Tue 15:06]
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE Freezes at
+CLOSED: [2022-09-08 Thu 11:07]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-09-08 Thu 11:07
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+#+begin_src bash
+E: Timestamp for this request is outside of the recieve_window=5000
+## Exiting
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+countdown for 30 seconds
+bot_type=btc mode started **
+#+end_src

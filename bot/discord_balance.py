@@ -69,6 +69,7 @@ class Discord_Alpy:
         await self.record_balance()
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
+
         # second
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost
@@ -125,7 +126,9 @@ class Discord_Alpy:
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
 
     async def record_balance(self):
-        config.env[cfg.TYPE].balance.add_single_key(cfg.CURRENT_DATE, {"btc": cfg.SUM_BTC, "usdt": cfg.SUM_USDT})
+        config.env[cfg.TYPE].balance.add_single_key(
+            cfg.CURRENT_DATE, {"btc": float(cfg.SUM_BTC), "usdt": float(cfg.SUM_USDT)}
+        )
 
     async def restart(self):
         log()
