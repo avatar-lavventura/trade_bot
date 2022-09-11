@@ -149,6 +149,19 @@ class BotHelperAsync:
     ########
     # SPOT #
     ########
+    async def _fetch_margin_balance(self):
+        """Fetch margin balance.
+
+        Example output:
+        ipdb> balances["info"]["assets"][0]["quoteAsset"] {'asset': 'USDT',
+        'borrowEnabled': True, 'borrowed': '0', 'free': '2.1602058', 'interest':
+        '0', 'locked': '0', 'netAsset': '2.1602058', 'netAssetOfBtc':
+        '0.0001003', 'repayEnabled': True, 'totalAsset': '2.1602058'}
+        """
+        balances = await helper.exchange.margin.fetch_balance()
+        total_asset = balances["info"]["assets"][0]["quoteAsset"]["totalAsset"]
+        return total_asset
+
     async def _fetch_balance(self):
         try:
             # margin_balance = await helper.exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
@@ -416,10 +429,10 @@ class BotHelperAsync:
         log(order, is_write=False)
 
     async def spot_order(self, quantity, symbol, side, is_return=False, from_exception=False):
-        try:
-            if not from_exception:
-                log(f"==> market_buy_order_quantity={quantity}")
+        if not from_exception:
+            log(f"==> market_buy_order_quantity={quantity}")
 
+        try:
             return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             _e = str(e)

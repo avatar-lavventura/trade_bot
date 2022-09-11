@@ -20,6 +20,7 @@ class Exchange:
         self.spot = None
         self.spot_usdt = None
         self.spot_btc = None
+        self.margin = None
         self.spot_markets = {}
         self._type: str = ""
 
@@ -43,9 +44,17 @@ class Exchange:
     def init(self, _type):
         self._type = _type
         if cfg.TYPE == "usdt":
-            self.spot = ccxt.binance(self.ops_check("alper_b"))
+            ops = self.ops_check("alper_b")
+            self.spot = ccxt.binance(ops)
         elif cfg.TYPE == "btc":
-            self.spot = ccxt.binance(self.ops_check("anne_b"))
+            ops = self.ops_check("anne_b")
+            self.spot = ccxt.binance(ops)
+
+        ops["options"] = {
+            "adustForTimeDifference": True,
+            "defaultMarginMode": "isolated",
+        }
+        self.margin = ccxt.binance(ops)
 
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])

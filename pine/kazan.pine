@@ -201,9 +201,11 @@ else
     if timeframe.period == "5"
         if alert3[1] or (col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and is_wt_cross_green)
             is_buy := true
-    else
-        if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
+
+        if is_wt_cross_green and col_aggressive == color.orange and col[1] == color.lime and col[2] == color.lime
             is_buy := true
+    else if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
+        is_buy := true
 
     if timeframe.period == "5"  // 5m
         if col_aggressive[1] == color.orange and alert3

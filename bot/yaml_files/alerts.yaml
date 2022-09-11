@@ -11,9 +11,9 @@ alerts:
       msg: ""
     a2:
       pair: ORNUSDT
-      price: 1.3
+      price: 1.25
       msg: ""
     a3:
       pair: ORNBTC
-      price: 0.000061
+      price: 0.000059
       msg: ""
