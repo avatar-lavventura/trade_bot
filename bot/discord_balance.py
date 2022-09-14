@@ -70,12 +70,12 @@ class Discord_Alpy:
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
 
-        # second
+        # secondly
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost
             scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
 
-        # hour
+        # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(self.record_balance, "cron", hour="*", timezone=tz)
 
@@ -96,11 +96,11 @@ class Discord_Alpy:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
 
     async def fetch_balance(self):
+        key = f"{cfg.TYPE}_timestamp"
+        pos_count = 0
+        del_list = []
+        ongoing_positions = []
         try:
-            key = f"{cfg.TYPE}_timestamp"
-            pos_count = 0
-            del_list = []
-            ongoing_positions = []
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
             for symbol in cfg.BALANCES:
                 if (

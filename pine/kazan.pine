@@ -206,10 +206,10 @@ else
         if alert3[1] or (col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and is_wt_cross_green)
             is_buy := true
 
-        if is_wt_cross_green and col_aggr == color.orange and col[1] == color.lime and col[2] == color.lime
+        if is_wt_cross_green and col_aggr == color.orange and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime
             is_buy := true
 
-        if col_aggr[1] == color.orange and alert3
+        if (col_aggr[1] == color.orange or col_aggr[2] == color.orange) and alert3
             is_buy := true
 
         //

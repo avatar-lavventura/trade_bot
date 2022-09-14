@@ -197,7 +197,10 @@ class BotHelperSpotAsync(BotHelperAsync):
         if qty == 0:
             return 0
 
-        if abs(float(asset_qty) - float(qty)) > 0.000000000001:
+        if (
+            abs(float(asset_qty) - float(qty)) > 0.000000000001
+            and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
+        ):
             log(f"warning: wrong calculation for {asset}/{_type.upper()} {asset_qty} == {qty}", is_write=False)
 
         qty_to_consider = qty

@@ -336,9 +336,10 @@ class BotHelperAsync:
         if pos_count > 2:
             pos_str = f"pos=**{pos_count}**"
 
+        free = float(free)
         if cfg.TYPE == "usdt":
             _free = ""
-            if float(free) > 1:
+            if free > 1:
                 _free = f"| free=`{free}` "
 
             if sum_busd > 0.1:
@@ -356,21 +357,21 @@ class BotHelperAsync:
             cfg.SUM_USDT = format(sum_usdt, ".2f")
         else:
             msg = _msg
-            if float(free) > 0:
-                msg = f"{msg}free=`{free}` |"
+            if free > 0:
+                msg = f"{msg}free=`{free}` (`{format(free * cfg.BTCUSDT_PRICE, '.2f')}$`) |"
 
             lost_usdt = format(float(lost) * cfg.BTCUSDT_PRICE, ".2f")
             if float(lost_usdt) < 0:
                 msg = (
-                    f"{msg}btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
-                    f"**lost=`{lost_usdt}$`** | {locked_per} {pos_str}"
+                    f"{msg} btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"**lost=`{lost_usdt}$`** {locked_per} {pos_str}"
                 )
             elif float(lost_usdt) == 0:
                 msg = f"btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**) @binance_{cfg.TYPE}"
             else:
                 msg = (
-                    f"{msg}btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**)\n"
-                    f"**gain=`+{lost_usdt}$`** | {locked_per} {pos_str}"
+                    f"{msg} btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"**gain=`+{lost_usdt}$`** {locked_per} {pos_str}"
                 )
 
             cfg.SUM_BTC = format(sum_btc, ".8f")
@@ -382,16 +383,14 @@ class BotHelperAsync:
 
         if config.cfg["root"][cfg.TYPE]["is_discord"] == "on":
             if cfg.TYPE == "btc":
-                await self._discord_send(
-                    msg, format(lost * 1000, ".5f"), pos_count, " mBTC", float(free), is_message=True
-                )
+                await self._discord_send(msg, format(lost * 1000, ".5f"), pos_count, " mBTC", free, is_message=True)
             else:
-                await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", float(free))
+                await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free)
         else:
             if cfg.TYPE == "btc":
-                await self.analyze_positions("mBTC", format(lost * 1000, ".5f"), pos_count, float(free))
+                await self.analyze_positions("mBTC", format(lost * 1000, ".5f"), pos_count, free)
             else:
-                await self.analyze_positions("$", format(lost, ".2f"), pos_count, float(free))
+                await self.analyze_positions("$", format(lost, ".2f"), pos_count, free)
 
         config.env[cfg.TYPE]._status.add_single_key("count", count)
         self.update_timestamp_status()
@@ -428,8 +427,8 @@ class BotHelperAsync:
 
         log(order, is_write=False)
 
-    async def spot_order(self, quantity, symbol, side, is_return=False, from_exception=False):
-        if not from_exception:
+    async def spot_order(self, quantity, symbol, side, is_return=False, from_ex=False):
+        if not from_ex:
             log(f"==> market_buy_order_quantity={quantity}")
 
         try:
@@ -438,31 +437,27 @@ class BotHelperAsync:
             _e = str(e)
             if "Account has insufficient balance" in _e:
                 log("E: Account has insufficient balance for requested action")
-                if (
-                    is_return
-                    or from_exception
-                    or config.env[cfg.TYPE].status["free"] < cfg.MINIMUM_POSITION[cfg.TYPE] * 4
-                ):
+                if is_return or from_ex or config.env[cfg.TYPE].status["free"] < cfg.MINIMUM_POSITION[cfg.TYPE] * 4:
                     return
 
                 quantity = quantity / 4  # re-try with much smalleer position size
                 log(f"==> re-opening [green]{side}[/green] 1/4_of_quantity={quantity} for {symbol}")
-                return await self.spot_order(quantity, symbol, side, is_return=True, from_exception=True)
+                return await self.spot_order(quantity, symbol, side, is_return=True, from_ex=True)
             elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
                 log(f"E: {e} quantity={quantity}")
                 decimal = decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
-                log(f"==> re-opening [green]{side}[/green] order_qty={_quantity}")
+                log(f"==> re-opening [green]{side}[/green] order qty={_quantity}")
                 if float(_quantity) > 0:
-                    return await self.spot_order(_quantity, symbol, side, from_exception=True)
+                    return await self.spot_order(_quantity, symbol, side, from_ex=True)
                 else:
                     log("E: quantity is zero, nothing to do")
             elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.4:
                 quantity += 0.1
                 #: fixes if its overrounded, ex: 1.2000000000000002
                 quantity = float("{:.1f}".format(quantity))
-                log(f"==> re-opening [green]{side}[/green] order_qty={quantity}")
-                return await self.spot_order(quantity, symbol, side, from_exception=True)
+                log(f"==> re-opening [green]{side}[/green] order qty={quantity}")
+                return await self.spot_order(quantity, symbol, side, from_ex=True)
             else:
                 print_tb(e)
                 raise e

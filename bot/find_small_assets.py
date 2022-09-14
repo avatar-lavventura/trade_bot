@@ -29,7 +29,7 @@ async def btc_search():
 
 
 async def usdt_search():
-    """List smaller USDT assets than 0.06 for blacklist.txt."""
+    """List smaller USDT assets than 0.06 for blacklist_usdt.txt."""
     helper.exchange.init_both()
     exchange = helper.exchange.spot_usdt
     assets = await exchange.fetch_balance()

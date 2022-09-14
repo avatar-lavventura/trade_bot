@@ -1,11 +1,11 @@
 * Guide
 
 ** tradingview new account
-
 - restart internet and open new session at Google Chrome
 - at macOS open [[proton.mail]] and
   [[https://www.tr.tradingview.com/gopro/?source=header_go_pro_button&feature=start_free_trial]] on
   *opera* and copy the link from the mail for authentication, during paste remove ~tr~
+- Set alerts and do not login again, TV may end up disable your account.
 
 ** [[http://alpyr.duckdns.org:81][Nginx setup]]
 

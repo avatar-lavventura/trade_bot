@@ -22,11 +22,12 @@ root:
     entry_prices:
       ASSET: 100
       ORN: 1.73
+      PNT: 0.4046
   btc:
     status: "on"
     is_discord: "on"
     initial: 0.00013
-    max_pos: 10
+    max_pos: 15
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
