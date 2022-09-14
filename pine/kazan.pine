@@ -1,10 +1,14 @@
 //@version=5
-// PREPARED F0R "1m" or "3m" //
-//: order immediate action
-strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', calc_on_order_fills=true, process_orders_on_close=true, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
-//
-//: order fills at the next bar’s open
-// strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},', shorttitle='alpy_vix', process_orders_on_close=false, default_qty_type=strategy.cash, calc_on_every_tick=true, pyramiding=100000, overlay=false)
+// Created by AlperAlimoglu on 01-01-2022 * prepared for "5m"
+strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},',
+     shorttitle='alpy_vix',
+     calc_on_order_fills=true,  // order immediate action
+     process_orders_on_close=true,
+     default_qty_type=strategy.cash,
+     calc_on_every_tick=true,
+     overlay=false,
+     pyramiding=100000)
+
 IS_BROWSER = false
 fromMonth = 3
 fromDay = 1
@@ -117,11 +121,7 @@ sgb = input(false, title="Check Box To Turn Bars Gray?")
 ltLB = input.int(99, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
 mtLB = input.int(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
 str = input.int(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
-//Alerts Instructions and Options Below...Inputs Tab
-new4 = input(false, title="-------------------------Turn On/Off ALERTS Below---------------------" )
-new5 = input(false, title="----To Activate Alerts You HAVE To Check The Boxes Below For Any Alert Criteria You Want----")
-new6 = input(false, title="----You Can Un Check The Box BELOW To Turn Off the WVF Histogram And Just See True/False Alert Criteria----")
-swvf = input(true, title="Show Williams Vix Fix Histogram, Uncheck to Turn Off!")
+// alerts Instructions and Options Below...Inputs Tab
 sa1 = input(false, title="Show Alert WVF = True?")
 sa2 = input(false, title="Show Alert WVF Was True Now False?")
 sa3 = input(false, title="Show Alert WVF Filtered?")
@@ -145,14 +145,14 @@ alert3 = upRange and close > close[str] and (close < close[ltLB]) and filtered ?
 alert4 = upRange_aggr and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered_aggr ? 1 : 0
 // highlight bar criteria
 barcolor(alert3 ? color.fuchsia : na)  // **
-barcolor(alert4 ? color.orange : na)
+barcolor(alert4 ? color.orange : na)  // **
 barcolor(sbc and (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and wvf < upper_band and wvf < rangeHigh ? color.aqua : na)
 barcolor(sbcc and (wvf >= upper_band or wvf >= rangeHigh) ? color.lime : na)
 barcolor(sgb and close ? color.gray : na)
 // coloring criteria of williams vix fix
 col = wvf >= upper_band or wvf >= rangeHigh ? color.lime : color.gray
 col_fuchsia = alert3 ? color.fuchsia : na
-col_aggressive = alert4 ? color.orange : color.red
+col_aggr = alert4 ? color.orange : color.red
 // plots for williams vix fix histogram and alerts
 plot(wvf ? wvf * -1 : na, title='williams vix fix', style=plot.style_columns, linewidth=4, color=col)
 plot(sa1 and alert1 ? alert1 : 0, title='alert If WVF = True', style=plot.style_columns, linewidth=2, color=color.new(color.lime, 0))
@@ -192,25 +192,27 @@ else
         if col[i] == color.lime
             count += 1
 
-    // if col_aggressive == color.orange and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray
+    // if col_aggr == color.orange and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray
     //    is_buy := true
 
     if col == color.gray and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray and low <= lowest_value
         is_buy := true
 
-    if timeframe.period == "5"
+    if timeframe.period != "5"
+        if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
+            is_buy := true
+
+    if timeframe.period == "5"  // 5m
         if alert3[1] or (col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and is_wt_cross_green)
             is_buy := true
 
-        if is_wt_cross_green and col_aggressive == color.orange and col[1] == color.lime and col[2] == color.lime
-            is_buy := true
-    else if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
-        is_buy := true
-
-    if timeframe.period == "5"  // 5m
-        if col_aggressive[1] == color.orange and alert3
+        if is_wt_cross_green and col_aggr == color.orange and col[1] == color.lime and col[2] == color.lime
             is_buy := true
 
+        if col_aggr[1] == color.orange and alert3
+            is_buy := true
+
+        //
         if high < close[1] * 1.00025 or wt1 > 53 or close[1] > out1[1]  // or low[1] == high[1]
             is_buy := false
 
@@ -296,16 +298,15 @@ else
 
                 if col[i] == color.gray and col[i + 1] == color.lime
                     break
-
     else if timeframe.period == "240"  // 4hr (60 * 4)
-        if col_aggressive == color.orange
+        if col_aggr == color.orange
             is_buy := true
 
-    // if col_aggressive == color.orange
+    // if col_aggr == color.orange
     //     msg := msg_aggr
 
     // (col[1] == color.lime and col == color.gray)
-    // col_aggressive == color.orange
+    // col_aggr == color.orange
 
 if IS_BROWSER and is_buy and window()
     strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
