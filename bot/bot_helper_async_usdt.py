@@ -54,9 +54,7 @@ class BotHelperSpotAsync(BotHelperAsync):
     def trade_debug_print(self, trade):
         log(trade)
 
-    def calculate_entry(
-        self, timestamp_list, ordering, trades, asset, asset_qty, is_return=False
-    ) -> Tuple[float, float, int]:
+    def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
         _sum = 0
         decimal = 0
         quantity = 0.0
@@ -95,20 +93,6 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                     quantity = round_float(quantity, 8)
                     _sum = round_float(_sum, 8)
-                    # if is_return:
-                    #     key = f"{cfg.TYPE}_timestamp"
-                    #     ts = trade["timestamp"]
-                    #     log(f"#> ts={ts} set for [blue]{asset}[/blue] in the timestamp yaml file")
-                    #     log("#> found_trade=", end="")
-                    #     del trade["info"]
-                    #     del trade["type"]
-                    #     del trade["fee"]
-                    #     del trade["fees"]
-                    #     del trade["takerOrMaker"]
-                    #     log(trade)
-                    #     _symbol = trade["symbol"].replace(f"/{cfg.TYPE.upper()}", "")
-                    #     config.timestamp[key][_symbol] = ts
-                    #     return (quantity, _sum, decimal)
 
         return (quantity, _sum, decimal)
 
@@ -130,15 +114,14 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(order)
 
     async def add_to_position(self, asset, qty, asset_price, sum_bal, limit_price) -> None:
-        new_order_size = qty * config.env[cfg.TYPE].multiply_ratio
-        if new_order_size * asset_price < 10:
+        new_qty = qty * config.env[cfg.TYPE].multiply_ratio
+        if new_qty * asset_price < 10:
             # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
-            new_order_size = qty * 1.05
+            new_qty = qty * 1.05
 
-        log(f"new_order_size={new_order_size}", "bold")
-        per = (100.0 * (qty + new_order_size) * asset_price) / sum_bal
-        log(f"==> {format(float(per), '.2f')}% => {format(float(per), '.2f')}% of the total asset value")
-        order = await self.spot_order(new_order_size, f"{asset}/{cfg.TYPE.upper()}", "BUY")
+        per = (100.0 * new_qty * asset_price) / sum_bal
+        log(f"==> new_order_qty={new_qty} | {format(float(per), '.2f')}% of the total asset")
+        order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
             log(order["info"])
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
@@ -205,9 +188,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                     ordering[trade["timestamp"]] = [idx]
 
             timestamp_list = sorted(ordering, reverse=True)
-            qty, _sum, decimal = self.calculate_entry(
-                timestamp_list, ordering, trades, asset, asset_qty, is_return=True
-            )
+            qty, _sum, decimal = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
 
         if asset_qty == 0:
             log(f"E: float division by zero asset={asset}")
@@ -226,6 +207,11 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         entry_price = _sum / qty_to_consider
         entry_price = float(f"{entry_price:.{decimal}f}")
+        with suppress(Exception):
+            if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
+                #: sets entry price with the value read from the config.yaml file
+                entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
+
         limit_price = f"{entry_price * TP.get_profit_amount(_sum):.{decimal}f}"
         if _type in ["usdt", "busd"]:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".2f"))
@@ -274,7 +260,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
-            msg = f"**{asset}** {entry_price * 1000} p={format(asset_price * 1000, '.4f')} q={qty_str} "
+            _entry_price = format(entry_price * 1000, ".4f").strip("0")
+            _price = format(asset_price * 1000, ".4f").strip("0")
+            msg = f"**{asset}** {_entry_price} p={_price} q={qty_str} "
 
         _per_change = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:

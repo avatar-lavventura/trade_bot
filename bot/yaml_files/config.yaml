@@ -4,25 +4,34 @@ root:
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
   take_profit: 0.005
-  locked_percent_limit: 100
+  locked_percent_limit: 99.99
   ignore: # for all
     - ORN
     - PNT
   usdt:
     status: "off" # "on" or "off"
+    is_discord: "on"
+    binancetr_btc_balance: 0.0
     max_pos: 3
     initial: 12
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
-    ignore:
-      - PAIR
+    binance_funding_usdt_balance: 0.00
+    binance_funding_btc_balance: 0.00
+    entry_prices:
+      ASSET: 100
+      ORN: 1.73
   btc:
     status: "on"
-    max_pos: 3
-    initial: 0.00011 # 0.00023
+    is_discord: "on"
+    initial: 0.00013
+    max_pos: 10
     multiply_ratio: 1.10
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
-    ignore:
-      - PAIR
+    binance_funding_usdt_balance: 0.00
+    binance_funding_btc_balance: 0.00
+    entry_prices:
+      ASSET: 0.0001
+      ORN: 0.0000661

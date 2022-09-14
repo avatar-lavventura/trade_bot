@@ -1,4 +1,16 @@
-* ~FTMUSDT~ has nice pump and dumps from, good back-testing duration starting 2022 May
+* Strategy approaches
+** order immediate action
+#+begin_src python
+strategy(..., calc_on_order_fills=true, ...)
+#+end_src
+
+** order fills at the next bar’s open
+#+begin_src python
+strategy(..., process_orders_on_close=false, ...)
+#+end_src
+
+* ~FTMUSDT~ has
+nice pump and dumps from, good back-testing duration starting 2022 May
 
 #+begin_src pine
 fromMonth = 3

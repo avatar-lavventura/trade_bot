@@ -11,7 +11,7 @@ _log.IS_WRITE = False
 
 def main():
     mc = MongoClient()
-    for symbol in ["btc"]:  # "usdt",
+    for symbol in ["btc"]:
         mongo = Mongo(mc, mc[symbol]["stats"])
         cursor = mongo.find_all(sort_str="timestamp", is_return=True)
         if cursor:

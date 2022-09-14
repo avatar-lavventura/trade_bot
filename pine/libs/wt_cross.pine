@@ -1,7 +1,7 @@
 // @author LazyBear
 //@version=4
 study(title="WaveTrend [LazyBear]", shorttitle="WT_LB", overlay=false)
-// 30m @BTCUSDT binance
+// 30m @BTCUSDT binance-usdt , once-per-minitue, https://alpybot.duckdns.org/webhook
 // __ https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT
 n1 = 10  //Channel Length
 n2 = 21  //Average Length

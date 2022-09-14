@@ -1,7 +1,7 @@
 files:
   input: pairs_btc.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/ZNmYO9Yl/?symbol=BINANCE%3ABTCUSDT
+  chartUrl: https://www.tradingview.com/chart/6ca43MDz/?symbol=BINANCE%3ABTCUSDT
   interval: 5m # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
 alert:
   condition:

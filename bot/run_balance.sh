@@ -46,13 +46,12 @@ fi
 
 clear -x
 # check_app
-while true
-do
+while true; do
     python3 discord_balance.py $1
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    printf "countdown for 30 seconds                                                         "
+    printf "#> countdown for 30 seconds                                            "
     countdown 30
-    echo "[  OK  ]                                                                           "
+    echo "[  OK  ]"
 done
 
 # LOG_FILE=_binance_balance.log

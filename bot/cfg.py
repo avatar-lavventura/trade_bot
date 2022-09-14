@@ -5,7 +5,7 @@ from broker._utils.tools import _date
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG"]
 SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 discord_message: str = f"`{_date(_type='hour')}`\n"
-discord_message_full: str = f"{_date(_type='hour')}\n"
+discord_message_full: str = discord_message
 discord_print: bool = False
 locked_balance: float = 0.0
 discord_sent_msg = None
@@ -16,6 +16,9 @@ TYPE: str = ""
 BALANCES = None
 SUM_BTC = None
 CURRENT_DATE = None
+MINIMUM_POSITION = {}
+MINIMUM_POSITION["btc"] = 0.0001
+MINIMUM_POSITION["usdt"] = 10
 
 """
 * IGNORE_SOLD_QUANTITY

@@ -30,9 +30,9 @@ while true; do
     clear -x
     hypercorn app_async:app -b 0.0.0.0:5000  # --reload
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    echo "countdown for 30 seconds                                                           "
+    printf "#> countdown for 30 seconds                                            "
     countdown 30
-    echo "[  OK  ]                                                                           "
+    echo "[  OK  ]"
 done
 
 # LOG_FILE=trade.log

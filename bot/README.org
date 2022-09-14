@@ -1,5 +1,12 @@
 * Guide
 
+** tradingview new account
+
+- restart internet and open new session at Google Chrome
+- at macOS open [[proton.mail]] and
+  [[https://www.tr.tradingview.com/gopro/?source=header_go_pro_button&feature=start_free_trial]] on
+  *opera* and copy the link from the mail for authentication, during paste remove ~tr~
+
 ** [[http://alpyr.duckdns.org:81][Nginx setup]]
 
 IP: [[https://alpybot.duckdns.org/webhook]]
@@ -160,8 +167,9 @@ npm install
 
 * Google Instance
 
-– Create with 15 GB boot disk, ~e2-small~ // Ubuntu LTS minimal
-– 1 non-preemptible e2-micro VM instance per month in one of the following
-US regions: ~Oregon: us-west1~, ~Iowa: us-central1~, ~South Carolina: us-east1~
+– Create with 15 GB boot disk, ~e2-small~ // Ubuntu LTS minimal 1 non-preemptible e2-micro VM instance
+– per month in one of the following US regions: ~Oregon: us-west1~, ~Iowa: us-central1~, ~South Carolina:
+– us-east1~
 
-- expired TV: alperalperalper123  // used_card ykb bank virtual card:4525
+** notes
+- expired TV: alpertrade3  // used_card YKB virtual credit-card:6884

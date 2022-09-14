@@ -6,7 +6,6 @@ from broker._utils._log import log
 from broker._utils.tools import _date, _remove
 
 _log.ll.LOG_FILENAME = "cpu.log"
-_remove(_log.ll.LOG_FILENAME)
 
 
 def cpu_percent():
@@ -14,6 +13,7 @@ def cpu_percent():
 
     __ https://stackoverflow.com/a/2468983/2402577
     """
+    _remove(_log.ll.LOG_FILENAME)
     while True:
         cpu_avg = psutil.cpu_percent(20)  # psutil.cpu_percent(4)
         if cpu_avg > 20:

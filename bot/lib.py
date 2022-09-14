@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 
 
+ignore_list = [
+    "info",
+    "BTC",
+    "LTC",
+    "ETH",
+    "timestamp",
+    "datetime",
+    "free",
+    "used",
+    "total",
+    "USDT",
+    "IQ",
+    "VTHO",
+]
+
+
 class LiqBase:
     def __init__(self):
         self.ignore_list = [

@@ -55,7 +55,7 @@ async def goal():
         log(f"goal={math.ceil(goal_sum)} USDT", "bold green")
 
 
-async def fetch_balance() -> float:  # noqa
+async def fetch_balance() -> float:
     total_lost = 0.0
     total_balance = 0.0
     print_flag = False

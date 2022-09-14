@@ -242,11 +242,11 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
             real_pc = _percent_change(float(future["entryPrice"]), price_to_consider)
             _real_pc = format(real_pc, ".2f")
             log(f" {_real_pc}%", end="")
-            if not real_pc == 0.0:
+            if real_pc == 0.0:
+                log()
+            else:
                 _leverage = round(abs(pc / real_pc))
                 log(f" x{_leverage}")
-            else:
-                log()
 
             return True
     return False

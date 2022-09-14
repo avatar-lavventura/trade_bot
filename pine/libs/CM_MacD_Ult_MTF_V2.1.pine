@@ -51,14 +51,14 @@ show_dots_LW  = input.int(3, minval=0, maxval=5, title = "-- Width", group="Show
 
 //show_trend    = input(true, title = "Colors MACD Lines w/ Trend Color", group="Show Plots?", inline="SP5")
 // MACD Lines colors
-col_macd      = input.color(#FF6D00, "MACD Line  ",  group="Color Settings", inline="CS1")
-col_signal    = input.color(#2962FF, "Signal Line  ",  group="Color Settings", inline="CS1")
-col_trnd_Up   = input.color(#4BAF4F, "Trend Up      ",  group="Color Settings", inline="CS2")
-col_trnd_Dn   = input.color(#B71D1C, "Trend Down    ",  group="Color Settings", inline="CS2")
+col_macd      = input.color(#FF6D00, "MACD Line",  group="Color Settings", inline="CS1")
+col_signal    = input.color(#2962FF, "Signal Line",  group="Color Settings", inline="CS1")
+col_trnd_Up   = input.color(#4BAF4F, "Trend Up",  group="Color Settings", inline="CS2")
+col_trnd_Dn   = input.color(#B71D1C, "Trend Down",  group="Color Settings", inline="CS2")
 // Histogram Colors
-col_grow_above = input.color(#26A69A, "Above   Grow",  group="Histogram Colors", inline="Hist10")
+col_grow_above = input.color(#26A69A, "Above_Grow",  group="Histogram Colors", inline="Hist10")
 col_fall_above = input.color(#B2DFDB, "Fall",  group="Histogram Colors", inline="Hist10")
-col_grow_below = input.color(#FF5252, "Below Grow",  group="Histogram Colors", inline="Hist20")
+col_grow_below = input.color(#FF5252, "Below_Grow",  group="Histogram Colors", inline="Hist20")
 col_fall_below = input.color(#FFCDD2, "Fall",  group="Histogram Colors", inline="Hist20")
 // Alerts T/F Inputs
 alert_Long    = input.bool(true, title = "MACD Cross Up", group = "Alerts", inline="Alert10")

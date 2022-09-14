@@ -35,15 +35,16 @@ def load_obj(fname):
 
 def check_binance_obj():
     global client
-    save_fname = f"{HOME}/.binance.pk"
+    save_fn = f"{HOME}/.binance.pk"
     try:
-        client = load_obj(save_fname)
+        client = load_obj(save_fn)
     except:
+        k = "alper_b"
         _cfg = Yaml(HOME / ".binance.yaml")
-        api_key = str(_cfg["b"]["key"])
-        api_secret = str(_cfg["b"]["secret"])
+        api_key = str(_cfg[k]["key"])
+        api_secret = str(_cfg[k]["secret"])
         client = Client(api_key, api_secret)
-        save_obj(save_fname, client)
+        save_obj(save_fn, client)
 
     try:
         return client, client.get_account()

@@ -38,7 +38,6 @@ if __name__ == "__main__":
     mark_temp = 0
     side = ""
     side_m = ""
-
     while True:
         future = client.futures_position_information(symbol="GRTUSDT")
         mark = future[0]["markPrice"]
