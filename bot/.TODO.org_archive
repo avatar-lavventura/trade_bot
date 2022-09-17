@@ -631,3 +631,13 @@ E: Timestamp for this request is outside of the recieve_window=5000
 countdown for 30 seconds
 bot_type=btc mode started **
 #+end_src
+
+* DONE next to date print also timestamp
+CLOSED: [2022-09-17 Sat 17:38]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-09-17 Sat 17:38
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

@@ -1,6 +1,8 @@
 #    -*- mode: org -*-
 
 * ALPY-BOT
+** TODO fetch latest timestamp record into mongoDB
+** TODO buy asset if funding rate is high in between -30 minutes before the function rate or 5m cross green keep buy it
 ** TODO lower than 5m candle maybe cut of the trade, check
 #+begin_src python
 response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)

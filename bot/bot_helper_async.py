@@ -24,14 +24,14 @@ class BotHelperAsync:
         await helper.exchange.close()
 
     def _update_timestamp_status(self, key) -> None:
+        latest_ts = config.env[cfg.TYPE].status["timestamp"]
         del_list = []
         for asset_timestamp in config.timestamp[key]:
             if asset_timestamp not in config.asset_list:
                 ts = int(config.timestamp[key][asset_timestamp])
-                if len(str(ts)) == 13:
-                    if ts <= config.env[cfg.TYPE].status["timestamp"] * 1000:
-                        del_list.append(asset_timestamp)
-                elif ts <= config.env[cfg.TYPE].status["timestamp"]:
+                if len(str(ts)) == 13 and ts <= latest_ts * 1000:
+                    del_list.append(asset_timestamp)
+                elif ts <= latest_ts:
                     del_list.append(asset_timestamp)
 
         for asset in del_list:
@@ -240,29 +240,34 @@ class BotHelperAsync:
                     cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
 
         sum_btc += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
+        ts = config.env[cfg.TYPE].status["timestamp"]
+        config.timestamp["latest_ts"][cfg.TYPE.lower()] = ts
         if sum_btc > 0.00002:
             own_usdt = sum_btc * cfg.BTCUSDT_PRICE
             log(
                 f" * btc=[green]%.8f[/green] [blue]==[/blue] [green]%.2f$[/green] [blue]*[/blue] "
-                f"bnb=[cy]%.2f$[/cy] | [blue]{_date(_type='hour')}[/blue]" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
+                f"bnb=[cy]%.2f$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
             )
 
         if cfg.BNB_BALANCE < 0.25 and float(cfg.locked_balance) < 100:
             try:
                 await self.buy_bnb()
             except Exception as e:
-                print_tb(e)
+                if "InsufficientFunds" in str(e):
+                    log(f"E: {e}")
+                else:
+                    print_tb(e)
 
         pos_count: int = 0
-        sum_busd = float(format(sum_busd, ".2f"))
         sum_usdt = float(format(sum_usdt, ".2f"))
+        sum_busd = float(format(sum_busd, ".2f"))
         if helper.is_start:
             if not helper.is_start and sum_usdt > 0.01:
                 console_ruler(character="-=")
 
             if len(config.asset_list) == 0:
                 #: cleans timestamp.yaml file
-                config.timestamp[f"{cfg.TYPE}_timestamp"] = dict(base=config.env[cfg.TYPE].status["timestamp"])
+                config.timestamp[f"{cfg.TYPE}_timestamp"] = dict(ts)
                 _console_clear()
                 if cfg.TYPE == "usdt":
                     log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
@@ -273,7 +278,7 @@ class BotHelperAsync:
 
                 log(
                     f" * usdt={sum_usdt} {busd_str}[blue]*[/blue] "
-                    f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}$[/cy] | [blue]{_date(_type='hour')}[/blue]"
+                    f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}"
                 )
 
             config.sum_usdt = sum_usdt
@@ -397,19 +402,24 @@ class BotHelperAsync:
         return own_usdt, sum_usdt, only_usdt, only_btc
 
     async def buy_bnb(self):
-        log(f"warning: current_bnb_amount={cfg.BNB_BALANCE}, buying minimum amount of [green]BNB", is_write=False)
+        cfg.BNB_BALANCE = float(format(cfg.BNB_BALANCE, ".6f"))
+        log(f"warning: current_bnb_amount={cfg.BNB_BALANCE}", is_write=False, end="")
         if cfg.TYPE == "btc":
             if float(config.env["btc"].status["free"]) < 0.0002:
+                print()
                 return
 
+            log(", buying minimum amount of [green]BNB", is_write=False)
             output = await helper.exchange.spot.fetch_ticker("BNBBTC")
             order = await helper.exchange.spot.create_market_buy_order(
                 "BNBBTC", float(format(0.00012 / output["last"], ".3f"))
             )
         else:
             if config.env["usdt"].status["free"] < 15:
+                print()
                 return
 
+            log(", buying minimum amount of [green]BNB", is_write=False)
             output = await helper.exchange.spot.fetch_ticker("BNBUSDT")
             order = await helper.exchange.spot.create_market_buy_order(
                 "BNBUSDT", float(format(12.0 / output["last"], ".3f"))

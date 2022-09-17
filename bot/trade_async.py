@@ -300,11 +300,11 @@ class BotHelper:
             log(f"==> size_check: last_price={last_price} size={self.strategy.size}", "bold")
 
     async def buy(self):
-        if self.strategy.market == "USDTPERP":
-            await self.both_side_order()
-            await self.futures_limit_order()
-            return
-        elif self.strategy.market == "BTC":
+        # if self.strategy.market == "USDTPERP":
+        #     await self.both_side_order()
+        #     await self.futures_limit_order()
+        #     return
+        if self.strategy.market == "BTC":
             output = await self.symbol_price(self.strategy.symbol, "spot")
             initial_amount = config.initial_btc_quantity / output["last"]
             self.strategy.size = self.get_initial_amount(initial_amount, "BTC")
@@ -356,8 +356,8 @@ class BotHelper:
 
     def get_decimal_count(self, value) -> int:
         try:
-            if self.strategy.market == "USDTPERP":
-                return helper.exchange.future_markets[self.strategy.symbol]["precision"]["price"]
+            # if self.strategy.market == "USDTPERP":
+            #     return helper.exchange.future_markets[self.strategy.symbol]["precision"]["price"]
 
             # for btc and usdt spot market
             return helper.exchange.spot_markets[self.strategy.symbol]["precision"]["price"]

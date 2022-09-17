@@ -8,6 +8,7 @@ root:
   ignore: # for all
     - ORN
     - PNT
+    - PHB
   usdt:
     status: "off" # "on" or "off"
     is_discord: "on"
@@ -35,4 +36,4 @@ root:
     binance_funding_btc_balance: 0.00
     entry_prices:
       ASSET: 0.0001
-      ORN: 0.0000661
+      ORN: 0.0000658

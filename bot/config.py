@@ -58,7 +58,16 @@ class Config:
     def get_spot_timestamp(self, asset) -> int:
         key = f"{cfg.TYPE}_timestamp"
         if self.timestamp[key][asset] == {}:
-            self.timestamp[key][asset] = int(config.env[cfg.TYPE].status["timestamp"])
+            try:
+                # fetch latest recorded timestamp before program closed
+                ts = config.timestamp["latest_ts"][cfg.TYPE.lower()]
+            except:
+                ts = int(config.env[cfg.TYPE].status["timestamp"])
+
+            if not ts:
+                ts = int(config.env[cfg.TYPE].status["timestamp"])
+
+            self.timestamp[key][asset] = ts
 
         return int(self.timestamp[key][asset])
 
