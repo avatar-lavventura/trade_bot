@@ -10,7 +10,7 @@ from broker._utils.yaml import Yaml
 from filelock import FileLock
 from pymongo import MongoClient
 
-from bot import cfg
+from bot import cfg, helper
 from bot.mongodb import Mongo
 
 mc = MongoClient()
@@ -55,9 +55,11 @@ class Config:
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
 
-    def get_spot_timestamp(self, asset) -> int:
+    async def get_spot_timestamp(self, asset) -> int:
+        """Returns asset's set timestamp and updates if it is not set."""
         key = f"{cfg.TYPE}_timestamp"
         if self.timestamp[key][asset] == {}:
+            symbol = f"{asset}{cfg.TYPE.upper()}"
             try:
                 # fetch latest recorded timestamp before program closed
                 ts = config.timestamp["latest_ts"][cfg.TYPE.lower()]
@@ -67,15 +69,34 @@ class Config:
             if not ts:
                 ts = int(config.env[cfg.TYPE].status["timestamp"])
 
+            if len(str(ts)) == 10:
+                _ts = ts * 1000
+
+            _trades = await helper.exchange.spot.fetch_my_trades(symbol, since=_ts)
+            with suppress(Exception):
+                for idx, trade in enumerate(_trades):
+                    print(trade)
+                    if trade["info"]["isBuyer"]:
+                        order_id = trade["info"]["orderId"]
+                        first_orders = await helper.exchange.spot.fetch_order_trades(order_id, symbol=symbol)
+                        # at exact 20 seconds cycle large trades splitted and partially made
+                        first_orders_ts = first_orders[0]["timestamp"]
+                        break
+
+                if first_orders_ts > 0 and first_orders_ts < _ts:
+                    # update few seconds behind such as ts - 9
+                    ts = first_orders_ts
+
             self.timestamp[key][asset] = ts
 
         return int(self.timestamp[key][asset])
 
     def _yaml_wrapper(self, path, dirname, fn, auto_dump=True):
+        _fn = f"initialize_{fn}.lock"
         if fn[0] == ".":
-            fp_lockname = f"initialize_{fn}.lock"
+            fp_lockname = _fn
         else:
-            fp_lockname = f".initialize_{fn}.lock"
+            fp_lockname = f".{_fn}"
 
         fp_lock = os.path.join(dirname, fp_lockname)
         with FileLock(fp_lock, timeout=5):

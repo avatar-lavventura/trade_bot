@@ -51,6 +51,15 @@ class BotHelperSpotAsync(BotHelperAsync):
         except:
             return decimal_count(value)
 
+    # async def _fetch_order_trades(self, asset):
+    #     symbol = f"{asset}{cfg.TYPE.upper()}"
+    #     for index in enumerate(timestamp_list):
+    #         for inner_index in ordering[index[1]]:
+    #             trade = trades[inner_index]
+    #             order_id = trade["info"]["orderId"]
+    #             first_orders = await helper.exchange.spot.fetch_order_trades(order_id, symbol=symbol)
+    #             log(first_orders[0]["timestamp"])
+
     def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
         _sum = 0
         quantity = 0.0
@@ -73,6 +82,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                             _trade = trades[latest_buy_trade_idx]
                             latest_ts = _trade["timestamp"]
                             if latest_ts != 0:
+                                #: sets timestamp for the asset
                                 config.timestamp[f"{cfg.TYPE}_timestamp"][asset] = latest_ts
 
                             return (quantity, _sum)
@@ -121,7 +131,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(order["info"])
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
 
-    def l(self, value):
+    def ll(self, value):
         if cfg.TYPE in ["usdt", "busd"]:
             return value
         else:
@@ -135,8 +145,8 @@ class BotHelperSpotAsync(BotHelperAsync):
         __ https://stackoverflow.com/questions/70318352/how-to-get-the-price-of-a-crypto-at-a-given-time-in-the-past
         """
         _type = cfg.TYPE
-        symbol = f"{asset}/{_type.upper()}"
-        since = config.get_spot_timestamp(asset)
+        symbol: str = f"{asset}/{_type.upper()}"
+        since = await config.get_spot_timestamp(asset)
         if len(str(since)) == 10:
             since = since * 1000
 
@@ -203,7 +213,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 abs(float(asset_qty) - float(qty)) > 0.000000000001
                 and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
             ):
-                log(f"warning: wrong calculation for {asset}/{_type.upper()} {asset_qty} == {qty}", is_write=False)
+                log(f"warning: wrong calculation for {symbol} {asset_qty} == {qty}", is_write=False)
 
             qty_to_consider = qty
             if asset_qty > qty:
@@ -224,15 +234,15 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".4f"))
 
-        log(f"[green]**[/green] {asset} q={qty_str} | e={self.l(entry_price)} | ", "bold", end="")
+        log(f"[green]**[/green] {asset} q={qty_str} | e={self.ll(entry_price)} | ", "bold", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"l={self.l(limit_price)} | ", "bold", end="")
+            log(f"l={self.ll(limit_price)} | ", "bold", end="")
 
         if entry_price == limit_price:
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
 
         asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
-        log(f"p={self.l(asset_price)} ", "bold", end="")
+        log(f"p={self.ll(asset_price)} ", "bold", end="")
         per = format((100.0 * qty_to_consider * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * qty_to_consider
         per_change_r = 0.0
