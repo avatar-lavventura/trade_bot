@@ -8,6 +8,7 @@ root:
   ignore: # for all
     - ORN
     - PNT
+    - PHB
   usdt:
     status: "off" # "on" or "off"
     is_discord: "on"

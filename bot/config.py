@@ -28,6 +28,7 @@ class Env:
         self.stats = None
         self.status = None
         self._status = None
+        self._ts = None
         self.max_pos = None
 
 
@@ -52,6 +53,7 @@ class Config:
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
+            self.env[asset]._ts = Mongo(mc, mc[asset]["timestamp"])
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
 
@@ -61,8 +63,8 @@ class Config:
         if self.timestamp[key][asset] == {}:
             symbol = f"{asset}{cfg.TYPE.upper()}"
             try:
-                # fetch latest recorded timestamp before program closed
-                ts = config.timestamp["latest_ts"][cfg.TYPE.lower()]
+                # fetch latest recorded timestamp before program closed from mongoDB
+                ts = config.env[cfg.TYPE]._ts.find_one("latest")["value"]
             except:
                 ts = int(config.env[cfg.TYPE].status["timestamp"])
 

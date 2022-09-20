@@ -258,6 +258,9 @@ class BotHelperSpotAsync(BotHelperAsync):
             per_change = percent_change(
                 initial=entry_price, change=asset_price - entry_price, end="", is_arrow=False, is_sign=False
             )
+            if per_change > 200:
+                raise Exception(f"per_change={per_change} is way too high qty of the entry price is calculated wrong")
+
             if float(per_change) < -10.0:
                 per_change_r = percent_change(
                     initial=asset_price, change=entry_price - asset_price, end="", is_arrow=False, color="orange1"

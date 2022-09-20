@@ -41,6 +41,12 @@ def liq_data():
     mongo.find_all(sort_str="timestamp")
 
 
+def get_latest_ts():
+    mongo = Mongo(mc, mc["btc"]["timestamp"])
+    # mongo.add_single_key("latest", 99)
+    print(mongo.find_one("latest")["value"])
+
+
 if __name__ == "__main__":
     mc = MongoClient()
     # mongo = Mongo(mc, mc["trader_bot"]["timestamp"])
@@ -58,9 +64,12 @@ if __name__ == "__main__":
     # mongo._inc(current_date)
     # mongo.find_all(sort_str="timestamp")
 
-    mongo = Mongo(mc, mc["btc"]["status"])
-    # output = mongo.add_single_key("count", 3)
-    # mongo._inc("count")
-    # output = mongo.find_one("count")
-    # print(output["value"])
-    mongo.find_all(sort_str="timestamp")
+    # mongo = Mongo(mc, mc["btc"]["status"])
+    # # output = mongo.add_single_key("count", 3)
+    # # mongo._inc("count")
+    # # output = mongo.find_one("count")
+    # # print(output["value"])
+    # mongo.find_all(sort_str="timestamp")
+    #
+    get_latest_ts()
+    print("end")

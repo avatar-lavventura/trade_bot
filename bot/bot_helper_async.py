@@ -241,7 +241,7 @@ class BotHelperAsync:
 
         sum_btc += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
         ts = config.env[cfg.TYPE].status["timestamp"]
-        config.timestamp["latest_ts"][cfg.TYPE.lower()] = ts
+        config.env[cfg.TYPE]._ts.add_single_key("latest", ts)  # latest ts is set at mongoDB
         if sum_btc > 0.00002:
             own_usdt = sum_btc * cfg.BTCUSDT_PRICE
             log(
