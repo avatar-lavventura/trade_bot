@@ -9,7 +9,6 @@ discord_message_full: str = discord_message
 discord_print: bool = False
 locked_balance: float = 0.0
 discord_sent_msg = None
-BTCUSDT_PRICE: float = 0.0
 BNB_QTY: float = 0.0
 BNB_BALANCE: float = 0.0
 TYPE: str = ""
@@ -19,6 +18,9 @@ CURRENT_DATE = None
 MINIMUM_POSITION = {}
 MINIMUM_POSITION["btc"] = 0.0001
 MINIMUM_POSITION["usdt"] = 10
+#
+PRICES = {}  # last price for the assets
+PRICES["BTCUSDT"] = 0.0
 
 """
 * IGNORE_SOLD_QUANTITY
@@ -32,7 +34,7 @@ genel kar gostergesi bir anda artiyor onceki kari dikkate aldigi icin
 guncellendi.  0.50% kar gozukurken maliyet dustugu icin o anki fiyatta kar
 gostergesi 1.0% oldu, daha ucuza satis emri verme durumu olabilir emirler guncellenirse
 """
-IGNORE_SOLD_QUANTITY = True  # True for all by default
+IGNORE_SOLD_QUANTITY = True  # by default True for all
 _IGNORE_SOLD_QUANTITY = {}
 _IGNORE_SOLD_QUANTITY["PNT/USDT"] = False
 _IGNORE_SOLD_QUANTITY["ORN/USDT"] = False

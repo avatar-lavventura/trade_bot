@@ -103,12 +103,11 @@ col2 = cc2 ? ma_up ? color.lime : ma_down ? color.red : color.aqua : color.aqua
 // plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
 
 // cm_williams vix fix formula
-// pd = 900
-pd = input(22, title="LookBack Period Standard Deviation High")
-bbl = input(20, title="Bolinger Band Length")
+pd = input(22, title="look_back period standard deviation high")  // 1 for 1m
+bbl = input(20, title="bolinger band length")
 mult = input.float(2.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
 lb = input(50  , title="Look Back Period Percentile High")
-ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.76
+ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
 new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
 sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
 sbcc = input(false, title="Show Highlight Bar if WVF IS True")

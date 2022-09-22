@@ -41,7 +41,7 @@ def peak_funding_rates():
         log(f"[b]ts={ts}", is_write=False)
         log(funding, is_write=False)
     else:
-        log("#> [white]no funding rate > 0.75%", is_write=False)
+        log("#> [white]no funding rate greater than 0.75%", is_write=False)
 
 
 def main():

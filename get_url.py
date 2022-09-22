@@ -118,8 +118,8 @@ def main():
             except Exception as e:
                 print(e)
 
-    counter_x = sorted(counter.items(), key=itemgetter(1), reverse=True)
     counter_dict = {}
+    counter_x = sorted(counter.items(), key=itemgetter(1), reverse=True)
     for co in counter_x:
         counter_dict[co[0]] = co[1]
 
