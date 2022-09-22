@@ -13,7 +13,6 @@ def fetch_ohlcv():
     ohlcv = binance.fetch_ohlcv(symbol, "1d")
     pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
     df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
-    pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
     df["Time"] = [datetime.fromtimestamp(float(time) / 1000) for time in df["Time"]]
     df.set_index("Time", inplace=True)
     print(df)

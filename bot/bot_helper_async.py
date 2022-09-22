@@ -24,7 +24,9 @@ class BotHelperAsync:
         await helper.exchange.close()
 
     def _update_timestamp_status(self, key) -> None:
+        #: ts when iteration started
         latest_ts = config.env[cfg.TYPE].status["timestamp"]
+        config.env[cfg.TYPE]._ts.add_single_key("latest", latest_ts)
         del_list = []
         for asset_timestamp in config.timestamp[key]:
             if asset_timestamp not in config.asset_list:
@@ -62,17 +64,16 @@ class BotHelperAsync:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
         _str = ""
         if name == "mBTC":
-            _str += "-=-=-=-=-=- "
-            lost_usdt = float(lost) / 1000 * cfg.BTCUSDT_PRICE
-            if float(lost) == 0:
-                _str += f"locked=[cy]{cfg.locked_balance}%[/cy] "
-            else:
-                _str += f"[{c}]{lost}{name} ({format(lost_usdt, '.2f')}$)[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
+            _str += "-=-=-=-=-=-=- "
+            if float(lost) != 0:
+                lost_usdt = float(lost) / 1000 * cfg.PRICES["BTCUSDT"]
+                _str += f"[{c}]{lost}{name}({format(lost_usdt, '.2f')}$)[/{c}] "
 
+            _str += f"locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 0:
                 free += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
-                _free_usdt = float(free) * cfg.BTCUSDT_PRICE
-                free = format(free, ".4f")
+                _free_usdt = float(free) * cfg.PRICES["BTCUSDT"]
+                free = format(free * 1000, ".4f")
                 _str = f"{_str}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
         else:
             _str += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- "
@@ -123,7 +124,12 @@ class BotHelperAsync:
                             per_str_c = f"([red]{percent}%[/red])" if percent < 0 else f"([green]+{percent}%[/green])"
 
                         asset_price = "{:,}".format(int(asset_price)).replace(",", ".")
-                        log(f" * {symbol}={asset_price} {per_str_c}", end="", is_write=False)
+                        if symbol == "BTCUSDT":
+                            c = "m"
+                        else:
+                            c = "cy"
+
+                        log(f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c}", end="", is_write=False)
                     elif "BTC" in symbol:
                         asset_price = "{:.8f}".format(asset_price).lstrip("0.")  # .rstrip("0")
 
@@ -203,7 +209,6 @@ class BotHelperAsync:
         except Exception as e:
             raise e
 
-        cfg.BTCUSDT_PRICE = float(await self.spot_fetch_ticker("BTC/USDT"))
         for balance in cfg.BALANCES["info"]["balances"]:
             asset = balance["asset"]
             if float(balance["free"]) != 0 or float(balance["locked"]) != 0:
@@ -222,7 +227,7 @@ class BotHelperAsync:
                                 count += 1
                     elif cfg.TYPE == "btc":
                         sum_btc += quantity * float(price)
-                        usdt_amount = quantity * float(price) * cfg.BTCUSDT_PRICE
+                        usdt_amount = quantity * float(price) * cfg.PRICES["BTCUSDT"]
                         if usdt_amount > 1.0:
                             config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
                             config.asset_list.append(asset)
@@ -241,19 +246,18 @@ class BotHelperAsync:
 
         sum_btc += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
         ts = config.env[cfg.TYPE].status["timestamp"]
-        config.env[cfg.TYPE]._ts.add_single_key("latest", ts)  # latest ts is set at mongoDB
         if sum_btc > 0.00002:
-            own_usdt = sum_btc * cfg.BTCUSDT_PRICE
+            own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
             log(
-                f" * btc=[green]%.8f[/green] [blue]==[/blue] [green]%.2f$[/green] [blue]*[/blue] "
+                f" * btc=[m]%.8f[/m] [blue]==[/blue] [m]%.2f$[/m] [blue]*[/blue] "
                 f"bnb=[cy]%.2f$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
             )
 
-        if cfg.BNB_BALANCE < 0.25 and float(cfg.locked_balance) < 100:
+        if cfg.BNB_BALANCE < 0.3:  # and float(cfg.locked_balance) < 100:
             try:
                 await self.buy_bnb()
             except Exception as e:
-                if "InsufficientFunds" in str(e):
+                if "InsufficientFunds" in str(e) or "insufficient balance" in str(e):
                     log(f"E: {e}")
                 else:
                     print_tb(e)
@@ -266,11 +270,14 @@ class BotHelperAsync:
                 console_ruler(character="-=")
 
             if len(config.asset_list) == 0:
-                #: cleans timestamp.yaml file
-                config.timestamp[f"{cfg.TYPE}_timestamp"] = dict(ts)
+                config.timestamp[f"{cfg.TYPE}_timestamp"] = {}  #: cleans timestamp.yaml file
                 _console_clear()
                 if cfg.TYPE == "usdt":
                     log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
+                elif cfg.TYPE == "btc":
+                    log(
+                        ":beer:  [bold green]spot=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usdt)
+                    )
             elif cfg.TYPE == "usdt":
                 busd_str = ""
                 if sum_busd > 0.1:
@@ -288,12 +295,6 @@ class BotHelperAsync:
                     config.env[cfg.TYPE].status["balance"] = sum_usdt
 
             if cfg.TYPE == "btc":
-                if len(config.asset_list) == 0:
-                    _console_clear()
-                    log(
-                        ":beer:  [bold green]spot=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usdt)
-                    )
-
                 config.env[cfg.TYPE].status["balance"] = float(format(sum_btc, ".8f"))
 
         if cfg.TYPE == "usdt":
@@ -363,19 +364,19 @@ class BotHelperAsync:
         else:
             msg = _msg
             if free > 0:
-                msg = f"{msg}free=`{free}` (`{format(free * cfg.BTCUSDT_PRICE, '.2f')}$`) |"
+                msg = f"{msg}free=`{free}` (`{format(free * cfg.PRICES['BTCUSDT'], '.2f')}$`) |"
 
-            lost_usdt = format(float(lost) * cfg.BTCUSDT_PRICE, ".2f")
+            lost_usdt = format(float(lost) * cfg.PRICES["BTCUSDT"], ".2f")
             if float(lost_usdt) < 0:
                 msg = (
-                    f"{msg} btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
                     f"**lost=`{lost_usdt}$`** {locked_per} {pos_str}"
                 )
             elif float(lost_usdt) == 0:
                 msg = f"btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**) @binance_{cfg.TYPE}"
             else:
                 msg = (
-                    f"{msg} btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
                     f"**gain=`+{lost_usdt}$`** {locked_per} {pos_str}"
                 )
 
@@ -401,30 +402,22 @@ class BotHelperAsync:
         self.update_timestamp_status()
         return own_usdt, sum_usdt, only_usdt, only_btc
 
-    async def buy_bnb(self):
+    async def buy_bnb(self) -> bool:
         cfg.BNB_BALANCE = float(format(cfg.BNB_BALANCE, ".6f"))
-        log(f"warning: current_bnb_amount={cfg.BNB_BALANCE}", is_write=False, end="")
         if cfg.TYPE == "btc":
-            if float(config.env["btc"].status["free"]) < 0.0002:
-                print()
-                return
-
-            log(", buying minimum amount of [green]BNB", is_write=False)
-            output = await helper.exchange.spot.fetch_ticker("BNBBTC")
-            order = await helper.exchange.spot.create_market_buy_order(
-                "BNBBTC", float(format(0.00012 / output["last"], ".3f"))
-            )
+            asset = "BNBBTC"
+            amount: float = 0.00011
         else:
-            if config.env["usdt"].status["free"] < 15:
-                print()
-                return
+            asset = "BNBUSDT"
+            amount: float = 11.0
 
-            log(", buying minimum amount of [green]BNB", is_write=False)
-            output = await helper.exchange.spot.fetch_ticker("BNBUSDT")
-            order = await helper.exchange.spot.create_market_buy_order(
-                "BNBUSDT", float(format(12.0 / output["last"], ".3f"))
-            )
+        if float(config.env[cfg.TYPE].status["free"]) < amount:
+            return False
 
+        log(f"#> buying minimum amount of [green]BNB[/green] bnb_balance={cfg.BNB_BALANCE}", is_write=False, end="")
+        output = await self.spot_fetch_ticker(asset)
+        order = await helper.exchange.spot.create_market_buy_order(asset, float(format(amount / output["last"], ".3f")))
+        log("[  ok  ]", is_write=False)
         order = order["info"]
         with suppress(Exception):
             del order["timeInForce"]
@@ -436,6 +429,7 @@ class BotHelperAsync:
             del order["executedQty"]
 
         log(order, is_write=False)
+        return True
 
     async def spot_order(self, quantity, symbol, side, is_return=False, from_ex=False):
         if not from_ex:
@@ -473,16 +467,17 @@ class BotHelperAsync:
                 raise e
 
     async def spot_fetch_ticker(self, asset, is_bid_price=False) -> float:
-        if "USDT" != asset[-4:] and "BUSD" == asset[-4:]:
-            asset = asset.replace("BUSD", "") + "/BUSD"
-        elif "USDT" != asset[-4:] and "BTC" != asset[-3:]:
-            asset = f"{asset}/BTC"
+        if not is_bid_price and asset in cfg.PRICES:
+            return cfg.PRICES[asset]
 
         price_ticker = await helper.exchange.spot.fetch_ticker(asset)
         if is_bid_price:
             return float(price_ticker["info"]["bidPrice"])
         else:
-            return price_ticker["last"]
+            if asset in ["BTCUSDT", "BNBUSDT"]:
+                cfg.PRICES[asset] = price_ticker["last"]
+
+            return float(price_ticker["last"])
 
     async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""

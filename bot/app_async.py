@@ -66,7 +66,7 @@ async def startup():
     if not config.cfg["root"]["is_write"]:
         _log.IS_WRITE = False
 
-    print(" * s t a r t i n g")
+    print(" * s t a r t i n g . . .")
 
 
 @app.after_serving
@@ -81,7 +81,7 @@ async def notify():
 
 
 @app.route("/webhook", methods=["POST"])
-async def webhook():
+async def webhook() -> (str, int):
     """Receive webhook message from the tradingview-alerts."""
     if request.method != "POST":
         abort(400)
@@ -94,13 +94,13 @@ async def webhook():
         else:
             for asset in ["BTC", "USDT", "BUSD"]:
                 if asset in data_msg and config.cfg["root"][asset.lower()]["status"] == "off":
-                    return "OK"
+                    return "OK", 0
 
             try:
                 if any(x in data_msg for x in ["enter", "alert"]):
                     await trade(data_msg.replace(":00Z", "").rstrip())
 
-                return "OK"
+                return "OK", 0
             except (QuietExit, KeyError) as e:
                 if e:
                     log(str(e), "bold")

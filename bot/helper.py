@@ -31,10 +31,10 @@ class Exchange:
             "secret": str(helper_cfg[key]["secret"]),
             "options": {"adustForTimeDifference": True},
         }
+        helper_cfg = None
         if not ops["apiKey"] or not ops["secret"]:
             raise Exception("apiKey or secret is {}")
 
-        helper_cfg = None
         return ops
 
     def init_both(self):
@@ -59,8 +59,8 @@ class Exchange:
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])
         dt = datetime(*parsed_date[:6])
-        unix_timestamp_ms = int(float(unix_time_millis(dt)) / 1000)
-        return unix_timestamp_ms
+        unix_ts_ms = int(float(unix_time_millis(dt)) / 1000)
+        return unix_ts_ms
 
     async def set_markets(self):
         if self.spot_usdt:
