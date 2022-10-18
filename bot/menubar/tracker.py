@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+
 import ccxt  # noqa: E402
 import rumps
 

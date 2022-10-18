@@ -59,17 +59,8 @@ class BotHelperSpotAsync(BotHelperAsync):
         except:
             return decimal_count(value)
 
-    # async def _fetch_order_trades(self, asset):
-    #     symbol = f"{asset}{cfg.TYPE.upper()}"
-    #     for index in enumerate(timestamp_list):
-    #         for inner_index in ordering[index[1]]:
-    #             trade = trades[inner_index]
-    #             order_id = trade["info"]["orderId"]
-    #             first_orders = await helper.exchange.spot.fetch_order_trades(order_id, symbol=symbol)
-    #             log(first_orders[0]["timestamp"])
-
     def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
-        _sum = 0
+        _sum = 0.0
         quantity = 0.0
         first_sell_flag = False
         latest_buy_trade_idx = 0
@@ -90,6 +81,8 @@ class BotHelperSpotAsync(BotHelperAsync):
                             _trade = trades[latest_buy_trade_idx]
                             latest_ts = _trade["timestamp"]
                             if latest_ts != 0:
+                                # TODO: in 10 seconds if ts not updated entry calculated wrong
+                                # and the gain may added && maliyet azalmis oluyor
                                 #: sets timestamp for the asset
                                 config.timestamp[f"{cfg.TYPE}_timestamp"][asset] = latest_ts
 
@@ -115,13 +108,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", qty)
             order = order["info"]
             with suppress(Exception):
-                del order["timeInForce"]
-                del order["orderListId"]
-                del order["price"]
-                del order["status"]
-                del order["type"]
-                del order["origQty"]
-                del order["executedQty"]
+                for name in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
+                    del order[name]
 
             log(f"## CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
@@ -279,10 +267,10 @@ class BotHelperSpotAsync(BotHelperAsync):
                 )
                 per_change_r = float(format(per_change_r, ".2f"))
 
+        c = "yellow on black blink"
         if _type in ["usdt", "busd"]:
-            log(f"[bold magenta]{format(_sum, '.2f')}[w]([/w][yellow]{per}%[/yellow][w])[/w]", end="")
+            log(f"[{c}]{per}%[/{c}] [italic magenta]{format(_sum, '.2f')}", end="")
         else:
-            log(f"[bold magenta]{format(_sum * 1000, '.4f')}", end="")
             if float(per) > 0:
                 if float(per) > 5:
                     if float(per) >= 100:
@@ -292,7 +280,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                 else:
                     per = float(per)
 
-                log(f"([y]{per}%[/y])", end="")
+                log(f"[{c}]{per}%[/{c}] ", end="")
+
+            log(f"[italic magenta]{format(_sum * 1000, '.4f')}", end="")
 
         cfg.locked_balance += float(per)
         if _type in ["usdt", "busd"]:

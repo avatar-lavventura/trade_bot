@@ -62,29 +62,29 @@ class BotHelperAsync:
 
     async def analyze_positions(self, name, lost, pos_count, free) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
-        _str = ""
+        msg = ""
         real_pos_count = config.env[cfg.TYPE]._status.find_one("real_pos_count")["value"]
         if name == "mBTC":
-            _str += "-=-=-=-=-=-=- "
+            msg += "-=-=-=-=-=-=- "
             if float(lost) != 0:
                 lost_usdt = float(lost) / 1000 * cfg.PRICES["BTCUSDT"]
-                _str += f"[{c}]{lost}{name}({format(lost_usdt, '.2f')}$)[/{c}] "
+                msg += f"[{c}]{lost}({format(lost_usdt, '.2f')}$)[/{c}] "
 
-            _str += f"locked=[cy]{cfg.locked_balance}%[/cy] "
+            msg += f"locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 0:
                 free += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
                 _free_usdt = float(free) * cfg.PRICES["BTCUSDT"]
                 free = format(free * 1000, ".4f")
-                _str = f"{_str}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
+                msg = f"{msg}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
         else:
-            _str += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- "
-            _str += f"[{c}]{lost}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
+            msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- "
+            msg += f"[{c}]{lost}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:
-                _str = f"{_str}free=[cy]{free}{name}[/cy] "
+                msg = f"{msg}free=[cy]{free}{name}[/cy] "
 
         if float(cfg.locked_balance) > 0:
             if real_pos_count > 1:
-                log(_str, "bold", end="")
+                log(msg, "bold", end="")
             else:
                 log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", "bold", end="")
 
@@ -154,7 +154,7 @@ class BotHelperAsync:
                 with suppress(Exception):
                     await cfg.discord_sent_msg.delete()
 
-                cfg.discord_message = f"`{_date(_type='hour')}`\n"
+                cfg.discord_message = f"`{_date()}`\n"
                 cfg.discord_sent_msg = None
 
     ########
@@ -313,8 +313,8 @@ class BotHelperAsync:
 
         lost: float = 0
         cfg.locked_balance = 0.0
-        cfg.discord_message = f"`{_date(_type='hour')}`\n"
-        cfg.discord_message_full = f"`{_date(_type='hour')}`\n"
+        cfg.discord_message = f"`{_date()}`\n"
+        cfg.discord_message_full = f"`{_date()}`\n"
         for asset in config.asset_list:
             if cfg.BALANCES:
                 balance = cfg.BALANCES[asset]["total"]

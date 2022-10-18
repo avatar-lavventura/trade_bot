@@ -72,7 +72,7 @@ class Discord_Alpy:
 
         # secondly
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
-        if cfg.TYPE == "btc":  # currently USDT side is waiting to recover its lost
+        if config.cfg["root"][cfg.TYPE]["status"] == "on":
             scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
 
         # hourly
