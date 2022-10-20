@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from tradingview_ta import TA_Handler, Interval, Exchange
+from tradingview_ta import Interval, TA_Handler
 
 """Python API wrapper to retrieve technical analysis from TradingView."""
 

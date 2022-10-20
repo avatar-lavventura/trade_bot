@@ -201,7 +201,10 @@ class BotHelperAsync:
             config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
             config.env[cfg.TYPE]._status.add_single_key("real_pos_count", real_pos_count)
         except Exception as e:
-            log(f"E: {e}")
+            if "Account has insufficient balance" in e:
+                log("", is_write=False)
+
+            log(f"E: {e}", is_write=False)
 
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
@@ -418,7 +421,7 @@ class BotHelperAsync:
             amount: float = 0.00011
         else:
             asset = "BNBUSDT"
-            amount: float = 11.0
+            amount: float = 10.5
 
         if float(config.env[cfg.TYPE].status["free"]) < amount:
             return False
@@ -449,7 +452,7 @@ class BotHelperAsync:
         except Exception as e:
             _e = str(e)
             if "Account has insufficient balance" in _e:
-                log("E: Account has insufficient balance for requested action")
+                log("E: Account has insufficient balance for requested action", is_write=False)
                 if is_return or from_ex or config.env[cfg.TYPE].status["free"] < cfg.MINIMUM_POSITION[cfg.TYPE] * 4:
                     return
 
@@ -457,14 +460,14 @@ class BotHelperAsync:
                 log(f"==> re-opening [green]{side}[/green] 1/4_of_quantity={quantity} for {symbol}")
                 return await self.spot_order(quantity, symbol, side, is_return=True, from_ex=True)
             elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
-                log(f"E: {e} quantity={quantity}")
+                log(f"E: {e} qty={quantity}")
                 decimal = decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
                 log(f"==> re-opening [green]{side}[/green] order qty={_quantity}")
                 if float(_quantity) > 0:
                     return await self.spot_order(_quantity, symbol, side, from_ex=True)
                 else:
-                    log("E: quantity is zero, nothing to do")
+                    log("E: quantity is zero, nothing to do", is_write=False)
             elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.4:
                 quantity += 0.1
                 #: fixes if its overrounded, ex: 1.2000000000000002
@@ -521,48 +524,3 @@ class BotHelperAsync:
     async def fetch_balance(self, code) -> float:
         balance = await helper.exchange.spot.fetch_balance()
         return balance[code]["total"]
-
-    ############
-    # USDTPERP #
-    ############
-    async def _load_markets(self) -> None:
-        await helper.exchange.future.load_markets()
-
-    async def transfer_in(self, amount) -> None:
-        """Transfer usdt from spot to usdtperp."""
-        await helper.exchange.future.transfer_in(code="USDT", amount=amount)
-
-    async def transfer_out(self, amount) -> None:
-        """Transfer USDT from USDTDPERP to SPOT.
-
-        __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
-        """
-        await helper.exchange.future.transfer_out(code="USDT", amount=amount)
-
-    async def is_future_position_open(self, symbol) -> bool:
-        futures = await helper.exchange.future.fetch_balance()
-        for future in futures["info"]["positions"]:
-            if future["symbol"].replace("/", "") == symbol.replace("/", "") and float(future["positionAmt"]) != 0:
-                return True
-
-        return False
-
-    async def set_leverage(self, symbol, leverage=1) -> None:
-        """Set leverage for futures."""
-        try:
-            market = helper.exchange.future.market(symbol)
-            response = await helper.exchange.future.fapiPrivate_post_leverage(
-                {"symbol": market["id"], "leverage": leverage}
-            )
-            log(response, "bold cyan")
-            response = await helper.exchange.future.fapiPrivate_post_margintype(
-                {"symbol": market["id"], "marginType": "ISOLATED"}
-            )
-            log(response, "bold cyan")
-        except Exception as e:
-            if "No need to change margin type" not in str(e):
-                print_tb(e)
-
-    async def futures_fetch_ticker(self, asset) -> float:
-        price = await helper.exchange.future.fetch_ticker(asset)
-        return float(price["last"])

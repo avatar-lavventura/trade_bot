@@ -16,26 +16,12 @@ is_start = True
 
 class Exchange:
     def __init__(self):
-        self.helper_cfg = None
         self.spot = None
         self.spot_usdt = None
         self.spot_btc = None
         self.margin = None
         self.spot_markets = {}
         self._type: str = ""
-
-    def ops_check(self, key):
-        helper_cfg = Yaml(Path.home() / ".binance.yaml")
-        ops = {
-            "apiKey": str(helper_cfg[key]["key"]),
-            "secret": str(helper_cfg[key]["secret"]),
-            "options": {"adustForTimeDifference": True},
-        }
-        helper_cfg = None
-        if not ops["apiKey"] or not ops["secret"]:
-            raise Exception("apiKey or secret is {}")
-
-        return ops
 
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))
@@ -55,6 +41,19 @@ class Exchange:
             "defaultMarginMode": "isolated",
         }
         self.margin = ccxt.binance(ops)
+
+    def ops_check(self, key):
+        _cfg = Yaml(Path.home() / ".binance.yaml")
+        ops = {
+            "apiKey": str(_cfg[key]["key"]),
+            "secret": str(_cfg[key]["secret"]),
+            "options": {"adustForTimeDifference": True},
+        }
+        _cfg = None
+        if not ops["apiKey"] or not ops["secret"]:
+            raise Exception("apiKey or secret is {}")
+
+        return ops
 
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])

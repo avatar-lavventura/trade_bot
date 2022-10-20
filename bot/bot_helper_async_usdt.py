@@ -18,15 +18,15 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def check_position_to_pass(self, asset, _sum, is_limit, per) -> bool:
         if _sum > config.isolated_wallet_limit:
-            log("PASS_1", "bold")
+            log("pass_a", "bold")
             return True
 
         if float(per) > 80:
-            log("PASS_2", "bold")
+            log("pass_b", "bold")
             return True
 
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
-            log("PASS_3", "bold")
+            log("pass_c", "bold")
             return True
 
         log()
@@ -62,20 +62,24 @@ class BotHelperSpotAsync(BotHelperAsync):
     def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
         _sum = 0.0
         quantity = 0.0
+        quantity_consider_sold = 0.0
         first_sell_flag = False
         latest_buy_trade_idx = 0
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
                 trade = trades[inner_index]
+                # log(trade)
                 # log(trade["info"])  # debug purposes
                 if float(trade["info"]["commission"]) > 0:
                     qty = float(trade["info"]["qty"])
                     if trade["info"]["isBuyer"]:
                         quantity += qty
+                        quantity_consider_sold += qty
                         _sum += trade["cost"]
                         latest_buy_trade_idx = inner_index
                         latest_ts = trade["timestamp"]
                     else:
+                        quantity_consider_sold -= qty
                         if not first_sell_flag and quantity == asset_qty:
                             # latest trade is buyer and equat to current asset number
                             _trade = trades[latest_buy_trade_idx]
@@ -97,9 +101,16 @@ class BotHelperSpotAsync(BotHelperAsync):
                             quantity -= qty
                             _sum -= trade["cost"]
 
+                    # if quantity_consider_sold == 0:
+                    #     quantity = 0
+                    #     _sum = 0  # reset previous trades
+                    #     # latest_ts = trade["timestamp"] + 1
+                    #     breakpoint()  # DEBUG
+
                     quantity = round_float(quantity, 8)
                     _sum = round_float(_sum, 8)
 
+        # breakpoint()  # DEBUG
         return (quantity, _sum)
 
     async def is_cut_loss(self, asset, profit, qty) -> None:
@@ -140,6 +151,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         __ https://stackoverflow.com/questions/70318352/how-to-get-the-price-of-a-crypto-at-a-given-time-in-the-past
         """
+        # TODO: could be done in thread
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
         since = await config.get_spot_timestamp(asset)
@@ -269,7 +281,15 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         c = "yellow on black blink"
         if _type in ["usdt", "busd"]:
-            log(f"[{c}]{per}%[/{c}] [italic magenta]{format(_sum, '.2f')}", end="")
+            current = None
+            if profit < 0:
+                current = format(_sum + profit, ".2f")
+                log(
+                    f"[{c}]{per}%[/{c}] | [white on black blink]{current}[/white on black blink] [italic magenta]{format(_sum, '.2f')}",
+                    end="",
+                )
+            else:
+                log(f"[{c}]{per}%[/{c}] [italic magenta]{format(_sum, '.2f')}", end="")
         else:
             if float(per) > 0:
                 if float(per) > 5:
