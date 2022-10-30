@@ -3,7 +3,6 @@
 # __ https://github.com/jaredks/rumps
 # __ https://github.com/srid/org-clock-dashboard
 
-import time
 import ccxt
 import rumps
 import subprocess
@@ -11,12 +10,13 @@ import subprocess
 # rumps.debug_mode(True)
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["DOGEUSDT", "DOGEBTC", "ORNBTC"]
-timer_duration = 2
-# sold = "ORNBTC"
-# bought = "DOGEBTC"
-# amount = {}
-# amount["ORNBTC"] = 735.6
-# amount["DOGEBTC"] = 7787
+interval = 10
+#
+sold_asset = "ORNBTC"
+bought_asset = "DOGEBTC"
+amount = {}
+amount["ORNBTC"] = 735.6
+amount["DOGEBTC"] = 7787
 
 
 def run(cmd):
@@ -47,7 +47,7 @@ class OrgClockStatusBarApp(rumps.App):
 def main():
     app = OrgClockStatusBarApp("starting...")
 
-    def timer_func(timer_duration):
+    def timer_func(_):
         _str = tracker_clock_string()
         print(_str)  # removing the print statement makes the app hang
         if _str:
@@ -55,9 +55,7 @@ def main():
         else:
             app.title = "Not tracking"
 
-        time.sleep(timer_duration)
-
-    timer = rumps.Timer(timer_func, timer_duration)
+    timer = rumps.Timer(timer_func, interval)
     timer.start()
     app.run()
 
