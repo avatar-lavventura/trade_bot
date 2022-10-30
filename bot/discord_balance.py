@@ -126,8 +126,13 @@ class Discord_Alpy:
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
 
     async def record_balance(self):
+        _balances = await helper.exchange.margin.fetch_balance()
+        _btc_bal = float(_balances["info"]["assets"][0]["baseAsset"]["free"])
+        _usdt_bal = float(_balances["info"]["assets"][0]["quoteAsset"]["totalAsset"])
+        _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
+        _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
         config.env[cfg.TYPE].balance.add_single_key(
-            cfg.CURRENT_DATE, {"btc": float(cfg.SUM_BTC), "usdt": float(cfg.SUM_USDT)}
+            cfg.CURRENT_DATE, {"btc": float(cfg.SUM_BTC) + _b, "usdt": float(cfg.SUM_USDT) + _u}
         )
 
     async def restart(self):

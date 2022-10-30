@@ -34,10 +34,7 @@ class Env:
 
 class Config:
     def __init__(self) -> None:
-        self.env = {}  # type: Dict[str, Env]
-        self.env["usdt"] = Env()
-        self.env["btc"] = Env()
-        # self.env["busd"] = Env()
+
         self.sum_usdt: float = 0.0
         self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
@@ -46,6 +43,10 @@ class Config:
         self.locked_per_limit_usdtperp = None
         self.asset_list = []
         self.btc_quantity = {}
+        self.env = {}  # type: Dict[str, Env]
+        for idx in ["usdt", "btc"]:  # "busd"
+            self.env[idx] = Env()  # should be initialized before reload()
+
         self._reload()
         # self.watchlist_mb = Mongo(mc, mc["watchlist"])
         for asset in ["usdt", "btc"]:

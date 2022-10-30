@@ -148,7 +148,7 @@ class BotHelperAsync:
                 else:
                     cfg.discord_sent_msg = await self.channel.send(msg)
             except Exception as e:
-                if "Not Found" not in str(e):
+                if "Not Found" not in str(e) and "HTTPException" not in str(e):
                     print_tb(e)
 
                 with suppress(Exception):
@@ -173,38 +173,32 @@ class BotHelperAsync:
         total_asset = balances["info"]["assets"][0]["quoteAsset"]["totalAsset"]
         return total_asset
 
-    async def _fetch_balance(self):
-        try:
-            # margin_balance = await helper.exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
-            pos_count = 0
-            real_pos_count = 0
-            ongoing_positions = []
-            cfg.BALANCES = await helper.exchange.spot.fetch_balance()
-            for symbol in cfg.BALANCES:
-                if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
-                    if cfg.BALANCES[symbol]["total"] > 0.0:
-                        ongoing_positions.append(symbol)
-                        if symbol not in cfg.STABLE_COINS:
-                            real_pos_count += 1
-                            if symbol not in config.SPOT_IGNORE_LIST:
-                                pos_count += 1
+    async def _fetch_balance(self) -> None:
+        # margin_balance = await helper.exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
+        pos_count = 0
+        real_pos_count = 0
+        ongoing_positions = []
+        cfg.BALANCES = await helper.exchange.spot.fetch_balance()
+        for symbol in cfg.BALANCES:
+            if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
+                if cfg.BALANCES[symbol]["total"] > 0.0:
+                    ongoing_positions.append(symbol)
+                    if symbol not in cfg.STABLE_COINS:
+                        real_pos_count += 1
+                        if symbol not in config.SPOT_IGNORE_LIST:
+                            pos_count += 1
 
-            del_list = []
-            key = f"{cfg.TYPE}_timestamp"
-            for asset_timestamp in config.timestamp[key]:
-                if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
-                    del_list.append(asset_timestamp)
+        del_list = []
+        key = f"{cfg.TYPE}_timestamp"
+        for asset_timestamp in config.timestamp[key]:
+            if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
+                del_list.append(asset_timestamp)
 
-            for asset in del_list:
-                del config.timestamp[key][asset]
+        for asset in del_list:
+            del config.timestamp[key][asset]
 
-            config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
-            config.env[cfg.TYPE]._status.add_single_key("real_pos_count", real_pos_count)
-        except Exception as e:
-            if "Account has insufficient balance" in e:
-                log("", is_write=False)
-
-            log(f"E: {e}", is_write=False)
+        config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
+        config.env[cfg.TYPE]._status.add_single_key("real_pos_count", real_pos_count)
 
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
@@ -219,7 +213,10 @@ class BotHelperAsync:
         try:
             await self._fetch_balance()
         except Exception as e:
-            raise e
+            if "Account has insufficient balance" in e:
+                log("", is_write=False)
+
+            log(f"E: {e}", is_write=False)
 
         for balance in cfg.BALANCES["info"]["balances"]:
             asset = balance["asset"]
@@ -362,12 +359,12 @@ class BotHelperAsync:
 
             if sum_busd > 0.1:
                 msg = (
-                    f"{_msg}`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` {_free}"
+                    f"{_msg}`{format(lost, '.2f')}$` usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` {_free}"
                     f"total=`{round(abs(lost) + sum_usdt)}$` {locked_per} | {pos_str}"
                 )
             else:
                 msg = (
-                    f"{_msg}**lost=`{format(lost, '.2f')}$`** | usdt=`{round(sum_usdt)}` {_free}"
+                    f"{_msg}**lost=`{format(lost, '.2f')}$`** usdt=`{round(sum_usdt)}` {_free}"
                     f"total=`{round(abs(lost) + sum_usdt)}$` {locked_per} {pos_str}"
                 )
 

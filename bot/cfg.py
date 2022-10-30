@@ -12,13 +12,14 @@ BNB_QTY: float = 0.0
 BNB_BALANCE: float = 0.0
 TYPE: str = ""
 BALANCES = None
-SUM_BTC = None
 CURRENT_DATE = None
 MINIMUM_POSITION = {}
 MINIMUM_POSITION["btc"] = 0.0001
 MINIMUM_POSITION["usdt"] = 10
 PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
+SUM_BTC = None  # TODO: carry into mongodb
+SUM_USDT = None  # TODO: carry into mongodb
 
 """
 * IGNORE_SOLD_QUANTITY

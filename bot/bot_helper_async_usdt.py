@@ -279,17 +279,15 @@ class BotHelperSpotAsync(BotHelperAsync):
                 )
                 per_change_r = float(format(per_change_r, ".2f"))
 
+        current_sum = format(_sum + profit, ".2f")
         c = "yellow on black blink"
         if _type in ["usdt", "busd"]:
-            current = None
             if profit < 0:
-                current = format(_sum + profit, ".2f")
-                log(
-                    f"[{c}]{per}%[/{c}] | [white on black blink]{current}[/white on black blink] [italic magenta]{format(_sum, '.2f')}",
-                    end="",
-                )
+                c1 = "white on black blink"
             else:
-                log(f"[{c}]{per}%[/{c}] [italic magenta]{format(_sum, '.2f')}", end="")
+                c1 = "green on black blink"
+
+            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [italic black]{format(_sum, '.2f')}", end="")
         else:
             if float(per) > 0:
                 if float(per) > 5:
@@ -302,7 +300,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(f"[italic magenta]{format(_sum * 1000, '.4f')}", end="")
+            log(f"[italic black]{format(_sum * 1000, '.4f')}", end="")
 
         cfg.locked_balance += float(per)
         if _type in ["usdt", "busd"]:
@@ -315,9 +313,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         per_change_str = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}%) `{round(_sum)}$`\n"
+                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}%) `{current_sum}$`\n"
             else:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}% ↑ {per_change_r}%) `{round(_sum)}$`\n"
+                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}% ↑ {per_change_r}%) `{current_sum}$`\n"
         else:
             if per_change_r == 0:
                 msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}% \n"

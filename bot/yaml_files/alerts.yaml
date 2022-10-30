@@ -7,7 +7,7 @@ alerts:
   greater_than: # >
     a1:
       pair: ORNBTC
-      price: 0.000059
+      price: 0.000066
       msg: ""
     a2:
       pair: PNTUSDT
@@ -15,13 +15,5 @@ alerts:
       msg: ""
     a3:
       pair: ORNUSDT
-      price: 1.25
-      msg: ""
-    a4:
-      pair: DOGEBTC
-      price: 0.0000065
-      msg: ""
-    a5:
-      pair: DOGEBTC
-      price: 0.000007
+      price: 1.35
       msg: ""
