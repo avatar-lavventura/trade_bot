@@ -4,19 +4,30 @@
 # __ https://github.com/srid/org-clock-dashboard
 
 import ccxt
-import rumps
+import rumps  # type: ignore
 import subprocess
 
 # rumps.debug_mode(True)
+interval = 20
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["DOGEUSDT", "DOGEBTC", "ORNBTC"]
-interval = 10
+assets = ["BTCUSDT"]
+assets = assets + ["SNMBTC", "SNMBUSD"]
+for idx, asset in enumerate(reversed(assets)):
+    try:
+        output = exchange.fetch_ticker(asset)
+    except Exception as e:
+        if "binance does not have market symbol" in str(e):
+            if "USDT" in asset:
+                assets[idx] = asset.replace("USDT", "BUSD")
+
+
+# assets = assets + ["DOGEBTC", "DOGEUSDT"]
 #
-sold_asset = "ORNBTC"
-bought_asset = "DOGEBTC"
-amount = {}
-amount["ORNBTC"] = 735.6
-amount["DOGEBTC"] = 7787
+# sold_asset = "ORNBTC"
+# bought_asset = "DOGEBTC"
+# amount = {}
+# amount["ORNBTC"] = 735.6
+# amount["DOGEBTC"] = 7787
 
 
 def run(cmd):
@@ -25,16 +36,25 @@ def run(cmd):
 
 def tracker_clock_string():
     msg = ""
-    for asset in reversed(assets):
-        output = exchange.fetch_ticker(asset)
-        price_last = output["last"]
-        price = "{:.8f}".format(price_last).strip("0")[1:].strip("0")
-        if not msg:
-            msg = f"{asset} {price}"
-        else:
-            msg = f"{asset} {price} | {msg}"
+    for idx, asset in enumerate(reversed(assets)):
+        try:
+            output = exchange.fetch_ticker(asset)
+            price = output["last"]
+            if price < 0.1:
+                price = "{:.8f}".format(price).strip("0.").lstrip("0")
+            elif price > 1000:
+                price = round(price)
+            elif price > 1:
+                price = "{:.4f}".format(price)
+            if not msg:
+                msg = f"{asset} {price}"
+            else:
+                msg = f"{asset} {price} | {msg}"
+        except Exception as e:
+            if "binance does not have market symbol" in str(e):
+                print(f"E' {e}")
 
-    return msg
+    return f"{msg} "
 
 
 class OrgClockStatusBarApp(rumps.App):
@@ -45,7 +65,7 @@ class OrgClockStatusBarApp(rumps.App):
 
 
 def main():
-    app = OrgClockStatusBarApp("starting...")
+    app = OrgClockStatusBarApp("starting... ")
 
     def timer_func(_):
         _str = tracker_clock_string()

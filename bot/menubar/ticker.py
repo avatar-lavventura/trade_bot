@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-
 import ccxt.async_support as ccxt  # noqa: E402
-from broker._utils._async import _sleep
-from broker._utils._log import log
-from broker._utils.tools import print_tb
 
 
 async def main(symbol):
@@ -13,7 +9,7 @@ async def main(symbol):
     # this way you request rate will never hit the limit of an exchange
     # the library will throttle your requests to avoid that
     flag = False
-    exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+    exchange = ccxt.binanceusdm({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
     while True:
         # print('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
         # print(exchange.iso8601(exchange.milliseconds()), 'fetching', symbol, 'ticker from', exchange.name)
@@ -24,15 +20,15 @@ async def main(symbol):
             # log(trades)
             # print(exchange.iso8601(exchange.milliseconds()), 'fetched', symbol, 'ticker from', exchange.name)
             if not flag:
-                log(ticker)
+                print(ticker)
                 flag = True
 
             print(ticker["last"])
             await _sleep()
         except Exception as e:
-            print_tb(e)
+            # print_tb(e)
             break
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main("ORNBTC"))
+    asyncio.get_event_loop().run_until_complete(main("SNMBUSD"))
