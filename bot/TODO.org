@@ -1,5 +1,6 @@
             *outline* TODO
 * ALPY-BOT
+** TODO record isolated margin balance every hour to mongodb and fetch for balance
 ** TODO when asset ordered and closed multiple times, entry-price calculated wrong :-(
 ** TODO add also the BTC price at mongodb
 ~{'key': '2022-07-13', 'value': {'btc':~

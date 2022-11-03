@@ -315,12 +315,12 @@ class BotHelperSpotAsync(BotHelperAsync):
             if per_change_r == 0:
                 msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}%) `{current_sum}$`\n"
             else:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}% ↑ {per_change_r}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
         else:
             if per_change_r == 0:
                 msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}% \n"
             else:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}% ↑ {per_change_r}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}% **↑**{per_change_r}%) | {per}% \n"
 
         if _type == "btc":
             _sum = _sum * cfg.PRICES["BTCUSDT"]  # total usdt if type is btc will be used for addition check

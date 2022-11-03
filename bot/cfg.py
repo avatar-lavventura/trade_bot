@@ -18,8 +18,6 @@ MINIMUM_POSITION["btc"] = 0.0001
 MINIMUM_POSITION["usdt"] = 10
 PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
-SUM_BTC = None  # TODO: carry into mongodb
-SUM_USDT = None  # TODO: carry into mongodb
 
 """
 * IGNORE_SOLD_QUANTITY

@@ -72,7 +72,6 @@ class BotHelperAsync:
 
             msg += f"locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 0:
-                free += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
                 _free_usdt = float(free) * cfg.PRICES["BTCUSDT"]
                 free = format(free * 1000, ".4f")
                 msg = f"{msg}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
@@ -253,7 +252,6 @@ class BotHelperAsync:
                     cfg.BNB_QTY = quantity
                     cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
 
-        sum_btc += config.cfg["root"][cfg.TYPE]["binance_funding_btc_balance"]
         ts = config.env[cfg.TYPE].status["timestamp"]
         if sum_btc > 0.00002:
             own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
@@ -285,7 +283,8 @@ class BotHelperAsync:
                     log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
                 elif cfg.TYPE == "btc":
                     log(
-                        ":beer:  [bold green]spot=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usdt)
+                        ":beer:  [bold green]balance=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT"
+                        % (sum_btc, own_usdt)
                     )
             elif cfg.TYPE == "usdt":
                 busd_str = ""
@@ -342,7 +341,8 @@ class BotHelperAsync:
                 _msg = cfg.discord_message_full
 
         cfg.locked_balance = min(float(cfg.locked_balance), 100)
-        if cfg.locked_balance == 100:
+        if cfg.locked_balance >= 99.90:
+            cfg.locked_balance = 100
             locked_per = "locked=`100%`"
         else:
             locked_per = f"locked=`{format(cfg.locked_balance, '.2f')}%`"
@@ -357,19 +357,19 @@ class BotHelperAsync:
             if free > 1:
                 _free = f"| free=`{free}` "
 
+            # f"total=`{round(abs(lost) + sum_usdt)}$`
             if sum_busd > 0.1:
                 msg = (
                     f"{_msg}`{format(lost, '.2f')}$` usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` {_free}"
-                    f"total=`{round(abs(lost) + sum_usdt)}$` {locked_per} | {pos_str}"
+                    f"{locked_per} | {pos_str}"
                 )
             else:
                 msg = (
-                    f"{_msg}**lost=`{format(lost, '.2f')}$`** usdt=`{round(sum_usdt)}` {_free}"
-                    f"total=`{round(abs(lost) + sum_usdt)}$` {locked_per} {pos_str}"
+                    f"{_msg}**usdt=`{round(sum_usdt)}` lost=**`{format(lost, '.2f')}` {_free}" f"{locked_per} {pos_str}"
                 )
 
-            cfg.SUM_BTC = 0
-            cfg.SUM_USDT = format(sum_usdt, ".2f")
+            config.env[cfg.TYPE].balance_sum.add_single_key("btc", 0)
+            config.env[cfg.TYPE].balance_sum.add_single_key("usdt", format(sum_usdt, ".2f"))
         else:
             msg = _msg
             if free > 0:
@@ -379,18 +379,20 @@ class BotHelperAsync:
             if float(lost_usdt) < 0:
                 msg = (
                     f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
-                    f"**lost=`{lost_usdt}$`** {locked_per} {pos_str}"
+                    f"**lost=`{lost_usdt}`** {locked_per} {pos_str}"
                 )
             elif float(lost_usdt) == 0:
-                msg = f"btc=`{format(sum_btc, '.5f')}` (**`{format(own_usdt, '.2f')}$`**) @binance_{cfg.TYPE}"
+                msg = (
+                    f":beer: **`{format(sum_btc, '.5f')}`** BTC == **`{format(own_usdt, '.2f')}$`** @binance_{cfg.TYPE}"
+                )
             else:
                 msg = (
                     f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
                     f"**gain=`+{lost_usdt}$`** {locked_per} {pos_str}"
                 )
 
-            cfg.SUM_BTC = format(sum_btc, ".8f")
-            cfg.SUM_USDT = format(own_usdt, ".2f")
+            config.env[cfg.TYPE].balance_sum.add_single_key("btc", format(sum_btc, ".8f"))
+            config.env[cfg.TYPE].balance_sum.add_single_key("usdt", format(own_usdt, ".2f"))
 
         output = config.env[cfg.TYPE].stats.find_one(cfg.CURRENT_DATE)
         if output:

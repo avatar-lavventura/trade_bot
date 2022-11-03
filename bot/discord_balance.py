@@ -30,7 +30,7 @@ class Discord_Alpy:
             else:
                 _log.IS_WRITE = False
 
-            log(f"[cyan]**[/cyan] bot_type={_type} mode started [cyan]**", "bold")
+            log(f"[cy]**[/cy] bot_type={_type} mode started [cyan]**", "b")
             self._type = cfg.TYPE = _type.lower()
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
@@ -66,7 +66,7 @@ class Discord_Alpy:
         await self.update_current_date()
         await helper.exchange.set_markets()
         await self.main()
-        await self.record_balance()
+        await helper.exchange.record_balance()
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
 
@@ -77,7 +77,7 @@ class Discord_Alpy:
 
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
-        scheduler.add_job(self.record_balance, "cron", hour="*", timezone=tz)
+        scheduler.add_job(helper.exchange.record_balance, "cron", hour="*", timezone=tz)
 
         # daily
         scheduler.add_job(
@@ -124,16 +124,6 @@ class Discord_Alpy:
 
     async def update_current_date(self):
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
-
-    async def record_balance(self):
-        _balances = await helper.exchange.margin.fetch_balance()
-        _btc_bal = float(_balances["info"]["assets"][0]["baseAsset"]["free"])
-        _usdt_bal = float(_balances["info"]["assets"][0]["quoteAsset"]["totalAsset"])
-        _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
-        _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
-        config.env[cfg.TYPE].balance.add_single_key(
-            cfg.CURRENT_DATE, {"btc": float(cfg.SUM_BTC) + _b, "usdt": float(cfg.SUM_USDT) + _u}
-        )
 
     async def restart(self):
         log()

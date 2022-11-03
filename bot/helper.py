@@ -10,6 +10,7 @@ from broker._utils.tools import unix_time_millis
 from broker._utils.yaml import Yaml
 
 from bot import cfg
+from bot.config import config
 
 is_start = True
 
@@ -60,6 +61,20 @@ class Exchange:
         dt = datetime(*parsed_date[:6])
         unix_ts_ms = int(float(unix_time_millis(dt)) / 1000)
         return unix_ts_ms
+
+    async def record_balance(self):
+        _balances = await self.margin.fetch_balance()
+        _btc_bal = float(_balances["info"]["assets"][0]["baseAsset"]["free"])
+        _usdt_bal = float(_balances["info"]["assets"][0]["quoteAsset"]["totalAsset"])
+        _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
+        _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
+        config.env[cfg.TYPE].balance.add_single_key(
+            cfg.CURRENT_DATE,
+            {
+                "btc": float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b,
+                "usdt": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u,
+            },
+        )
 
     async def set_markets(self):
         if self.spot_usdt:

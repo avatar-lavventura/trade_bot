@@ -7,7 +7,7 @@ from pymongo import MongoClient
 
 class Mongo(BaseMongoClass):
     def add_single_key(self, key, value):
-        """Add key along with its portfolio into mongo_db."""
+        """Add, if exists replace, key along with its portfolio into mongo_db."""
         item = {"key": key, "value": value}
         res = self.collection.replace_one({"key": key}, item, True)
         return res.acknowledged

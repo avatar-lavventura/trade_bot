@@ -1,6 +1,5 @@
 root:
   goal: 4600
-  goal_btc: 97.4461
   is_write: False
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
@@ -9,31 +8,26 @@ root:
   ignore: # for all
     - ORN
     - PNT
-    - DOGE
   usdt:
     status: "off" # "on" or "off"
     is_discord: "on"
     binancetr_btc_balance: 0.0
-    max_pos: 3
-    initial: 12
-    multiply_ratio: 1.10
+    max_pos: 10
+    initial: 10.3
+    multiply_ratio: 1.1
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
-    binance_funding_usdt_balance: 0.00
-    binance_funding_btc_balance: 0.00
     entry_prices:
       DUMMY_ASSET: 1.0
-      ORN: 1.55
+      ORN: 1.53
       PNT: 0.4045
   btc:
     status: "on"
-    is_discord: "on"
+    is_discord: "off"
     initial: 0.00013
-    max_pos: 15
-    multiply_ratio: 1.10
+    max_pos: 10
+    multiply_ratio: 1.1
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
-    binance_funding_usdt_balance: 0.00
-    binance_funding_btc_balance: 0.00
     entry_prices:
       DUMMY_ASSET: 1.0

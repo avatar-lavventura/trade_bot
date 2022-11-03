@@ -51,6 +51,7 @@ class Config:
         # self.watchlist_mb = Mongo(mc, mc["watchlist"])
         for asset in ["usdt", "btc"]:
             self.env[asset].balance = Mongo(mc, mc[asset]["balance"])
+            self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
