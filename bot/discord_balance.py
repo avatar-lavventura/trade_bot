@@ -13,7 +13,8 @@ from broker._utils._log import log
 from broker._utils.tools import _date, print_tb
 from broker._utils.yaml import Yaml
 
-from bot import binance_balance, cfg, helper
+from bot import binance_balance, cfg
+from bot import config as helper
 from bot.binance_balance import process_main
 from bot.config import config
 

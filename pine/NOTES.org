@@ -9,10 +9,9 @@ strategy(..., calc_on_order_fills=true, ...)
 strategy(..., process_orders_on_close=false, ...)
 #+end_src
 
-* ~FTMUSDT~ has
-nice pump and dumps from, good back-testing duration starting 2022 May
-
-#+begin_src pine
+* ~FTMUSDT~
+Nice pump and dumps from, good back-testing duration starting 2022 May
+#+begin_src bash
 fromMonth = 3
 fromDay = 1
 thruMonth = 1

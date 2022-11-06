@@ -5,7 +5,7 @@ from contextlib import suppress
 
 from broker._utils.tools import print_tb
 
-from bot import helper
+from bot import config as helper
 from bot.lib import ignore_list
 
 

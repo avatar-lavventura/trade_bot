@@ -5,7 +5,7 @@ from broker._utils._log import br, log
 from broker._utils.tools import print_tb
 from broker.errors import QuietExit
 
-from bot import helper
+from bot import config as helper
 from bot.config import config
 from bot.trade_async import BotHelper
 

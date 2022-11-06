@@ -9,7 +9,7 @@ strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      overlay=false,
      pyramiding=100000)
 
-IS_BROWSER = false
+IS_BROWSER = false  // should be `false` while adding alerts
 fromMonth = 3
 fromDay = 1
 thruMonth = 1
@@ -59,15 +59,10 @@ long_VWMA = vwap_above <= close and close < vwap_above_limit
 _src = close
 len = input(20, title="Moving Average Length - LookBack Period")
 atype = 1 // input(1,minval=1,maxval=7,title="1=SMA, 2=EMA, 3=WMA, 4=HullMA, 5=VWMA, 6=RMA, 7=TEMA")
-cc = input(true,title="Change Color Based On Direction?")
 smoothe = 2 // input(2, minval=1, maxval=10, title="Color Smoothing - 1 = No Smoothing")
 doma2 = input(false, title="Optional 2nd Moving Average")
 len2 = input(50, title="Moving Average Length - Optional 2nd MA")
 atype2 = 1 // input(1,minval=1,maxval=7,title="1=SMA, 2=EMA, 3=WMA, 4=HullMA, 5=VWMA, 6=RMA, 7=TEMA")
-cc2 = input(true,title="Change Color Based On Direction 2nd MA?")
-warn = input(false, title="***You Can Turn On The Show Dots Parameter Below Without Plotting 2nd MA to See Crosses***")
-warn2 = input(false, title="***If Using Cross Feature W/O Plotting 2ndMA - Make Sure 2ndMA Parameters are Set Correctly***")
-sd = input(false, title="Show Dots on Cross of Both MA's")
 
 res = timeframe.period
 //hull ma definition
@@ -97,9 +92,6 @@ out2 = request.security(syminfo.tickerid, res, out_two)
 
 ma_up = out1 >= out1[smoothe]
 ma_down = out1 < out1[smoothe]
-
-col1 = cc ? ma_up ? color.lime : ma_down ? color.red : color.aqua : color.aqua
-col2 = cc2 ? ma_up ? color.lime : ma_down ? color.red : color.aqua : color.aqua
 // plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
 
 // cm_williams vix fix formula
@@ -158,24 +150,17 @@ plot(sa1 and alert1 ? alert1 : 0, title='alert If WVF = True', style=plot.style_
 plot(sa2 and alert2 ? alert2 : 0, title='alert If WVF Was True Now False', style=plot.style_columns, linewidth=2, color=color.new(color.aqua, 0))
 plot(sa3 and alert3 ? alert3 : 0, title='alert Filtered Entry', style=plot.style_columns, linewidth=2, color=color.new(color.fuchsia, 0))
 plot(alert4 ? alert4 : 0, title='alert aggressive filtered entry', style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+daily_per_change = (close - close[86400]) / close[86400] * 100
+BASE = 1000 // equal to 1 second in unix epoc
+SLEEP_DUR = 30 * BASE // 30 seconds
+_timenow = (timenow - 1000000000000)
+
+if not IS_BROWSER and strategy.position_size[0] != 0 and window() and _timenow > math.abs(strategy.position_size) + SLEEP_DUR
+    strategy.close_all()
 
 // buy alerts
 // ==========
-daily_per_change = (close - close[86400]) / close[86400] * 100
-
-//: try 600 (10 minutes? instead 15 seconds)
-// close position for alpy-bot new incoming alerts
-// wait for 10 minutes for the next alert, gain might be less due to less
-// alerts will show up but risk will be lower. Rapid alerts won't show up.
-SLEEP_BAR = 0
-if timeframe.isseconds
-    SLEEP_BAR := 20
-else
-    SLEEP_BAR := 0
-
-if not IS_BROWSER and strategy.position_size[0] != 0 and bar_index > math.abs(strategy.position_size) + SLEEP_BAR and window()
-    strategy.close_all()
-
 is_buy = false
 if timeframe.isseconds
     if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA
@@ -308,16 +293,17 @@ else
     // col_aggr == color.orange
 
 if IS_BROWSER and is_buy and window()
-    strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
+    strategy.entry('l', strategy.long, qty=_timenow, alert_message=msg)
 
-if not IS_BROWSER and is_buy // "l": "long"
+if not IS_BROWSER and is_buy and _timenow > math.abs(strategy.position_size) + SLEEP_DUR // "l": "long"
+    // final timenow check, alerts should sleep for given seconds
     if strategy.opentrades[0] == 0 or strategy.position_size < 0 and window()
-        strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
-    else if bar_index > math.abs(strategy.position_size)
+        strategy.entry('l', strategy.long, qty=_timenow, alert_message=msg)
+    else if _timenow > math.abs(strategy.position_size)
         if strategy.position_size[0] != 0 and window()
             strategy.close_all()
         else if window()
-            strategy.entry('l', strategy.long, qty=bar_index, alert_message=msg)
+            strategy.entry('l', strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)
 // if (strategy.position_size > 0)

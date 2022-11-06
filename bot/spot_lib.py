@@ -6,7 +6,8 @@ from typing import Dict
 from broker._utils._log import log
 from broker.errors import QuietExit
 
-from bot import cfg, helper
+from bot import cfg
+from bot import config as helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
 

@@ -6,7 +6,8 @@ from typing import Tuple
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
 
-from bot import cfg, helper
+from bot import cfg
+from bot import config as helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.config import config
 

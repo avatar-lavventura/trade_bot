@@ -9,7 +9,7 @@ from bot.bot_helper_async import BotHelperAsync
 from bot.trade_async import BotHelper
 from bot.user_setup import check_binance_obj
 
-# from bot import helper
+# from bot import config as helper
 
 client, _ = check_binance_obj()
 bot = BotHelper(client)

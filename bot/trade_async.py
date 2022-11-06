@@ -8,7 +8,7 @@ from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
 from pymongo import MongoClient
 
-from bot import helper
+from bot import config as helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.client_helper import DiscordClient
 from bot.config import config
@@ -247,7 +247,11 @@ class BotHelper:
             config.env[_type].hit._inc(self.strategy.asset)
             return order
         except Exception as e:
-            if "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(e):
+            if "insufficient balance" in str(e) or "InsufficientFunds" in str(e):
+                log(str(e).lower())
+            elif "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(
+                e
+            ):
                 log(f"E: {e}")
                 decimal = self.get_decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
@@ -276,8 +280,8 @@ class BotHelper:
                 log(f" *  re-opening [green]{side}[/green] ", end="")
                 return await self.spot_order(float(quantity))
             else:
-                if "Filter failure: LOT_SIZE" in str(e) or "InsufficientFunds" in str(e):
-                    log(str(e))
+                if "Filter failure: LOT_SIZE" in str(e):
+                    log(str(e).lower())
                 else:
                     print_tb(e)
 

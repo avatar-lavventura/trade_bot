@@ -4,7 +4,7 @@
 from broker._utils._log import log
 from broker._utils.tools import print_tb
 
-from bot import helper
+from bot import config as helper
 from bot.fund_time import Fund
 from bot.take_profit import TakeProfit
 

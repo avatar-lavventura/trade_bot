@@ -17,3 +17,7 @@ alerts:
       pair: PNTUSDT
       price: 0.28
       msg: ""
+    a4:
+      pair: DOGEBTC
+      price: 0.0000053
+      msg: ""

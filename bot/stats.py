@@ -7,7 +7,6 @@ from broker._utils import _log
 from broker._utils._log import log
 from pymongo import MongoClient
 
-from bot import helper
 from bot.mongodb import Mongo
 
 _log.IS_WRITE = False
@@ -42,7 +41,13 @@ async def main():
     for symbol in total_balance:
         total_balance[symbol] = round(total_balance[symbol])
 
-    log(dict(total_balance))
+    log(total_balance)
+    max_val = 0
+    for _, value in total_balance.items():
+        if value > max_val:
+            max_val = value
+
+    log(f"highet={max_val}")
 
     # mongo = Mongo(mc, mc["btc"]["hit"])
     # mongo.find_all(sort_str="value")

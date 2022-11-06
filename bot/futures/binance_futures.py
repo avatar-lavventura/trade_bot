@@ -6,7 +6,8 @@ from broker._utils._log import log
 from broker._utils.tools import _date, percent_change
 from filelock import FileLock
 
-from bot import cfg, helper
+from bot import cfg
+from bot import config as helper
 from bot.bot_helper_async import TP
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config

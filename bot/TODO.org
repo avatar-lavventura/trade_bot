@@ -22,6 +22,12 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO funding -0.0075% olan coin leri listele ve long yap, insanlari patlatmak icin pump oluyor BUSD icin de bak
     - ~binanceusdm.fetchFundingRate~
 ** TODO BTC-spot volume 10.0 dan kucukse hic bulasma
+** TODO pine-kazan
+- for ~SLEEP_DUR~
+//: try 600 (10 minutes? instead 15 seconds)
+// close position for alpy-bot new incoming alerts
+// wait for 10 minutes for the next alert, gain might be less due to less
+// alerts will show up but risk will be lower. Rapid alerts does not show up.
 ** TODO stop-loss @tolga
   > 5$ la poz ac
   > 5% dusunce birinci eklemeyi yap (+10$)

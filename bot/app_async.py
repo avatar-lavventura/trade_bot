@@ -49,7 +49,7 @@ async def startup():
     from broker._utils import _log
 
     import bot.trade_async as bot_trade
-    from bot import helper
+    from bot import config as helper
     from bot.client_helper import DiscordClient
 
     _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"

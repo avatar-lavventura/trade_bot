@@ -6,8 +6,8 @@ from typing import Tuple
 from broker._utils._log import _console_clear, console_ruler, log
 from broker._utils.tools import _date, decimal_count, print_tb
 
-from bot import cfg, helper
-from bot.config import config
+from bot import cfg
+from bot.config import config, exchange, is_start
 from bot.fund_time import Fund
 from bot.take_profit import TakeProfit
 
@@ -21,7 +21,7 @@ class BotHelperAsync:
 
         __ https://stackoverflow.com/a/54528397/2402577
         """
-        await helper.exchange.close()
+        await exchange.close()
 
     def _update_timestamp_status(self, key) -> None:
         #: ts when iteration started
@@ -70,7 +70,7 @@ class BotHelperAsync:
                 lost_usdt = float(lost) / 1000 * cfg.PRICES["BTCUSDT"]
                 msg += f"[{c}]{lost}({format(lost_usdt, '.2f')}$)[/{c}] "
 
-            msg += f"locked=[cy]{cfg.locked_balance}%[/cy] "
+            msg += f"locked=[cy]{format(float(cfg.locked_balance), '.2f')}%[/cy] "
             if free > 0:
                 _free_usdt = float(free) * cfg.PRICES["BTCUSDT"]
                 free = format(free * 1000, ".4f")
@@ -168,16 +168,16 @@ class BotHelperAsync:
         '0', 'locked': '0', 'netAsset': '2.1602058', 'netAssetOfBtc':
         '0.0001003', 'repayEnabled': True, 'totalAsset': '2.1602058'}
         """
-        balances = await helper.exchange.margin.fetch_balance()
+        balances = await exchange.margin.fetch_balance()
         total_asset = balances["info"]["assets"][0]["quoteAsset"]["totalAsset"]
         return total_asset
 
     async def _fetch_balance(self) -> None:
-        # margin_balance = await helper.exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
+        # margin_balance = await exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
         pos_count = 0
         real_pos_count = 0
         ongoing_positions = []
-        cfg.BALANCES = await helper.exchange.spot.fetch_balance()
+        cfg.BALANCES = await exchange.spot.fetch_balance()
         for symbol in cfg.BALANCES:
             if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
                 if cfg.BALANCES[symbol]["total"] > 0.0:
@@ -272,8 +272,8 @@ class BotHelperAsync:
         pos_count: int = 0
         sum_usdt = float(format(sum_usdt, ".2f"))
         sum_busd = float(format(sum_busd, ".2f"))
-        if helper.is_start:
-            if not helper.is_start and sum_usdt > 0.01:
+        if is_start:
+            if not is_start and sum_usdt > 0.01:
                 console_ruler(character="-=")
 
             if len(config.asset_list) == 0:
@@ -427,7 +427,7 @@ class BotHelperAsync:
 
         log(f"#> buying minimum amount of [green]BNB[/green] bnb_balance={cfg.BNB_BALANCE}", is_write=False, end="")
         output = await self.spot_fetch_ticker(asset)
-        order = await helper.exchange.spot.create_market_buy_order(asset, float(format(amount / output, ".3f")))
+        order = await exchange.spot.create_market_buy_order(asset, float(format(amount / output, ".3f")))
         log("[  ok  ]", is_write=False)
         order = order["info"]
         with suppress(Exception):
@@ -447,7 +447,7 @@ class BotHelperAsync:
             log(f"==> market_buy_order_quantity={quantity}")
 
         try:
-            return await helper.exchange.spot.create_market_buy_order(symbol, quantity)
+            return await exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
             _e = str(e)
             if "Account has insufficient balance" in _e:
@@ -481,7 +481,7 @@ class BotHelperAsync:
         if not is_bid_price and asset in cfg.PRICES:
             return cfg.PRICES[asset]
 
-        price_ticker = await helper.exchange.spot.fetch_ticker(asset)
+        price_ticker = await exchange.spot.fetch_ticker(asset)
         if is_bid_price:
             return float(price_ticker["info"]["bidPrice"])
         else:
@@ -493,15 +493,15 @@ class BotHelperAsync:
     async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""
         symbol = f"{asset}/{market}"
-        open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
+        open_orders = await exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
             with suppress(Exception):
                 # the order may already closed if there was a rapid change
-                await helper.exchange.spot.cancel_order(order["id"], symbol)
+                await exchange.spot.cancel_order(order["id"], symbol)
 
         try:
             balance = await self.fetch_balance(asset)
-            response = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
+            response = await exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
             log("==> [green]new_limit_order[/green]=", end="")
             if "info" in response:
                 response = response["info"]
@@ -521,5 +521,5 @@ class BotHelperAsync:
                 log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")
 
     async def fetch_balance(self, code) -> float:
-        balance = await helper.exchange.spot.fetch_balance()
+        balance = await exchange.spot.fetch_balance()
         return balance[code]["total"]

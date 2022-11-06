@@ -10,7 +10,8 @@ from broker.errors import QuietExit
 from broker.libs.math import _percent
 from ccxt.base.errors import RequestTimeout
 
-from bot import cfg, helper
+from bot import cfg
+from bot import config as helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
 from bot.spot_lib import update_spot_timestamps

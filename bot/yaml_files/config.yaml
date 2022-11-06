@@ -19,13 +19,13 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
-      ORN: 1.53
+      ORN: 1.51
       PNT: 0.4045
   btc:
     status: "on"
-    is_discord: "off"
-    initial: 0.00013
-    max_pos: 10
+    is_discord: "on"
+    initial: 0.00012
+    max_pos: 15
     multiply_ratio: 1.1
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
