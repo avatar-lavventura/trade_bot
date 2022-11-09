@@ -2,7 +2,7 @@ alerts:
   less_than: # <
     a1:
       pair: BTCUSDT
-      price: 18000
+      price: 16000
       msg: ""
   greater_than: # >
     a1:
@@ -11,7 +11,7 @@ alerts:
       msg: ""
     a2:
       pair: ORNUSDT
-      price: 1.51
+      price: 1.50
       msg: ""
     a3:
       pair: PNTUSDT
@@ -19,5 +19,9 @@ alerts:
       msg: ""
     a4:
       pair: DOGEBTC
-      price: 0.0000053
+      price: 0.0000056
+      msg: ""
+    a5:
+      pair: DOGEUSDT
+      price: 0.10
       msg: ""

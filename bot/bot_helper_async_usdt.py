@@ -42,15 +42,19 @@ class BotHelperSpotAsync(BotHelperAsync):
                     if float(limit_price) < float(order["price"]) or cfg.BALANCES[asset]["total"] > float(
                         order["amount"]
                     ):
-                        q_per_change = abs(
-                            percent_change(
-                                cfg.BALANCES[asset]["total"],
-                                cfg.BALANCES[asset]["total"] - order["amount"],
-                                is_print=False,
-                            )
-                        )
-                        if q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
+                        if cfg.BALANCES[asset]["total"] - order["amount"] == 0:
                             await self.new_limit_order(asset, limit_price, market)
+                        else:
+                            q_per_change = abs(
+                                percent_change(
+                                    cfg.BALANCES[asset]["total"],
+                                    cfg.BALANCES[asset]["total"] - order["amount"],
+                                    is_print=False,
+                                )
+                            )
+                            if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
+                                # Note that `q_per_change` may end up 0, which prevent new order to be created
+                                await self.new_limit_order(asset, limit_price, market)
         else:
             await self.new_limit_order(asset, limit_price, market)
 
@@ -307,8 +311,8 @@ class BotHelperSpotAsync(BotHelperAsync):
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
-            _entry_price = format(entry_price * 1000, ".4f").strip("0")
-            _price = format(asset_price * 1000, ".4f").strip("0")
+            _entry_price = format(entry_price * 1000, ".4f").replace("0.", "").lstrip("0")
+            _price = format(asset_price * 1000, ".4f").replace("0.", "").lstrip("0")
             msg = f"**{asset}** {_entry_price} p={_price} q={qty_str} "
 
         per_change_str = format(per_change, ".2f")

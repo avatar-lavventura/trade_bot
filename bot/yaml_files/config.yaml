@@ -1,5 +1,5 @@
 root:
-  goal: 4600
+  goal: 4870
   is_write: False
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
@@ -8,6 +8,7 @@ root:
   ignore: # for all
     - ORN
     - PNT
+    - DOGE
   usdt:
     status: "off" # "on" or "off"
     is_discord: "on"
@@ -24,8 +25,8 @@ root:
   btc:
     status: "on"
     is_discord: "on"
-    initial: 0.00012
-    max_pos: 15
+    initial: 0.00011
+    max_pos: 12
     multiply_ratio: 1.1
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True

@@ -184,7 +184,7 @@ class BotHelper:
 
     async def spot_order_limit(self):
         try:
-            log("==> attempting limit order ", end="")
+            log("#> attempting limit order ", end="")
             limit_price, *_ = await self.get_spot_entry()
             symbol = self.strategy.symbol.replace("/", "")
             open_orders = await self.strategy.exchange.fetch_open_orders(symbol=symbol)
@@ -277,6 +277,10 @@ class BotHelper:
             elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
                 quantity += 0.1
                 quantity = float("{:.1f}".format(quantity))  # sometimes overround 1.2000000000000002
+                log(f" *  re-opening [green]{side}[/green] ", end="")
+                return await self.spot_order(float(quantity))
+            elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity < 1:
+                quantity = 1
                 log(f" *  re-opening [green]{side}[/green] ", end="")
                 return await self.spot_order(float(quantity))
             else:

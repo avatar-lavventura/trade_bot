@@ -651,3 +651,21 @@ CLOSED: [2022-09-22 Thu 11:43]
 :ARCHIVE_CATEGORY: TODO
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE ** NEAR q=6.5 e=0.13043 l=0.13110 p=0.13149 0.11$ 0.0069(0.81%) 0.76% 0.8478
+CLOSED: [2022-11-10 Thu 13:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-11-10 Thu 13:49
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+If profit >.5% force to close order some times it does not close for almost 5 minutes idk why
+
+Pozisyon kapanmamis :
+=> RUNE q=6.5 e=0.06600 l=0.06630 p=0.06780 0.19$ 0.0117(2.73%) 0.39% 0.4292
+- 0.0000679  dan satmis
+
+Sanirim 0.50% profit yerine 1% (2 kati) koyuyor ama log larda 0.50 limit olarak gosteriyor
+3% u hedefliyor ?

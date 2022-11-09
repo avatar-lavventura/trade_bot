@@ -1,7 +1,7 @@
 //@version=5
 // Created by AlperAlimoglu on 01-01-2022 * prepared for "5m"
-strategy(title='{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},',
-     shorttitle='alpy_vix',
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy_vix",
      calc_on_order_fills=true,  // order immediate action
      process_orders_on_close=true,
      default_qty_type=strategy.cash,
@@ -20,8 +20,8 @@ testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
 start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
 finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
-msg = timeframe.period + '_enter'
-msg_aggr = msg + '_aggr'
+msg = timeframe.period + "_enter"
+msg_aggr = msg + "_aggr"
 window() =>
     time >= start and time <= finish ? true : false
 
@@ -38,7 +38,7 @@ wt2 = ta.sma(wt1, 4)  // red-line
 is_wt_cross_green = wt2 < wt1 and wt2[1] > wt1[1]
 
 //: hunter
-vwap_period = input(title='Period', defval=5)
+vwap_period = input(title="Period", defval=5)
 vwap_source = hlc3
 vwap_price_volume = vwap_source * volume
 sum_vwap_source = math.sum(vwap_price_volume, vwap_period)
@@ -145,18 +145,18 @@ col = wvf >= upper_band or wvf >= rangeHigh ? color.lime : color.gray
 col_fuchsia = alert3 ? color.fuchsia : na
 col_aggr = alert4 ? color.orange : color.red
 // plots for williams vix fix histogram and alerts
-plot(wvf ? wvf * -1 : na, title='williams vix fix', style=plot.style_columns, linewidth=4, color=col)
-plot(sa1 and alert1 ? alert1 : 0, title='alert If WVF = True', style=plot.style_columns, linewidth=2, color=color.new(color.lime, 0))
-plot(sa2 and alert2 ? alert2 : 0, title='alert If WVF Was True Now False', style=plot.style_columns, linewidth=2, color=color.new(color.aqua, 0))
-plot(sa3 and alert3 ? alert3 : 0, title='alert Filtered Entry', style=plot.style_columns, linewidth=2, color=color.new(color.fuchsia, 0))
-plot(alert4 ? alert4 : 0, title='alert aggressive filtered entry', style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
+plot(wvf ? wvf * -1 : na, title="williams vix fix", style=plot.style_columns, linewidth=4, color=col)
+plot(sa1 and alert1 ? alert1 : 0, title="alert If WVF = True", style=plot.style_columns, linewidth=2, color=color.new(color.lime, 0))
+plot(sa2 and alert2 ? alert2 : 0, title="alert If WVF Was True Now False", style=plot.style_columns, linewidth=2, color=color.new(color.aqua, 0))
+plot(sa3 and alert3 ? alert3 : 0, title="alert Filtered Entry", style=plot.style_columns, linewidth=2, color=color.new(color.fuchsia, 0))
+plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
 BASE = 1000 // equal to 1 second in unix epoc
-SLEEP_DUR = 30 * BASE // 30 seconds
+SLEEP_DUR = 40 * BASE // 40 seconds
 _timenow = (timenow - 1000000000000)
-
-if not IS_BROWSER and strategy.position_size[0] != 0 and window() and _timenow > math.abs(strategy.position_size) + SLEEP_DUR
+is_sleep_pass = _timenow > math.abs(strategy.position_size) + SLEEP_DUR
+if not IS_BROWSER and strategy.position_size[0] != 0 and window() and is_sleep_pass
     strategy.close_all()
 
 // buy alerts
@@ -282,9 +282,8 @@ else
 
                 if col[i] == color.gray and col[i + 1] == color.lime
                     break
-    else if timeframe.period == "240"  // 4hr (60 * 4)
-        if col_aggr == color.orange
-            is_buy := true
+    else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
+        is_buy := true
 
     // if col_aggr == color.orange
     //     msg := msg_aggr
@@ -292,18 +291,18 @@ else
     // (col[1] == color.lime and col == color.gray)
     // col_aggr == color.orange
 
+// "l": "long"
 if IS_BROWSER and is_buy and window()
-    strategy.entry('l', strategy.long, qty=_timenow, alert_message=msg)
+    strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
-if not IS_BROWSER and is_buy and _timenow > math.abs(strategy.position_size) + SLEEP_DUR // "l": "long"
+if not IS_BROWSER and is_buy and is_sleep_pass
     // final timenow check, alerts should sleep for given seconds
     if strategy.opentrades[0] == 0 or strategy.position_size < 0 and window()
-        strategy.entry('l', strategy.long, qty=_timenow, alert_message=msg)
-    else if _timenow > math.abs(strategy.position_size)
-        if strategy.position_size[0] != 0 and window()
-            strategy.close_all()
-        else if window()
-            strategy.entry('l', strategy.long, qty=_timenow, alert_message=msg)
+        strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+    else if strategy.position_size[0] != 0 and window()
+        strategy.close_all()
+    else if window()
+        strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)
 // if (strategy.position_size > 0)

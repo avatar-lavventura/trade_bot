@@ -1,5 +1,7 @@
             *outline* TODO
 * ALPY-BOT
+** TODO calculate 2$ worth of BTC as enterance
+2 => 4 => 8 => 16 ...
 ** TODO record isolated margin balance every hour to mongodb and fetch for balance
 ** TODO when asset ordered and closed multiple times, entry-price calculated wrong :-(
 ** TODO add also the BTC price at mongodb

@@ -11,8 +11,9 @@ if [[ -d $DIR ]]; then
     if [[ -d $DIR ]]; then
         cp -a $DIR ~/trade_bot/bot/yaml_files/
     fi
-    cd ~/trade_bot/tradingview-alerts/tv_lists
-    $GIT_TOPLEVEL/bot/scripts/filter.sh
+    # pass new added assets are risky usually heavily dumped,
+    # which causes drain of the money
+    # ./update_binance_assets.sh
     cd $CURRENT_DIR
     printf "pre-commit.sh  [  OK  ]  "
 fi

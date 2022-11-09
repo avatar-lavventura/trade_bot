@@ -60,15 +60,15 @@ class BotHelperAsync:
         percent = ((asset_price - bar_price) / bar_price) * 100
         return asset_price, float(format(percent, ".2f"))
 
-    async def analyze_positions(self, name, lost, pos_count, free) -> None:
+    async def analyze_positions(self, name, lost, pos_count, free, total) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
         msg = ""
         real_pos_count = config.env[cfg.TYPE]._status.find_one("real_pos_count")["value"]
         if name == "mBTC":
-            msg += "-=-=-=-=-=-=- "
+            msg += "-=-=-=-=-=-= "
             if float(lost) != 0:
                 lost_usdt = float(lost) / 1000 * cfg.PRICES["BTCUSDT"]
-                msg += f"[{c}]{lost}({format(lost_usdt, '.2f')}$)[/{c}] "
+                msg += f"[{c}]{format(lost_usdt, '.2f')}$({lost})[/{c}] "
 
             msg += f"locked=[cy]{format(float(cfg.locked_balance), '.2f')}%[/cy] "
             if free > 0:
@@ -76,8 +76,9 @@ class BotHelperAsync:
                 free = format(free * 1000, ".4f")
                 msg = f"{msg}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
         else:
-            msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- "
-            msg += f"[{c}]{lost}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
+            msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
+            # total_str = f"[italic #6272a4]{total}[/italic #6272a4]"
+            msg += f"[{c}]{abs(float(lost))}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:
                 msg = f"{msg}free=[cy]{free}{name}[/cy] "
 
@@ -85,20 +86,22 @@ class BotHelperAsync:
             if real_pos_count > 1:
                 log(msg, "bold", end="")
             else:
-                log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", "bold", end="")
+                log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=", "bold", end="")
 
+            output = config.env[cfg.TYPE].stats.find_one(cfg.CURRENT_DATE)
             if pos_count > 2:
-                output = config.env[cfg.TYPE].stats.find_one(cfg.CURRENT_DATE)
                 if output:
                     log(f"pos=[blue]{pos_count}[/blue] perf=[blue]{output['value']}[/blue]", "bold")
                 else:
                     log(f"pos=[blue]{pos_count}[/blue]", "bold")
+            elif output:
+                log(f"perf=[blue]{output['value']}[/blue]", "bold")
             else:
                 log()
 
-    async def _discord_send(self, msg, lost, pos_count, name, free, is_message=True) -> None:
+    async def _discord_send(self, msg, lost, pos_count, name, free, total, is_message=True) -> None:
         cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.5 else format(cfg.locked_balance, ".2f")
-        await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free)
+        await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free, total)
         if not is_message:
             return
 
@@ -343,29 +346,32 @@ class BotHelperAsync:
         cfg.locked_balance = min(float(cfg.locked_balance), 100)
         if cfg.locked_balance >= 99.90:
             cfg.locked_balance = 100
-            locked_per = "locked=`100%`"
+            locked_per = ":lock:=`100%`"
         else:
-            locked_per = f"locked=`{format(cfg.locked_balance, '.2f')}%`"
+            locked_per = f":lock:=`{format(cfg.locked_balance, '.2f')}%`"
 
         pos_str = ""
         if pos_count > 2:
             pos_str = f"pos=**{pos_count}**"
 
+        total = 0
         free = float(free)
         if cfg.TYPE == "usdt":
             _free = ""
             if free > 1:
                 _free = f"| free=`{free}` "
 
-            # f"total=`{round(abs(lost) + sum_usdt)}$`
+            total = round(abs(lost) + sum_usdt)
             if sum_busd > 0.1:
                 msg = (
                     f"{_msg}`{format(lost, '.2f')}$` usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` {_free}"
                     f"{locked_per} | {pos_str}"
                 )
             else:
+                goal = round(float(sum_usdt) + float(abs(lost)))
                 msg = (
-                    f"{_msg}**usdt=`{round(sum_usdt)}` lost=**`{format(lost, '.2f')}` {_free}" f"{locked_per} {pos_str}"
+                    f"{_msg}**:moneybag:=`{round(sum_usdt)}` lost=**`{format(lost, '.2f')}` :dart:=`{goal}` {_free}"
+                    f"{locked_per} {pos_str}"
                 )
 
             config.env[cfg.TYPE].balance_sum.add_single_key("btc", 0)
@@ -373,21 +379,19 @@ class BotHelperAsync:
         else:
             msg = _msg
             if free > 0:
-                msg = f"{msg}free=`{free}` (`{format(free * cfg.PRICES['BTCUSDT'], '.2f')}$`) |"
+                msg = f"{msg}free=`{free}` (`{format(free * cfg.PRICES['BTCUSDT'], '.2f')}$`) "
 
             lost_usdt = format(float(lost) * cfg.PRICES["BTCUSDT"], ".2f")
             if float(lost_usdt) < 0:
                 msg = (
-                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}`:moneybag:**)\n"
                     f"**lost=`{lost_usdt}`** {locked_per} {pos_str}"
                 )
             elif float(lost_usdt) == 0:
-                msg = (
-                    f":beer: **`{format(sum_btc, '.5f')}`** BTC == **`{format(own_usdt, '.2f')}$`** @binance_{cfg.TYPE}"
-                )
+                msg = f":beer: **`{format(sum_btc, '.5f')}`** BTC == **`{format(own_usdt, '.2f')}`:moneybag:** @binance_{cfg.TYPE}"
             else:
                 msg = (
-                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}$`**)\n"
+                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}`:moneybag:**)\n"
                     f"**gain=`+{lost_usdt}$`** {locked_per} {pos_str}"
                 )
 
@@ -400,14 +404,16 @@ class BotHelperAsync:
 
         if config.cfg["root"][cfg.TYPE]["is_discord"] == "on":
             if cfg.TYPE == "btc":
-                await self._discord_send(msg, format(lost * 1000, ".5f"), pos_count, " mBTC", free, is_message=True)
+                await self._discord_send(
+                    msg, format(lost * 1000, ".5f"), pos_count, " mBTC", free, total, is_message=True
+                )
             else:
-                await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free)
+                await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free, total)
         else:
             if cfg.TYPE == "btc":
-                await self.analyze_positions("mBTC", format(lost * 1000, ".5f"), pos_count, free)
+                await self.analyze_positions("mBTC", format(lost * 1000, ".5f"), pos_count, free, total)
             else:
-                await self.analyze_positions("$", format(lost, ".2f"), pos_count, free)
+                await self.analyze_positions("$", format(lost, ".2f"), pos_count, free, total)
 
         config.env[cfg.TYPE]._status.add_single_key("count", count)
         self.update_timestamp_status()
