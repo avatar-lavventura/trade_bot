@@ -112,10 +112,6 @@ sgb = input(false, title="Check Box To Turn Bars Gray?")
 ltLB = input.int(99, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
 mtLB = input.int(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
 str = input.int(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
-// alerts Instructions and Options Below...Inputs Tab
-sa1 = input(false, title="Show Alert WVF = True?")
-sa2 = input(false, title="Show Alert WVF Was True Now False?")
-sa3 = input(false, title="Show Alert WVF Filtered?")
 
 // williams vix fix formula
 wvf = (ta.highest(close, pd) - low) / ta.highest(close, pd) * 100
@@ -146,9 +142,6 @@ col_fuchsia = alert3 ? color.fuchsia : na
 col_aggr = alert4 ? color.orange : color.red
 // plots for williams vix fix histogram and alerts
 plot(wvf ? wvf * -1 : na, title="williams vix fix", style=plot.style_columns, linewidth=4, color=col)
-plot(sa1 and alert1 ? alert1 : 0, title="alert If WVF = True", style=plot.style_columns, linewidth=2, color=color.new(color.lime, 0))
-plot(sa2 and alert2 ? alert2 : 0, title="alert If WVF Was True Now False", style=plot.style_columns, linewidth=2, color=color.new(color.aqua, 0))
-plot(sa3 and alert3 ? alert3 : 0, title="alert Filtered Entry", style=plot.style_columns, linewidth=2, color=color.new(color.fuchsia, 0))
 plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
@@ -196,7 +189,6 @@ else
         if (col_aggr[1] == color.orange or col_aggr[2] == color.orange) and alert3
             is_buy := true
 
-        //
         if high < close[1] * 1.00025 or wt1 > 53 or close[1] > out1[1]  // or low[1] == high[1]
             is_buy := false
 
@@ -292,16 +284,16 @@ else
     // col_aggr == color.orange
 
 // "l": "long"
-if IS_BROWSER and is_buy and window()
-    strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
-
-if not IS_BROWSER and is_buy and is_sleep_pass
-    // final timenow check, alerts should sleep for given seconds
-    if strategy.opentrades[0] == 0 or strategy.position_size < 0 and window()
+if IS_BROWSER
+    if is_buy and window()
         strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+else if is_buy
+    if strategy.opentrades[0] == 0 or strategy.position_size < 0 and window()
+        if is_sleep_pass  // final timenow check, alerts should sleep for given seconds
+            strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
     else if strategy.position_size[0] != 0 and window()
         strategy.close_all()
-    else if window()
+    else if window() and is_sleep_pass
         strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)

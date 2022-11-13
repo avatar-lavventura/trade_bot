@@ -31,6 +31,10 @@ async def discord_send_alert():
             alert = config.ALERTS[alert_key][idx]
             _pair = alert["pair"]
             asset_price_dict[_pair] = _asset_price = await bot_async.spot_fetch_ticker(_pair)
+            if _asset_price == 0:
+                log("warning: asset_price is 0 , something is wrong")
+                return
+
             if (alert_key == "greater_than" and float(_asset_price) >= alert["price"]) or (
                 alert_key == "less_than" and float(_asset_price) <= alert["price"]
             ):
@@ -44,7 +48,7 @@ async def discord_send_alert():
                     _type = "USDT"
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
-                    msg = f"{_pair}={_asset_price} {_type} {_date()}"
+                    msg = f"{_pair}={_asset_price} {_date()}"
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
                     alert_track[asset] = True
 
@@ -80,30 +84,20 @@ async def process(unix_timestamp_ms):
     if helper.is_start and pos_count == 0 and not float(cfg.locked_balance) > 10:
         delete_multiple_lines(1)
 
-    # if IS_FUTURES:
-    #     positions = await helper.exchange.future.fetch_positions()
-    #     is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms, bot_async.channel)
-    #     if not is_printed and not helper.is_start and pos_count == 0 and not float(cfg.locked_balance) > 10:
-    #         delete_multiple_lines(2)
-
-    #     if not is_printed or helper.is_start:
-    #         future_stats(usdt_bal, unix_timestamp_ms)
-    #         helper.is_start = False
-    if cfg.TYPE == "usdt":
-        await discord_send_alert()
-
 
 async def process_main(obj):
     """Process binance check operations.
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
+    is_silent = True  # FIXME uncomment
     bot_async.channel = obj.channel
     bot_async.channel_alerts = obj.channel_alerts
     config._reload()
     try:
         unix_timestamp_ms = helper.exchange.get_spot_timestamp()
-        await process(unix_timestamp_ms)
+        if is_silent:
+            await process(unix_timestamp_ms)
     except RequestTimeout:
         _sys_exit("Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
@@ -113,10 +107,13 @@ async def process_main(obj):
         if "quantity is zero" in str(e):
             log(f"#> {e} [green]don't worry")
         elif "Timestamp for this request is outside of the recvWindow" in str(e):
-            log("warning: Timestamp for this request is outside of the recvWindow")
+            log("warning: timestamp for this request is outside of the recvWindow")
         else:
             print_tb(e)
             await _sleep(30)
+
+    if cfg.TYPE == "usdt":
+        await discord_send_alert()
 
 
 async def main():

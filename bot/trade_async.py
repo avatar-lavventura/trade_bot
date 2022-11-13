@@ -179,7 +179,7 @@ class BotHelper:
         entry_price = _sum / contracts
         entry_price = f"{entry_price:.{decimal}f}"
         limit_price = f"{float(entry_price) * TP.get_profit_amount():.{decimal}f}"
-        log(f"qty={asset_balance} | entry={entry_price} | limit={limit_price}", "bold")
+        log(f"qty={asset_balance} entry={entry_price} limit={limit_price}", "bold")
         return limit_price, entry_price
 
     async def spot_order_limit(self):
@@ -279,7 +279,7 @@ class BotHelper:
                 quantity = float("{:.1f}".format(quantity))  # sometimes overround 1.2000000000000002
                 log(f" *  re-opening [green]{side}[/green] ", end="")
                 return await self.spot_order(float(quantity))
-            elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity < 1:
+            elif ("Filter failure: MIN_NOTIONAL" in str(e) or "Invalid quantity" in str(e)) and quantity < 1:
                 quantity = 1
                 log(f" *  re-opening [green]{side}[/green] ", end="")
                 return await self.spot_order(float(quantity))

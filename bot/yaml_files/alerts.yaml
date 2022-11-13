@@ -2,7 +2,7 @@ alerts:
   less_than: # <
     a1:
       pair: BTCUSDT
-      price: 16000
+      price: 15500
       msg: ""
   greater_than: # >
     a1:
@@ -15,13 +15,17 @@ alerts:
       msg: ""
     a3:
       pair: PNTUSDT
-      price: 0.28
+      price: 0.2
       msg: ""
     a4:
       pair: DOGEBTC
-      price: 0.0000056
+      price: 0.0000054
       msg: ""
     a5:
       pair: DOGEUSDT
       price: 0.10
+      msg: ""
+    a6:
+      pair: SNMBTC
+      price: 0.00007
       msg: ""

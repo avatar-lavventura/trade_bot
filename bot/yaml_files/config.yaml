@@ -9,10 +9,12 @@ root:
     - ORN
     - PNT
     - DOGE
+    - SNM
+  ignore_warning:
+    - DUMMY
   usdt:
     status: "off" # "on" or "off"
-    is_discord: "on"
-    binancetr_btc_balance: 0.0
+    is_discord: "off"
     max_pos: 10
     initial: 10.3
     multiply_ratio: 1.1
@@ -21,12 +23,13 @@ root:
     entry_prices:
       DUMMY_ASSET: 1.0
       ORN: 1.51
-      PNT: 0.4045
+      PNT: 0.2927
+      SNM: 0.000143
   btc:
     status: "on"
-    is_discord: "on"
+    is_discord: "off"
     initial: 0.00011
-    max_pos: 12
+    max_pos: 1
     multiply_ratio: 1.1
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True

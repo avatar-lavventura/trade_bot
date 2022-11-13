@@ -47,7 +47,7 @@ async def main():
         if value > max_val:
             max_val = value
 
-    log(f"highet={max_val}")
+    # log(f"highet={max_val}")
 
     # mongo = Mongo(mc, mc["btc"]["hit"])
     # mongo.find_all(sort_str="value")

@@ -182,13 +182,15 @@ class BotHelperAsync:
         ongoing_positions = []
         cfg.BALANCES = await exchange.spot.fetch_balance()
         for symbol in cfg.BALANCES:
-            if symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]:
-                if cfg.BALANCES[symbol]["total"] > 0.0:
-                    ongoing_positions.append(symbol)
-                    if symbol not in cfg.STABLE_COINS:
-                        real_pos_count += 1
-                        if symbol not in config.SPOT_IGNORE_LIST:
-                            pos_count += 1
+            if (
+                symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
+                and cfg.BALANCES[symbol]["total"] > 0
+            ):
+                ongoing_positions.append(symbol)
+                if symbol not in cfg.STABLE_COINS:
+                    real_pos_count += 1
+                    if symbol not in config.SPOT_IGNORE_LIST:
+                        pos_count += 1
 
         del_list = []
         key = f"{cfg.TYPE}_timestamp"
@@ -239,7 +241,7 @@ class BotHelperAsync:
                     elif cfg.TYPE == "btc":
                         sum_btc += quantity * float(price)
                         usdt_amount = quantity * float(price) * cfg.PRICES["BTCUSDT"]
-                        if usdt_amount > 1.0:
+                        if usdt_amount > 1:
                             config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
                             config.asset_list.append(asset)
                             if asset not in config.SPOT_IGNORE_LIST:
@@ -317,16 +319,22 @@ class BotHelperAsync:
         cfg.locked_balance = 0.0
         cfg.discord_message = f"`{_date()}`\n"
         cfg.discord_message_full = f"`{_date()}`\n"
-        for asset in config.asset_list:
-            if cfg.BALANCES:
+        if cfg.BALANCES:
+            new_asset_list = []  # TODO: order asset based on their position size sort the list based on its size
+            for asset in config.asset_list:
+                balance = cfg.BALANCES[asset]["total"]
+                if balance > 0:
+                    new_asset_list.append(asset)
+
+            for asset in config.asset_list:
                 balance = cfg.BALANCES[asset]["total"]
                 if balance > 0:
                     output = await self.spot_limit(asset, balance, _sum, is_limit)
-
                     lost += float(output)
                 else:
                     log(f"{asset} balance is zero")
-            else:
+        else:
+            for asset in config.asset_list:
                 output = await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
                 lost += float(output)
 
@@ -473,7 +481,7 @@ class BotHelperAsync:
                     return await self.spot_order(_quantity, symbol, side, from_ex=True)
                 else:
                     log("E: quantity is zero, nothing to do", is_write=False)
-            elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.4:
+            elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.1:
                 quantity += 0.1
                 #: fixes if its overrounded, ex: 1.2000000000000002
                 quantity = float("{:.1f}".format(quantity))
@@ -485,16 +493,15 @@ class BotHelperAsync:
 
     async def spot_fetch_ticker(self, asset, is_bid_price=False) -> float:
         if not is_bid_price and asset in cfg.PRICES:
-            return cfg.PRICES[asset]
+            if cfg.PRICES[asset] != 0:
+                return cfg.PRICES[asset]
 
         price_ticker = await exchange.spot.fetch_ticker(asset)
         if is_bid_price:
             return float(price_ticker["info"]["bidPrice"])
-        else:
-            if asset in ["BTCUSDT", "BNBUSDT"]:
-                cfg.PRICES[asset] = price_ticker["last"]
 
-            return float(price_ticker["last"])
+        cfg.PRICES[asset] = price_ticker["last"]  # record prices in case could be used in the same cycle
+        return float(price_ticker["last"])
 
     async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""

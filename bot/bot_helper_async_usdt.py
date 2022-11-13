@@ -163,7 +163,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         if len(str(since)) == 10:
             since = since * 1000
 
-        decimal: int = helper.exchange.spot_markets[symbol]["precision"]["price"]
+        decimal: int = helper.exchange.spot_markets[symbol]["precision"]["price"]  # TODO: store at PRICES
         if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
             entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
             qty_to_consider = asset_qty
@@ -225,6 +225,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             if (
                 abs(float(asset_qty) - float(qty)) > 0.000000000001
                 and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
+                and asset not in config.cfg["root"]["ignore_warning"]
             ):
                 log(f"warning: wrong calculation for {symbol} {asset_qty} == {qty}", is_write=False)
 

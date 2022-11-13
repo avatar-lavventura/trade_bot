@@ -90,12 +90,11 @@ class Exchange:
         _usdt_bal = float(_balances["info"]["assets"][0]["quoteAsset"]["totalAsset"])
         _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
         _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
-        usdt_format = format(float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u, ".2f")
         config.env[cfg.TYPE].balance.add_single_key(
             cfg.CURRENT_DATE,
             {
                 "btc": float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b,
-                "usdt": float(usdt_format),
+                "usdt": float(format(float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u, ".2f")),
             },
         )
 
