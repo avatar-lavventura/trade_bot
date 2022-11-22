@@ -669,3 +669,13 @@ Pozisyon kapanmamis :
 
 Sanirim 0.50% profit yerine 1% (2 kati) koyuyor ama log larda 0.50 limit olarak gosteriyor
 3% u hedefliyor ?
+
+* DONE show total BTC amount in the btc-spot, easier to keep track of
+CLOSED: [2022-11-24 Thu 21:05]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-11-24 Thu 21:05
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

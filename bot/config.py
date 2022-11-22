@@ -84,10 +84,13 @@ class Exchange:
         unix_ts_ms = int(float(unix_time_millis(dt)) / 1000)
         return unix_ts_ms
 
+    async def get_margin_balance(self):
+        return await self.margin.fetch_balance()
+
     async def record_balance(self):
-        _balances = await self.margin.fetch_balance()
-        _btc_bal = float(_balances["info"]["assets"][0]["baseAsset"]["free"])
-        _usdt_bal = float(_balances["info"]["assets"][0]["quoteAsset"]["totalAsset"])
+        margin_balance = await self.get_margin_balance()
+        _btc_bal = float(margin_balance["info"]["assets"][0]["baseAsset"]["free"])
+        _usdt_bal = float(margin_balance["info"]["assets"][0]["quoteAsset"]["totalAsset"])
         _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
         _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
         config.env[cfg.TYPE].balance.add_single_key(
@@ -142,11 +145,13 @@ class Config:
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
 
-    async def get_spot_timestamp(self, asset) -> int:
+    async def get_spot_timestamp(self, asset, symbol=None) -> int:
         """Returns asset's set timestamp and updates if it is not set."""
         key = f"{cfg.TYPE}_timestamp"
         if self.timestamp[key][asset] == {}:
-            symbol = f"{asset}{cfg.TYPE.upper()}"
+            if not symbol:
+                symbol = f"{asset}{cfg.TYPE.upper()}"
+
             try:
                 # fetch latest recorded timestamp before program closed from mongoDB
                 ts = config.env[cfg.TYPE]._ts.find_one("latest")["value"]

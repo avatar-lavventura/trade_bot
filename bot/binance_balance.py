@@ -46,9 +46,12 @@ async def discord_send_alert():
                 elif _pair[-4:] == "USDT":
                     asset = _pair[:-4]
                     _type = "USDT"
+                elif _pair[-4:] == "BUSD":
+                    asset = _pair[:-4]
+                    _type = "BUSD"
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
-                    msg = f"{_pair}={_asset_price} {_date()}"
+                    msg = f"{_pair}={_asset_price} {_type} {_date()}"
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
                     alert_track[asset] = True
 

@@ -2,30 +2,18 @@ alerts:
   less_than: # <
     a1:
       pair: BTCUSDT
-      price: 15500
+      price: 16000
+      msg: ""
+    a2:
+      pair: SNMBUSD
+      price: 0.75
       msg: ""
   greater_than: # >
     a1:
-      pair: ORNBTC
-      price: 0.000072
+      pair: SNMBTC
+      price: 0.000070
       msg: ""
     a2:
-      pair: ORNUSDT
-      price: 1.50
-      msg: ""
-    a3:
-      pair: PNTUSDT
-      price: 0.2
-      msg: ""
-    a4:
-      pair: DOGEBTC
-      price: 0.0000054
-      msg: ""
-    a5:
-      pair: DOGEUSDT
-      price: 0.10
-      msg: ""
-    a6:
-      pair: SNMBTC
-      price: 0.00007
+      pair: SNMBUSD
+      price: 0.83
       msg: ""

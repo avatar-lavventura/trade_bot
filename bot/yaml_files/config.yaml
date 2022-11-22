@@ -25,13 +25,16 @@ root:
       ORN: 1.51
       PNT: 0.2927
       SNM: 0.000143
+      SNM_USDT: 1.44
   btc:
     status: "on"
     is_discord: "off"
     initial: 0.00011
     max_pos: 1
     multiply_ratio: 1.1
-    percent_change_to_add: 4.5
+    percent_change_to_add: 4.49
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
+      DUMMY_SNM: 0.00011835
+      SNM: 0.0000599

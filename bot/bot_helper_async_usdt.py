@@ -159,7 +159,10 @@ class BotHelperSpotAsync(BotHelperAsync):
         # TODO: could be done in thread
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
-        since = await config.get_spot_timestamp(asset)
+        if symbol == "SNM/USDT":
+            return 0
+
+        since = await config.get_spot_timestamp(asset, symbol)
         if len(str(since)) == 10:
             since = since * 1000
 
