@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import asyncio
+import os
+import sys
 from contextlib import suppress
 
 from broker._utils._async import _sleep
@@ -102,7 +104,9 @@ async def process_main(obj):
         if is_silent:
             await process(unix_timestamp_ms)
     except RequestTimeout:
-        _sys_exit("Timestamp for this request is outside of the recieve_window=5000")
+        log("E: Timestamp for this request is outside of the recieve_window=5000; restarting...")
+        os.execv(sys.argv[0], sys.argv)
+        # _sys_exit("Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
         print_tb(e)
         _sys_exit("KeyError")

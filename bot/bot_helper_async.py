@@ -291,8 +291,9 @@ class BotHelperAsync:
                     cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
 
         ts = config.env[cfg.TYPE].status["timestamp"]
-        if sum_btc > 0.00002:
-            own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
+        own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
+        pos_count: int = config.env[cfg.TYPE]._status.find_one("count")["value"]
+        if sum_btc > 0.00002 and pos_count > 0:
             log(
                 f" * btc=[m]%.8f[/m] [blue]==[/blue] [m]%.2f$[/m] [blue]*[/blue] "
                 f"bnb=[cy]%.2f$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
@@ -308,7 +309,6 @@ class BotHelperAsync:
                 else:
                     print_tb(e)
 
-        pos_count: int = 0
         sum_usdt = float(format(sum_usdt, ".2f"))
         sum_busd = float(format(sum_busd, ".2f"))
         if is_start:
@@ -320,14 +320,15 @@ class BotHelperAsync:
                 _console_clear()
                 if cfg.TYPE == "usdt":
                     if sum_usdt > 0.01:
-                        log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
+                        log(f":beer: :heavy_dollar_sign: [green]usdt=[green]{sum_usdt}", "bold")
                     else:
                         log(f":heavy_dollar_sign: {_date(_type='hour')} spot_balance=0", "bold")
                 elif cfg.TYPE == "btc":
                     if own_usdt > 0.01:
                         log(
-                            ":beer:  [bold green]balance=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT"
-                            % (sum_btc, own_usdt)
+                            f":beer: :bee: {_date(_type='hour')} balance=%.8f BTC [blue]==[/blue] %.2f USDT"
+                            % (sum_btc, own_usdt),
+                            "bold",
                         )
                     else:
                         log(f":bee: {_date(_type='hour')} spot_balance=0", "bold")
@@ -343,7 +344,6 @@ class BotHelperAsync:
 
             config.sum_usdt = sum_usdt
             if sum_usdt > 1.0:
-                pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
                 if pos_count == 0 and config.env[cfg.TYPE].status["balance"] != sum_usdt:
                     config.env[cfg.TYPE].status["balance"] = sum_usdt
 

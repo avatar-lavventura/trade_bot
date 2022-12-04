@@ -25,9 +25,7 @@ async def main(symbol):
                 flag = True
 
             print(ticker["last"])
-            await _sleep()
-        except Exception as e:
-            # print_tb(e)
+        except:
             break
 
 
