@@ -61,17 +61,17 @@ _discord = Discord_Alpy()
 #     channel = self.client.get_channel(self.channel_id)
 #     if MESSAGE:
 #         await MESSAGE.delete()
-
+#
 #     MESSAGE = await channel.send(current_time)
 #     # this also works
 #     # await message.channel.send('Goodbye in 3 seconds...', delete_after=3.0)
 #     await _sleep(10)
-
+#
 # @client.event
 # async def on_message(message):
 #     if message.author == client.user:
 #         return
-
+#
 #     if message.content.startswith('$hello'):
 #         await message.channel.send('Hello!')
 # async def _send_msg(msg):

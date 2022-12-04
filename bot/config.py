@@ -39,11 +39,12 @@ class Env:
 
 class Exchange:
     def __init__(self) -> None:
+        self.spot_markets = {}  # noqa
         self.spot = None
         self.spot_usdt = None
         self.spot_btc = None
-        self.margin = None
-        self.spot_markets = {}
+        self.margin_isolated = None
+        self.margin_cross = None
         self._type: str = ""
 
     def init_both(self):
@@ -63,7 +64,13 @@ class Exchange:
             "adustForTimeDifference": True,
             "defaultMarginMode": "isolated",
         }
-        self.margin = ccxt.binance(ops)
+        self.margin_isolated = ccxt.binance(ops)
+
+        ops["options"] = {
+            "adustForTimeDifference": True,
+            "defaultMarginMode": "cross",
+        }
+        self.margin_cross = ccxt.binance(ops)
 
     def ops_check(self, key):
         _cfg = Yaml(Path.home() / ".binance.yaml")
@@ -84,20 +91,29 @@ class Exchange:
         unix_ts_ms = int(float(unix_time_millis(dt)) / 1000)
         return unix_ts_ms
 
-    async def get_margin_balance(self):
-        return await self.margin.fetch_balance()
+    async def get_cross_balance(self):
+        return await self.margin_cross.fetch_balance()
+
+    async def get_isolated_balance(self):
+        return await self.margin_isolated.fetch_balance()
 
     async def record_balance(self):
-        margin_balance = await self.get_margin_balance()
+        margin_balance = await self.get_isolated_balance()
         _btc_bal = float(margin_balance["info"]["assets"][0]["baseAsset"]["free"])
         _usdt_bal = float(margin_balance["info"]["assets"][0]["quoteAsset"]["totalAsset"])
         _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
         _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
+        #
+        balances_cross = await self.get_cross_balance()
+        #: total_net_asset_of_usdt
+        _c = float(balances_cross["info"]["totalNetAssetOfBtc"]) * cfg.PRICES["BTCUSDT"]
         config.env[cfg.TYPE].balance.add_single_key(
             cfg.CURRENT_DATE,
             {
                 "btc": float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b,
-                "usdt": float(format(float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u, ".2f")),
+                "usdt": float(
+                    format(float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c, ".2f")
+                ),
             },
         )
 
@@ -120,7 +136,6 @@ class Exchange:
 
 class Config:
     def __init__(self) -> None:
-
         self.sum_usdt: float = 0.0
         self.base_dir = Path.home() / ".bot"
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]

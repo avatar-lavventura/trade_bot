@@ -6,14 +6,14 @@ alerts:
       msg: ""
     a2:
       pair: SNMBUSD
-      price: 0.75
+      price: 0.67
       msg: ""
   greater_than: # >
     a1:
       pair: SNMBTC
-      price: 0.000070
+      price: 0.000065
       msg: ""
     a2:
       pair: SNMBUSD
-      price: 0.83
+      price: 0.82
       msg: ""

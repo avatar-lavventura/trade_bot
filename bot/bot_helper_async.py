@@ -104,6 +104,48 @@ class BotHelperAsync:
             else:
                 log()
 
+    async def _discord_sent_msg(self, msg):
+        try:
+            if cfg.discord_sent_msg:
+                await cfg.discord_sent_msg.edit(content=msg)
+            else:
+                cfg.discord_sent_msg = await self.channel.send(msg)
+        except Exception as e:
+            if "Not Found" not in str(e) and "HTTPException" not in str(e):
+                print_tb(e)
+
+            with suppress(Exception):
+                await cfg.discord_sent_msg.delete()
+
+            cfg.discord_message = f"`{_date()}`\n"
+            cfg.discord_sent_msg = None
+
+    async def _discord_send_watchlist(self) -> None:
+        msg = ""
+        flag = False
+        for symbol in config.WATCHLIST:
+            if not flag:
+                flag = True
+                msg = f"{msg}\n```"
+
+            try:
+                asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+            except Exception as e:
+                log(f"E: {symbol} {e}")
+                print_tb(e)
+
+            per_str = f"({percent}%)" if percent < 0 else f"(+{percent}%)"
+            if symbol == "BTCUSDT":
+                asset_price = "{:,}".format(int(asset_price)).replace(",", ".")
+            elif "BTC" in symbol:
+                asset_price = "{:.8f}".format(asset_price).lstrip("0.")  # .rstrip("0")
+
+            msg = f"{msg}\n{symbol}={asset_price} {per_str}"
+
+        if msg:
+            msg = f"{msg}\n```{_date(_type='hour')}"
+            await self._discord_sent_msg(msg)
+
     async def _discord_send(self, msg, lost, pos_count, name, free, total, is_message=True) -> None:
         cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.5 else format(cfg.locked_balance, ".2f")
         await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free, total)
@@ -149,20 +191,7 @@ class BotHelperAsync:
                 if flag:
                     msg = f"{msg}\n```"
 
-            try:
-                if cfg.discord_sent_msg:
-                    await cfg.discord_sent_msg.edit(content=msg)
-                else:
-                    cfg.discord_sent_msg = await self.channel.send(msg)
-            except Exception as e:
-                if "Not Found" not in str(e) and "HTTPException" not in str(e):
-                    print_tb(e)
-
-                with suppress(Exception):
-                    await cfg.discord_sent_msg.delete()
-
-                cfg.discord_message = f"`{_date()}`\n"
-                cfg.discord_sent_msg = None
+            await self._discord_sent_msg(msg)
 
     ########
     # SPOT #
@@ -176,12 +205,11 @@ class BotHelperAsync:
         '0', 'locked': '0', 'netAsset': '2.1602058', 'netAssetOfBtc':
         '0.0001003', 'repayEnabled': True, 'totalAsset': '2.1602058'}
         """
-        balances = await exchange.margin.fetch_balance()
+        balances = await exchange.margin_isolated.fetch_balance()
         total_asset = balances["info"]["assets"][0]["quoteAsset"]["totalAsset"]
         return total_asset
 
     async def _fetch_balance(self) -> None:
-        # margin_balance = await exchange.spot.fetch_balance({"type": "margin", "marginType": "isolated"})
         pos_count = 0
         real_pos_count = 0
         ongoing_positions = []
@@ -433,6 +461,7 @@ class BotHelperAsync:
             if cfg.TYPE == "btc":
                 await self.analyze_positions("mBTC", format(lost * 1000, ".5f"), pos_count, free, total)
             else:
+                await self._discord_send_watchlist()
                 await self.analyze_positions("$", format(lost, ".2f"), pos_count, free, total)
 
         config.env[cfg.TYPE]._status.add_single_key("count", count)
@@ -510,17 +539,19 @@ class BotHelperAsync:
 
         try:
             price_ticker = await exchange.spot.fetch_ticker(asset)
+            if is_bid_price:
+                return float(price_ticker["info"]["bidPrice"])
+
+            #: record prices in case could be used in the same cycle
+            cfg.PRICES[asset] = price_ticker["last"]
+            return float(price_ticker["last"])
         except Exception as e:
             if "binance does not have market symbol" in str(e):
                 if "USDT" in asset:
                     asset = asset.replace("USDT", "BUSD")
                     return await self.spot_fetch_ticker(asset, is_bid_price)
 
-        if is_bid_price:
-            return float(price_ticker["info"]["bidPrice"])
-
-        cfg.PRICES[asset] = price_ticker["last"]  # record prices in case could be used in the same cycle
-        return float(price_ticker["last"])
+            raise e
 
     async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""

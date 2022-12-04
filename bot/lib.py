@@ -4,6 +4,7 @@
 ignore_list = [
     "info",
     "BTC",
+    "BCH",
     "LTC",
     "ETH",
     "timestamp",
@@ -37,6 +38,7 @@ class LiqBase:
             "DOGEUSDT",
             "ETCUSDT",
             "ETHBUSD",
+            "FTTUSDT",
             "ETHUSDT",
             "EOSUSDT",
             "HNTUSDT",

@@ -130,5 +130,5 @@ yarl==1.8.1
 yfinance==0.1.63
 wrapt==1.12.1
 whatthepatch==1.0.2
-zope.event==4.5.0
 zope.interface==5.4.0
+zope.event==4.5.0

@@ -1,5 +1,9 @@
 root:
-  goal: 4870
+  goal: 5910
+  anne:
+      first_usdt_side: 520
+      second_btc_side: 210
+      second_btc_side_: 310
   is_write: False
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150

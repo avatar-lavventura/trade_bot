@@ -1,5 +1,7 @@
             *outline* TODO
 * ALPY-BOT
+** TODO kagidin gecmis datalarina bak 1 gunde 10x 20x cikmissa uzak dur -- 10x ciktigi noktaya geri donerse muhtemelen scam bosaltiyorlar
+kagitlarin listesini cikar analiz etmek icin faydali olabilir
 ** TODO mongodb delete wrong calculated balances
 ** TODO remove BTC pairs that does not have USDT, like SNM , add it into the script
 ** TODO calculate 2$ worth of BTC as enterance
