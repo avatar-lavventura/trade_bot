@@ -35,8 +35,10 @@ async def main(symbol):
             print(f"{int(eq)}      ---      {_last}")
             await _sleep(3)
         except Exception as e:
-            print_tb(e)
-            break
+            # print_tb(e)
+            print("sleeping for 60 seconds...")
+            await _sleep(60)
+            print("[  ok  ]")
 
 
 if __name__ == "__main__":

@@ -128,7 +128,7 @@ class Discord_Alpy:
 
     async def restart(self):
         log()
-        log("#> -=-=-=-=-=-=-=-=-=-=-=- RESTARTING -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log("#> -=-=-=-=-=-=-=-=-=-=-=- [green]RESTARTING[/green] -=-=-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

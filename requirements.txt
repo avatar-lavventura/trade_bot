@@ -15,7 +15,7 @@ black==22.10.0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==2.2.79
+ccxt==2.2.91
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -32,7 +32,7 @@ delete==0.3.0
 discord.py==1.7.3
 distlib==0.3.2
 filelock==3.0.12
-flake8==5.0.4
+flake8==6.0.0
 Flask==2.1.1
 forex-python==1.5
 gevent==21.1.2
@@ -80,7 +80,7 @@ pycares==4.0.0
 pycodestyle==2.9.1
 pycparser==2.20
 pydocstyle==6.1.1
-pyflakes==2.5.0
+pyflakes==3.0.1
 Pygments==2.10.0
 pylint==2.10.2
 pymongo==4.1.0

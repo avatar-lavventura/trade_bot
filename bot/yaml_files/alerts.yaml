@@ -6,7 +6,7 @@ alerts:
       msg: ""
     a2:
       pair: SNMBUSD
-      price: 0.67
+      price: 0.60
       msg: ""
   greater_than: # >
     a1:
@@ -15,5 +15,5 @@ alerts:
       msg: ""
     a2:
       pair: SNMBUSD
-      price: 0.82
+      price: 0.80
       msg: ""
