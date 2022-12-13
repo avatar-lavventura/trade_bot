@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-
-import ccxt.async_support as ccxt  # noqa: E402
+import ccxt.async_support as ccxt
 
 
 async def main(symbol):
@@ -12,7 +11,6 @@ async def main(symbol):
     flag = False
     exchange = ccxt.binanceusdm({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
     while True:
-        # print('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
         # print(exchange.iso8601(exchange.milliseconds()), 'fetching', symbol, 'ticker from', exchange.name)
         # this can be any call instead of fetch_ticker, really
         try:
@@ -30,4 +28,5 @@ async def main(symbol):
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main("SNMBUSD"))
+    asset = "SNMBUSD"
+    asyncio.get_event_loop().run_until_complete(main(asset))
