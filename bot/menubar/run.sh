@@ -1,4 +1,5 @@
 #!/bin/bash
 
-pkill -f python3 python
+rm -f output.log
+pkill -f python python3
 nohup ./tracker.py > output.log &

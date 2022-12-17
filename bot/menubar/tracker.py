@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-# __ https://github.com/jaredks/rumps
-# __ https://github.com/srid/org-clock-dashboard
-
 import subprocess
 
 import ccxt
 import rumps  # type: ignore
 
-# rumps.debug_mode(True)
-interval = 20
+# __ https://github.com/jaredks/rumps
+# __ https://github.com/srid/org-clock-dashboard
+
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+# rumps.debug_mode(True)
 assets = ["BTCUSDT"]
 assets = assets + ["SNMBTC", "SNMBUSD"]
 for idx, asset in enumerate(reversed(assets)):
@@ -22,22 +21,13 @@ for idx, asset in enumerate(reversed(assets)):
                 assets[idx] = asset.replace("USDT", "BUSD")
 
 
-# assets = assets + ["DOGEBTC", "DOGEUSDT"]
-#
-# sold_asset = "ORNBTC"
-# bought_asset = "DOGEBTC"
-# amount = {}
-# amount["ORNBTC"] = 735.6
-# amount["DOGEBTC"] = 7787
-
-
 def run(cmd):
     return subprocess.check_output(cmd, shell=True).strip()
 
 
 def tracker_clock_string():
     msg = ""
-    for idx, asset in enumerate(reversed(assets)):
+    for _, asset in enumerate(reversed(assets)):
         try:
             output = exchange.fetch_ticker(asset)
             price = output["last"]
@@ -61,8 +51,7 @@ def tracker_clock_string():
 class OrgClockStatusBarApp(rumps.App):
     @rumps.clicked("Refresh")
     def update_ticker(self, _):
-        clock_title = tracker_clock_string()
-        self.title = clock_title
+        self.title = tracker_clock_string()
 
 
 def main():
@@ -76,7 +65,7 @@ def main():
         else:
             app.title = "Not tracking"
 
-    timer = rumps.Timer(timer_func, interval)
+    timer = rumps.Timer(timer_func, 20)
     timer.start()
     app.run()
 

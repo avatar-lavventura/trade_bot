@@ -15,7 +15,7 @@ black==22.10.0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==2.2.91
+ccxt==2.4.26
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -99,6 +99,7 @@ requests==2.26.0
 rich==12.6.0
 ruamel.yaml==0.17.13
 ruamel.yaml.clib==0.2.6
+rumps==0.4.0
 selenium==3.141.0
 simplejson==3.17.4
 six==1.16.0
