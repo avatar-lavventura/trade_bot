@@ -27,7 +27,7 @@ if [ $(is_running "[h]ypercorn app_async:app") -ge 1 ]; then
 fi
 
 while true; do
-    clear -x
+    # clear -x
     hypercorn app_async:app -b 0.0.0.0:5000  # --reload
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
     printf "#> countdown for 30 seconds                                            "

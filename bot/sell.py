@@ -26,10 +26,13 @@ bot_async = BotHelperAsync()
 #         await helper.exchange.spot.close()
 
 
+# async def main():
+#     """Start fetching balance."""
+#     await sell_order()
+
+
 async def main():
-    """Start fetching balance."""
     pass
-    # await sell_order()
 
 
 if __name__ == "__main__":

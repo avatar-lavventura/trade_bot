@@ -25,6 +25,15 @@ msg_aggr = msg + "_aggr"
 window() =>
     time >= start and time <= finish ? true : false
 
+// buying volume and selling volume
+buyVolume = 0.0
+if high!=low
+    buyVolume := volume*(close-low)/(high-low)
+
+sellVolume = 0.0
+if high!=low
+    sellVolume := volume*(high-close)/(high-low)
+
 //: wave_trend: https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT
 n1 = 10  // channel Length
 n2 = 21  // average Length
@@ -154,6 +163,7 @@ if not IS_BROWSER and strategy.position_size[0] != 0 and window() and is_sleep_p
 
 // buy alerts
 // ==========
+base_cond = (buyVolume > sellVolume)
 is_buy = false
 if timeframe.isseconds
     if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA
@@ -282,6 +292,9 @@ else
 
     // (col[1] == color.lime and col == color.gray)
     // col_aggr == color.orange
+
+if not base_cond
+    is_buy := false
 
 // "l": "long"
 if IS_BROWSER

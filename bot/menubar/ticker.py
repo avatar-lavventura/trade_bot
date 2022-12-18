@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+
 import ccxt.async_support as ccxt
 
 

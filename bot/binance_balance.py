@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import asyncio
-import os
-import sys
 from contextlib import suppress
 
 from broker._utils._async import _sleep
@@ -86,7 +84,7 @@ async def process(unix_timestamp_ms):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
     pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
-    if helper.is_start and pos_count == 0 and not float(cfg.locked_balance) > 10:
+    if helper.is_start and pos_count == 0 and float(cfg.locked_balance) <= 10:
         delete_multiple_lines(1)
 
 
@@ -104,9 +102,7 @@ async def process_main(obj):
         if is_silent:
             await process(unix_timestamp_ms)
     except RequestTimeout:
-        log("E: Timestamp for this request is outside of the recieve_window=5000; restarting...")
-        os.execv(sys.argv[0], sys.argv)
-        # _sys_exit("Timestamp for this request is outside of the recieve_window=5000")
+        _sys_exit("E: Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
         print_tb(e)
         _sys_exit("KeyError")

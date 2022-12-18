@@ -26,11 +26,13 @@ class Fund:
 
         return now
 
+    def parse_now(self, now) -> int:
+        cls = f"{now.strftime('%Y-%m-%d')} 00:00:00+00:00"
+        date_string = "%Y-%m-%d %H:%M:%S%z"
+        return int(datetime.strptime(cls, date_string).timestamp() * 1000)
+
     def percent_change_since_day_start(self, symbol):
-        now = datetime.utcnow()
-        times_ts = int(
-            datetime.strptime(f"{now.strftime('%Y-%m-%d')} 00:00:00+00:00", "%Y-%m-%d %H:%M:%S%z").timestamp() * 1000
-        )
+        times_ts = self.parse_now(datetime.utcnow())
         if (symbol, times_ts) not in self.fund_prices:
             self.fund_prices[(symbol, times_ts)] = self.binance.fetch_ohlcv(
                 symbol=symbol, timeframe="1h", since=times_ts, limit=1
@@ -40,9 +42,7 @@ class Fund:
 
     def percent_change_since_last_fund(self, symbol):  # TODO: check this function?
         now = self.init()
-        times_ts = int(  # ?
-            datetime.strptime(f"{now.strftime('%Y-%m-%d')} 00:00:00+00:00", "%Y-%m-%d %H:%M:%S%z").timestamp() * 1000
-        )
+        times_ts = self.parse_now(now)
         # now = datetime.utcnow()
         _since = 0
         for times_ts in self.fund_times_ts:
