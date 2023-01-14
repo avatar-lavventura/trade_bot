@@ -1,0 +1,12 @@
+* NOTES
+
+** cross-margin 3x
+- Aslinda 4 kat, 25% duserse liq oluyorsun ama hesaba para koyunca liq fiyati
+azaliyor fakat ekledigin para kitleniyor.
+
+- extra islem yapinca, ornegin repay yaparsan, hem liq fiyati artti hem de
+toplam yapacagim kar azaldi. Islem sirasinda `repay` yapmak karli degil.
+
+** a price may drop 10% in one minute
+- minimum 20% safe cross-margin is a good way to go
+- might be good to catch 10% suddent drops in 1 minute instead of pumps, they may end up suddent jump backs.

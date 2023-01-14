@@ -1,0 +1,10 @@
+//@version=4
+// https://www.tradingview.com/script/l21KxMmX-Buy-Sell-Volume-Bars/
+study("BS",format=format.volume, precision=0)
+
+// BUYING VOLUME AND SELLING VOLUME //
+buyVolume = iff( (high==low), 0, volume*(close-low)/(high-low))
+sellVolume = iff( (high==low), 0, volume*(high-close)/(high-low))
+
+plot(volume, style=plot.style_columns, color=color.red, title="SELL V") // shows total volume (!)
+plot(buyVolume, style=plot.style_columns, color=color.teal, title="BUY V") // shows only buy volume

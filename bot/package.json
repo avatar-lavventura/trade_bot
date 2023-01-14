@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@alleyway/add-tradingview-alerts-tool": "^2.1.2"
+  }
+}

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from broker._utils._log import log
+
 from bot.config import config
 from ebloc_broker.broker._utils._log import log
 

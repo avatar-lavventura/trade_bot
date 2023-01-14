@@ -26,7 +26,7 @@ def job():
 try:
     sched.start()
 except KeyboardInterrupt:
-    print("Program stopped manually !!!")
+    print("Program stopped manually!")
     try:
         sys.exit(0)
     except SystemExit:

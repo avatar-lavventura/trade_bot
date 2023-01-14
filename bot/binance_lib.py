@@ -15,17 +15,9 @@ import sys
 import time
 from contextlib import suppress
 
+from broker._utils.tools import _percent_change, log, percent_change, print_tb, timestamp_to_local, utc_to_local
 from dateutil.parser import parse
 from forex_python.converter import CurrencyRates
-
-from ebloc_broker.broker._utils.tools import (
-    _percent_change,
-    log,
-    percent_change,
-    print_tb,
-    timestamp_to_local,
-    utc_to_local,
-)
 
 c = CurrencyRates()
 TOTAL_BALANCE = 1000
@@ -72,7 +64,6 @@ def futures_history(client, _symbol=None):
         history_log = client.futures_income_history(limit=1000, incomeType="REALIZED_PNL")
         history_log_comms = client.futures_income_history(limit=1000, incomeType="COMMISSION")
         history_log_fundings = client.futures_income_history(limit=1000, incomeType="FUNDING_FEE")
-
         for history_log_comm in history_log_comms:
             comm_dict[history_log_comm["tradeId"]] = abs(float(history_log_comm["income"]))
 
@@ -251,11 +242,11 @@ def positions(client, latest_symbol_income, daily_progress, _symbol=None):
             real_pc = _percent_change(float(future["entryPrice"]), price_to_consider)
             _real_pc = format(real_pc, ".2f")
             log(f" {_real_pc}%", end="")
-            if not real_pc == 0.0:
+            if real_pc == 0.0:
+                log()
+            else:
                 _leverage = round(abs(pc / real_pc))
                 log(f" x{_leverage}")
-            else:
-                log()
 
             return True
     return False

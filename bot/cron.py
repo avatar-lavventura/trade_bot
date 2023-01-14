@@ -5,8 +5,7 @@ import logging
 import os
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
-from ebloc_broker.broker._utils.tools import get_dt_time
+from broker._utils.tools import get_dt_time
 
 logging.getLogger("apscheduler.executors.default").propagate = False
 

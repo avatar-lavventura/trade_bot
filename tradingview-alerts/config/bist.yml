@@ -1,17 +1,17 @@
 files:
-  input: bist_anne.csv
+    input: bist_anne.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/Kwlc5uuo/
-  interval: 4h
+    chartUrl: https://www.tradingview.com/chart/eFHdQNtD/?symbol=BINANCE%3ABTCUSDT
+    interval: 4h
 alert:
-  condition:
-    primaryLeft: alpy_vix
-  actions:
-    notifyOnApp: false
-    showPopup: false
-    sendEmail: false
-    webhook:
-      enabled: true
-      url: "https://alpybot.duckdns.org/webhook"
-  message: >
-    {{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},{{strategy.position_size}},{{time}},
+    condition:
+      primaryLeft: alpy_vix
+    actions:
+      notifyOnApp: false
+      showPopup: false
+      sendEmail: false
+      webhook:
+        enabled: true
+        url: "https://alpybot.duckdns.org/webhook"
+    message: >
+      {{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},{{strategy.position_size}},{{time}},

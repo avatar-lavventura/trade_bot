@@ -1,0 +1,6 @@
+root:
+  9_11_2022:
+    try: 5000 # transferred
+    kur: 18.50
+    btc: 0.01567 # bought
+    usd: 270 # should be

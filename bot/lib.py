@@ -1,11 +1,29 @@
 #!/usr/bin/env python3
 
 
+ignore_list = [
+    "info",
+    "BTC",
+    "BCH",
+    "LTC",
+    "ETH",
+    "timestamp",
+    "datetime",
+    "free",
+    "used",
+    "total",
+    "USDT",
+    "IQ",
+    "VTHO",
+]
+
+
 class LiqBase:
     def __init__(self):
         self.ignore_list = [
             "1000XECUSDT",
             "1000SHIBUSDT",
+            "1000LUNCBUSD",
             "SHIBUSDT",
             "AAVEUSDT",
             "AVAXUSDT",
@@ -17,14 +35,17 @@ class LiqBase:
             "BTGUSDT",
             "BTCBUSD",
             "EGLDUSDT",
+            "DOGEUSDT",
             "ETCUSDT",
             "ETHBUSD",
+            "FTTUSDT",
             "ETHUSDT",
+            "EOSUSDT",
             "HNTUSDT",
             "ICPUSDT",
             "KSMUSDT",
             "LTCUSDT",
-            "LUNAUSDT",
+            "LUNA2BUSD",
             "MANAUSDT",
             "SOLUSDT",
             "XLMUSDT",

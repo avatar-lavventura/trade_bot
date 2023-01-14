@@ -1,6 +1,34 @@
 * Setup
 
+~git clone https://github.com/alleyway/add-tradingview-alerts-tool.git~
+
 #+begin_src bash
+cd ~/trade_bot/tradingview-alerts/tradingview-alerts-home
 npx @alleyway/create-tradingview-alerts-home
-npm install
+# npm install
+#+end_src
+
+---------------------
+
+* run_btc
+#+begin_src bash
+cd $HOME/trade_bot
+git reset --hard HEAD
+git pull -r -v
+cd $HOME/trade_bot/tradingview-alerts
+cp config/btc_spot.yml config.yml
+cp add-alerts.js tradingview-alerts-home/node_modules/@alleyway/add-tradingview-alerts-tool/dist/add-alerts.js
+./tradingview-alerts-home/atat add-alerts -d 2200
+#+end_src
+
+* run_usdt
+
+#+begin_src bash
+cd $HOME/trade_bot
+git reset --hard HEAD
+git pull -r -v
+cd $HOME/trade_bot/tradingview-alerts
+cp config/usdt_spot.yml config.yml
+cp add-alerts.js tradingview-alerts-home/node_modules/@alleyway/add-tradingview-alerts-tool/dist/add-alerts.js
+./tradingview-alerts-home/atat add-alerts -d 2200
 #+end_src

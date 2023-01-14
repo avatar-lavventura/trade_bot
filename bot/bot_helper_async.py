@@ -4,333 +4,568 @@ from contextlib import suppress
 from typing import Tuple
 
 from broker._utils._log import _console_clear, console_ruler, log
-from broker._utils.tools import _date, decimal_count, percent_change, print_tb, round_float
-from filelock import FileLock
+from broker._utils.tools import _date, decimal_count, print_tb
 
-from bot import cfg, helper
-from bot.config import config
-
-
-class TP_calculate(Exception):
-    pass
-
-
-class TakeProfit:
-    def __init__(self):
-        self.TAKE_PROFIT_LONG = []
-        self.TAKE_PROFIT_SHORT = []
-        self.take_profit_percent: float = config.take_profit
-        # index:0 => 0.5% profit
-        self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent)
-        self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent)
-        # index:1 => ex: 0.5 * 2 (1%) profit
-        multiply_ratio = 1
-        self.TAKE_PROFIT_LONG.append(1.000 + self.take_profit_percent * multiply_ratio)
-        self.TAKE_PROFIT_SHORT.append(1.000 - self.take_profit_percent * multiply_ratio)
-
-    def get_profit_amount(self, side, amount=0.0) -> float:
-        amount = abs(float(amount))
-        index = 0
-        if side == "long":
-            quantity = config._initial_usdt_qty
-        else:  # side == "short":
-            quantity = config._initial_usdt_qty_short
-
-        if amount > (quantity + quantity / 2):
-            # if the initial margin is more than first opened position amount
-            index = 1
-
-        if side == "long":
-            return self.TAKE_PROFIT_LONG[index]
-        else:  # side == "short":
-            return self.TAKE_PROFIT_SHORT[index]
-
-    def get_long_tp(self, entry_price, isolated_wallet, decimal):
-        price = f"{float(entry_price) * self.get_profit_amount('long', isolated_wallet):.{decimal}f}"
-        price = float(price)
-        if price <= entry_price:
-            raise TP_calculate(f"limit_price={price}, decimal={decimal} calculated wrong")
-
-        return price
-
-    def get_short_tp(self, entry_price, isolated_wallet, decimal):
-        price = f"{float(entry_price) * TP.get_profit_amount('short', isolated_wallet):.{decimal}f}"
-        price = float(price)
-        if price >= entry_price:
-            raise TP_calculate(f"limit_price={price}, decimal={decimal} calculated wrong")
-
-        return price
-
+from bot import cfg
+from bot.config import config, exchange, is_start
+from bot.fund_time import Fund
+from bot.take_profit import TakeProfit
 
 TP = TakeProfit()
+fund = Fund()
 
 
 class BotHelperAsync:
-    def __init__(self):
-        self.balances = []
-
     async def close(self):
-        """Close async function.
+        """Close the async function.
 
-        https://stackoverflow.com/a/54528397/2402577
+        __ https://stackoverflow.com/a/54528397/2402577
         """
-        await helper.exchange.close()
+        await exchange.close()
 
-    ############
-    # USDTPERP #
-    ############
-    async def _load_markets(self):
-        await helper.exchange.future.load_markets()
-
-    async def transfer_in(self, amount):
-        """Transfer usdt from spot to usdtperp."""
-        await helper.exchange.future.transfer_in(code="USDT", amount=amount)
-
-    async def transfer_out(self, amount):
-        """Transfer USDT from usdtperp to spot.
-
-        __ https://github.com/ccxt/ccxt/issues/10169#issuecomment-937605731
-        """
-        await helper.exchange.future.transfer_out(code="USDT", amount=amount)
-
-    async def is_future_position_open(self, symbol_original) -> bool:
-        futures = await helper.exchange.future.fetch_balance()
-        for future in futures["info"]["positions"]:
-            if float(future["positionAmt"]) != 0.0:
-                if future["symbol"].replace("/", "") == symbol_original.replace("/", ""):
-                    return True
-
-        return False
-
-    async def set_leverage(self, symbol, leverage=1):
-        """Set leverage for futures."""
-        try:
-            market = helper.exchange.future.market(symbol)
-            response = await helper.exchange.future.fapiPrivate_post_leverage(
-                {"symbol": market["id"], "leverage": leverage}
-            )
-            log(response, "bold cyan")
-            response = await helper.exchange.future.fapiPrivate_post_margintype(
-                {"symbol": market["id"], "marginType": "ISOLATED"}
-            )
-            log(response, "bold cyan")
-        except Exception as e:
-            if "No need to change margin type." not in str(e):
-                print_tb(e)
-
-    async def futures_fetch_ticker(self, asset) -> float:
-        price = await helper.exchange.future.fetch_ticker(asset)
-        return float(price["last"])
-
-    def update_timestamp_status(self):
+    def _update_timestamp_status(self, key) -> None:
+        #: ts when iteration started
+        latest_ts = config.env[cfg.TYPE].status["timestamp"]
+        config.env[cfg.TYPE]._ts.add_single_key("latest", latest_ts)
         del_list = []
-        key = f"{cfg.TYPE.lower()}_timestamp"
         for asset_timestamp in config.timestamp[key]:
-            if asset_timestamp != "base" and asset_timestamp not in config.asset_list:
-                if len(str(config.timestamp[key][asset_timestamp])) == 13:
-                    if int(config.timestamp[key][asset_timestamp]) <= config.run_balance["root"]["timestamp"] * 1000:
-                        del_list.append(asset_timestamp)
-                else:
-                    if int(config.timestamp[key][asset_timestamp]) <= config.run_balance["root"]["timestamp"]:
-                        del_list.append(asset_timestamp)
+            if asset_timestamp not in config.asset_list:
+                ts = int(config.timestamp[key][asset_timestamp])
+                if len(str(ts)) == 13 and ts <= latest_ts * 1000:
+                    del_list.append(asset_timestamp)
+                elif ts <= latest_ts:
+                    del_list.append(asset_timestamp)
 
         for asset in del_list:
             if asset not in config.SPOT_IGNORE_LIST:
                 del config.timestamp[key][asset]
 
-    async def _discord_send(self, msg, _lost, name):
-        cfg.locked_balance = float(format(cfg.locked_balance, ".2f"))
-        if cfg.locked_balance > 0:
-            log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "gray", end="", filename=cfg.balance_fn)
-            log(
-                f"[red]{_lost}{name}[/red] locked=([yellow]{cfg.locked_balance}%[/yellow])",
-                "bold",
-                filename=cfg.balance_fn,
-            )
-        if cfg.discord_message != ".\n":
-            if not cfg.discord_sent_message:
-                cfg.discord_sent_message = await self.channel.send(msg)
+    def update_timestamp_status(self) -> None:
+        self._update_timestamp_status(f"{cfg.TYPE}_timestamp")
+        # if cfg.TYPE == "usdt" and config.cfg["root"]["busd"]["status"] == "on":
+        #     self._update_timestamp_status("busd_timestamp")
+
+    async def fetch_symbol_percent_change(self, symbol, price=None):
+        bar_price = fund.percent_change_since_day_start(symbol)
+        try:
+            bar_price = bar_price[0][1]  # time, open, high, low, close, volume
+        except Exception as e:
+            raise KeyboardInterrupt from e
+
+        if price:
+            asset_price = price
+        else:
+            asset_price = await self.spot_fetch_ticker(symbol)
+
+        percent = ((asset_price - bar_price) / bar_price) * 100
+        return asset_price, float(format(percent, ".2f"))
+
+    async def analyze_positions(self, name, lost, pos_count, free, total) -> None:
+        c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
+        msg = ""
+        lost = float(lost)
+        real_pos_count = config.env[cfg.TYPE]._status.find_one("real_pos_count")["value"]
+        if name == "mBTC":
+            msg += "-=-=-=-=-=-= "
+            if lost != 0:
+                lost_usdt = lost / 1000 * cfg.PRICES["BTCUSDT"]
+                msg += f"[{c}]{format(lost_usdt, '.2f')}$({lost})[/{c}] "
+
+            msg += f"locked=[cy]{format(float(cfg.locked_balance), '.2f')}%[/cy] "
+            if free > 0:
+                _free_usdt = float(free) * cfg.PRICES["BTCUSDT"]
+                free = format(free * 1000, ".4f")
+                msg = f"{msg}free_btc=[cy]{free}[/cy]([cy]{format(_free_usdt, '.2f')}$[/cy]) "
+
+            _total = cfg.SUM_BTC + abs(lost) / 1000
+            _total = format(_total, ".5f")
+            msg += f"[italic black]{_total}[/italic black]"
+        else:
+            msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
+            # total_str = f"[italic #6272a4]{total}[/italic #6272a4]"
+            msg += f"[{c}]{abs(lost)}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
+            if free > 1:
+                msg = f"{msg}free=[cy]{free}{name}[/cy] "
+
+        if float(cfg.locked_balance) > 0:
+            if real_pos_count > 1:
+                log(msg, "bold", end="")
             else:
-                await cfg.discord_sent_message.edit(content=msg)
+                log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=", "bold", end="")
+
+            output = config.env[cfg.TYPE].stats.find_one(cfg.CURRENT_DATE)
+            if pos_count > 2:
+                if output:
+                    log(f"pos=[blue]{pos_count}[/blue] perf=[blue]{output['value']}[/blue]", "bold")
+                else:
+                    log(f"pos=[blue]{pos_count}[/blue]", "bold")
+            elif output:
+                log(f"perf=[blue]{output['value']}[/blue]", "bold")
+            else:
+                log()
+
+    async def _discord_sent_msg(self, msg):
+        try:
+            if cfg.discord_sent_msg:
+                await cfg.discord_sent_msg.edit(content=msg)
+            else:
+                cfg.discord_sent_msg = await self.channel.send(msg)
+        except Exception as e:
+            if "Not Found" not in str(e) and "HTTPException" not in str(e):
+                print_tb(e)
+
+            with suppress(Exception):
+                await cfg.discord_sent_msg.delete()
+
+            cfg.discord_message = f"`{_date()}`\n"
+            cfg.discord_sent_msg = None
+
+    async def _discord_send_watchlist(self) -> None:
+        msg = ""
+        flag = False
+        for symbol in config.WATCHLIST:
+            if not flag:
+                flag = True
+                msg = f"{msg}\n```"
+
+            try:
+                asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+            except Exception as e:
+                log(f"E: {symbol} {e}")
+                print_tb(e)
+
+            per_str = f"({percent}%)" if percent < 0 else f"(+{percent}%)"
+            if symbol == "BTCUSDT":
+                asset_price = "{:,}".format(int(asset_price)).replace(",", ".")
+            elif "BTC" in symbol:
+                asset_price = "{:.8f}".format(asset_price).lstrip("0.")  # .rstrip("0")
+
+            msg = f"{msg}\n{symbol}={asset_price} {per_str}"
+
+        if msg:
+            msg = f"{msg}\n```{_date(_type='hour')}"
+            await self._discord_sent_msg(msg)
+
+    async def _discord_send(self, msg, lost, pos_count, name, free, total, is_message=True) -> None:
+        cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.5 else format(cfg.locked_balance, ".2f")
+        await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free, total)
+        if not is_message:
+            return
+
+        if (
+            cfg.discord_message
+            and len(cfg.discord_message) > 11
+            or (cfg.TYPE == "btc" and cfg.discord_message_full and len(cfg.discord_message_full) >= 11)
+        ):
+            if cfg.TYPE == "usdt":
+                flag = False
+                for symbol in config.WATCHLIST:
+                    if not flag:
+                        flag = True
+                        msg = f"{msg}\n```"
+
+                    try:
+                        asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+                    except Exception as e:
+                        log(f"E: {symbol} {e}")
+                        print_tb(e)
+
+                    per_str = f"({percent}%)" if percent < 0 else f"(+{percent}%)"
+                    if symbol == "BTCUSDT":
+                        if percent == 0:
+                            per_str_c = "(0.0%)"
+                        else:
+                            per_str_c = f"([red]{percent}%[/red])" if percent < 0 else f"([green]+{percent}%[/green])"
+
+                        asset_price = "{:,}".format(int(asset_price)).replace(",", ".")
+                        if symbol == "BTCUSDT":
+                            c = "m"
+                        else:
+                            c = "cy"
+
+                        log(f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c}", end="", is_write=False)
+                    elif "BTC" in symbol:
+                        asset_price = "{:.8f}".format(asset_price).lstrip("0.")  # .rstrip("0")
+
+                    msg = f"{msg}\n{symbol}={asset_price} {per_str}"
+                if flag:
+                    msg = f"{msg}\n```"
+
+            await self._discord_sent_msg(msg)
 
     ########
     # SPOT #
     ########
-    async def spot_balance(self, is_limit=True, balance_type="usdt") -> Tuple[float, float, float]:
+    async def _fetch_margin_balance(self):
+        """Fetch margin balance.
+
+        Example output:
+        ipdb> balances["info"]["assets"][0]["quoteAsset"] {'asset': 'USDT',
+        'borrowEnabled': True, 'borrowed': '0', 'free': '2.1602058', 'interest':
+        '0', 'locked': '0', 'netAsset': '2.1602058', 'netAssetOfBtc':
+        '0.0001003', 'repayEnabled': True, 'totalAsset': '2.1602058'}
+        """
+        balances = await exchange.margin_isolated.fetch_balance()
+        total_asset = balances["info"]["assets"][0]["quoteAsset"]["totalAsset"]
+        return total_asset
+
+    async def _fetch_balance(self) -> None:
+        pos_count = 0
+        real_pos_count = 0
+        ongoing_positions = []
+        cfg.BALANCES = await exchange.spot.fetch_balance()
+        for symbol in cfg.BALANCES:
+            if (
+                symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
+                and cfg.BALANCES[symbol]["total"] > 0
+            ):
+                ongoing_positions.append(symbol)
+                if symbol not in cfg.STABLE_COINS:
+                    real_pos_count += 1
+                    if symbol not in config.SPOT_IGNORE_LIST:
+                        pos_count += 1
+
+        del_list = []
+        key = f"{cfg.TYPE}_timestamp"
+        for asset_timestamp in config.timestamp[key]:
+            if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
+                del_list.append(asset_timestamp)
+
+        for asset in del_list:
+            del config.timestamp[key][asset]
+
+        config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
+        config.env[cfg.TYPE]._status.add_single_key("real_pos_count", real_pos_count)
+
+    async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
-        own_usd = 0.0
-        sum_usdt = 0.0
-        sum_btc = 0.0
-        count = 0
-        only_usdt = 0.0
+        own_usdt: float = 0
+        sum_usdt: float = 0
+        sum_busd: float = 0
+        sum_btc: float = 0
+        only_usdt: float = 0
+        only_btc: float = 0
+        count: int = 0
         config.asset_list = []
         try:
-            self.balances = await helper.exchange.spot.fetch_balance()
+            await self._fetch_balance()
         except Exception as e:
-            raise e
+            if "Account has insufficient balance" in e:
+                log("", is_write=False)
 
-        btcusdt_price = float(await self.spot_fetch_ticker("BTC/USDT"))
-        for balance in self.balances["info"]["balances"]:
+            log(f"E: {e}", is_write=False)
+
+        for balance in cfg.BALANCES["info"]["balances"]:
             asset = balance["asset"]
-            if float(balance["free"]) != 0.0 or float(balance["locked"]) != 0.0:
+            if float(balance["free"]) != 0 or float(balance["locked"]) != 0:
                 quantity = float(balance["free"]) + float(balance["locked"])
                 if asset == "BTC":
+                    only_btc = quantity
                     sum_btc += quantity
-                else:
-                    if asset not in ["USDT", "BNB", "ETH", "PAX", "PAXG", "BUSD", "TUSD", "USDC"]:
-                        # price = await self.spot_fetch_ticker(asset)
-                        price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
-                        if cfg.TYPE == "usdt":
-                            usdt_to_added = quantity * float(price)
-                            if usdt_to_added > 10:  # TODO: check float(balance["free"]) USDT value if > 1.0 USDT
-                                # below 10$ would not count as open position
-                                config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
-                                config.asset_list.append(asset)
-                                if asset not in config.SPOT_IGNORE_LIST:
-                                    count += 1
-                        elif cfg.TYPE == "btc":
-                            sum_btc += quantity * float(price)
-                            usdt_to_added = quantity * float(price) * btcusdt_price
-                            if usdt_to_added > 4:
-                                config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
-                                config.asset_list.append(asset)
-                                if asset not in config.SPOT_IGNORE_LIST:
-                                    count += 1
+                elif asset not in cfg.STABLE_COINS:
+                    price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
+                    if cfg.TYPE == "usdt":
+                        usdt_amount = quantity * float(price)
+                        if usdt_amount > 1.0:  # below 1.0$ would not be count as open position
+                            config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
+                            config.asset_list.append(asset)
+                            if asset not in config.SPOT_IGNORE_LIST:
+                                count += 1
+                    elif cfg.TYPE == "btc":
+                        sum_btc += quantity * float(price)
+                        usdt_amount = quantity * float(price) * cfg.PRICES["BTCUSDT"]
+                        if usdt_amount > 1:
+                            config.btc_quantity[asset] = float(balance["free"]) + float(balance["locked"])
+                            config.asset_list.append(asset)
+                            if asset not in config.SPOT_IGNORE_LIST:
+                                count += 1
 
-                        sum_usdt += usdt_to_added
-                    elif asset == cfg.TYPE.upper():
-                        only_usdt = quantity
-                        sum_usdt += quantity
+                    sum_usdt += usdt_amount
+                elif asset.lower() == cfg.TYPE:
+                    only_usdt = quantity
+                    sum_usdt += quantity
+                elif asset.lower() == "busd":
+                    sum_busd += quantity
+                if asset.lower() == "bnb":
+                    cfg.BNB_QTY = quantity
+                    cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
 
-        if sum_btc > 0.00002:
-            own_usd = sum_btc * btcusdt_price
+        ts = config.env[cfg.TYPE].status["timestamp"]
+        own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
+        pos_count: int = config.env[cfg.TYPE]._status.find_one("count")["value"]
+        if sum_btc > 0.00002 and pos_count > 0:
             log(
-                f" * btc=%.8f [blue]==[/blue] [cyan]%.2f$[/cyan] | [blue]{_date(_type='hour')}[/blue]"
-                % (sum_btc, own_usd)
+                f" * btc=[m]%.8f[/m] [blue]==[/blue] [m]%.2f$[/m] [blue]*[/blue] "
+                f"bnb=[cy]%.2f$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}" % (sum_btc, own_usdt, cfg.BNB_BALANCE)
             )
+            cfg.SUM_BTC = sum_btc
+
+        if cfg.BNB_BALANCE < 0.3:
+            try:
+                await self.buy_bnb()
+            except Exception as e:
+                if "InsufficientFunds" in str(e) or "insufficient balance" in str(e):
+                    log(f"E: {e}")
+                else:
+                    print_tb(e)
 
         sum_usdt = float(format(sum_usdt, ".2f"))
-        if helper.is_start or config.total_position_count() > 0:
-            if not helper.is_start and sum_usdt > 0.01:
+        sum_busd = float(format(sum_busd, ".2f"))
+        if is_start:
+            if not is_start and sum_usdt > 0.01:
                 console_ruler(character="-=")
 
             if len(config.asset_list) == 0:
-                #: cleans timestamp.yaml
-                config.timestamp[f"{cfg.TYPE.lower()}_timestamp"] = dict(base=config.run_balance["root"]["timestamp"])
+                config.timestamp[f"{cfg.TYPE}_timestamp"] = {}  #: cleans timestamp.yaml file
                 _console_clear()
-                if cfg.TYPE.lower() == "usdt":
-                    log(f":beer:  [green]usdt=[green]{sum_usdt}", "bold")
-            else:
-                if cfg.TYPE.lower() == "usdt":
-                    log(f" * usdt={sum_usdt} | [blue]{_date(_type='hour')}[/blue]")
+                if cfg.TYPE == "usdt":
+                    if sum_usdt > 0.01:
+                        log(f":beer: :heavy_dollar_sign: [green]usdt=[green]{sum_usdt}", "bold")
+                    else:
+                        log(f":heavy_dollar_sign: {_date(_type='hour')} spot_balance=0", "bold")
+                elif cfg.TYPE == "btc":
+                    if own_usdt > 0.01:
+                        log(
+                            f":beer: :bee: {_date(_type='hour')} balance=%.8f BTC [blue]==[/blue] %.2f USDT"
+                            % (sum_btc, own_usdt),
+                            "bold",
+                        )
+                    else:
+                        log(f":bee: {_date(_type='hour')} spot_balance=0", "bold")
+            elif cfg.TYPE == "usdt":
+                busd_str = ""
+                if sum_busd > 0.1:
+                    busd_str = f"| busd={sum_busd} "
+
+                log(
+                    f" * usdt={sum_usdt} {busd_str}[blue]*[/blue] "
+                    f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}"
+                )
 
             config.sum_usdt = sum_usdt
             if sum_usdt > 1.0:
-                if cfg.TYPE.lower() == "usdt":
-                    pos_count = config.status_usdt["count"]
-                elif cfg.TYPE.lower() == "btc":
-                    pos_count = config.status_btc["count"]
+                if pos_count == 0 and config.env[cfg.TYPE].status["balance"] != sum_usdt:
+                    config.env[cfg.TYPE].status["balance"] = sum_usdt
 
-                if pos_count == 0 and config.status["root"][cfg.TYPE]["balance"] != sum_usdt:
-                    with FileLock(config.status.fp_lock, timeout=5):
-                        config.status["root"][cfg.TYPE]["balance"] = sum_usdt
+            if cfg.TYPE == "btc":
+                config.env[cfg.TYPE].status["balance"] = float(format(sum_btc, ".8f"))
 
-            if cfg.TYPE.lower() == "btc":
-                if len(config.asset_list) == 0:
-                    _console_clear()
-                    log(":beer:  [bold green]spot=[/bold green]%.8f BTC [blue]==[/blue] %.2f USDT" % (sum_btc, own_usd))
-
-                config.status["root"][cfg.TYPE]["balance"] = sum_btc
-
-        if cfg.TYPE.lower() == "usdt":
+        if cfg.TYPE == "usdt":
             _sum = sum_usdt
         else:
             _sum = sum_btc
 
-        lost = 0.0
-        cfg.discord_message = ".\n"
-        cfg.discord_message_full = ".\n"
+        lost: float = 0
         cfg.locked_balance = 0.0
-        open(cfg.balance_fn, "w").close()
-        for asset in config.asset_list:
-            lost += await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
-            # await self.spot_limit(asset, btc_quantity, sum_btc, is_limit)
+        cfg.discord_message = f"`{_date()}`\n"
+        cfg.discord_message_full = f"`{_date()}`\n"
+        if cfg.BALANCES:
+            new_asset_list = []  # TODO: order asset based on their position size sort the list based on its size
+            for asset in config.asset_list:
+                balance = cfg.BALANCES[asset]["total"]
+                if balance > 0:
+                    new_asset_list.append(asset)
 
-        if abs(lost) < 5:
-            msg = f"{cfg.discord_message}lost=`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}`"
+            for asset in config.asset_list:
+                balance = cfg.BALANCES[asset]["total"]
+                if balance > 0:
+                    output = await self.spot_limit(asset, balance, _sum, is_limit)
+                    lost += float(output)
+                else:
+                    log(f"{asset} balance is zero")
         else:
-            msg = f"{cfg.discord_message_full}lost=`{format(lost, '.2f')}$` | usdt=`{round(sum_usdt)}`"
+            for asset in config.asset_list:
+                output = await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
+                lost += float(output)
 
-        msg = f"{msg}\n`{_date(_type='hour')}`"
-
-        if cfg.TYPE.lower() == "usdt":
-            if lost < -0.1:
-                await self._discord_send(msg, format(lost, ".2f"), "$")
+        if cfg.TYPE == "usdt":
+            free = format(float(config.env["usdt"].status["free"]), ".2f")
+            if lost > -5.0:
+                _msg = cfg.discord_message
             else:
-                if cfg.discord_sent_message:
-                    await cfg.discord_sent_message.delete()
-                    cfg.discord_sent_message = None
+                _msg = cfg.discord_message_full
+        else:
+            free = format(float(config.env["btc"].status["free"]), ".5f")
+            if lost > -0.0001:
+                _msg = cfg.discord_message
+            else:
+                _msg = cfg.discord_message_full
 
-            with FileLock(config.status_usdt.fp_lock, timeout=5):
-                config.status_usdt["count"] = count
-        elif cfg.TYPE.lower() == "btc":
-            await self._discord_send(msg, format(lost * 1000, ".5f"), " mBTC")
-            with FileLock(config.status_btc.fp_lock, timeout=5):
-                config.status_btc["count"] = count
+        cfg.locked_balance = min(float(cfg.locked_balance), 100)
+        if cfg.locked_balance >= 99.90:
+            cfg.locked_balance = 100
+            locked_per = ":lock:=`100%`"
+        else:
+            locked_per = f":lock:=`{format(cfg.locked_balance, '.2f')}%`"
 
+        pos_str = ""
+        if pos_count > 2:
+            pos_str = f"pos=**{pos_count}**"
+
+        total = 0
+        free = float(free)
+        if cfg.TYPE == "usdt":
+            _free = ""
+            if free > 1:
+                _free = f"| free=`{free}` "
+
+            total = round(abs(lost) + sum_usdt)
+            if sum_busd > 0.1:
+                msg = (
+                    f"{_msg}`{format(lost, '.2f')}$` usdt=`{round(sum_usdt)}` | busd=`{sum_busd}` {_free}"
+                    f"{locked_per} | {pos_str}"
+                )
+            else:
+                goal = round(float(sum_usdt) + float(abs(lost)))
+                msg = (
+                    f"{_msg}**:moneybag:=`{round(sum_usdt)}` lost=**`{format(lost, '.2f')}` :dart:=`{goal}` {_free}"
+                    f"{locked_per} {pos_str}"
+                )
+
+            config.env[cfg.TYPE].balance_sum.add_single_key("btc", 0)
+            config.env[cfg.TYPE].balance_sum.add_single_key("usdt", format(sum_usdt, ".2f"))
+        else:
+            msg = _msg
+            if free > 0:
+                msg = f"{msg}free=`{free}` (`{format(free * cfg.PRICES['BTCUSDT'], '.2f')}$`) "
+
+            lost_usdt = format(float(lost) * cfg.PRICES["BTCUSDT"], ".2f")
+            if float(lost_usdt) < 0:
+                msg = (
+                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}`:moneybag:**)\n"
+                    f"**lost=`{lost_usdt}`** {locked_per} {pos_str}"
+                )
+            elif float(lost_usdt) == 0:
+                msg = f":beer: **`{format(sum_btc, '.5f')}`** BTC == **`{format(own_usdt, '.2f')}`:moneybag:** @binance_{cfg.TYPE}"
+            else:
+                msg = (
+                    f"{msg}btc=**`{format(sum_btc, '.5f')}`** (**`{format(own_usdt, '.2f')}`:moneybag:**)\n"
+                    f"**gain=`+{lost_usdt}$`** {locked_per} {pos_str}"
+                )
+
+            config.env[cfg.TYPE].balance_sum.add_single_key("btc", format(sum_btc, ".8f"))
+            config.env[cfg.TYPE].balance_sum.add_single_key("usdt", format(own_usdt, ".2f"))
+
+        output = config.env[cfg.TYPE].stats.find_one(cfg.CURRENT_DATE)
+        if output:
+            msg = f"{msg} perf=**{output['value']}**"
+
+        if config.cfg["root"][cfg.TYPE]["is_discord"] == "on":
+            if cfg.TYPE == "btc":
+                await self._discord_send(
+                    msg, format(lost * 1000, ".5f"), pos_count, " mBTC", free, total, is_message=True
+                )
+            else:
+                await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free, total)
+        else:
+            if cfg.TYPE == "btc":
+                await self.analyze_positions("mBTC", format(lost * 1000, ".5f"), pos_count, free, total)
+            else:
+                await self._discord_send_watchlist()
+                await self.analyze_positions("$", format(lost, ".2f"), pos_count, free, total)
+
+        config.env[cfg.TYPE]._status.add_single_key("count", count)
         self.update_timestamp_status()
-        return own_usd, sum_usdt, only_usdt
+        return own_usdt, sum_usdt, only_usdt, only_btc
 
-    async def spot_order(self, quantity, symbol, side):
+    async def buy_bnb(self) -> bool:
+        cfg.BNB_BALANCE = float(format(cfg.BNB_BALANCE, ".6f"))
+        if cfg.TYPE == "btc":
+            asset = "BNBBTC"
+            amount: float = 0.00011
+        else:
+            asset = "BNBUSDT"
+            amount: float = 10.5
+
+        if float(config.env[cfg.TYPE].status["free"]) < amount:
+            return False
+
+        log(f"#> buying minimum amount of [green]BNB[/green] bnb_balance={cfg.BNB_BALANCE}", is_write=False, end="")
+        output = await self.spot_fetch_ticker(asset)
+        order = await exchange.spot.create_market_buy_order(asset, float(format(amount / output, ".3f")))
+        log("[  ok  ]", is_write=False)
+        order = order["info"]
+        with suppress(Exception):
+            del order["timeInForce"]
+            del order["orderListId"]
+            del order["price"]
+            del order["status"]
+            del order["type"]
+            del order["origQty"]
+            del order["executedQty"]
+
+        log(order, is_write=False)
+        return True
+
+    async def spot_order(self, quantity, symbol, side, is_return=False, from_ex=False):
+        if not from_ex:
+            log(f"==> market_buy_order_quantity={quantity}")
+
         try:
-            log(f"==> market_buy_order_quantity={quantity}", "bold")
-            output = await helper.exchange.spot.create_market_buy_order(symbol, quantity)
-            return output
+            return await exchange.spot.create_market_buy_order(symbol, quantity)
         except Exception as e:
-            if "Account has insufficient balance" in str(e):
-                log("E: Account has insufficient balance for requested action")
-                return
-            elif "Precision is over the maximum defined for this asset" in str(e) or "Filter failure: LOT_SIZE" in str(
-                e
-            ):
-                log(f"E: {e} quantity={quantity}")
+            _e = str(e)
+            if "Account has insufficient balance" in _e:
+                log("E: Account has insufficient balance for requested action", is_write=False)
+                if is_return or from_ex or config.env[cfg.TYPE].status["free"] < cfg.MINIMUM_POSITION[cfg.TYPE] * 4:
+                    return
+
+                quantity = quantity / 4  # re-try with much smalleer position size
+                log(f"==> re-opening [green]{side}[/green] 1/4_of_quantity={quantity} for {symbol}")
+                return await self.spot_order(quantity, symbol, side, is_return=True, from_ex=True)
+            elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
+                log(f"E: {e} qty={quantity}")
                 decimal = decimal_count(quantity)
                 _quantity = f"{float(quantity):.{decimal - 1}f}"
-                log(f"==> re-opening {side} order, quantity={_quantity}")
-                if float(_quantity) > 0.0:
-                    return await self.spot_order(_quantity, symbol, side)
+                log(f"==> re-opening [green]{side}[/green] order qty={_quantity}")
+                if float(_quantity) > 0:
+                    return await self.spot_order(_quantity, symbol, side, from_ex=True)
                 else:
-                    log("E: quantity is zero, nothing to do")
-            elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
+                    log("E: quantity is zero, nothing to do", is_write=False)
+            elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.1:
                 quantity += 0.1
-                #: Fixes if its overrounded, ex: 1.2000000000000002
+                #: fixes if its overrounded, ex: 1.2000000000000002
                 quantity = float("{:.1f}".format(quantity))
-                log(f"==> re-opening {side} order, quantity={quantity}")
-                return await self.spot_order(quantity, symbol, side)
+                log(f"==> re-opening [green]{side}[/green] order qty={quantity}")
+                return await self.spot_order(quantity, symbol, side, from_ex=True)
             else:
                 print_tb(e)
                 raise e
 
-    async def spot_fetch_ticker(self, asset) -> float:
-        if "USDT" not in asset and "BTC" not in asset:
-            asset = f"{asset}/BTC"
+    async def spot_fetch_ticker(self, asset, is_bid_price=False) -> float:
+        if not is_bid_price and asset in cfg.PRICES:
+            if cfg.PRICES[asset] != 0:
+                return cfg.PRICES[asset]
 
-        price = await helper.exchange.spot.fetch_ticker(asset)
-        return float(price["last"])
+        try:
+            price_ticker = await exchange.spot.fetch_ticker(asset)
+            if is_bid_price:
+                return float(price_ticker["info"]["bidPrice"])
+
+            #: record prices in case could be used in the same cycle
+            cfg.PRICES[asset] = price_ticker["last"]
+            return float(price_ticker["last"])
+        except Exception as e:
+            if "binance does not have market symbol" in str(e):
+                if "USDT" in asset:
+                    asset = asset.replace("USDT", "BUSD")
+                    return await self.spot_fetch_ticker(asset, is_bid_price)
+
+            raise e
 
     async def new_limit_order(self, asset, limit_price, market="BTC"):
         """Create new limit order with the added quantity."""
         symbol = f"{asset}/{market}"
-        open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
+        open_orders = await exchange.spot.fetch_open_orders(symbol)
         for order in open_orders:
             with suppress(Exception):
-                # The order may already closed if there was a rapid change
-                await helper.exchange.spot.cancel_order(order["id"], symbol)
+                # the order may already closed if there was a rapid change
+                await exchange.spot.cancel_order(order["id"], symbol)
 
         try:
             balance = await self.fetch_balance(asset)
-            response = await helper.exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
-            log("==> new_limit_order:")
+            response = await exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
+            log("==> [green]new_limit_order[/green]=", end="")
             if "info" in response:
                 response = response["info"]
 
@@ -340,108 +575,14 @@ class BotHelperAsync:
                 del response["timeInForce"]
                 del response["cummulativeQuoteQty"]
                 del response["orderListId"]
+                del response["executedQty"]
+                del response["fills"]
 
             log(response, "bold cyan")
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
-                log(f"E: Failed to create order with {type(e).__name__} {e}")
+                log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")
 
     async def fetch_balance(self, code) -> float:
-        balance = await helper.exchange.spot.fetch_balance()
+        balance = await exchange.spot.fetch_balance()
         return balance[code]["total"]
-
-    async def spot_limit(self, asset, asset_balance, sum_btc, is_limit=True):
-        """Order spot limit.
-
-        * Python sort list based on key sorted list:
-        __ https://stackoverflow.com/a/18016874/2402577
-        """
-        decimal = 0
-        _sum = 0.0
-        quantity = 0.0
-        try:
-            _since = config.get_spot_timestamp(asset)
-            if not _since:
-                _since = config.SPOT_TIMESTAMP
-        except:
-            _since = config.SPOT_TIMESTAMP
-
-        trades = await helper.exchange.spot.fetch_my_trades(asset + "/BTC", since=_since)
-        ordering = {}
-        for idx, trade in enumerate(trades):
-            try:
-                # in case orders occur in the same timestamp
-                ordering[trade["timestamp"]].append(idx)
-            except:
-                ordering[trade["timestamp"]] = [idx]
-
-        # Sort transactions based on their timestamp
-        timestamp_list = sorted(ordering, reverse=True)
-        for index in enumerate(timestamp_list):
-            for inner_index in ordering[index[1]]:
-                trade = trades[inner_index]
-                decimal = decimal_count(trade["price"])
-                qty = float(trade["info"]["qty"])
-                # botrade_cost = qty * float(trade["info"]["price"])
-                trade_cost = trade["cost"]  # ignoring fees
-                if trade["info"]["isBuyer"]:
-                    # log(qty, "green")
-                    quantity += qty
-                    _sum += trade_cost
-                else:
-                    # log(qty, "red")
-                    quantity -= qty
-                    _sum -= trade_cost
-
-                quantity = round_float(quantity, 8)
-                _sum = round_float(_sum, 8)
-
-        entry_price = _sum / quantity
-        if _sum <= 0 or abs(quantity - asset_balance) > 0.01:
-            log(f"warning: {asset} sum={_sum} qty={quantity} asset_balance={asset_balance}")
-            entry_price = 0.0005738
-        else:
-            entry_price = float(f"{entry_price:.{decimal}f}")
-
-        limit_price = f"{entry_price * TP.get_profit_amount('long'):.{decimal}f}"
-        log(f"==> {asset} quantity={asset_balance} | entry_price={entry_price} | ", end="")
-        if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"limit_price={limit_price} ", end="")
-
-        try:
-            asset_price = await self.spot_fetch_ticker(asset)
-        except Exception as e:
-            raise Exception(f"asset({asset}) is not found in ticker") from e
-
-        per = format((100.0 * asset_balance * asset_price) / sum_btc, ".2f")
-        log(f"{per}% ", "blue", end="")
-        asset_percent_change = percent_change(
-            initial=entry_price, change=asset_price - entry_price, is_arrow_print=False
-        )
-        if not is_limit or asset in config.SPOT_IGNORE_LIST:
-            return
-
-        if asset_percent_change <= config.SPOT_PERCENT_CHANGE_TO_ADD and float(per) < 50.0:
-            new_order_size = asset_balance * config.SPOT_MULTIPLY_RATIO
-            log(f"==> new_order_size={new_order_size} | {per} of the total asset value", end="")
-            if float(per) <= config.SPOT_locked_percent_limit:
-                order = await self.spot_order(new_order_size, f"{asset}/BTC", "BUY")
-                log(order["info"], "bold")
-                await self.new_limit_order(asset, limit_price)
-            else:
-                new_per = (100.0 * asset_balance * asset_price) / sum_btc
-                per_to_buy = config.SPOT_locked_percent_limit - abs(new_per)
-                btc_amount_to_buy = per_to_buy * sum_btc / 100.0
-                _new_order_size = btc_amount_to_buy / asset_price
-                _new_order_size = f"{_new_order_size:.{decimal}f}"
-                order = await self.spot_order(_new_order_size, f"{asset}/BTC", "BUY")
-                log(order["info"], "bold")
-                await self.new_limit_order(asset, limit_price)
-
-        open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/BTC")
-        if not open_orders:
-            await self.new_limit_order(asset, limit_price)
-        else:
-            for order in open_orders:
-                if order["info"]["side"] == "SELL" and float(limit_price) < float(order["price"]):
-                    await self.new_limit_order(asset, limit_price)

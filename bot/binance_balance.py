@@ -5,64 +5,87 @@ from contextlib import suppress
 
 from broker._utils._async import _sleep
 from broker._utils._log import log
-from broker._utils.tools import _exit, delete_multiple_lines, print_tb
+from broker._utils.tools import _date, _sys_exit, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 from broker.libs.math import _percent
-from ccxt.base.errors import RequestTimeout  # noqa
-from filelock import FileLock
+from ccxt.base.errors import RequestTimeout
 
-from bot import cfg, helper
-from bot.binance_futures import future_stats, futures_bal, process_future_positions
+from bot import cfg
+from bot import config as helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
-from bot.spot_lib import update_spot_timestamp
+from bot.spot_lib import update_spot_timestamps
 
-RUN_FUTURES = False
+# from bot.futures.binance_futures import futures_bal
+
+IS_FUTURES = False
 bot_async = BotHelperSpotAsync()
 
 
-async def process(unix_timestamp_ms):
-    update_spot_timestamp(unix_timestamp_ms)  # first update spot timestamps
-    *_, usdt_bal, free_usdt = await bot_async.spot_balance(balance_type=cfg.TYPE)
-    if RUN_FUTURES:
-        bot_async.futures_balance = await helper.exchange.future.fetch_balance()
-        unix_timestamp_ms = helper.exchange.get_future_timestamp()
+async def discord_send_alert():
+    alert_track = {}
+    asset_price_dict = {}
+    alert_key = "greater_than"
+    for alert_key in ["greater_than", "less_than"]:
+        for idx in config.ALERTS[alert_key]:
+            alert = config.ALERTS[alert_key][idx]
+            _pair = alert["pair"]
+            asset_price_dict[_pair] = _asset_price = await bot_async.spot_fetch_ticker(_pair)
+            if _asset_price == 0:
+                log("warning: asset_price is 0 , something is wrong")
+                return
 
+            if (alert_key == "greater_than" and float(_asset_price) >= alert["price"]) or (
+                alert_key == "less_than" and float(_asset_price) <= alert["price"]
+            ):
+                _type = ""
+                if _pair[-3:] == "BTC":
+                    asset = _pair[:-3]
+                    _type = "mBTC"
+                    _asset_price = format(_asset_price * 1000, ".5")
+                elif _pair[-4:] == "USDT":
+                    asset = _pair[:-4]
+                    _type = "USDT"
+                elif _pair[-4:] == "BUSD":
+                    asset = _pair[:-4]
+                    _type = "BUSD"
+
+                if asset not in alert_track:  #: allows only 1 alert per asset
+                    msg = f"{_pair}={_asset_price} {_type} {_date()}"
+                    await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
+                    alert_track[asset] = True
+
+
+async def clean_for_new_cycle() -> None:
+    cfg.PRICES = {}
+    cfg.PRICES["BTCUSDT"] = await bot_async.spot_fetch_ticker("BTCUSDT")
+
+
+async def process(unix_timestamp_ms):
+    """Start iteration to analyze open positions."""
+    await clean_for_new_cycle()
+    update_spot_timestamps(unix_timestamp_ms)  # current ts is saved
+    *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
     if usdt_bal > 0.125 and not helper.is_start:
         log()
 
-    if RUN_FUTURES:
-        with FileLock(config.status.fp_lock, timeout=5):
-            config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
-
-        usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
-    else:
-        with FileLock(config.status.fp_lock, timeout=5):
-            if cfg.TYPE == "usdt":
-                config.status["root"][cfg.TYPE]["balance"] = usdt_bal
-                config.status["root"][cfg.TYPE]["free"] = free_usdt
+    # if IS_FUTURES:
+    #     bot_async.futures_balance = await helper.exchange.future.fetch_balance()
+    #     unix_timestamp_ms = helper.exchange.get_future_timestamp()
+    #     config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
+    #     usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
+    if cfg.TYPE == "usdt":
+        config.env[cfg.TYPE].status["balance"] = usdt_bal
+        config.env[cfg.TYPE].status["free"] = free_usdt
+    elif cfg.TYPE == "btc":
+        config.env[cfg.TYPE].status["free"] = float(format(free_btc, ".8f"))
 
     for idx in range(1, 6):
-        config.risk[cfg.TYPE][f"{idx}_per"] = _percent(config.status["root"][cfg.TYPE]["balance"], idx)
+        config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
-    if RUN_FUTURES:
-        positions = await helper.exchange.future.fetch_positions()
-        is_printed = await process_future_positions(positions, usdt_bal, unix_timestamp_ms, bot_async.channel)
-        if not is_printed and not helper.is_start and config.status_usdt["count"] == 0:
-            delete_multiple_lines(2)
-
-        if not is_printed or helper.is_start:
-            future_stats(usdt_bal, unix_timestamp_ms)
-            helper.is_start = False
-    elif helper.is_start and config.status_usdt["count"] == 0:
+    pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
+    if helper.is_start and pos_count == 0 and float(cfg.locked_balance) <= 10:
         delete_multiple_lines(1)
-
-    for alert in config.ALERTS:
-        _alert = config.ALERTS[alert]
-        if _alert:
-            asset_price = await bot_async.spot_fetch_ticker(_alert["pair"])
-            if float(asset_price) > _alert["price"]:
-                await bot_async.channel_alerts.send(f"{_alert['pair']}={asset_price}", delete_after=cfg.SLEEP_INTERVAL)
 
 
 async def process_main(obj):
@@ -70,27 +93,30 @@ async def process_main(obj):
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
+    is_silent = True  # FIXME uncomment
     bot_async.channel = obj.channel
     bot_async.channel_alerts = obj.channel_alerts
-    config.reload()
+    config._reload()
     try:
-        if not RUN_FUTURES:
-            unix_timestamp_ms = helper.exchange.get_spot_timestamp()
-
-        await process(unix_timestamp_ms)
+        unix_timestamp_ms = helper.exchange.get_spot_timestamp()
+        if is_silent:
+            await process(unix_timestamp_ms)
     except RequestTimeout:
-        _exit("Timestamp for this request is outside of the recieve_window=5000")
+        _sys_exit("E: Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
         print_tb(e)
-        _exit("KeyError")
+        _sys_exit("KeyError")
     except Exception as e:
         if "quantity is zero" in str(e):
-            log(f"warning: {e}, [green]don't worry")
+            log(f"#> {e} [green]don't worry")
         elif "Timestamp for this request is outside of the recvWindow" in str(e):
-            log("E: Timestamp for this request is outside of the recvWindow")
+            log("warning: timestamp for this request is outside of the recvWindow")
         else:
             print_tb(e)
             await _sleep(30)
+
+    if cfg.TYPE == "usdt":
+        await discord_send_alert()
 
 
 async def main():
@@ -103,7 +129,7 @@ async def main():
             break
         except Exception as e:
             if "Timestamp for this request is outside of the recvWindow" in str(e):
-                log(f"E: {e}")
+                log(f"warning: {e}")
             else:
                 print_tb(e)
 

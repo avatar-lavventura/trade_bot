@@ -1,20 +1,44 @@
 root:
-    isolated_wallet_limit: 150
-    discord_msg_above_usdt: 100
-    take_profit: 0.0055 # 0.0049
-    ignore: # for all
-      - FTM
-    btc:
-        max_pos: 3
-        initial: 0.00025 # 0.00015
-        multiply_ratio: 1.07
-        percent_change_to_add: 5
-        locked_percent_limit: 95
-        take_profit: 0.005
-    usdt:
-        max_pos: 4
-        initial: 12
-        multiply_ratio: 1.08
-        percent_change_to_add: 4
-        locked_percent_limit: 90
-        take_profit: 0.0055
+  goal: 5910
+  anne:
+      first_usdt_side: 520
+      second_btc_side: 210
+      second_btc_side_: 310
+  is_write: False
+  isolated_wallet_limit: 150
+  discord_msg_above_usdt: 150
+  take_profit: 0.005
+  locked_percent_limit: 99.99
+  ignore: # for all
+    - ORN
+    - PNT
+    - DOGE
+    - SNM
+  ignore_warning:
+    - DUMMY
+  usdt:
+    status: "off" # "on" or "off"
+    is_discord: "off"
+    max_pos: 10
+    initial: 10.3
+    multiply_ratio: 1.1
+    percent_change_to_add: 4.5
+    stop_trade_wt_30m_red: True
+    entry_prices:
+      DUMMY_ASSET: 1.0
+      ORN: 1.51
+      PNT: 0.2927
+      SNM: 0.000143
+      SNM_USDT: 1.44
+  btc:
+    status: "on"
+    is_discord: "off"
+    initial: 0.00011
+    max_pos: 1
+    multiply_ratio: 1.1
+    percent_change_to_add: 4.49
+    stop_trade_wt_30m_red: True
+    entry_prices:
+      DUMMY_ASSET: 1.0
+      DUMMY_SNM: 0.00011835
+      SNM: 0.0000599

@@ -13,8 +13,7 @@ y_data = []
 z_data = []
 figure = pyplot.figure()
 (line,) = pyplot.plot_date(x_data, y_data, "-")
-HOME = Path.home()
-_cfg = HOME / ".binance.yaml"
+_cfg = Path.home() / ".binance.yaml"
 api_key = str(_cfg["b"]["key"])
 api_secret = str(_cfg["b"]["secret"])
 client = Client(api_key, api_secret)
@@ -39,7 +38,6 @@ if __name__ == "__main__":
     mark_temp = 0
     side = ""
     side_m = ""
-
     while True:
         future = client.futures_position_information(symbol="GRTUSDT")
         mark = future[0]["markPrice"]
