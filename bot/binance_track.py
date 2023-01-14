@@ -48,10 +48,10 @@ import binance_lib
 import requests
 from binance_lib import positions
 from bs4 import BeautifulSoup
-from ebloc_broker.broker._utils import _log
-from ebloc_broker.broker._utils.tools import log, run
 
 from bot.user_setup import check_binance_obj
+from ebloc_broker.broker._utils import _log
+from ebloc_broker.broker._utils.tools import log, run
 
 HOME = str(Path.home())
 _log.ll.LOG_FILENAME = "progress.log"

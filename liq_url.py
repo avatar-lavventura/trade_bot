@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import time
-
 # mark price is current value
 from contextlib import closing
 from operator import itemgetter

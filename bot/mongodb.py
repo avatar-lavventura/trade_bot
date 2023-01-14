@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from ebloc_broker.broker.libs.mongodb import BaseMongoClass
 from pymongo import MongoClient
+
+from ebloc_broker.broker.libs.mongodb import BaseMongoClass
 
 
 class Mongo(BaseMongoClass):

@@ -41,3 +41,4 @@ run_balance.yaml
 /.mypy_cache/
 .mypy_cache/
 cpu.log
+tradingview-alerts/tradingview-alerts-home/

@@ -2,13 +2,13 @@
 
 import asyncio
 
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _timestamp, print_tb
 from pymongo import MongoClient
 
 from bot.config import config
 from bot.mongodb import Mongo
 from bot.my_balance import fetch_balance, get_gold, get_silver
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker._utils.tools import _timestamp, print_tb
 
 mc = MongoClient()
 mongo_db = Mongo(mc, mc["trader_bot"]["timestamp"])
