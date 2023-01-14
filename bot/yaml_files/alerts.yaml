@@ -1,4 +1,19 @@
 alerts:
+  less_than: # <
     a1:
-        pair: FTMUSDT
-        price: 1.40
+      pair: BTCUSDT
+      price: 16000
+      msg: ""
+    a2:
+      pair: SNMBUSD
+      price: 0.5
+      msg: ""
+  greater_than: # >
+    a1:
+      pair: SNMBTC
+      price: 0.00005
+      msg: ""
+    a2:
+      pair: SNMBUSD
+      price: 0.70
+      msg: ""

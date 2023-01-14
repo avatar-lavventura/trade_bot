@@ -1,0 +1,3 @@
+* NOTE
+
+Running these scripts over again may end up tradingview to disable your account.

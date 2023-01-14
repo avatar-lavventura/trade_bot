@@ -15,10 +15,12 @@ from pathlib import Path
 
 import requests
 from binance.client import Client
+from broker._utils.yaml import Yaml
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
-from ebloc_broker.broker._utils.yaml import Yaml
 from utils import log, utc_to_local
+
+from ebloc_broker.broker._utils.yaml import Yaml
 
 HOME = Path.home()
 SYMBOL = "GRTUSDT"
@@ -568,14 +570,14 @@ if __name__ == "__main__":
     futures_usd = get_futures_usd()
     print(f"Futures ==> {futures_usd} USD")
 
-    own_usd = 0.0
-    own_usd = sum_btc * float(current_btc_price_USD)
+    own_usdt = 0.0
+    own_usdt = sum_btc * float(current_btc_price_USD)
     own_try = sum_btc * float(current_btc_price_TRY)
     print("Spot => %.8f BTC == " % sum_btc, end="")
-    print("%.8f USD == " % own_usd, end="")
+    print("%.8f USD == " % own_usdt, end="")
     print("%.8f TRY" % own_try)
 
-    print(f"overview => {float(own_usd) + float(futures_usd)} USD")
+    print(f"overview => {float(own_usdt) + float(futures_usd)} USD")
 
     for asset in client.futures_account_balance():
         name = asset["asset"]

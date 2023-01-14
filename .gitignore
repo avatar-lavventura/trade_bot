@@ -41,3 +41,6 @@ run_balance.yaml
 /.mypy_cache/
 .mypy_cache/
 cpu.log
+tradingview-alerts-home/
+tradingview-alerts/node_modules
+bot/scripts/common_btc_markets.txt

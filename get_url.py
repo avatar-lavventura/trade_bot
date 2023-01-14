@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import time
-
-# mark price is current value
 from contextlib import closing
 from operator import itemgetter
 
-from ebloc_broker.broker._utils.tools import log
+from broker._utils.tools import log
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+
+from ebloc_broker.broker._utils.tools import log
 
 options = Options()
 options.add_argument("--disable-extensions")
@@ -20,8 +20,8 @@ driver = webdriver.Chrome(options=options)
 
 urls = []
 names = []
-counter = dict()
-entries = dict()
+counter = {}
+entries = {}
 
 
 def get_url(url, name):
@@ -106,7 +106,7 @@ def get_url(url, name):
                 log(position + " => " + str(res) + " " + side, "bold red")
 
 
-if __name__ == "__main__":
+def main():
     base_url = "https://www.binance.com/en/futures-activity/leaderboard/user?uid="
     with open("urls.txt") as f:
         urls = [line.rstrip() for line in f]
@@ -120,10 +120,14 @@ if __name__ == "__main__":
             except Exception as e:
                 print(e)
 
-    counter_x = sorted(counter.items(), key=itemgetter(1), reverse=True)
     counter_dict = {}
+    counter_x = sorted(counter.items(), key=itemgetter(1), reverse=True)
     for co in counter_x:
         counter_dict[co[0]] = co[1]
 
     for k, v in counter_dict.items():
         print(f"{k} => {v} {entries[k]}")
+
+
+if __name__ == "__main__":
+    main()

@@ -3,12 +3,15 @@
 from contextlib import suppress
 from typing import Dict
 
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker.errors import QuietExit
+from broker._utils._log import log
+from broker.errors import QuietExit
 
-from bot import helper
+from bot import cfg
+from bot import config as helper
 from bot.bot_helper_async_usdt import BotHelperSpotAsync
 from bot.config import config
+from ebloc_broker.broker._utils._log import log
+from ebloc_broker.broker.errors import QuietExit
 
 bot_async = BotHelperSpotAsync()
 
@@ -51,18 +54,17 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
         if config.status["root"]["free_usdt"] > abs(new_amount_margin):
             await create_market_order(symbol, new_amount, side)
         else:
-            raise QuietExit(f"warning: Not enough free USDT, amount={new_amount} margin={new_amount_margin}")
-    else:
-        if _per < 100:
-            log(f"warning: Total locked amount is {_per}%", end="")
+            raise QuietExit(f"warning: not enough free USDT, amount={new_amount} margin={new_amount_margin}")
+    elif _per < 100:
+        log(f"warning: Total locked amount is {_per}%", end="")
 
 
-def update_spot_timestamp(unix_timestamp_ms: int):
-    if not isinstance(config.run_balance["root"]["timestamp"], int):
-        config.run_balance["root"]["timestamp"] = 0
+def update_spot_timestamps(unix_timestamp_ms: int) -> None:
+    if not isinstance(config.env[cfg.TYPE].status["timestamp"], int):
+        config.env[cfg.TYPE].status["timestamp"] = 0
 
-    if unix_timestamp_ms > config.run_balance["root"]["timestamp"]:
-        config.run_balance["root"]["timestamp"] = unix_timestamp_ms
+    if unix_timestamp_ms > config.env[cfg.TYPE].status["timestamp"]:
+        config.env[cfg.TYPE].status["timestamp"] = unix_timestamp_ms
 
 
 async def create_limit_order(symbol, position_amt, limit_price, side) -> None:

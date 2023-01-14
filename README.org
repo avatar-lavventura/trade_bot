@@ -1,1 +1,6 @@
-README
+* Trading Bot for Binance Spot
+
+** Disclaimer
+
+I don't guarantee that this bot can make profit from market, use it at your risk.
+Don't put your real money into the market before you read the codes. Use at your own risk.

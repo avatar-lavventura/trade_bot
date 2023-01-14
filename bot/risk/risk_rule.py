@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from ebloc_broker.broker._utils._log import log
+from broker._utils._log import log
 
 from bot.config import config
+from ebloc_broker.broker._utils._log import log
 
 
 def percent(amount, ratio):

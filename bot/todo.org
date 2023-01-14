@@ -1,0 +1,46 @@
+            *outline* TODO
+* ALPY-BOT
+** TODO kagidin gecmis datalarina bak 1 gunde 10x 20x cikmissa uzak dur -- 10x ciktigi noktaya geri donerse muhtemelen scam bosaltiyorlar
+kagitlarin listesini cikar analiz etmek icin faydali olabilir
+** TODO mongodb delete wrong calculated balances
+** TODO remove BTC pairs that does not have USDT, like SNM , add it into the script
+** TODO calculate 2$ worth of BTC as enterance
+2 => 4 => 8 => 16 ...
+** TODO record isolated margin balance every hour to mongodb and fetch for balance
+** TODO when asset ordered and closed multiple times, entry-price calculated wrong :-(
+** TODO add also the BTC price at mongodb
+~{'key': '2022-07-13', 'value': {'btc':~
+** TODO buy asset if funding rate is high in between -30 minutes before the function rate or 5m cross green keep buy it
+** TODO lower than 5m candle maybe cut of the trade, check
+#+begin_src python
+response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
+#+end_src
+** TODO ilk 5% dususte maliyet kadar ekleme yap diger eklemeler:
+  %5 zarar varsa ve 45 dakikalikdan + 2 hr sinyal gelirse ekleme yap.
+  10% default zararda ekleme yap
+** TODO 4hr turuncu or magenta open positions and lock for that bar
+** TODO ignore sell positions to affect ortalama
+** TODO consider closing each trade if there is 1% loss (~12$)
+** TODO Implement sell_order.py to give sell orders from the bot
+** TODO ignore pairs >30% rise during the day in 1h or 1day?
+** TODO before order check is the give asset is not in blocked list
+** TODO appy take_profit for both btc and USDT
+** TODO funding -0.0075% olan coin leri listele ve long yap, insanlari patlatmak icin pump oluyor BUSD icin de bak
+    - ~binanceusdm.fetchFundingRate~
+** TODO BTC-spot volume 10.0 dan kucukse hic bulasma
+** TODO pine-kazan
+- for ~SLEEP_DUR~
+//: try 600 (10 minutes? instead 15 seconds)
+// close position for alpy-bot new incoming alerts
+// wait for 10 minutes for the next alert, gain might be less due to less
+// alerts will show up but risk will be lower. Rapid alerts does not show up.
+
+** TODO stop-loss @tolga
+  > 5$ la poz ac
+  > 5% dusunce birinci eklemeyi yap (+10$)
+  > birinci ekleme yaptigin fiyattan 5% dusunce ikinci eklemeyi yap (+15$)
+  > ikinci ekleme yaptigin fiyattan 5% dusunce ucuncu eklemeyi yap (+20$)
+  > ucuncu ekleme yaptigin fiyattan 5% dusunce pozisyonu zararina market sell yap (stop loss)
+  ---
+  3 ekleme yapiyorsun sonra 4. ekleme yapmak yerine market sell yapiyorsun
+  ilk poz 5$ // 1. ekleme 10$ // 2. ekleme 15$ // 3. ekleme 20$ // 4. ekleme yerine market sell

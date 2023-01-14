@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RED="\033[1;31m"; GREEN='\033[0;32m'; NC='\033[0m'
+RED="\033[1;31m"; GREEN='\033[0;32m'; NC='\033[0m';
 if [ "$#" -ne 1 ]; then
     echo "Illegal number of parameters provide <usdt or btc>"
     exit 1
@@ -11,39 +11,47 @@ if ! [[ $1 == "usdt" || $1 == "btc" ]] ; then
     exit 1
 fi
 
+countdown () {  # https://superuser.com/a/611582/723632
+    _date=$((`date +%s` + $(expr $1 - 1)))
+    while [ "$_date" -ge `date +%s` ]; do
+        echo -ne "$(date -u --date @$(($_date - `date +%s`)) +%H:%M:%S)                                             \r"
+        sleep 0.1
+    done
+}
+
 check_app () {
-    printf "curl https://alpybot.duckdns.org  [  "
+    printf "curl https://alpybot.duckdns.org  "
     if curl -sL --fail https://alpybot.duckdns.org -o /dev/null; then
-        echo -e "${GREEN}OK${NC}  ]"
+        echo -e "[  ${GREEN}OK${NC}  ]"
     else
-        echo -e "${RED}FAIL${NC}  ]"
+        echo -e "[  ${RED}FAIL${NC}  ]"
         exit 1
     fi
 }
 
-countdown () {  # https://superuser.com/a/611582/723632
-   date1=$((`date +%s` + $(expr $1 - 1)))
-   while [ "$date1" -ge `date +%s` ]; do
-     echo -ne "$(date -u --date @$(($date1 - `date +%s`)) +%H:%M:%S)\r"
-     sleep 0.1
-   done
+is_running () {
+    ps auxww | grep -E "$1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l
 }
 
-num=$(ps aux | grep -E "[p]ython3 discord_balance.py $1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l)
-if [ $num -ge 1 ]; then
-    echo "warning: run_balance is already running, count="$num
+if [ $(is_running "[m]ongodb") -eq 0 ]; then
+    echo "warning: mongodb is not running in the background. Do:\n"
+    echo "systemctl enable mongod.service\nsudo systemctl start mongod"
+    exit
+fi
+
+if [ $(is_running "[p]ython3 discord_balance.py $1") -ge 1 ]; then
+    echo "warning: discord_balance.py for $1 is already running"
     exit
 fi
 
 clear -x
 # check_app
-while true
-do
+while true; do
     python3 discord_balance.py $1
     echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    printf "countdown for 30 seconds "
+    printf "#> countdown for 30 seconds                                            "
     countdown 30
-    echo "[  ${GREEN}OK${NC}  ]"
+    echo "[  OK  ]"
 done
 
 # LOG_FILE=_binance_balance.log

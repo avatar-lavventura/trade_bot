@@ -1,0 +1,681 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file ~/trade_bot/bot/TODO.org
+
+* DONE PULL already open positions from yaml that is written by binance_balance.py
+CLOSED: [2021-09-12 Sun 03:20]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-12 Sun 03:20
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE carry _sleep into public async lib
+CLOSED: [2021-09-12 Sun 14:35]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-12 Sun 14:35
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Futuresda olmayip spotta olan usdt pairlerini cikar
+CLOSED: [2021-09-12 Sun 14:35]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-15 Wed 15:33
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 45 min signal should come too or 15 min with 3.5 band
+CLOSED: [2021-09-15 Wed 15:33]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-15 Wed 15:33
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Change color for " * 2021-09-18 21:54:03 FTMUSDTPERP,..."
+CLOSED: [2021-09-19 Sun 16:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-19 Sun 16:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE binance does not have market symbol DEFI/USDT // for price
+CLOSED: [2021-09-19 Sun 16:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-19 Sun 16:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 1m position open USDT amount could be 50 more than default position open amount
+CLOSED: [2021-09-19 Sun 16:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-19 Sun 16:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+pull from `self.time_duration` if its 1m get different value
+
+* DONE >80% locked due nothing
+CLOSED: [2021-09-20 Mon 14:26]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-09-20 Mon 14:26
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE yaml default {} instead assign 0
+CLOSED: [2021-10-05 Tue 15:03]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-10-05 Tue 15:03
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE spot_usdt show balance
+CLOSED: [2021-10-16 Sat 19:07]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-10-16 Sat 19:07
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE REP USDT check instead of BTC
+CLOSED: [2021-10-16 Sat 19:08]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-10-16 Sat 19:08
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE if pozition size 12$ multiply ratio should be min 1
+CLOSED: [2021-11-07 Sun 11:41]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-11-07 Sun 11:41
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE liq convert timestamp into normal date
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE calculate leverage
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE tolganin dedigini 15 dakikalik yerine 4 saatlik band olarak dene
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 1 dakikalikta turunca olunca gir
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE accept CHESS
+CLOSED: [2021-12-05 Sun 12:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE SPOT timestamp update yap
+CLOSED: [2021-12-05 Sun 12:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE `bar_index` on pine strategy
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Spot tarafinda 4h cross sinyal 3AM oncesi gelirse al
+CLOSED: [2021-12-05 Sun 12:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE trade_main() call using flask-apscheduler
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/jobs.py
+https://github.com/viniciuschiele/flask-apscheduler
+
+* DONE yaml: lock/re-load/modify/write and make sure you catch any setting of something already set by another process.
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE binance_balance add overall lost to left end
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 1 saniyelikte SELL sinyali gelirse ve USDTPERP de varsa kagit usdt-spot ta buy yerine usdtperp de sell yap
+CLOSED: [2021-12-05 Sun 12:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-17 Fri 17:28
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE carry usdt from spot if there not enough in futures
+CLOSED: [2022-01-19 Wed 15:30]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-01-19 Wed 15:30
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE 3. ekleme 9% gorurse 2 kat ekleme yap
+CLOSED: [2022-02-24 Thu 11:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:54
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE FIX ==> opening BUY order in the USDT market for ACH ACH/USDT order_quantity=185.0
+CLOSED: [2022-02-24 Thu 11:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:54
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+#+begin_src python
+Traceback (most recent call last):
+  File "~/trade_bot/bot/trade_async.py", line 352, in spot_order
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 2723,
+in create_order
+    response = await getattr(self, method)(self.extend(request, params))
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4952,
+in request
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
+104, in fetch2
+    return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line
+169, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response,
+json_response, request_headers, request_body)
+  File "~/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 4908,
+in handle_errors
+    message = self.safe_string(response, 'msg')
+  File "~/venv/lib/python3.8/site-packages/ccxt/base/exchange.py", line 566, in
+throw_exactly_matched_exception
+    raise exact(message)
+ccxt.base.errors.InsufficientFunds: binance Account has insufficient balance for requested action.
+An exception of type InsufficientFunds occurred. Arguments:
+('binance Account has insufficient balance for requested action.',)
+binance Account has insufficient balance for requested action.
+#+end_src
+
+* DONE 30 dakika icinde ters yone poz acma
+CLOSED: [2022-02-24 Thu 11:54]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:55
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+ex: 3:50 SHORT ... 4:12 LONG gelirse, 30 dakika icinde ters yone sinyal geldigi
+icin ignore yap// prev position side
+
+* DONE save timestamp for orders to record its bar_index
+CLOSED: [2022-02-24 Thu 11:55]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:55
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+Compare current bar_index value with latest position's bar index.
+
+* DONE seperate stauts.yaml for btc and spot
+CLOSED: [2022-02-24 Thu 11:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-24 Thu 11:56
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Give alert if 10% is locked and alert came for that pair
+CLOSED: [2022-02-25 Fri 08:42]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-25 Fri 08:42
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE run_app log disable writing into a file
+CLOSED: [2022-02-25 Fri 08:42]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-25 Fri 08:42
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE yellow calculate all locked position percent amount
+CLOSED: [2022-02-26 Sat 16:56]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-26 Sat 16:56
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE usdt ignore prices < 0.001 also remove them from blacklist
+CLOSED: [2022-02-28 Mon 10:19]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-02-28 Mon 10:19
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE discord.py edit message
+CLOSED: [2022-03-07 Mon 10:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-07 Mon 10:49
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+https://stackoverflow.com/questions/55711572/how-to-edit-a-message-in-discord-py
+
+* DONE Remove usdt pairs less than (0.02 cent)
+CLOSED: [2022-03-07 Mon 21:20]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-07 Mon 21:20
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Seems like trade__async does not update order count in btc
+CLOSED: [2022-03-13 Sun 13:13]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-13 Sun 13:13
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: alpy
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Apply swap space into google instance
+CLOSED: [2022-03-15 Tue 15:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-15 Tue 15:49
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT/carry google instance to ~Taiwan: asia-east1~
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE carry google instance to ~Taiwan: asia-east1~
+CLOSED: [2022-03-20 Sun 12:50]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-20 Sun 12:50
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE if >200$ is locked changed profit to %1
+CLOSED: [2022-03-22 Tue 16:59]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-03-22 Tue 16:59
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Script for side-by-side stats https://stackoverflow.com/questions/13341832/display-two-files-side-by-side
+CLOSED: [2022-04-01 Fri 22:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-04-01 Fri 22:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Check: BTC alerts worked in 30 for /S scripts seems like it works fine
+CLOSED: [2022-04-02 Sat 09:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-04-02 Sat 09:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE BTC 30 dakikalik yesil cross a gore ekleme iznini ver
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE BTC 1 dakikalik dusute cross a gore posizyon kabul etme
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE BTCUSDT 1h kirmizi top dusuteyse do nothing?
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE CPU usage >70% killall python
+CLOSED: [2022-05-08 Sun 18:32]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:32
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+Do it from cpu.py script
+
+* DONE trade_async log alert stuff don't write to disk
+CLOSED: [2022-05-08 Sun 18:33]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:33
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+- YAML might consume memory while reading file try to make it efficient, if required remove writing
+  into ".yaml~" file this may add extra memory usage
+- post count: do as: usdt_<_pair>.yaml it will only contains its count
+#+begin_src python
+# file name contains the asset like: hit/firousdt.yaml
+count: 10
+#+end_src
+
+* DONE python code at home machine to add new added pairs into TV alert
+CLOSED: [2022-05-08 Sun 18:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-08 Sun 18:34
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE add color to discord messages
+CLOSED: [2022-05-15 Sun 11:35]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-15 Sun 11:35
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE print BNB balance
+CLOSED: [2022-05-25 Wed 17:59]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-25 Wed 17:59
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Faster to read from mongodb than re-read from yaml have a look
+CLOSED: [2022-05-28 Sat 13:27]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-28 Sat 13:27
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+- search mongoDB write to a file fast or slow?
+
+* DONE convert .status into _status read from mongodb
+CLOSED: [2022-05-28 Sat 13:27]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-28 Sat 13:27
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Check: Don't open position when red wave_trend is on in 30m
+CLOSED: [2022-05-28 Sat 23:21]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-05-28 Sat 23:21
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE buy BNB when its < 1$ worth
+CLOSED: [2022-06-06 Mon 22:11]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-06-06 Mon 22:11
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE on btc-side show free btc as usdt at bottom
+CLOSED: [2022-06-20 Mon 17:31]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-06-20 Mon 17:31
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE pine-alert comes 5m at the end of bar
+CLOSED: [2022-06-20 Mon 18:21]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-06-20 Mon 18:21
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE re-start TV at July 6th
+CLOSED: [2022-08-23 Tue 15:06]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-08-23 Tue 15:06
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Freezes at
+CLOSED: [2022-09-08 Thu 11:07]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-09-08 Thu 11:07
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+#+begin_src bash
+E: Timestamp for this request is outside of the recieve_window=5000
+## Exiting
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+countdown for 30 seconds
+bot_type=btc mode started **
+#+end_src
+
+* DONE next to date print also timestamp
+CLOSED: [2022-09-17 Sat 17:38]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-09-17 Sat 17:38
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE fetch latest timestamp record into mongoDB
+CLOSED: [2022-09-22 Thu 11:43]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-09-22 Thu 11:43
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE ** NEAR q=6.5 e=0.13043 l=0.13110 p=0.13149 0.11$ 0.0069(0.81%) 0.76% 0.8478
+CLOSED: [2022-11-10 Thu 13:49]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-11-10 Thu 13:49
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:
+If profit >.5% force to close order some times it does not close for almost 5 minutes idk why
+
+Pozisyon kapanmamis :
+=> RUNE q=6.5 e=0.06600 l=0.06630 p=0.06780 0.19$ 0.0117(2.73%) 0.39% 0.4292
+- 0.0000679  dan satmis
+
+Sanirim 0.50% profit yerine 1% (2 kati) koyuyor ama log larda 0.50 limit olarak gosteriyor
+3% u hedefliyor ?
+
+* DONE show total BTC amount in the btc-spot, easier to keep track of
+CLOSED: [2022-11-24 Thu 21:05]
+:PROPERTIES:
+:ARCHIVE_TIME: 2022-11-24 Thu 21:05
+:ARCHIVE_FILE: ~/trade_bot/bot/TODO.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: TODO
+:ARCHIVE_TODO: DONE
+:END:

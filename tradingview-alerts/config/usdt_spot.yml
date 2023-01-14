@@ -1,16 +1,16 @@
 files:
   input: pairs_usdt.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/Kwlc5uuo/
-  interval: 1s # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  chartUrl: https://www.tradingview.com/chart/vJo45W0J/
+  interval: 1h
 alert:
   condition:
     primaryLeft: alpy_vix
+    primaryRight:
   actions:
     notifyOnApp: false
     showPopup: false
     sendEmail: false
-    # playSound: false
     webhook:
       enabled: true
       url: "https://alpybot.duckdns.org/webhook"

@@ -3,12 +3,13 @@
 from pathlib import Path
 
 import ccxt
-from ebloc_broker.broker._utils.yaml import Yaml
+from broker._utils.yaml import Yaml
 
 HOME = Path.home()
 _cfg = Yaml(HOME / ".binance.yaml")
-api_key = str(_cfg["b"]["key"])
-api_secret = str(_cfg["b"]["secret"])
+k = "alper_b"
+api_key = str(_cfg[k]["key"])
+api_secret = str(_cfg[k]["secret"])
 
 
 def forces_order(exchange, symbol, since=None, limit=None, params={}):
