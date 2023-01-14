@@ -25,6 +25,61 @@ msg_aggr = msg + "_aggr"
 window() =>
     time >= start and time <= finish ? true : false
 
+// bomba: https://www.tradingview.com/script/ZfDaDkHX-Quadratic-Semaphore/
+p = input(6)
+length = input(30)
+x1 = bar_index
+x2 = math.sqrt(x1)
+y = high
+
+S11 = math.sum(x2,length) - math.sqrt(math.sum(x1,length)) / length
+S12 = math.sum(x1*x2,length) - (math.sum(x1,length) * math.sum(x2,length)) / length
+S22 = math.sum(math.sqrt(x2),length) - math.sqrt(math.sum(x2,length)) / length
+Sy1 = math.sum (y*x1,length) - (math.sum(y,length) * math.sum(x1,length)) / length
+Sy2 = math.sum (y*x2,length) - (math.sum(y,length) * math.sum(x2,length)) / length
+
+max1 = ta.sma(x1,length)
+max2 = ta.sma(x2,length)
+may = ta.sma(y,length)
+b2 = ((Sy1 * S22) - (Sy2*S12))/(S22*S11 - math.sqrt(S12))
+b3 = ((Sy2 * S11) - (Sy1 * S12))/(S22 * S11 - math.sqrt(S12))
+b1 = may - b2*max1 - b3*max2
+qr = b1 + b2*x1 + b3*x2
+yl = low
+Sy1l = math.sum(yl*x1,length) - (math.sum(yl,length) * math.sum(x1,length)) / length
+Sy2l = math.sum(yl*x2,length) - (math.sum(yl,length) * math.sum(x2,length)) / length
+mayl = ta.sma(yl,length)
+b2l = ((Sy1l * S22) - (Sy2l*S12))/(S22*S11 - math.sqrt(S12))
+b3l = ((Sy2l * S11) - (Sy1l * S12))/(S22 * S11 - math.sqrt(S12))
+b1l = mayl - b2l*max1 - b3l*max2
+qrl = b1l + b2l*x1 + b3l*x2
+period = math.round(p/2)+1
+hh = qr[period]
+ll = qrl[period]
+countH = 0
+countL = 0
+buy=0
+sell=0
+for i = 1 to period-1
+    if qr[i]<hh
+        countH:=countH+1
+    if qrl[i]>ll
+        countL:=countL+1
+
+for i = period+1 to p+1
+    if qr[i]<hh
+        countH:=countH+1
+    if qrl[i]>ll
+        countL:=countL+1
+
+if countH==p
+    pivotH = high[period]
+    buy := 1
+
+if countL==p
+    pivotL = low[period]
+    sell := 1
+
 // buying volume and selling volume
 buyVolume = 0.0
 if high!=low
@@ -163,7 +218,7 @@ if not IS_BROWSER and strategy.position_size[0] != 0 and window() and is_sleep_p
 
 // buy alerts
 // ==========
-base_cond = (buyVolume > sellVolume)
+base_cond = (buyVolume > sellVolume or buy == 1)
 is_buy = false
 if timeframe.isseconds
     if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA

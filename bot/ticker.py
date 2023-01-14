@@ -31,7 +31,7 @@ async def main(symbol):
             _last = ticker["last"]
             eq = 2887.39 * _last - 1826
             # eq = 2588 * _last - 1600
-            print(f"{int(eq)}      ---      {_last}")
+            print(f"{int(eq)}      ---      {_last}     -- should be: 3400")
             await _sleep(3)
         except Exception:
             print("sleeping for 60 seconds...")

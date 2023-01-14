@@ -8,9 +8,6 @@ from pymongo import MongoClient
 
 from bot.lib import LiqBase
 from bot.mongodb import Mongo
-from ebloc_broker.broker._utils import _log
-from ebloc_broker.broker._utils._log import log
-from ebloc_broker.broker._utils.tools import _date, print_tb
 
 _log.ll.LOG_FILENAME = "liq.log"
 mc = MongoClient()

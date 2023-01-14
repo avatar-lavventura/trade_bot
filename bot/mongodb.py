@@ -4,8 +4,6 @@
 from broker.libs.mongodb import BaseMongoClass
 from pymongo import MongoClient
 
-from ebloc_broker.broker.libs.mongodb import BaseMongoClass
-
 
 class Mongo(BaseMongoClass):
     def add_single_key(self, key, value):

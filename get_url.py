@@ -9,8 +9,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 
-from ebloc_broker.broker._utils.tools import log
-
 options = Options()
 options.add_argument("--disable-extensions")
 options.add_argument("--headless")

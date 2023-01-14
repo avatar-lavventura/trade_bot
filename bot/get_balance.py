@@ -4,7 +4,6 @@ from broker._utils.tools import log
 
 from bot.client_helper import ClientHelper
 from bot.user_setup import check_binance_obj
-from ebloc_broker.broker._utils.tools import log
 
 # from bot import cfg
 # from bot.trade_async import BotHelper, Strategy
