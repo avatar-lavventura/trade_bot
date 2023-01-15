@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import os
+import sys
 from contextlib import suppress
 from typing import Tuple
 
@@ -104,6 +106,11 @@ class BotHelperAsync:
             else:
                 log()
 
+    async def restart(self):
+        log()
+        log(f"#> -=-=-=-=-=-=-=-=-=- [green]RESTARTING[/green] {_date()}-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        os.execv(sys.argv[0], sys.argv)
+
     async def _discord_sent_msg(self, msg):
         try:
             if cfg.discord_sent_msg:
@@ -111,8 +118,12 @@ class BotHelperAsync:
             else:
                 cfg.discord_sent_msg = await self.channel.send(msg)
         except Exception as e:
-            if "Not Found" not in str(e) and "HTTPException" not in str(e):
-                print_tb(e)
+            log(f"E: discord: {e}")
+            # if "Not Found" not in str(e) and "HTTPException" not in str(e):
+            #     print_tb(e)
+
+            if "Service Unavailable" in str(e):
+                self.restart()
 
             with suppress(Exception):
                 await cfg.discord_sent_msg.delete()

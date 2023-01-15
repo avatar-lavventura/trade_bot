@@ -12,6 +12,17 @@ from bot.mongodb import Mongo
 _log.IS_WRITE = False
 
 
+def print_total_balance(total_balance):
+    for k, v in total_balance.items():
+        total_balance[k] = round(v)
+
+    log(total_balance)
+    max_val = 0
+    for _, value in total_balance.items():
+        if value > max_val:
+            max_val = value
+
+
 async def main():
     mc = MongoClient()
     for symbol in ["btc"]:
@@ -19,7 +30,6 @@ async def main():
         cursor = mongo.find_all(sort_str="timestamp", is_return=True)
         if cursor:
             log(f" * {symbol}")
-
             for document in cursor:
                 log(document)
 
@@ -38,15 +48,8 @@ async def main():
             with suppress(Exception):
                 total_balance[_key] += float(item["value"]["usdt"])
 
-    for symbol in total_balance:
-        total_balance[symbol] = round(total_balance[symbol])
-
-    log(total_balance)
-    max_val = 0
-    for _, value in total_balance.items():
-        if value > max_val:
-            max_val = value
-
+    # print_total_balance(total_balance)
+    #
     # log(f"highet={max_val}")
 
     # mongo = Mongo(mc, mc["btc"]["hit"])

@@ -107,15 +107,25 @@ class Exchange:
         balances_cross = await self.get_cross_balance()
         #: total_net_asset_of_usdt
         _c = float(balances_cross["info"]["totalNetAssetOfBtc"]) * cfg.PRICES["BTCUSDT"]
-        config.env[cfg.TYPE].balance.add_single_key(
-            cfg.CURRENT_DATE,
-            {
-                "btc": float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b,
-                "usdt": float(
-                    format(float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c, ".2f")
-                ),
-            },
-        )
+        btc_asset = float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b
+        usdt_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c
+        if float(format(btc_asset, ".8f")) > 0.0001:
+            config.env[cfg.TYPE].balance.add_single_key(
+                cfg.CURRENT_DATE,
+                {
+                    "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                    "btc": float(format(btc_asset, ".8f")),
+                    "usdt": float(format(usdt_asset, ".2f")),
+                },
+            )
+        else:
+            config.env[cfg.TYPE].balance.add_single_key(
+                cfg.CURRENT_DATE,
+                {
+                    "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                    "usdt": float(format(usdt_asset, ".2f")),
+                },
+            )
 
     async def set_markets(self):
         if self.spot_usdt:
