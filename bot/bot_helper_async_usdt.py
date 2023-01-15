@@ -159,7 +159,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         # TODO: could be done in thread
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
-        if symbol == "SNM/USDT":
+        if symbol == "SNM/BTC" or symbol == "SNM/USDT":
             return 0
 
         since = await config.get_spot_timestamp(asset, symbol)
@@ -266,6 +266,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         if profit == 0:
             per_change = 0
         else:
+            per_change = percent_change(
+                initial=entry_price, change=asset_price - entry_price, end="", is_arrow=False, is_sign=False
+            )
             if _type in ["usdt", "busd"]:
                 log(format(abs(profit), ".2f"), "bold green" if profit > 0 else "bold red", end="")
             else:
@@ -276,10 +279,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 log(f"{_usd}$", "green on black blink" if profit > 0 else "red on black blink", end="")
                 log(f" {format(abs(profit) * 1000, '.4f')}", "italic green" if profit > 0 else "italic red", end="")
 
-            per_change = percent_change(
-                initial=entry_price, change=asset_price - entry_price, end="", is_arrow=False, is_sign=False
-            )
-            if per_change > 200:
+            if asset not in config.SPOT_IGNORE_LIST and per_change > 110:
                 raise Exception(f"per_change={per_change} is too large; qty of the entry price is calculated wrong")
 
             if float(per_change) < -10.0:

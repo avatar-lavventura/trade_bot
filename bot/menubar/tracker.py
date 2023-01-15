@@ -30,14 +30,19 @@ def tracker_clock_string():
     for _, asset in enumerate(reversed(assets)):
         try:
             output = exchange.fetch_ticker(asset)
-            asset = asset.replace("USDT", "")
             price = output["last"]
-            if price < 0.1:
-                price = "{:.8f}".format(price).strip("0.").lstrip("0")
-            elif price > 1000:
-                price = round(price)
-            elif price > 1:
-                price = "{:.4f}".format(price)
+
+            if asset == "SNMBUSD":
+                price = "{:.3f}".format(price)
+            else:
+                asset = asset.replace("USDT", "")
+                if price < 0.1:
+                    price = "{:.8f}".format(price).strip("0.").lstrip("0")
+                elif price > 1000:
+                    price = round(price)
+                elif price > 1:
+                    price = "{:.4f}".format(price)
+
             if not msg:
                 msg = f"{asset} {price}"
             else:

@@ -104,10 +104,7 @@ class Discord_Alpy:
         try:
             cfg.BALANCES = await helper.exchange.spot.fetch_balance()
             for symbol in cfg.BALANCES:
-                if (
-                    symbol not in ["BTC", "BNB", "USDT", "info", "timestamp", "datetime", "free", "used", "total"]
-                    and cfg.BALANCES[symbol]["total"] > 0
-                ):
+                if symbol not in cfg.ignore_list and cfg.BALANCES[symbol]["total"] > 0:
                     ongoing_positions.append(symbol)
                     if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
                         pos_count += 1

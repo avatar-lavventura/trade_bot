@@ -31,7 +31,11 @@ async def main(symbol):
             _last = ticker["last"]
             eq = 2887.39 * _last - 1826
             # eq = 2588 * _last - 1600
-            print(f"{int(eq)}      ---      {_last}     -- should be: 3400")
+            if int(eq) < 0:
+                log(f"[red]{int(eq)}[/red]      ---      {_last}     -- should be: 3400", is_write=False)
+            else:
+                log(f"{int(eq)}      ---      {_last}     -- should be: 3400", is_write=False)
+
             await _sleep(3)
         except Exception:
             print("sleeping for 60 seconds...")

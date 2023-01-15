@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import os
+import sys
 from contextlib import suppress
 from typing import Tuple
 
-from broker._utils._log import _console_clear, console_ruler, log
+from broker._utils._log import console_ruler, log
 from broker._utils.tools import _date, decimal_count, print_tb
 
 from bot import cfg
@@ -104,6 +106,11 @@ class BotHelperAsync:
             else:
                 log()
 
+    async def restart(self):
+        log()
+        log(f"#> -=-=-=-=-=-=-=-=-=- [green]RESTARTING[/green] {_date()}-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        os.execv(sys.argv[0], sys.argv)
+
     async def _discord_sent_msg(self, msg):
         try:
             if cfg.discord_sent_msg:
@@ -111,8 +118,12 @@ class BotHelperAsync:
             else:
                 cfg.discord_sent_msg = await self.channel.send(msg)
         except Exception as e:
-            if "Not Found" not in str(e) and "HTTPException" not in str(e):
-                print_tb(e)
+            log(f"E: discord: {e}")
+            # if "Not Found" not in str(e) and "HTTPException" not in str(e):
+            #     print_tb(e)
+
+            if "Service Unavailable" in str(e):
+                self.restart()
 
             with suppress(Exception):
                 await cfg.discord_sent_msg.delete()
@@ -147,7 +158,7 @@ class BotHelperAsync:
             await self._discord_sent_msg(msg)
 
     async def _discord_send(self, msg, lost, pos_count, name, free, total, is_message=True) -> None:
-        cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.5 else format(cfg.locked_balance, ".2f")
+        cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.4 else format(cfg.locked_balance, ".2f")
         await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free, total)
         if not is_message:
             return
@@ -215,10 +226,7 @@ class BotHelperAsync:
         ongoing_positions = []
         cfg.BALANCES = await exchange.spot.fetch_balance()
         for symbol in cfg.BALANCES:
-            if (
-                symbol not in ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
-                and cfg.BALANCES[symbol]["total"] > 0
-            ):
+            if symbol not in cfg.ignore_list and cfg.BALANCES[symbol]["total"] > 0:
                 ongoing_positions.append(symbol)
                 if symbol not in cfg.STABLE_COINS:
                     real_pos_count += 1
@@ -315,21 +323,24 @@ class BotHelperAsync:
             if not is_start and sum_usdt > 0.01:
                 console_ruler(character="-=")
 
-            if len(config.asset_list) == 0:
+            if len(config.asset_list) == 0 or config.trade_mode:
                 config.timestamp[f"{cfg.TYPE}_timestamp"] = {}  #: cleans timestamp.yaml file
-                _console_clear()
+                _da = f"[blue]{_date(_type='hour')}[/blue]"
+                _sum_usdt = format(sum_usdt, ".2f")
                 if cfg.TYPE == "usdt":
                     if sum_usdt > 0.01:
-                        log(f":beer: :heavy_dollar_sign: [green]usdt=[green]{sum_usdt}", "bold")
+                        log(f":heavy_dollar_sign: [y]Estimated_Balance[/y] [cy]${_sum_usdt}[/cy] | {_da}", "bold")
+                        config.env[cfg.TYPE].estimated_balance.add_single_key("total_balance", _sum_usdt)
                     else:
-                        log(f":heavy_dollar_sign: {_date(_type='hour')} spot_balance=0", "bold")
+                        log(":heavy_dollar_sign: spot_balance=0", "bold")
                 elif cfg.TYPE == "btc":
                     if own_usdt > 0.01:
                         log(
-                            f":beer: :bee: {_date(_type='hour')} balance=%.8f BTC [blue]==[/blue] %.2f USDT"
+                            f":bee: [y]Estimated_Balance[/y] %.8f BTC[blue] ≈[/blue] [cy]$%.2f[/cy] | {_da}"
                             % (sum_btc, own_usdt),
                             "bold",
                         )
+                        config.env[cfg.TYPE].estimated_balance.add_single_key("total_balance", format(own_usdt, ".2f"))
                     else:
                         log(f":bee: {_date(_type='hour')} spot_balance=0", "bold")
             elif cfg.TYPE == "usdt":
@@ -338,8 +349,8 @@ class BotHelperAsync:
                     busd_str = f"| busd={sum_busd} "
 
                 log(
-                    f" * usdt={sum_usdt} {busd_str}[blue]*[/blue] "
-                    f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}$[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}"
+                    f" * usdt={_sum_usdt} {busd_str}[blue]*[/blue] "
+                    f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}$[/cy] | {_da} {ts}"
                 )
 
             config.sum_usdt = sum_usdt
@@ -401,6 +412,8 @@ class BotHelperAsync:
         pos_str = ""
         if pos_count > 2:
             pos_str = f"pos=**{pos_count}**"
+        elif config.trade_mode:
+            log()  # needed to not overwrite printed balance
 
         total = 0
         free = float(free)

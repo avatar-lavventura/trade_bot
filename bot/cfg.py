@@ -3,6 +3,7 @@
 from broker._utils.tools import _date
 
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG"]
+ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
 SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 discord_message_full = discord_message = f"`{_date()}`\n"
 discord_print: bool = False

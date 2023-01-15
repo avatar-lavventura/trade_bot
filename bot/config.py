@@ -107,15 +107,25 @@ class Exchange:
         balances_cross = await self.get_cross_balance()
         #: total_net_asset_of_usdt
         _c = float(balances_cross["info"]["totalNetAssetOfBtc"]) * cfg.PRICES["BTCUSDT"]
-        config.env[cfg.TYPE].balance.add_single_key(
-            cfg.CURRENT_DATE,
-            {
-                "btc": float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b,
-                "usdt": float(
-                    format(float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c, ".2f")
-                ),
-            },
-        )
+        btc_asset = float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b
+        usdt_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c
+        if float(format(btc_asset, ".8f")) > 0.0001:
+            config.env[cfg.TYPE].balance.add_single_key(
+                cfg.CURRENT_DATE,
+                {
+                    "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                    "btc": float(format(btc_asset, ".8f")),
+                    "usdt": float(format(usdt_asset, ".2f")),
+                },
+            )
+        else:
+            config.env[cfg.TYPE].balance.add_single_key(
+                cfg.CURRENT_DATE,
+                {
+                    "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                    "usdt": float(format(usdt_asset, ".2f")),
+                },
+            )
 
     async def set_markets(self):
         if self.spot_usdt:
@@ -157,6 +167,7 @@ class Config:
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
             self.env[asset]._ts = Mongo(mc, mc[asset]["timestamp"])
+            self.env[asset].estimated_balance = Mongo(mc, mc[asset]["estimated_balance"])
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
 
@@ -240,6 +251,7 @@ class Config:
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
+        self.trade_mode = self.cfg["root"]["trade_mode"]
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
             self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
