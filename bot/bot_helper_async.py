@@ -154,7 +154,11 @@ class BotHelperAsync:
             msg = f"{msg}\n{symbol}={asset_price} {per_str}"
 
         if msg:
-            msg = f"{msg}\n```{_date(_type='hour')}"
+            _da = _date(_type="hour")
+            if _da[0:5] == "03:00":
+                _da = _date()
+
+            msg = f"{msg}\n```{_da}"
             await self._discord_sent_msg(msg)
 
     async def _discord_send(self, msg, lost, pos_count, name, free, total, is_message=True) -> None:
@@ -328,19 +332,28 @@ class BotHelperAsync:
                 _da = f"[blue]{_date(_type='hour')}[/blue]"
                 _sum_usdt = format(sum_usdt, ".2f")
                 if cfg.TYPE == "usdt":
-                    if sum_usdt > 0.01:
-                        log(f":heavy_dollar_sign: [y]Estimated_Balance[/y] [cy]${_sum_usdt}[/cy] | {_da}", "bold")
-                        config.env[cfg.TYPE].estimated_balance.add_single_key("total_balance", _sum_usdt)
-                    else:
-                        log(":heavy_dollar_sign: spot_balance=0", "bold")
+                    #: estimated balance:
+                    _total_balance = format(float(_sum_usdt) + float(sum_busd), ".2f")
+                    log(f":heavy_dollar_sign: [cy]${_total_balance}[/cy] | {_da}", "bold")
+                    config.env[cfg.TYPE].estimated_balance.add_single_key("total_balance", _total_balance)
                 elif cfg.TYPE == "btc":
                     if own_usdt > 0.01:
+                        #: estimated balance:
+                        _total_balance = format(own_usdt + sum_busd, ".2f")
+                        log(":bee: ", end="")
+                        if only_btc > 0:
+                            log(f"btc={only_btc} ", "bold", end="")
+
+                        if sum_busd > 0.1:
+                            log(f"busd={sum_busd} | ", "bold", end="")
+
                         log(
-                            f":bee: [y]Estimated_Balance[/y] %.8f BTC[blue] ≈[/blue] [cy]$%.2f[/cy] | {_da}"
-                            % (sum_btc, own_usdt),
+                            "%.8f BTC[blue] ≈[/blue] [cy]$%.2f[/cy] " % (sum_btc, own_usdt),
                             "bold",
+                            end="",
                         )
-                        config.env[cfg.TYPE].estimated_balance.add_single_key("total_balance", format(own_usdt, ".2f"))
+                        log(f"| {_da}", "bold")
+                        config.env[cfg.TYPE].estimated_balance.add_single_key("total_balance", _total_balance)
                     else:
                         log(f":bee: {_date(_type='hour')} spot_balance=0", "bold")
             elif cfg.TYPE == "usdt":

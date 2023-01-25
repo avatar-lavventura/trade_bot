@@ -8,10 +8,13 @@ import rumps  # type: ignore
 # __ https://github.com/jaredks/rumps
 # __ https://github.com/srid/org-clock-dashboard
 
-exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 # rumps.debug_mode(True)
+
+sleep_duration = 10
+exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT"]
-assets = assets + ["FTMUSDT", "SNMBTC", "SNMBUSD"]
+# assets = assets + ["FTMUSDT", "SNMBTC", "SNMBUSD"]
+assets = assets + ["SNMBTC", "SNMBUSD"]
 for idx, asset in enumerate(reversed(assets)):
     try:
         output = exchange.fetch_ticker(asset)
@@ -71,7 +74,7 @@ def main():
         else:
             app.title = "Not tracking"
 
-    timer = rumps.Timer(timer_func, 20)
+    timer = rumps.Timer(timer_func, sleep_duration)
     timer.start()
     app.run()
 

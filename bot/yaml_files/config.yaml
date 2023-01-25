@@ -6,7 +6,7 @@ root:
   discord_msg_above_usdt: 150
   take_profit: 0.005
   locked_percent_limit: 99.99
-  slee_time: 20
+  sleep_duration: 20
   ignore: # for all
     - SNM
   ignore_warning:

@@ -159,7 +159,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         # TODO: could be done in thread
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
-        if symbol == "SNM/BTC" or symbol == "SNM/USDT":
+        if symbol == "SNM/BTC" or symbol == "SNM/USDT" or symbol == "CFX/BTC" or symbol == "CFX/USDT":
             return 0
 
         since = await config.get_spot_timestamp(asset, symbol)

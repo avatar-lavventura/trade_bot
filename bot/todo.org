@@ -44,3 +44,7 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
   3 ekleme yapiyorsun sonra 4. ekleme yapmak yerine market sell yapiyorsun
   ilk poz 5$ // 1. ekleme 10$ // 2. ekleme 15$ // 3. ekleme 20$ // 4. ekleme yerine market sell
 ** TODO access mongodb remotely
+** TODO alert for all time high in a week 50% pumped coins
+** TODO mongo fetch balance from kama to home
+** TODO tradingview buy sell order makas lari ogrenebilir misin?
+** TODO discord mute message -15m fund rate time is close when trade_mode is on
