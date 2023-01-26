@@ -171,6 +171,11 @@ class Config:
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
 
+    def estimated_balance(self) -> int:
+        balance_brave = float(config.env["usdt"].estimated_balance.find_one("total_balance")["value"])
+        balalance_chrome = float(config.env["btc"].estimated_balance.find_one("total_balance")["value"])
+        return int(balance_brave + balalance_chrome)
+
     async def get_spot_timestamp(self, asset, symbol=None) -> int:
         """Returns asset's set timestamp and updates if it is not set."""
         key = f"{cfg.TYPE}_timestamp"

@@ -158,7 +158,7 @@ class BotHelperAsync:
             if _da[0:5] == "03:00":
                 _da = _date()
 
-            msg = f"{msg}\n```{_da}"
+            msg = f"{msg}\n```{_da}  ${config.estimated_balance()}"
             await self._discord_sent_msg(msg)
 
     async def _discord_send(self, msg, lost, pos_count, name, free, total, is_message=True) -> None:
