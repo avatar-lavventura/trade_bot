@@ -4,16 +4,16 @@ alerts:
       pair: BTCUSDT
       price: 16000
       msg: ""
-    a2:
-      pair: SNMBUSD
-      price: 0.5
-      msg: ""
+    # a2:
+    #   pair: SNMBUSD
+    #   price: 1.0
+    #   msg: ""
+    # a3:
+    #   pair: SNMBUSD
+    #   price: 0.83
+    #   msg: ""
   greater_than: # >
     a1:
-      pair: SNMBTC
-      price: 0.000056
-      msg: ""
-    a2:
-      pair: SNMBUSD
-      price: 1.19
+      pair: GASBUSD
+      price: 3.9
       msg: ""

@@ -98,26 +98,42 @@ class Exchange:
         return await self.margin_isolated.fetch_balance()
 
     async def record_balance(self):
+        # await bot_async.read_margin_cross_balance()
+        # binance_balance.bot_async
         margin_balance = await self.get_isolated_balance()
         _btc_bal = float(margin_balance["info"]["assets"][0]["baseAsset"]["free"])
         _usdt_bal = float(margin_balance["info"]["assets"][0]["quoteAsset"]["totalAsset"])
-        _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
+        btc_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) / cfg.PRICES["BTCUSDT"]
         _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
-        #
         balances_cross = await self.get_cross_balance()
-        #: total_net_asset_of_usdt
         _c = float(balances_cross["info"]["totalNetAssetOfBtc"]) * cfg.PRICES["BTCUSDT"]
-        btc_asset = float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b
         usdt_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c
         if float(format(btc_asset, ".8f")) > 0.0001:
-            config.env[cfg.TYPE].balance.add_single_key(
-                cfg.CURRENT_DATE,
-                {
-                    "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                    "btc": float(format(btc_asset, ".8f")),
-                    "usdt": float(format(usdt_asset, ".2f")),
-                },
-            )
+            _only_btc = float(config.env[cfg.TYPE].estimated_balance.find_one("only_btc")["value"])
+            if _only_btc > 0:
+                remaining_asset_in_usdt = (
+                    float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"])
+                    - float(_only_btc) * cfg.PRICES["BTCUSDT"]
+                )
+                config.env[cfg.TYPE].balance.add_single_key(
+                    cfg.CURRENT_DATE,
+                    {
+                        "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                        "o_btc": _only_btc,
+                        "o_usdt": float(format(remaining_asset_in_usdt, ".2f")),
+                        "btc": float(format(btc_asset, ".8f")),
+                        "usdt": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
+                    },
+                )
+            else:
+                config.env[cfg.TYPE].balance.add_single_key(
+                    cfg.CURRENT_DATE,
+                    {
+                        "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                        "btc": float(format(btc_asset, ".8f")),
+                        "usdt": float(format(usdt_asset, ".2f")),
+                    },
+                )
         else:
             config.env[cfg.TYPE].balance.add_single_key(
                 cfg.CURRENT_DATE,
@@ -195,9 +211,16 @@ class Config:
             if len(str(ts)) == 10:
                 _ts = ts * 1000
 
-            _trades = await exchange.spot.fetch_my_trades(symbol, since=_ts)
+            try:
+                _trades = await exchange.spot.fetch_my_trades(symbol, since=_ts)
+            except Exception as e:
+                if "/USDT" in symbol:
+                    _trades = await exchange.spot.fetch_my_trades(symbol.replace("/USDT", "/BUSD"), since=_ts)
+                else:
+                    raise e
+
             with suppress(Exception):
-                for idx, trade in enumerate(_trades):
+                for _, trade in enumerate(_trades):
                     print(trade)
                     if trade["info"]["isBuyer"]:
                         order_id = trade["info"]["orderId"]
@@ -206,7 +229,7 @@ class Config:
                         first_orders_ts = first_orders[0]["timestamp"]
                         break
 
-                if first_orders_ts > 0 and first_orders_ts < _ts:
+                if 0 < first_orders_ts < _ts:
                     # update few seconds behind such as ts - 9
                     ts = first_orders_ts
 

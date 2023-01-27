@@ -47,4 +47,8 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO alert for all time high in a week 50% pumped coins
 ** TODO mongo fetch balance from kama to home
 ** TODO tradingview buy sell order makas lari ogrenebilir misin?
-** TODO discord mute message -15m fund rate time is close when trade_mode is on
+** TODO split busd and usdt orders
+** TODO ignore < 0.0001 BTC asset positions
+** TODO Google Spreadsheets Python API v4
+Link: [[https://github.com/burnash/gspread]]
+** TODO fetch assets first : BTC USDT BUSD detect which one exist

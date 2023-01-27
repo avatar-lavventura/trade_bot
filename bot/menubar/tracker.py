@@ -10,11 +10,12 @@ import rumps  # type: ignore
 
 # rumps.debug_mode(True)
 
-sleep_duration = 10
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT"]
 # assets = assets + ["FTMUSDT", "SNMBTC", "SNMBUSD"]
 assets = assets + ["SNMBTC", "SNMBUSD"]
+sleep_duration = 20
+
 for idx, asset in enumerate(reversed(assets)):
     try:
         output = exchange.fetch_ticker(asset)

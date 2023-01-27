@@ -1,5 +1,4 @@
 root:
-  goal: 7200 # 3400 + 1800 +(BTCPRICE × 0.087)
   trade_mode: True
   is_write: False
   isolated_wallet_limit: 150
@@ -9,6 +8,8 @@ root:
   sleep_duration: 20
   ignore: # for all
     - SNM
+    - GFT
+    - GAS
   ignore_warning:
     - DUMMY
   usdt:
@@ -21,9 +22,10 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
+      SNM: 1.057
   btc:
-    status: "on"
-    is_discord: "off"
+    status: "off"
+    is_discord: "on"
     initial: 0.00011
     max_pos: 1
     multiply_ratio: 1.1
@@ -31,3 +33,4 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
+      GASBUSD: 3.954

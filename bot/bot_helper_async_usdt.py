@@ -65,25 +65,39 @@ class BotHelperSpotAsync(BotHelperAsync):
             return decimal_count(value)
 
     def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
+        """Calculates entry price for the position."""
+        verbose = False
         _sum = 0.0
         quantity = 0.0
+        quantity_real = 0
         quantity_consider_sold = 0.0
         first_sell_flag = False
         latest_buy_trade_idx = 0
         for index in enumerate(timestamp_list):
             for inner_index in ordering[index[1]]:
                 trade = trades[inner_index]
-                # log(trade)
-                # log(trade["info"])  # debug purposes
-                if float(trade["info"]["commission"]) > 0:
+                if verbose:
+                    t = trade.copy()
+                    del t["info"]
+                    del t["fees"]
+                    del t["fee"]
+                    del t["takerOrMaker"]
+                    del t["type"]
+                    log(t)
+
+                if float(trade["info"]["commission"]) > 0 or (
+                    float(trade["info"]["commission"]) == 0 and trade["info"]["isMaker"] is True
+                ):
                     qty = float(trade["info"]["qty"])
                     if trade["info"]["isBuyer"]:
                         quantity += qty
+                        quantity_real += qty
                         quantity_consider_sold += qty
                         _sum += trade["cost"]
                         latest_buy_trade_idx = inner_index
                         latest_ts = trade["timestamp"]
                     else:
+                        quantity_real -= qty
                         quantity_consider_sold -= qty
                         if not first_sell_flag and quantity == asset_qty:
                             # latest trade is buyer and equat to current asset number
@@ -114,6 +128,9 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                     quantity = round_float(quantity, 8)
                     _sum = round_float(_sum, 8)
+
+                if verbose:
+                    log(f"qty={quantity_real}")
 
         # breakpoint()  # DEBUG
         return (quantity, _sum)
@@ -159,51 +176,59 @@ class BotHelperSpotAsync(BotHelperAsync):
         # TODO: could be done in thread
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
-        if symbol == "SNM/BTC" or symbol == "SNM/USDT" or symbol == "CFX/BTC" or symbol == "CFX/USDT":
-            return 0
-
         since = await config.get_spot_timestamp(asset, symbol)
         if len(str(since)) == 10:
             since = since * 1000
 
-        decimal: int = helper.exchange.spot_markets[symbol]["precision"]["price"]  # TODO: store at PRICES
+        try:
+            decimal: int = helper.exchange.spot_markets[symbol]["precision"]["price"]  # TODO: store at PRICES
+        except Exception as e:
+            if "/USDT" in symbol:
+                symbol = symbol.replace("/USDT", "/BUSD")
+                decimal: int = helper.exchange.spot_markets[symbol]["precision"]["price"]
+            else:
+                raise e
+
         if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
             entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
             qty_to_consider = asset_qty
             _sum = float(entry_price) * asset_qty
         else:
             trades = await helper.exchange.spot.fetch_my_trades(symbol, since=since)
-            if _type == "btc":
-                with suppress(Exception):
-                    _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT", since=since)
+            timestamp_list = None
+            if trades:
+                if _type == "btc":
                     with suppress(Exception):
-                        for idx, trade in enumerate(_trades):
-                            if not trade["info"]["isBuyer"]:
-                                ts = int(trade["info"]["time"])
-                                response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
-                                trade["cost"] = trade["cost"] / float(response[0][1])
-                                trade["ignore_sold"] = True
-                                trades.append(trade)
-            # else:
-            #     _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/BTC", since=since)
-            #     with suppress(Exception):
-            #         for idx, trade in enumerate(_trades):
-            #             if not trade["info"]["isBuyer"]:
-            #                 ts = int(trade["info"]["time"])
-            #                 response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
-            #                 trade["cost"] = trade["cost"] * float(response[0][1])
-            #                 trade["ignore_sold"] = True
-            #                 trades.append(trade)
-            ordering = {}
-            for idx, trade in enumerate(trades):
-                try:
-                    # In case orders occur in the same timestamp
-                    ordering[trade["timestamp"]].append(idx)
-                except:
-                    ordering[trade["timestamp"]] = [idx]
+                        _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT", since=since)
+                        with suppress(Exception):
+                            for idx, trade in enumerate(_trades):
+                                if not trade["info"]["isBuyer"]:
+                                    ts = int(trade["info"]["time"])
+                                    response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
+                                    trade["cost"] = trade["cost"] / float(response[0][1])
+                                    trade["ignore_sold"] = True
+                                    trades.append(trade)
+                # else:
+                #     _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/BTC", since=since)
+                #     with suppress(Exception):
+                #         for idx, trade in enumerate(_trades):
+                #             if not trade["info"]["isBuyer"]:
+                #                 ts = int(trade["info"]["time"])
+                #                 response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
+                #                 trade["cost"] = trade["cost"] * float(response[0][1])
+                #                 trade["ignore_sold"] = True
+                #                 trades.append(trade)
+                ordering = {}
+                for idx, trade in enumerate(trades):
+                    try:
+                        # In case orders occur in the same timestamp
+                        ordering[trade["timestamp"]].append(idx)
+                    except:
+                        ordering[trade["timestamp"]] = [idx]
 
-            #: iterate transactions based on their timestamp
-            timestamp_list = sorted(ordering, reverse=True)
+                #: iterate transactions based on their timestamp
+                timestamp_list = sorted(ordering, reverse=True)
+
             if timestamp_list:
                 qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
             else:
@@ -216,8 +241,28 @@ class BotHelperSpotAsync(BotHelperAsync):
                         ordering[trade["timestamp"]] = [idx]
 
                 timestamp_list = sorted(ordering, reverse=True)
-                qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
+                latest_busd_ts = 0
+                try:
+                    if "/USDT" in symbol:
+                        trades_busd = await helper.exchange.spot.fetch_my_trades(symbol.replace("/USDT", "/BUSD"))
+                        ordering_busd = {}
+                        for idx, trade in enumerate(trades_busd):
+                            try:
+                                ordering_busd[trade["timestamp"]].append(idx)
+                            except Exception:
+                                ordering_busd[trade["timestamp"]] = [idx]
 
+                        timestamp_list_busd = sorted(ordering_busd, reverse=True)
+                        latest_busd_ts = timestamp_list_busd[0]
+                except:
+                    pass
+
+                if timestamp_list[0] > latest_busd_ts:
+                    qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
+                else:
+                    qty, _sum = self.calculate_entry(timestamp_list_busd, ordering_busd, trades_busd, asset, asset_qty)
+
+            # breakpoint()  # DEBUG
             if asset_qty == 0:
                 log(f"E: float division by zero asset={asset}")
                 return 0
@@ -271,15 +316,16 @@ class BotHelperSpotAsync(BotHelperAsync):
             )
             if _type in ["usdt", "busd"]:
                 log(format(abs(profit), ".2f"), "bold green" if profit > 0 else "bold red", end="")
+                log(" ", end="")
             else:
                 _usd = format(abs(profit) * cfg.PRICES["BTCUSDT"], ".2f")
                 if profit < 0:
                     _usd = f"-{_usd}"
 
-                log(f"{_usd}$", "green on black blink" if profit > 0 else "red on black blink", end="")
-                log(f" {format(abs(profit) * 1000, '.4f')}", "italic green" if profit > 0 else "italic red", end="")
+                log(f"${_usd}", "green on black blink" if profit > 0 else "red on black blink", end="")
+                log(f" {format(abs(profit) * 1000, '.2f')} ", "italic green" if profit > 0 else "italic red", end="")
 
-            if asset not in config.SPOT_IGNORE_LIST and per_change > 110:
+            if asset not in config.SPOT_IGNORE_LIST and per_change > 20:
                 raise Exception(f"per_change={per_change} is too large; qty of the entry price is calculated wrong")
 
             if float(per_change) < -10.0:

@@ -692,3 +692,13 @@ CLOSED: [2023-01-26 Thu 12:24]
 
 if _str[0:5] == "03:00":
       date +
+
+* DONE discord mute message -15m fund rate time is close when trade_mode is on
+CLOSED: [2023-01-27 Fri 12:16]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-27 Fri 12:16
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:

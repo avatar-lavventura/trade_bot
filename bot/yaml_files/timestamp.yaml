@@ -1,2 +1,4 @@
-usdt_timestamp: {}
-btc_timestamp: {}
+usdt_timestamp:
+    GAS: 1676039924
+btc_timestamp:
+    GAS: 1676039943

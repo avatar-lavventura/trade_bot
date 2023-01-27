@@ -31,13 +31,14 @@ class Discord_Alpy:
             else:
                 _log.IS_WRITE = False
 
-            log(f"[cy]**[/cy] bot_type={_type} mode started [cyan]**", "b")
+            log(f"[cy]**[/cy] bot_type={_type} started [cyan]**", "b")
             self._type = cfg.TYPE = _type.lower()
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
             self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
+            self.channel_notifications: str = ""
             self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
             self.TOKEN = str(_config["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())
@@ -71,7 +72,7 @@ class Discord_Alpy:
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
 
-        # secondly
+        # secondly, each 20 seconds
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if config.cfg["root"][cfg.TYPE]["status"] == "on":
             scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
@@ -84,6 +85,22 @@ class Discord_Alpy:
         scheduler.add_job(
             self.restart, "cron", year="*", month="*", day="*", hour="03", minute="01", second="0", timezone=tz
         )
+
+        if cfg.TYPE == "usdt":
+            # funding-time: https://cron.help/#45_2,10,18_*_*_*
+            scheduler.add_job(
+                self.fund_alert,
+                "cron",
+                year="*",
+                month="*",
+                day="*",
+                hour="2,10,18",
+                minute="45",
+                second="0",
+                timezone=tz,
+            )
+
+        # log(scheduler.get_jobs())
         scheduler.start()
 
     async def pre_discord_setup(self):
@@ -95,6 +112,9 @@ class Discord_Alpy:
 
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
+
+        if not self.channel_notifications:
+            self.channel_notifications = discord.utils.get(self.client.get_all_channels(), name="notifications")
 
     async def fetch_balance(self):
         key = f"{cfg.TYPE}_timestamp"
@@ -123,9 +143,15 @@ class Discord_Alpy:
     async def update_current_date(self):
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
 
+    async def fund_alert(self):
+        if config.trade_mode:
+            await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>")
+            # await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>", delete_after=60)
+
     async def restart(self):
+        """Restart at 03:00:00."""
         log()
-        log(f"#> -=-=-=-=-=-=-=-=-=- [green]RESTARTING[/green] {_date()}-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()}-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

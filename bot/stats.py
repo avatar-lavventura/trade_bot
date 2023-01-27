@@ -13,11 +13,11 @@ _log.IS_WRITE = False
 
 
 def print_total_balance(total_balance):
+    max_val = 0
     for k, v in total_balance.items():
         total_balance[k] = round(v)
 
     log(total_balance)
-    max_val = 0
     for _, value in total_balance.items():
         if value > max_val:
             max_val = value
@@ -27,7 +27,7 @@ async def main():
     mc = MongoClient()
     for symbol in ["btc"]:
         mongo = Mongo(mc, mc[symbol]["stats"])
-        cursor = mongo.find_all(sort_str="timestamp", is_return=True)
+        cursor = mongo.find_all(sort_str="timestamp", is_print=True)
         if cursor:
             log(f" * {symbol}")
             for document in cursor:
@@ -38,8 +38,8 @@ async def main():
     total_balance = {}
     for symbol in ["usdt", "btc"]:
         mongo = Mongo(mc, mc[symbol]["balance"])
-        output = mongo.find_all(sort_str="timestamp", is_return=True)
-        mongo.find_all(sort_str="timestamp")
+        output = mongo.find_all(sort_str="timestamp", is_print=True)
+        mongo.find_all(sort_str="timestamp", is_compact=True)
         for item in output:
             _key = item["key"]
             if _key not in total_balance:

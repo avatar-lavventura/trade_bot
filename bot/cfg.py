@@ -2,7 +2,7 @@
 
 from broker._utils.tools import _date
 
-STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG"]
+STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
 SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 discord_message_full = discord_message = f"`{_date()}`\n"
@@ -13,13 +13,17 @@ BNB_QTY: float = 0.0
 BNB_BALANCE: float = 0.0
 TYPE: str = ""
 BALANCES = None
-CURRENT_DATE = None
+CURRENT_DATE = None  # zone is UTC
 MINIMUM_POSITION = {}
 MINIMUM_POSITION["btc"] = 0.0001
 MINIMUM_POSITION["usdt"] = 10
 PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
 SUM_BTC: float = 0.0
+
+BALANCE_FLAG = False
+MARGIN_BAL_BTC = 0
+MARGIN_BAL = 0
 
 """
 * IGNORE_SOLD_QUANTITY
