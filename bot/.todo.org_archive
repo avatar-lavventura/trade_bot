@@ -702,3 +702,14 @@ CLOSED: [2023-01-27 Fri 12:16]
 :ARCHIVE_CATEGORY: todo
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE Google Spreadsheets Python API v4
+CLOSED: [2023-02-13 Mon 08:37]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-02-13 Mon 08:37
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+Link: [[https://github.com/burnash/gspread]]

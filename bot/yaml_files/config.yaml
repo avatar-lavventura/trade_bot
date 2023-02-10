@@ -1,20 +1,21 @@
 root:
-  trade_mode: True
+  goal: 0
+  is_manual_trade: True
+  is_funding_rate_alert: False
   is_write: False
+  balance_silent: False
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
   take_profit: 0.005
   locked_percent_limit: 99.99
   sleep_duration: 20
   ignore: # for all
-    - SNM
-    - GFT
-    - GAS
+    - DREP
   ignore_warning:
     - DUMMY
   usdt:
     status: "off" # "on" or "off"
-    is_discord: "off"
+    isolated: "on"
     max_pos: 1
     initial: 10.3
     multiply_ratio: 1.1
@@ -22,10 +23,9 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
-      SNM: 1.057
   btc:
     status: "off"
-    is_discord: "on"
+    isolated: "on"
     initial: 0.00011
     max_pos: 1
     multiply_ratio: 1.1
@@ -33,4 +33,4 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
-      GASBUSD: 3.954
+      DREPBUSD: 0.65

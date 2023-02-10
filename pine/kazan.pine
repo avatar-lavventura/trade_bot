@@ -80,6 +80,8 @@ if countL==p
     pivotL = low[period]
     sell := 1
 
+// bomba ends
+
 // buying volume and selling volume
 buyVolume = 0.0
 if high!=low

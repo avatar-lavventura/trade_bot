@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     # # mongo.add_single_key("doo", {"key": "doo", "value": 1})
     # mongo = Mongo(mc, mc["btc"]["value"])
-    # current_date = _date(_type="month")
+    # current_date = _date(_type="month-day")
     # mongo._inc(current_date)
     # mongo.find_all(sort_str="timestamp")
 

@@ -38,7 +38,7 @@ async def main():
     total_balance = {}
     for symbol in ["usdt", "btc"]:
         mongo = Mongo(mc, mc[symbol]["balance"])
-        output = mongo.find_all(sort_str="timestamp", is_print=True)
+        output = mongo.find_all(sort_str="timestamp", is_print=True, is_compact=True)
         mongo.find_all(sort_str="timestamp", is_compact=True)
         for item in output:
             _key = item["key"]

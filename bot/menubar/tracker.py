@@ -12,8 +12,7 @@ import rumps  # type: ignore
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT"]
-# assets = assets + ["FTMUSDT", "SNMBTC", "SNMBUSD"]
-assets = assets + ["SNMBTC", "SNMBUSD"]
+assets = assets + ["DREPBTC", "DREPBUSD"]
 sleep_duration = 20
 
 for idx, asset in enumerate(reversed(assets)):
@@ -23,6 +22,8 @@ for idx, asset in enumerate(reversed(assets)):
         if "binance does not have market symbol" in str(e):
             if "USDT" in asset:
                 assets[idx] = asset.replace("USDT", "BUSD")
+            elif "USDT" in asset:
+                assets[idx] = asset.replace("BTC", "BUSD")
 
 
 def run(cmd):
@@ -35,8 +36,7 @@ def tracker_clock_string():
         try:
             output = exchange.fetch_ticker(asset)
             price = output["last"]
-
-            if asset == "SNMBUSD":
+            if 1 <= price <= 10:
                 price = "{:.3f}".format(price)
             else:
                 asset = asset.replace("USDT", "")

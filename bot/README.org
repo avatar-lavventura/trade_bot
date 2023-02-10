@@ -1,4 +1,4 @@
-* Guide
+* guide
 
 ** tradingview new account
 - restart internet and open new session at Google Chrome

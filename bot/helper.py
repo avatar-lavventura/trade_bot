@@ -11,7 +11,6 @@ from broker._utils.yaml import Yaml
 
 from bot import cfg
 
-is_start = True
 is_futures = False
 
 

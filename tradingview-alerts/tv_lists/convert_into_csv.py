@@ -2,16 +2,15 @@
 
 import sys
 
-# is_futures = False
-# if is_futures:
-#     filename = "binance_usdt_futures.txt"
-#     with open(filename) as f:
-#         for line in f:
-#             _line = line.rstrip()
-#             print(f"{_line},{_line.replace('USDTPERP', '').replace('BINANCE:', '')},USDTPERP,")
 
-filename = sys.argv[1]
-with open(filename) as f:
-    for line in f:
-        _line = line.rstrip()
-        print(f"{_line},{_line.replace('USDT', '').replace('BINANCE:', '')},USDT,")
+def main():
+    fn = sys.argv[1]
+    _type = sys.argv[2]
+    with open(fn) as f:
+        for line in f:
+            _line = line.rstrip()
+            print(f"{_line},{_line.replace(_type, '').replace('BINANCE:', '')},{_type},")
+
+
+if __name__ == "__main__":
+    main()

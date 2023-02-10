@@ -33,6 +33,7 @@ class Discord_Alpy:
 
             log(f"[cy]**[/cy] bot_type={_type} started [cyan]**", "b")
             self._type = cfg.TYPE = _type.lower()
+            config._env = config.env[cfg.TYPE]
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
             self.client = discord.Client()
@@ -144,14 +145,14 @@ class Discord_Alpy:
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
 
     async def fund_alert(self):
-        if config.trade_mode:
+        if config.is_funding_rate_alert:
             await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>")
             # await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>", delete_after=60)
 
     async def restart(self):
         """Restart at 03:00:00."""
         log()
-        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()}-=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

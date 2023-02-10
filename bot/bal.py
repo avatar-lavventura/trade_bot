@@ -1,32 +1,55 @@
 #!/usr/bin/env python3
 
-import time
 import asyncio
+import time
+from contextlib import suppress
+
+import gspread
 from broker._utils import _log
 from broker._utils._log import log
-from broker._utils.tools import _date
-from bot.bot_helper_async import BotHelperAsync
+from broker._utils.tools import _date, _timestamp
 
+from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 
 _log.IS_WRITE = False
 bot_async = BotHelperAsync()
+gc = gspread.service_account()
+sh = gc.open("guncel_kendime_olan_borclar")
+goal = 0
 
 
 async def main():
-    max_val = 8600
-    while True:
-        # if config.trade_mode:
-        #     await bot_async.read_margin_cross_balance()
+    max_in_run = 0
+    max_val = 0
+    if goal > 0:
+        max_val = goal
 
-        bal_brave = float(config.env["usdt"].estimated_balance.find_one("total_balance")["value"])
-        bal_chrome = float(config.env["btc"].estimated_balance.find_one("total_balance")["value"])
+    while True:
+        # if config.is_manual_trade:
+        #     await bot_async.read_margin_cross_balance()
+        start = ""
+
+        bal_brave = config.total_balance("usdt")
+        bal_chrome = config.total_balance("btc")
         _sum = int(bal_brave + bal_chrome)
         if _sum > max_val:
             max_val = _sum
 
+        if _sum > max_in_run and max_in_run != 0:
+            start = "[green]***********"
+
+        max_in_run = _sum
         log(f"{_date(_type='hour')} | ", end="")
-        log(f"{int(bal_brave)} + {int(bal_chrome)} => {_sum} | max=[italic black]{max_val}", "bold")
+
+        if goal == 0:
+            log(f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val} {start}", "bold")
+        else:
+            log(f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}  {max_in_run} {start}", "bold")
+
+        with suppress(Exception):
+            sh.sheet1.update("A20:D20", [[_timestamp(), int(bal_brave), int(bal_chrome), _sum]])
+
         time.sleep(10)
 
 

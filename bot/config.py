@@ -18,7 +18,6 @@ from bot import cfg
 from bot.mongodb import Mongo
 
 mc = MongoClient()
-is_start = True
 
 
 class Env:
@@ -170,6 +169,7 @@ class Config:
         self.locked_per_limit_usdtperp = None
         self.asset_list = []
         self.btc_quantity = {}
+        self._env = None  #: shorted name
         self.env = {}  # type: Dict[str, Env]
         for idx in ["usdt", "btc"]:  # "busd"
             self.env[idx] = Env()  # should be initialized before reload()
@@ -187,9 +187,12 @@ class Config:
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
 
+    def total_balance(self, _type) -> float:
+        return float(self.env[_type].estimated_balance.find_one("total_balance")["value"])
+
     def estimated_balance(self) -> int:
-        balance_brave = float(config.env["usdt"].estimated_balance.find_one("total_balance")["value"])
-        balalance_chrome = float(config.env["btc"].estimated_balance.find_one("total_balance")["value"])
+        balance_brave = self.total_balance("usdt")
+        balalance_chrome = self.total_balance("btc")
         return int(balance_brave + balalance_chrome)
 
     async def get_spot_timestamp(self, asset, symbol=None) -> int:
@@ -275,11 +278,13 @@ class Config:
         self.reload_wavetrend()
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
-        self.WATCHLIST = self.watchlist["watchlist"]
+        self.WATCHLIST = self.watchlist["watch"]["list"]
+        self.WATCHLIST_MSG = self.watchlist["watch"]["target"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
-        self.trade_mode = self.cfg["root"]["trade_mode"]
+        self.is_manual_trade = self.cfg["root"]["is_manual_trade"]
+        self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
             self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
@@ -287,6 +292,7 @@ class Config:
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
             self.env[_type].positions_alert = self.yaml_wrapper(self.base_dir / f"positions_alert_{_type}.yaml")
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
+            self.env[_type].isolated = self.cfg["root"][_type]["isolated"]
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01

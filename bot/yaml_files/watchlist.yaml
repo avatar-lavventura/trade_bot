@@ -1,5 +1,8 @@
-watchlist:
-  - BTCUSDT
-  - FTMUSDT
-  - SNMBTC
-  - SNMBUSD
+watch:
+  list:
+    - BTCUSDT
+    - COCOSBUSD
+    - DREPBTC
+    - DREPBUSD
+  target:
+    DREPBUSD: 6570

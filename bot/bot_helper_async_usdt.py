@@ -5,6 +5,7 @@ from typing import Tuple
 
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
+from broker.errors import QuietExit
 
 from bot import cfg
 from bot import config as helper
@@ -55,7 +56,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                             if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
-        else:
+        elif not config.is_manual_trade:
             await self.new_limit_order(asset, limit_price, market)
 
     def get_decimal_count(self, symbol, value) -> int:
@@ -167,7 +168,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             return format(float(value) * 1000, ".5f")
 
     async def spot_limit(self, asset, asset_qty, sum_bal, is_limit=True) -> float:
-        """Limit order for the SPOT market.
+        """Give limit order on the spot market.
 
         :param asset_qty: complete quantity of the asset, could be left over due the 0 BNB
 
@@ -262,7 +263,6 @@ class BotHelperSpotAsync(BotHelperAsync):
                 else:
                     qty, _sum = self.calculate_entry(timestamp_list_busd, ordering_busd, trades_busd, asset, asset_qty)
 
-            # breakpoint()  # DEBUG
             if asset_qty == 0:
                 log(f"E: float division by zero asset={asset}")
                 return 0
@@ -328,11 +328,14 @@ class BotHelperSpotAsync(BotHelperAsync):
             if asset not in config.SPOT_IGNORE_LIST and per_change > 20:
                 raise Exception(f"per_change={per_change} is too large; qty of the entry price is calculated wrong")
 
-            if float(per_change) < -10.0:
+            if float(per_change) < -10:
                 per_change_r = percent_change(
                     initial=asset_price, change=entry_price - asset_price, end="", is_arrow=False, color="orange1"
                 )
                 per_change_r = float(format(per_change_r, ".2f"))
+
+        # if config.is_manual_trade:
+        #     log()
 
         current_sum = format(_sum + profit, ".2f")
         c = "yellow on black blink"
@@ -342,7 +345,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 c1 = "green on black blink"
 
-            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [italic black]{format(_sum, '.2f')}", end="")
+            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}", end="")
         else:
             if float(per) > 0:
                 if float(per) > 5:
@@ -355,7 +358,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(f"[italic black]{format(_sum * 1000, '.4f')}", end="")
+            log(f"[ib]{format(_sum * 1000, '.4f')}", end="")
 
         cfg.locked_balance += float(per)
         if _type in ["usdt", "busd"]:
@@ -401,6 +404,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                 cfg.discord_message += msg
             elif _type == "btc":
                 cfg.discord_message += msg
+
+        if config.is_manual_trade:  # manual trade is on
+            return profit
 
         # self.is_cut_loss(asset, profit, qty_to_consider)
         config.reload_wavetrend()

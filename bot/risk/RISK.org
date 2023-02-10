@@ -62,10 +62,22 @@ trade, where to put a stop loss and when to exit requires skills.
 [[https://pastebin.com/sqJUcbjp][link]]
 
 * Start slowly. Question every trade.
-// Write down your assessment and refer to your comments before making your next
-trade.
+// Write down your assessment and refer to your comments before making your next trade.
 
 1. What motivated it?
 2. How was the trade managed?
 3. Was it successful? Why?
-4. Did you lode? Why?
+4. Did you lose? Why?
+
+** Before trade ask this questions:
+1. Where are you?
+2. What time is it?
+3. Are you angry?
+4. Are you sad?
+5. Is there noise around (at neighborhoods)?
+   - Is your head phone on?
+6. Do you have a plan?
+7. Did you log the money you start with?
+8. Do you feel confident?
+9. Are you already in loss?
+10. Are you in self-sabotage mode?

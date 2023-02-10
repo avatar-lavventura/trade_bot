@@ -49,6 +49,7 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO tradingview buy sell order makas lari ogrenebilir misin?
 ** TODO split busd and usdt orders
 ** TODO ignore < 0.0001 BTC asset positions
-** TODO Google Spreadsheets Python API v4
-Link: [[https://github.com/burnash/gspread]]
 ** TODO fetch assets first : BTC USDT BUSD detect which one exist
+** TODO conditinal-workflow order: ex: if this is sold buy 10$ of BTC from market
+chain of orders with condition:
+if total balance reach x : sell x then if price of y is this buy y with all

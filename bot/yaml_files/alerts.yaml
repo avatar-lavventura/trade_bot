@@ -4,16 +4,14 @@ alerts:
       pair: BTCUSDT
       price: 16000
       msg: ""
-    # a2:
-    #   pair: SNMBUSD
-    #   price: 1.0
-    #   msg: ""
-    # a3:
-    #   pair: SNMBUSD
-    #   price: 0.83
-    #   msg: ""
+    a2:
+      pair: DREPBUSD
+      price: 0.495
+      msg: ""
   greater_than: # >
     a1:
-      pair: GASBUSD
-      price: 3.9
+      pair: DREPBUSD
+      price: 0.59
       msg: ""
+  balance_greater_than:
+    value: 10000

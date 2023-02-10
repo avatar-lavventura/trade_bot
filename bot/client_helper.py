@@ -49,8 +49,7 @@ class ClientHelper:
 
     def get_balance_margin_usdt(self) -> float:
         with suppress(Exception):
-            _len = len(self.client.get_margin_account()["userAssets"])
-            for idx in range(_len):
+            for idx in range(len(self.client.get_margin_account()["userAssets"])):
                 if self.client.get_margin_account()["userAssets"][idx]["asset"] == "USDT":
                     balance_usdt = self.client.get_margin_account()["userAssets"][idx]["free"]
                     return float(balance_usdt)
