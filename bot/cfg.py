@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
-from broker._utils.tools import _date
+import time
 import gspread
+from bot.sheets_lib import fetch_withdrawn
+from broker._utils.tools import _date
+
 
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
@@ -24,6 +27,13 @@ SUM_BTC: float = 0.0
 BALANCE_FLAG = False
 MARGIN_BAL_BTC = 0
 MARGIN_BAL = 0
+FIRST_PRINT_CYCLE = True
+
+gc = gspread.service_account()
+sh = gc.open("guncel_kendime_olan_borclar")
+
+WITHDRAWN = fetch_withdrawn(sh)
+
 
 """
 * IGNORE_SOLD_QUANTITY
@@ -42,7 +52,3 @@ IGNORE_SOLD_QUANTITY = True  # by default True for all
 _IGNORE_SOLD_QUANTITY = {}
 for symbol in ["PNT/USDT", "ORN/USDT"]:
     _IGNORE_SOLD_QUANTITY[symbol] = False
-
-gc = gspread.service_account()
-sh = gc.open("guncel_kendime_olan_borclar")
-TOTAL_WITHDRAW = float(sh.sheet1.get("L2")[0][0])

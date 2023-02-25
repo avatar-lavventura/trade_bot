@@ -142,8 +142,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", qty)
             order = order["info"]
             with suppress(Exception):
-                for name in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
-                    del order[name]
+                for key in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
+                    del order[key]
 
             log(f"## CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
@@ -334,9 +334,6 @@ class BotHelperSpotAsync(BotHelperAsync):
                 )
                 per_change_r = float(format(per_change_r, ".2f"))
 
-        # if config.is_manual_trade:
-        #     log()
-
         current_sum = format(_sum + profit, ".2f")
         c = "yellow on black blink"
         if _type in ["usdt", "busd"]:
@@ -344,6 +341,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                 c1 = "white on black blink"
             else:
                 c1 = "green on black blink"
+
+            if float(per) == int(per.replace(".00", "")):
+                per = int(per.replace(".00", ""))
 
             log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}", end="")
         else:

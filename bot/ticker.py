@@ -44,6 +44,4 @@ async def main(symbol):
 
 
 if __name__ == "__main__":
-    # symbol = "BTCUSDT"
-    symbol = "SNMBUSD"
-    asyncio.get_event_loop().run_until_complete(main(symbol))
+    asyncio.get_event_loop().run_until_complete(main("BTCUSDT"))

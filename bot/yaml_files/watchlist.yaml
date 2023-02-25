@@ -1,8 +1,9 @@
 watch:
   list:
     - BTCUSDT
+    - FTMUSDT
     - COCOSBUSD
     - DREPBTC
     - DREPBUSD
   target:
-    DREPBUSD: 6570
+    DREPBUSD: 61

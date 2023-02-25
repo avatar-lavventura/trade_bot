@@ -7,7 +7,7 @@ from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
 from typing import Dict
-
+from broker._utils._log import log
 import ccxt.async_support as ccxt
 from broker._utils.tools import unix_time_millis
 from broker._utils.yaml import Yaml
@@ -224,7 +224,12 @@ class Config:
 
             with suppress(Exception):
                 for _, trade in enumerate(_trades):
-                    print(trade)
+                    log("config.get_spot_timestamp():", is_write=False)
+                    t = trade.copy()
+                    for key in ["info", "fee", "fees", "takerOrMaker", "type"]:
+                        del t[key]
+
+                    log(t, is_write=False)
                     if trade["info"]["isBuyer"]:
                         order_id = trade["info"]["orderId"]
                         first_orders = await exchange.spot.fetch_order_trades(order_id, symbol=symbol)

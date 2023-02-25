@@ -3,7 +3,7 @@ root:
   is_manual_trade: True
   is_funding_rate_alert: False
   is_write: False
-  balance_silent: False
+  balance_silent: True
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
   take_profit: 0.005
@@ -33,4 +33,4 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
-      DREPBUSD: 0.65
+      DREPBUSD: 0.61

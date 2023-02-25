@@ -11,11 +11,14 @@ from broker._utils.tools import _date, _timestamp
 
 from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
+from bot.sheets_lib import fetch_withdrawn
+
 
 _log.IS_WRITE = False
 bot_async = BotHelperAsync()
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
+WITHDRAWN = fetch_withdrawn(sh)
 goal = 0
 
 
@@ -43,7 +46,10 @@ async def main():
         log(f"{_date(_type='hour')} | ", end="")
 
         if goal == 0:
-            log(f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val} {start}", "bold")
+            log(
+                f"{int(bal_brave)} , {int(bal_chrome)} => {_sum}  {int(_sum + WITHDRAWN)} | [ib]{max_val} {start}",
+                "bold",
+            )
         else:
             log(f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}  {max_in_run} {start}", "bold")
 
