@@ -18,7 +18,6 @@ from bot import cfg
 from bot.mongodb import Mongo
 
 mc = MongoClient()
-is_start = True
 
 
 class Env:
@@ -98,26 +97,42 @@ class Exchange:
         return await self.margin_isolated.fetch_balance()
 
     async def record_balance(self):
+        # await bot_async.read_margin_cross_balance()
+        # binance_balance.bot_async
         margin_balance = await self.get_isolated_balance()
         _btc_bal = float(margin_balance["info"]["assets"][0]["baseAsset"]["free"])
         _usdt_bal = float(margin_balance["info"]["assets"][0]["quoteAsset"]["totalAsset"])
-        _b = _btc_bal + _usdt_bal / cfg.PRICES["BTCUSDT"]
+        btc_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) / cfg.PRICES["BTCUSDT"]
         _u = _btc_bal * cfg.PRICES["BTCUSDT"] + _usdt_bal
-        #
         balances_cross = await self.get_cross_balance()
-        #: total_net_asset_of_usdt
         _c = float(balances_cross["info"]["totalNetAssetOfBtc"]) * cfg.PRICES["BTCUSDT"]
-        btc_asset = float(config.env[cfg.TYPE].balance_sum.find_one("btc")["value"]) + _b
         usdt_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c
         if float(format(btc_asset, ".8f")) > 0.0001:
-            config.env[cfg.TYPE].balance.add_single_key(
-                cfg.CURRENT_DATE,
-                {
-                    "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                    "btc": float(format(btc_asset, ".8f")),
-                    "usdt": float(format(usdt_asset, ".2f")),
-                },
-            )
+            _only_btc = float(config.env[cfg.TYPE].estimated_balance.find_one("only_btc")["value"])
+            if _only_btc > 0:
+                remaining_asset_in_usdt = (
+                    float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"])
+                    - float(_only_btc) * cfg.PRICES["BTCUSDT"]
+                )
+                config.env[cfg.TYPE].balance.add_single_key(
+                    cfg.CURRENT_DATE,
+                    {
+                        "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                        "o_btc": _only_btc,
+                        "o_usdt": float(format(remaining_asset_in_usdt, ".2f")),
+                        "btc": float(format(btc_asset, ".8f")),
+                        "usdt": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
+                    },
+                )
+            else:
+                config.env[cfg.TYPE].balance.add_single_key(
+                    cfg.CURRENT_DATE,
+                    {
+                        "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
+                        "btc": float(format(btc_asset, ".8f")),
+                        "usdt": float(format(usdt_asset, ".2f")),
+                    },
+                )
         else:
             config.env[cfg.TYPE].balance.add_single_key(
                 cfg.CURRENT_DATE,
@@ -154,6 +169,7 @@ class Config:
         self.locked_per_limit_usdtperp = None
         self.asset_list = []
         self.btc_quantity = {}
+        self._env = None  #: shorted name
         self.env = {}  # type: Dict[str, Env]
         for idx in ["usdt", "btc"]:  # "busd"
             self.env[idx] = Env()  # should be initialized before reload()
@@ -167,8 +183,17 @@ class Config:
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
             self.env[asset]._ts = Mongo(mc, mc[asset]["timestamp"])
+            self.env[asset].estimated_balance = Mongo(mc, mc[asset]["estimated_balance"])
             if not self.env[asset]._status.find_one("count"):
                 self.env[asset]._status.add_single_key("count", 0)
+
+    def total_balance(self, _type) -> float:
+        return float(self.env[_type].estimated_balance.find_one("total_balance")["value"])
+
+    def estimated_balance(self) -> int:
+        balance_brave = self.total_balance("usdt")
+        balalance_chrome = self.total_balance("btc")
+        return int(balance_brave + balalance_chrome)
 
     async def get_spot_timestamp(self, asset, symbol=None) -> int:
         """Returns asset's set timestamp and updates if it is not set."""
@@ -189,9 +214,16 @@ class Config:
             if len(str(ts)) == 10:
                 _ts = ts * 1000
 
-            _trades = await exchange.spot.fetch_my_trades(symbol, since=_ts)
+            try:
+                _trades = await exchange.spot.fetch_my_trades(symbol, since=_ts)
+            except Exception as e:
+                if "/USDT" in symbol:
+                    _trades = await exchange.spot.fetch_my_trades(symbol.replace("/USDT", "/BUSD"), since=_ts)
+                else:
+                    raise e
+
             with suppress(Exception):
-                for idx, trade in enumerate(_trades):
+                for _, trade in enumerate(_trades):
                     print(trade)
                     if trade["info"]["isBuyer"]:
                         order_id = trade["info"]["orderId"]
@@ -200,7 +232,7 @@ class Config:
                         first_orders_ts = first_orders[0]["timestamp"]
                         break
 
-                if first_orders_ts > 0 and first_orders_ts < _ts:
+                if 0 < first_orders_ts < _ts:
                     # update few seconds behind such as ts - 9
                     ts = first_orders_ts
 
@@ -246,10 +278,13 @@ class Config:
         self.reload_wavetrend()
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
-        self.WATCHLIST = self.watchlist["watchlist"]
+        self.WATCHLIST = self.watchlist["watch"]["list"]
+        self.WATCHLIST_MSG = self.watchlist["watch"]["target"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
+        self.is_manual_trade = self.cfg["root"]["is_manual_trade"]
+        self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
             self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
@@ -257,6 +292,7 @@ class Config:
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
             self.env[_type].positions_alert = self.yaml_wrapper(self.base_dir / f"positions_alert_{_type}.yaml")
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
+            self.env[_type].isolated = self.cfg["root"][_type]["isolated"]
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01

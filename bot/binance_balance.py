@@ -38,20 +38,16 @@ async def discord_send_alert():
             if (alert_key == "greater_than" and float(_asset_price) >= alert["price"]) or (
                 alert_key == "less_than" and float(_asset_price) <= alert["price"]
             ):
-                _type = ""
                 if _pair[-3:] == "BTC":
                     asset = _pair[:-3]
-                    _type = "mBTC"
                     _asset_price = format(_asset_price * 1000, ".5")
                 elif _pair[-4:] == "USDT":
                     asset = _pair[:-4]
-                    _type = "USDT"
                 elif _pair[-4:] == "BUSD":
                     asset = _pair[:-4]
-                    _type = "BUSD"
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
-                    msg = f"{_pair}={_asset_price} {_type} {_date()}"
+                    msg = f"{_pair}={_asset_price} {_date(_format='%m-%d %H:%M:%S')}"
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
                     alert_track[asset] = True
 
@@ -66,8 +62,8 @@ async def process(unix_timestamp_ms):
     await clean_for_new_cycle()
     update_spot_timestamps(unix_timestamp_ms)  # current ts is saved
     *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
-    if usdt_bal > 0.125 and not helper.is_start:
-        log()
+    # if usdt_bal > 0.125:
+    #     log()
 
     # if IS_FUTURES:
     #     bot_async.futures_balance = await helper.exchange.future.fetch_balance()
@@ -84,8 +80,8 @@ async def process(unix_timestamp_ms):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
     pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
-    if helper.is_start and pos_count == 0 and float(cfg.locked_balance) <= 10:
-        delete_multiple_lines(1)
+    if pos_count == 0 and float(cfg.locked_balance) <= 10:
+        delete_multiple_lines(2)
 
 
 async def process_main(obj):
@@ -93,14 +89,12 @@ async def process_main(obj):
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
-    is_silent = True  # FIXME uncomment
     bot_async.channel = obj.channel
     bot_async.channel_alerts = obj.channel_alerts
     config._reload()
     try:
         unix_timestamp_ms = helper.exchange.get_spot_timestamp()
-        if is_silent:
-            await process(unix_timestamp_ms)
+        await process(unix_timestamp_ms)
     except RequestTimeout:
         _sys_exit("E: Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:

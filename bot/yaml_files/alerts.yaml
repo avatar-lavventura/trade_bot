@@ -5,15 +5,13 @@ alerts:
       price: 16000
       msg: ""
     a2:
-      pair: SNMBUSD
-      price: 0.5
+      pair: DREPBUSD
+      price: 0.495
       msg: ""
   greater_than: # >
     a1:
-      pair: SNMBTC
-      price: 0.00005
+      pair: DREPBUSD
+      price: 0.59
       msg: ""
-    a2:
-      pair: SNMBUSD
-      price: 0.70
-      msg: ""
+  balance_greater_than:
+    value: 10000

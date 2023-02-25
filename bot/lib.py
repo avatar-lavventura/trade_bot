@@ -24,7 +24,6 @@ class LiqBase:
             "1000XECUSDT",
             "1000SHIBUSDT",
             "1000LUNCBUSD",
-            "SHIBUSDT",
             "AAVEUSDT",
             "AVAXUSDT",
             "AXSUSDT",
@@ -53,4 +52,5 @@ class LiqBase:
             "HOTUSDT",
             "YFIUSDT",
             "YFIIUSDT",
+            "SHIBUSDT",
         ]

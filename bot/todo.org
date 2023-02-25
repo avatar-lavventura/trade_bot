@@ -43,4 +43,13 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
   ---
   3 ekleme yapiyorsun sonra 4. ekleme yapmak yerine market sell yapiyorsun
   ilk poz 5$ // 1. ekleme 10$ // 2. ekleme 15$ // 3. ekleme 20$ // 4. ekleme yerine market sell
-** TODO access mongodb remotely
+** TODO access mongodb remotely from home machine
+** TODO alert for all time high in a week 50% pumped coins
+** TODO mongo fetch balance from kama to home
+** TODO tradingview buy sell order makas lari ogrenebilir misin?
+** TODO split busd and usdt orders
+** TODO ignore < 0.0001 BTC asset positions
+** TODO fetch assets first : BTC USDT BUSD detect which one exist
+** TODO conditinal-workflow order: ex: if this is sold buy 10$ of BTC from market
+chain of orders with condition:
+if total balance reach x : sell x then if price of y is this buy y with all
