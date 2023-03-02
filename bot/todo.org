@@ -53,3 +53,11 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO conditinal-workflow order: ex: if this is sold buy 10$ of BTC from market
 chain of orders with condition:
 if total balance reach x : sell x then if price of y is this buy y with all
+
+** TODO about <pair> diye bir fonksiyon yap. 
+Kagidim tum pair lerini gostersin. Fikir acisindan faydali olabilir.
++ Current funding rate if there is...
++ =Market Cap =Volume= da onemli coingeicko dan
+historical data kismindan cekebilirsin.
+market cap ve volume azaldikca genelde fiyat dusuyor sanirim
+ex: [[https://www.coingecko.com/en/coins/cocos-bcx/historical_data#panel]]

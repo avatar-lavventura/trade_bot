@@ -12,8 +12,10 @@ import rumps  # type: ignore
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT"]
-assets = assets + ["DREPBTC", "DREPBUSD"]
+assets = assets + ["COCOSUSDT"]
 sleep_duration = 20
+is_quote = True
+MSG = "The most important rule in trading is to protect your capital at all cost."
 
 for idx, asset in enumerate(reversed(assets)):
     try:
@@ -47,13 +49,19 @@ def tracker_clock_string():
                 elif price > 1:
                     price = "{:.4f}".format(price)
 
-            if not msg:
-                msg = f"{asset} {price}"
+            if msg:
+                if asset == "BTC":
+                    msg = f"{price} | {msg}"
+                else:
+                    msg = f"{asset} {price} | {msg}"
             else:
-                msg = f"{asset} {price} | {msg}"
+                msg = f"{asset} {price}"
         except Exception as e:
             if "binance does not have market symbol" in str(e):
                 print(f"E' {e}")
+
+    if is_quote:
+        msg = f"{MSG} {msg}"
 
     return f"{msg} "
 

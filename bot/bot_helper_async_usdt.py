@@ -342,8 +342,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 c1 = "green on black blink"
 
-            if float(per) == int(per.replace(".00", "")):
-                per = int(per.replace(".00", ""))
+            if float(per) == int(float(per.replace(".00", ""))):
+                per = int(float(per.replace(".00", "")))
 
             log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}", end="")
         else:

@@ -8,3 +8,8 @@
 - Aslinda 4 kat, 25% duserse liq oluyorsun ama hesaba para koyunca liq fiyati azaliyor fakat ekledigin para kitleniyor.
 - extra islem yapinca, ornegin repay yaparsan, hem liq fiyati artti hem de
 toplam yapacagim kar azaldi. Islem sirasinda `repay` yapmak karli degil.
+
+* Funding Rate
+The payment rate exchanged between the long and short positions for the next
+funding. If the funding rate is positive, longs pay shorts. If negative, shorts
+pay longs.

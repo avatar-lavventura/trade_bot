@@ -1,9 +1,12 @@
 root:
-  goal: 0
+  ekleme:
+    08-03: "20000 try == 1014 usdt (baba)"
+  goal: 10000
+  goal_log: "13:28:11 | 0 , 7253 => 7253  9053 | 8423 10223"
+  balance_silent: True
   is_manual_trade: True
   is_funding_rate_alert: False
   is_write: False
-  balance_silent: True
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
   take_profit: 0.005
@@ -15,6 +18,7 @@ root:
     - DUMMY
   usdt:
     status: "off" # "on" or "off"
+    auto_buy_bnb:  "off"
     isolated: "on"
     max_pos: 1
     initial: 10.3
@@ -25,6 +29,7 @@ root:
       DUMMY_ASSET: 1.0
   btc:
     status: "off"
+    auto_buy_bnb:  "off"
     isolated: "on"
     initial: 0.00011
     max_pos: 1
@@ -33,4 +38,4 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
-      DREPBUSD: 0.61
+      DREPBUSD: 0.60

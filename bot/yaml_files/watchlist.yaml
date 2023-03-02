@@ -2,8 +2,11 @@ watch:
   list:
     - BTCUSDT
     - FTMUSDT
-    - COCOSBUSD
     - DREPBTC
     - DREPBUSD
+    - COCOSUSDT
   target:
-    DREPBUSD: 61
+    DREPBUSD: 599
+    COCOSUSDT: 1.71
+  liq:
+    COCOSUSDT: 1.25

@@ -41,12 +41,35 @@ def one_hr(symbol, _since=60):
     pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
     df["Time"] = [datetime.fromtimestamp(float(time) / 1000) for time in df["Time"]]
     df.set_index("Time", inplace=True)
-    print(df)
     log(ohlcv)
 
 
-def main():
-    symbol = "BTCUSDT"
+def _fetch_ohlcv(ohlcv, is_compact=False):
+    if is_compact:
+        _ohl = ohlcv[0][1:-2]
+        if float(_ohl[0]) > 10000:  # for btc
+            _ohl[0] = int(_ohl[0])
+            _ohl[1] = int(_ohl[1])
+            _ohl[2] = int(_ohl[2])
+
+        ohlcv = [_ohl]
+
+    # convert it into Pandas DataFrame
+    pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
+    if is_compact:
+        df = pd.DataFrame(ohlcv, columns=["Open", "High", "Low"])
+    else:
+        df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
+
+    pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
+    if not is_compact:
+        df["Time"] = [datetime.fromtimestamp(float(time) / 1000) for time in df["Time"]]
+        df.set_index("Time", inplace=True)
+
+    return df
+
+
+def main(symbol):
     binance = ccxt.binance()
     # now = datetime.utcnow()
     # _since = 0
@@ -58,19 +81,19 @@ def main():
     #     else:
     #         break
 
-    _since = fund.midnight
-    ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1h", since=_since, limit=1)
-    # convert it into Pandas DataFrame
-    pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
-    df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
-    pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
-    df["Time"] = [datetime.fromtimestamp(float(time) / 1000) for time in df["Time"]]
-    df.set_index("Time", inplace=True)
+    # _since = fund.midnight
+    ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="4h", limit=24)
+    df = _fetch_ohlcv(ohlcv)
     print(df)
-    log(ohlcv)
+    print()
+
+    ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
+    df = _fetch_ohlcv(ohlcv, is_compact=True)
+    print(df)
 
 
 if __name__ == "__main__":
+    main("COCOSUSDT")
     # symbol = "FTMUSDT"
     # output = fund.percent_change_since_fund(symbol)
     # print(output)
@@ -78,5 +101,4 @@ if __name__ == "__main__":
     # print(output)
     # output = percent_change_since_fund(symbol)
     # print(output)
-    # main()
-    one_hr("LUNAUSDT", _since=600)
+    # one_hr("LUNAUSDT", _since=600)

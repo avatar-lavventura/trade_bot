@@ -7,8 +7,8 @@ from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
 from typing import Dict
-from broker._utils._log import log
 import ccxt.async_support as ccxt
+from broker._utils._log import log
 from broker._utils.tools import unix_time_millis
 from broker._utils.yaml import Yaml
 from filelock import FileLock
@@ -45,6 +45,7 @@ class Exchange:
         self.margin_isolated = None
         self.margin_cross = None
         self._type: str = ""
+        self.binance = ccxt.binance()
 
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))

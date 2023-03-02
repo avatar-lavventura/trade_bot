@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 from contextlib import suppress
 from typing import Tuple
 
@@ -12,6 +13,7 @@ from bot import cfg
 from bot.config import config, exchange
 from bot.fund_time import Fund
 from bot.take_profit import TakeProfit
+from bot.bar_ohlcv import _fetch_ohlcv
 
 TP = TakeProfit()
 fund = Fund()
@@ -57,7 +59,13 @@ class BotHelperAsync:
         if price:
             asset_price = price
         else:
-            asset_price = await self.spot_fetch_ticker(symbol)
+            if symbol in cfg.PRICES:
+                if symbol == "BTCUSDT":
+                    asset_price = int(cfg.PRICES[symbol])
+                else:
+                    asset_price = cfg.PRICES[symbol]
+            else:
+                asset_price = await self.spot_fetch_ticker(symbol)
 
         percent = ((asset_price - bar_price) / bar_price) * 100
         return asset_price, float(format(percent, ".2f"))
@@ -68,7 +76,7 @@ class BotHelperAsync:
         lost = float(lost)
         real_pos_count = config._env._status.find_one("real_pos_count")["value"]
         if name == "mBTC":
-            msg += "-=-=-=-=-=-= "
+            msg += "\n-=-=-=-=-=-= "
             if lost != 0:
                 lost_usdt = lost / 1000 * cfg.PRICES["BTCUSDT"]
                 msg += f"[{c}]{format(lost_usdt, '.2f')}$({lost})[/{c}] "
@@ -140,6 +148,7 @@ class BotHelperAsync:
         ):
             if cfg.TYPE == "usdt":
                 flag = False
+                width1 = max(len(v) for v in config.WATCHLIST)
                 for symbol in config.WATCHLIST:
                     if not flag:
                         flag = True
@@ -147,6 +156,7 @@ class BotHelperAsync:
 
                     try:
                         asset_price, percent = await self.fetch_symbol_percent_change(symbol)
+                        # asset_price = str(asset_price)
                     except Exception as e:
                         log(f"E: {symbol} {e}")
                         print_tb(e)
@@ -155,10 +165,10 @@ class BotHelperAsync:
                     if symbol == "BTCUSDT":
                         if percent == 0:
                             per_str_c = "(0.0%)"
+                            per_str = "( 0.00%)"
                         else:
-                            per_str_c = f"([red]{percent}%[/red])" if percent < 0 else f"([green]+{percent}%[/green])"
+                            per_str_c = f"([red]{percent}%[/red])" if percent < 0 else f"([g]+{percent}%[/g])"
 
-                        asset_price = "{:,}".format(int(asset_price)).replace(",", ".")
                         c = "m" if symbol == "BTCUSDT" else "cy"
                         if float(lost) > 0:
                             log(f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c}", end="", is_write=False)
@@ -167,9 +177,21 @@ class BotHelperAsync:
 
                     if symbol in config.WATCHLIST_MSG:
                         goal = config.WATCHLIST_MSG[symbol]
-                        msg = f"{msg}\n{symbol}={asset_price} {per_str} 🎯{goal}"
+                        if symbol == "COCOSUSDT":
+                            liq_str = "💣 0.97483550"
+                            msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str} 🎯{goal} {liq_str}"
+                            ohlcv = await exchange.binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
+                            df = _fetch_ohlcv(ohlcv, is_compact=True)
+                            msg = f"{msg}\n{df}"
+                        else:
+                            msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str} 🎯{goal}"
+
                     else:
-                        msg = f"{msg}\n{symbol}={asset_price} {per_str}"
+                        msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                        if symbol == "BTCUSDT":
+                            ohlcv = await exchange.binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
+                            df = _fetch_ohlcv(ohlcv, is_compact=True)
+                            msg = f"{msg}\n{df}"
 
                 if flag and msg:
                     _time = _date(_format="%m-%d %H:%M:%S")
@@ -181,12 +203,16 @@ class BotHelperAsync:
                         if not config.cfg["root"]["balance_silent"]:
                             msg = f"{msg}=> `{_time}`"
 
-                    if "03:00:" in _time or not config.cfg["root"]["balance_silent"]:
+                    if config.estimated_balance() and ("03:00:" in _time or not config.cfg["root"]["balance_silent"]):
                         msg = f"{msg}  :moneybag:`{config.estimated_balance()}`"
                         msg = f"{msg} w=`${int(cfg.WITHDRAWN)}`\n\t\t"
                         msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN)}`"
 
-            await self._discord_sent_msg(msg)
+            if "03:00:" in _time:
+                if config.estimated_balance():
+                    await self._discord_sent_msg(msg)
+            else:
+                await self._discord_sent_msg(msg)
 
     ########
     # SPOT #
@@ -303,7 +329,7 @@ class BotHelperAsync:
             )
             cfg.SUM_BTC = sum_btc
 
-        if cfg.BNB_BALANCE < 0.3:
+        if cfg.BNB_BALANCE < 0.3 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on":
             try:
                 await self.buy_bnb()
             except Exception as e:
@@ -570,6 +596,11 @@ class BotHelperAsync:
             with suppress(Exception):
                 del order[item]
 
+        if order["symbol"] == "BNBBTC":
+            for item in ["fills", "selfTradePreventionMode", "clientOrderId"]:
+                with suppress(Exception):
+                    del order[item]
+
         log(order, is_write=False)
         return True
 
@@ -629,6 +660,13 @@ class BotHelperAsync:
                 elif "BTC" in asset:
                     asset = asset.replace("BTC", "BUSD")
                     return await self.spot_fetch_ticker(asset, is_bid_price)
+
+            print(str(e))
+            if "Connection reset by peer" in str(e):
+                # TODO: maybe restart again or recall the function
+                time.sleep(5)
+                log("hereeeeeeeeeeeeeeeeeeeeeeeeeee eeerrrrrrrrrrrrrr")
+                return await self.spot_fetch_ticker(asset, is_bid_price)
 
             raise e
 

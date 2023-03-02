@@ -4,6 +4,7 @@ import asyncio
 import time
 from contextlib import suppress
 
+import ccxt.async_support as ccxt  # noqa: E402
 import gspread
 from broker._utils import _log
 from broker._utils._log import log
@@ -13,13 +14,14 @@ from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 from bot.sheets_lib import fetch_withdrawn
 
-
 _log.IS_WRITE = False
 bot_async = BotHelperAsync()
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
 WITHDRAWN = fetch_withdrawn(sh)
 goal = 0
+goal_btc = 0.125
+exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 
 
 async def main():
@@ -32,6 +34,9 @@ async def main():
         # if config.is_manual_trade:
         #     await bot_async.read_margin_cross_balance()
         start = ""
+
+        # ticker = await exchange.fetch_ticker("BTCUSDT")
+        # _goal = int(ticker["last"] * goal_btc)
 
         bal_brave = config.total_balance("usdt")
         bal_chrome = config.total_balance("btc")
@@ -47,7 +52,7 @@ async def main():
 
         if goal == 0:
             log(
-                f"{int(bal_brave)} , {int(bal_chrome)} => {_sum}  {int(_sum + WITHDRAWN)} | [ib]{max_val} {start}",
+                f"{int(bal_brave)} , {int(bal_chrome)} => {_sum}  {int(_sum + WITHDRAWN)} | [ib]{max_val} {int(max_val + WITHDRAWN)} {start} ",
                 "bold",
             )
         else:

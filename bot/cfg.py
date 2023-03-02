@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import time
+
 import gspread
-from bot.sheets_lib import fetch_withdrawn
 from broker._utils.tools import _date
 
+from bot.sheets_lib import fetch_withdrawn
 
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
@@ -21,8 +22,14 @@ CURRENT_DATE = None  # zone is UTC
 MINIMUM_POSITION = {}
 MINIMUM_POSITION["btc"] = 0.0001
 MINIMUM_POSITION["usdt"] = 10
+
 PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
+
+# TODO: {ts, asset, price} @ mongoDB
+# do not fetch price within 20 seconds for BTCUSDT
+
+
 SUM_BTC: float = 0.0
 BALANCE_FLAG = False
 MARGIN_BAL_BTC = 0
