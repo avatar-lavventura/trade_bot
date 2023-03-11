@@ -31,7 +31,7 @@ class Discord_Alpy:
             else:
                 _log.IS_WRITE = False
 
-            log(f"[cy]**[/cy] bot_type={_type} started [cyan]**", "b")
+            log(f"[cy]**[/cy] bot_type={_type} started [cy]**", "b")
             self._type = cfg.TYPE = _type.lower()
             config._env = config.env[cfg.TYPE]
             helper.exchange.init(_type)

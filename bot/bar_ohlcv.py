@@ -87,13 +87,19 @@ def main(symbol):
     print(df)
     print()
 
+    ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1h", limit=1)
+    df = _fetch_ohlcv(ohlcv, is_compact=True)
+    print(df)
+
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
     df = _fetch_ohlcv(ohlcv, is_compact=True)
     print(df)
 
 
 if __name__ == "__main__":
-    main("COCOSUSDT")
+    symbol = "COCOSUSDT"
+    symbol = "BTCUSDT"
+    main(symbol)
     # symbol = "FTMUSDT"
     # output = fund.percent_change_since_fund(symbol)
     # print(output)

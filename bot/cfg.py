@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import time
-
 import gspread
 from broker._utils.tools import _date
 

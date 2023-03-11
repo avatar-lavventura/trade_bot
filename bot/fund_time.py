@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import ccxt
+from bot.config import exchange
 
 
 class Fund:
@@ -12,7 +13,7 @@ class Fund:
         self.fund_prices = {}
         self.fund_times = ["00:00:00+00:00", "09:00:00+00:00", "16:00:00+00:00"]
         self.init()
-        self.binance = ccxt.binance()
+        self.binance = exchange.binance
 
     def init(self):
         now = datetime.utcnow()
@@ -31,16 +32,16 @@ class Fund:
         date_string = "%Y-%m-%d %H:%M:%S%z"
         return int(datetime.strptime(cls, date_string).timestamp() * 1000)
 
-    def percent_change_since_day_start(self, symbol):
+    async def percent_change_since_day_start(self, symbol, tf):
         times_ts = self.parse_now(datetime.utcnow())
+        _bar = await self.binance.fetch_ohlcv(symbol=symbol, timeframe=tf, limit=1)
         if (symbol, times_ts) not in self.fund_prices:
-            self.fund_prices[(symbol, times_ts)] = self.binance.fetch_ohlcv(
-                symbol=symbol, timeframe="1h", since=times_ts, limit=1
-            )
+            self.fund_prices[(symbol, times_ts)] = _bar
+            # symbol=symbol, timeframe="1d", since=times_ts, limit=1
 
-        return self.fund_prices[(symbol, times_ts)]
+        return _bar
 
-    def percent_change_since_last_fund(self, symbol):  # TODO: check this function?
+    async def percent_change_since_last_fund(self, symbol):  # TODO: check this function?
         now = self.init()
         times_ts = self.parse_now(now)
         # now = datetime.utcnow()
@@ -54,7 +55,7 @@ class Fund:
             _since = times_ts
 
         if (symbol, times_ts) not in self.fund_prices:
-            self.fund_prices[(symbol, times_ts)] = self.binance.fetch_ohlcv(
+            self.fund_prices[(symbol, times_ts)] = await self.binance.fetch_ohlcv(
                 symbol=symbol, timeframe="1h", since=_since, limit=1
             )
 

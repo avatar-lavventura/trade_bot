@@ -6,7 +6,6 @@ watch:
     - DREPBUSD
     - COCOSUSDT
   target:
-    DREPBUSD: 599
-    COCOSUSDT: 1.71
+    COCOSUSDT: 1.74
   liq:
-    COCOSUSDT: 1.25
+    COCOSUSDT: 0.975

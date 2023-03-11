@@ -22,11 +22,13 @@ WITHDRAWN = fetch_withdrawn(sh)
 goal = 0
 goal_btc = 0.125
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+KEFEN = 3383
+BABA = 2061
 
 
 async def main():
     max_in_run = 0
-    max_val = 0
+    max_val = 10252  # 0
     if goal > 0:
         max_val = goal
 
@@ -34,10 +36,8 @@ async def main():
         # if config.is_manual_trade:
         #     await bot_async.read_margin_cross_balance()
         start = ""
-
         # ticker = await exchange.fetch_ticker("BTCUSDT")
         # _goal = int(ticker["last"] * goal_btc)
-
         bal_brave = config.total_balance("usdt")
         bal_chrome = config.total_balance("btc")
         _sum = int(bal_brave + bal_chrome)
@@ -51,8 +51,9 @@ async def main():
         log(f"{_date(_type='hour')} | ", end="")
 
         if goal == 0:
+            current_bal = int(_sum + WITHDRAWN - BABA)
             log(
-                f"{int(bal_brave)} , {int(bal_chrome)} => {_sum}  {int(_sum + WITHDRAWN)} | [ib]{max_val} {int(max_val + WITHDRAWN)} {start} ",
+                f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val} {current_bal} {start} ",
                 "bold",
             )
         else:

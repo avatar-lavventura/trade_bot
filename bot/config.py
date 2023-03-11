@@ -7,6 +7,7 @@ from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
 from typing import Dict
+
 import ccxt.async_support as ccxt
 from broker._utils._log import log
 from broker._utils.tools import unix_time_millis

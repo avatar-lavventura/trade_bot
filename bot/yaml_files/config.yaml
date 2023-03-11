@@ -19,7 +19,8 @@ root:
   usdt:
     status: "off" # "on" or "off"
     auto_buy_bnb:  "off"
-    isolated: "on"
+    isolated: "off"
+    cross: "off"
     max_pos: 1
     initial: 10.3
     multiply_ratio: 1.1
@@ -30,7 +31,8 @@ root:
   btc:
     status: "off"
     auto_buy_bnb:  "off"
-    isolated: "on"
+    isolated: "off"
+    cross: "on"
     initial: 0.00011
     max_pos: 1
     multiply_ratio: 1.1
@@ -38,4 +40,3 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
-      DREPBUSD: 0.60

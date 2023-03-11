@@ -5,7 +5,6 @@ from typing import Tuple
 
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
-from broker.errors import QuietExit
 
 from bot import cfg
 from bot import config as helper

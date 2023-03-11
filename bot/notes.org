@@ -9,6 +9,8 @@
 - extra islem yapinca, ornegin repay yaparsan, hem liq fiyati artti hem de
 toplam yapacagim kar azaldi. Islem sirasinda `repay` yapmak karli degil.
 
+** Always sleep your phone in charge if you have alerts and in lose.
+
 * Funding Rate
 The payment rate exchanged between the long and short positions for the next
 funding. If the funding rate is positive, longs pay shorts. If negative, shorts

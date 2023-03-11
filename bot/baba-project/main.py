@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from broker._utils._log import log
-from tradingview_ta import Exchange, Interval, TA_Handler
+from tradingview_ta import Interval, TA_Handler
 
 
 """

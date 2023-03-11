@@ -5,21 +5,23 @@ import sys
 import time
 from contextlib import suppress
 from typing import Tuple
-
-from broker._utils._log import log
+from broker._utils._log import log, ok  # flake8: noqa
 from broker._utils.tools import _date, _timestamp, decimal_count, print_tb
-
+from broker.errors import QuietExit
 from bot import cfg
+from bot.bar_ohlcv import _fetch_ohlcv
 from bot.config import config, exchange
 from bot.fund_time import Fund
 from bot.take_profit import TakeProfit
-from bot.bar_ohlcv import _fetch_ohlcv
 
 TP = TakeProfit()
 fund = Fund()
 
 
 class BotHelperAsync:
+    def __init__(self) -> None:
+        self.CROSS_READ_FLAG = False
+
     async def close(self):
         """Close the async function.
 
@@ -49,10 +51,11 @@ class BotHelperAsync:
         # if cfg.TYPE == "usdt" and config.cfg["root"]["busd"]["status"] == "on":
         #     self._update_timestamp_status("busd_timestamp")
 
-    async def fetch_symbol_percent_change(self, symbol, price=None):
-        bar_price = fund.percent_change_since_day_start(symbol)
+    async def fetch_symbol_percent_change(self, symbol, tf, price=None):
+        bar_price = await fund.percent_change_since_day_start(symbol, tf)
+        # print(bar_price)
         try:
-            bar_price = bar_price[0][1]  # time, open, high, low, close, volume
+            bar_price = bar_price[0]  # time, open, high, low, close, volume
         except Exception as e:
             raise KeyboardInterrupt from e
 
@@ -67,10 +70,21 @@ class BotHelperAsync:
             else:
                 asset_price = await self.spot_fetch_ticker(symbol)
 
+        high = bar_price[2]
+        low = bar_price[3]
+        # TODO: check here
+        if asset_price < low:
+            bar_price = high  # high
+        else:
+            bar_price = low  # low
+
+        # if tf == "1d":
+        #     bar_price = low  # low
+
         percent = ((asset_price - bar_price) / bar_price) * 100
         return asset_price, float(format(percent, ".2f"))
 
-    async def analyze_positions(self, name, lost, pos_count, free, total) -> None:
+    async def analyze_positions(self, name, lost, pos_count, free) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
         msg = ""
         lost = float(lost)
@@ -92,7 +106,6 @@ class BotHelperAsync:
             msg += f"[ib]{_total}[/ib]"
         else:
             msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
-            # total_str = f"[italic #6272a4]{total}[/italic #6272a4]"
             msg += f"[{c}]{abs(lost)}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:
                 msg = f"{msg}free=[cy]{free}{name}[/cy] "
@@ -138,9 +151,10 @@ class BotHelperAsync:
             cfg.discord_message = f"`{_date()}`\n"
             cfg.discord_sent_msg = None
 
-    async def _discord_send(self, msg, lost, pos_count, name, free, total) -> None:
+    async def _discord_send(self, msg, lost, pos_count, name, free) -> None:
+        _time = _date(_format="%m-%d %H:%M:%S")
         cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.3 else format(cfg.locked_balance, ".2f")
-        await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free, total)
+        await self.analyze_positions(name.replace(" ", ""), lost, pos_count, free)
         if (
             cfg.discord_message
             and len(cfg.discord_message) > 11
@@ -155,30 +169,34 @@ class BotHelperAsync:
                         msg = f"{msg}\n```"
 
                     try:
-                        asset_price, percent = await self.fetch_symbol_percent_change(symbol)
-                        # asset_price = str(asset_price)
+                        time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
+                        asset_price, percent_1h = await self.fetch_symbol_percent_change(symbol, tf="1h")
+                        time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
+                        asset_price, percent_1d = await self.fetch_symbol_percent_change(symbol, tf="1d")
                     except Exception as e:
                         log(f"E: {symbol} {e}")
                         print_tb(e)
 
-                    per_str = f"({percent}%)" if percent < 0 else f"(+{percent}%)"
+                    per_str_1h = f"{percent_1h}" if percent_1h < 0 else f"+{percent_1h}"
+                    per_str_1d = f"{percent_1d}" if percent_1d < 0 else f"+{percent_1d}"
+                    per_str = f"{per_str_1h}  {per_str_1d}"
                     if symbol == "BTCUSDT":
-                        if percent == 0:
-                            per_str_c = "(0.0%)"
-                            per_str = "( 0.00%)"
-                        else:
-                            per_str_c = f"([red]{percent}%[/red])" if percent < 0 else f"([g]+{percent}%[/g])"
-
+                        per_str_c_1h = f"([red]{percent_1h}%[/red])" if percent_1h < 0 else f"([g]+{percent_1h}%[/g])"
+                        per_str_c_1d = f"([red]{percent_1d}%[/red])" if percent_1d < 0 else f"([g]+{percent_1d}%[/g])"
                         c = "m" if symbol == "BTCUSDT" else "cy"
                         if float(lost) > 0:
-                            log(f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c}", end="", is_write=False)
+                            log(
+                                f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+                                end="",
+                                is_write=False,
+                            )
                     elif "BTC" in symbol:
                         asset_price = "{:.8f}".format(asset_price).lstrip("0.")
 
                     if symbol in config.WATCHLIST_MSG:
                         goal = config.WATCHLIST_MSG[symbol]
                         if symbol == "COCOSUSDT":
-                            liq_str = "💣 0.97483550"
+                            liq_str = "💣 0.968"
                             msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str} 🎯{goal} {liq_str}"
                             ohlcv = await exchange.binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
@@ -187,14 +205,16 @@ class BotHelperAsync:
                             msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str} 🎯{goal}"
 
                     else:
-                        msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
                         if symbol == "BTCUSDT":
                             ohlcv = await exchange.binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
+                            # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
-                            msg = f"{msg}\n{df}"
+                            msg = f"{msg}\n{df}\n                   1h%   24h%\n"
+                            msg = f"{msg}{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                        else:
+                            msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
 
                 if flag and msg:
-                    _time = _date(_format="%m-%d %H:%M:%S")
                     if "03:00:" in _time:
                         _time = _time[:-3]
                         msg = f"=> `{_time}`"
@@ -225,7 +245,11 @@ class BotHelperAsync:
         '0', 'locked': '0', 'netAsset': '2.1602058', 'netAssetOfBtc':
         '0.0001003', 'repayEnabled': True, 'totalAsset': '2.1602058'}
         """
-        balances = await exchange.margin_isolated.fetch_balance()
+        try:
+            balances = await exchange.margin_isolated.fetch_balance()
+        except Exception as e:
+            raise QuietExit("warning: cannot fetch isolated balance") from e
+
         return float(balances["info"]["totalNetAssetOfBtc"])
 
     async def _fetch_balance(self) -> None:
@@ -256,16 +280,23 @@ class BotHelperAsync:
     async def _fetch_margin_cross_balance(self):
         """Fetch margin balance in cross and estimated in btc."""
         balances = await exchange.margin_cross.fetch_balance()
-        return float(balances["info"]["totalAssetOfBtc"])
+        cfg.BNB_QTY += balances["total"]["BNB"]
+        cfg.BNB_BALANCE += cfg.BNB_QTY * await self.spot_fetch_ticker("BNBUSDT")
+        return float(balances["info"]["totalNetAssetOfBtc"])
 
     async def read_margin_cross_balance(self):
-        cfg.BALANCE_FLAG = True
-        cfg.MARGIN_BAL_BTC = await self._fetch_margin_cross_balance()
-        if cfg.MARGIN_BAL_BTC:
-            cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
+        if not self.CROSS_READ_FLAG:
+            self.CROSS_READ_FLAG = True
+            cfg.BALANCE_FLAG = True
+            cfg.MARGIN_BAL_BTC = await self._fetch_margin_cross_balance()
+            if cfg.MARGIN_BAL_BTC:
+                cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
 
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
+        self.CROSS_READ_FLAG = False
+        cfg.BNB_QTY = 0
+        cfg.BNB_BALANCE = 0
         own_usdt: float = 0
         sum_usdt: float = 0
         sum_busd: float = 0
@@ -316,8 +347,8 @@ class BotHelperAsync:
                 elif asset.lower() == "busd":
                     sum_busd += quantity
                 if asset.lower() == "bnb":
-                    cfg.BNB_QTY = quantity
-                    cfg.BNB_BALANCE = quantity * await self.spot_fetch_ticker("BNBUSDT")
+                    cfg.BNB_QTY += quantity
+                    cfg.BNB_BALANCE += quantity * await self.spot_fetch_ticker("BNBUSDT")
 
         ts = config._env.status["timestamp"]
         own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
@@ -345,6 +376,7 @@ class BotHelperAsync:
         if not cfg.BALANCE_FLAG or "03:00:" in _da:
             await self.read_margin_cross_balance()
 
+        await self.read_margin_cross_balance()
         if len(config.asset_list) == 0 or config.is_manual_trade:
             config.timestamp[f"{cfg.TYPE}_timestamp"] = {}  #: cleans timestamp.yaml file
             if cfg.TYPE == "usdt":
@@ -352,7 +384,7 @@ class BotHelperAsync:
                 _total_balance = float(_sum_usdt) + float(sum_busd)
                 if cfg.MARGIN_BAL > 0.1:
                     _total_balance += float(cfg.MARGIN_BAL)
-                    # log(f"cross_usdt={cfg.MARGIN_BAL} | ", "bold", end="")
+                    log(f"cross_usdt={cfg.MARGIN_BAL} | ", "bold", end="")
                 else:
                     cfg.MARGIN_BAL = 0
 
@@ -365,7 +397,7 @@ class BotHelperAsync:
                     _total_balance = float(_sum_usdt) + float(sum_busd) + float(cfg.MARGIN_BAL)
 
                 sum_btc += cfg.MARGIN_BAL_BTC
-                if float(_total_balance) < 1 or config._env.isolated:
+                if float(_total_balance) < 1 and config._env.isolated == "on":
                     _total_balance += await self._fetch_isolated_balance() * cfg.PRICES["BTCUSDT"]
 
                 _total_balance = format(_total_balance, ".2f")
@@ -383,9 +415,9 @@ class BotHelperAsync:
                 if cfg.MARGIN_BAL > 0.1:
                     own_usdt += float(cfg.MARGIN_BAL)
                     if sum_busd > 0.1:
-                        print_str += f"busd={sum_busd + cfg.MARGIN_BAL} [/bold]"
+                        print_str += f"busd={sum_busd + cfg.MARGIN_BAL} "
                     else:
-                        print_str += f"cross_usdt={cfg.MARGIN_BAL} | [/bold]"
+                        print_str += f"cross_usdt={cfg.MARGIN_BAL} | "
                 else:
                     cfg.MARGIN_BAL = 0
 
@@ -397,7 +429,7 @@ class BotHelperAsync:
                     await self.read_margin_cross_balance()
                     own_usdt = sum_btc * cfg.PRICES["BTCUSDT"] + sum_busd + float(cfg.MARGIN_BAL)
 
-                if config._env.isolated:
+                if config._env.isolated == "on":
                     own_usdt += await self._fetch_isolated_balance() * cfg.PRICES["BTCUSDT"]
 
                 log(print_str, end="")
@@ -416,8 +448,7 @@ class BotHelperAsync:
                         end="",
                     )
 
-                log(f"| {_da}", "bold")
-
+                log(f"| bnb={format(cfg.BNB_BALANCE, '.2f')} | [bold]{_da}")
                 config._env.estimated_balance.add_single_key("total_balance", own_usdt)
         elif cfg.TYPE == "usdt":
             busd_str = ""
@@ -548,8 +579,10 @@ class BotHelperAsync:
                 )
             elif float(lost_usdt) == 0:
                 # TODO: record this msg and print if a position opens in next cycle
+                BABA_KEFEN = 2026
                 msg = (
                     f":bee: btc=`{s_btc}` ≈ {u_btc} + `${int(float(own_usdt) -_b)}` => **`${format(own_usdt, '.2f')}`**"
+                    f"// `${format(own_usdt - BABA_KEFEN, '.2f')}`"
                 )
             else:
                 msg = (
@@ -565,10 +598,10 @@ class BotHelperAsync:
             msg = f"{msg} perf=**{output['value']}**"
 
         if cfg.TYPE == "usdt":
-            await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free, total)
+            await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free)
         else:
             _lost = format(lost * 1000, ".5f")
-            await self._discord_send(msg, _lost, pos_count, " mBTC", free, total)
+            await self._discord_send(msg, _lost, pos_count, " mBTC", free)
 
         cfg.FIRST_PRINT_CYCLE = False
         config._env._status.add_single_key("count", count)
@@ -590,7 +623,7 @@ class BotHelperAsync:
         log(f"#> buying minimum amount of [green]BNB[/green] bnb_balance={cfg.BNB_BALANCE}", is_write=False, end="")
         output = await self.spot_fetch_ticker(asset)
         order = await exchange.spot.create_market_buy_order(asset, float(format(amount / output, ".3f")))
-        log("[  ok  ]", is_write=False)
+        log(ok(), is_write=False)
         order = order["info"]
         for item in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
             with suppress(Exception):
@@ -665,7 +698,6 @@ class BotHelperAsync:
             if "Connection reset by peer" in str(e):
                 # TODO: maybe restart again or recall the function
                 time.sleep(5)
-                log("hereeeeeeeeeeeeeeeeeeeeeeeeeee eeerrrrrrrrrrrrrr")
                 return await self.spot_fetch_ticker(asset, is_bid_price)
 
             raise e
