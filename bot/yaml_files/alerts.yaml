@@ -7,17 +7,20 @@ alerts:
       msg: "💣"
     a1:
       pair: COCOSUSDT
-      price: 1.30
-      rapid_alert: "on"
+      price: 1.60
       msg: ""
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 25000
-      rapid_alert: "on"
+      price: 28500
+      rapid_alert: "off"
     a1:
-      pair: COCOSUSDT
-      price: 1.58
-      msg: ""
+      pair: DREPBTC
+      price: 0.0000185
+      rapid_alert: "off"
+    a2:
+      pair: JOEUSDT
+      price: 0.35
+      rapid_alert: "on"
   balance_greater_than:
     value: 10000

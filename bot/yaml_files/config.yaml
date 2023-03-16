@@ -1,8 +1,4 @@
 root:
-  ekleme:
-    08-03: "20000 try == 1014 usdt (baba)"
-  goal: 10000
-  goal_log: "13:28:11 | 0 , 7253 => 7253  9053 | 8423 10223"
   balance_silent: True
   is_manual_trade: True
   is_funding_rate_alert: False
@@ -14,6 +10,7 @@ root:
   sleep_duration: 20
   ignore: # for all
     - DREP
+    - JOE
   ignore_warning:
     - DUMMY
   usdt:
@@ -31,8 +28,8 @@ root:
   btc:
     status: "off"
     auto_buy_bnb:  "off"
-    isolated: "off"
-    cross: "on"
+    isolated: "on"
+    cross: "off"
     initial: 0.00011
     max_pos: 1
     multiply_ratio: 1.1

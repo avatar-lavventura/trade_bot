@@ -47,6 +47,8 @@ class Exchange:
         self.margin_cross = None
         self._type: str = ""
         self.binance = ccxt.binance()
+        self.mexc = ccxt.mexc()
+        self.bitmex = ccxt.bitmex()
 
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))
@@ -287,6 +289,7 @@ class Config:
         self.ALERTS = self.alerts["alerts"]
         self.WATCHLIST = self.watchlist["watch"]["list"]
         self.WATCHLIST_MSG = self.watchlist["watch"]["target"]
+        self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
@@ -299,6 +302,7 @@ class Config:
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
             self.env[_type].positions_alert = self.yaml_wrapper(self.base_dir / f"positions_alert_{_type}.yaml")
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
+            self.env[_type].cross = self.cfg["root"][_type]["cross"]
             self.env[_type].isolated = self.cfg["root"][_type]["isolated"]
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]

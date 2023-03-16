@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import time
 import asyncio
+import time
 from contextlib import suppress
 
 from broker._utils._async import _sleep

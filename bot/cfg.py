@@ -23,6 +23,7 @@ MINIMUM_POSITION["usdt"] = 10
 
 PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
+BNBUSDT: float = 0.0  # constant set its price only at startup
 
 # TODO: {ts, asset, price} @ mongoDB
 # do not fetch price within 20 seconds for BTCUSDT

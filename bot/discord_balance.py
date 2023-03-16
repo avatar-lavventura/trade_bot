@@ -59,6 +59,10 @@ class Discord_Alpy:
             print_tb(e)
             breakpoint()  # DEBUG
 
+    async def constructor(self):
+        output = await helper.exchange.spot.fetch_ticker("BNBUSDT")
+        cfg.BNBUSDT = float(output["last"])
+
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
 
@@ -72,6 +76,8 @@ class Discord_Alpy:
         await helper.exchange.record_balance()
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
+
+        await self.constructor()
 
         # secondly, each 20 seconds
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)

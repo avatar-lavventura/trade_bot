@@ -3,7 +3,7 @@
 import logging
 from contextlib import suppress
 from pathlib import Path
-
+from bot import cfg
 import discord
 from broker._utils.tools import log
 from broker._utils.yaml import Yaml
@@ -86,8 +86,7 @@ class ClientHelper:
                 futures_usd += balance
 
             if name == "BNB" and is_both:
-                current_bnb_price_USD = self.client.get_symbol_ticker(symbol="BNBUSDT")["price"]
-                futures_usd += balance * float(current_bnb_price_USD)
+                futures_usd += balance * cfg.BNBUSDT
 
         return float(futures_usd)
 

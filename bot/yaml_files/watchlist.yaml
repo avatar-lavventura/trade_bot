@@ -3,9 +3,9 @@ watch:
     - BTCUSDT
     - FTMUSDT
     - DREPBTC
-    - DREPBUSD
+    - DREPUSDT
     - COCOSUSDT
   target:
-    COCOSUSDT: 1.74
-  liq:
-    COCOSUSDT: 0.975
+    DREPUSDT: 528
+  bar:
+    - COCOSUSDT

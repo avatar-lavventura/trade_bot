@@ -1,6 +1,10 @@
-usdt_timestamp: {}
-btc_timestamp: {}
+usdt_timestamp:
+    JOE: 1679318538
+btc_timestamp:
+    JOE: 1679318946
 type:
     LQTY: 1677942601
-    DREP: 1677942782
+    DREP: 1679234247
     TRU: 1677939381
+    JOE: 1679308335
+    COCOS: 1679228776

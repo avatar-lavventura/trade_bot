@@ -9,38 +9,31 @@ import gspread
 from broker._utils import _log
 from broker._utils._log import log
 from broker._utils.tools import _date, _timestamp
-
-from bot.bot_helper_async import BotHelperAsync
 from bot.config import config
 from bot.sheets_lib import fetch_withdrawn
 
+exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+
 _log.IS_WRITE = False
-bot_async = BotHelperAsync()
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
 WITHDRAWN = fetch_withdrawn(sh)
+
 goal = 0
-goal_btc = 0.125
-exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-KEFEN = 3383
-BABA = 2061
+EKLEME = 2060
 
 
 async def main():
     max_in_run = 0
-    max_val = 10252  # 0
+    max_val = 10600
     if goal > 0:
         max_val = goal
 
     while True:
-        # if config.is_manual_trade:
-        #     await bot_async.read_margin_cross_balance()
         start = ""
-        # ticker = await exchange.fetch_ticker("BTCUSDT")
-        # _goal = int(ticker["last"] * goal_btc)
         bal_brave = config.total_balance("usdt")
         bal_chrome = config.total_balance("btc")
-        _sum = int(bal_brave + bal_chrome)
+        _sum = int(bal_brave + bal_chrome + WITHDRAWN - EKLEME)
         if _sum > max_val:
             max_val = _sum
 
@@ -50,19 +43,16 @@ async def main():
         max_in_run = _sum
         log(f"{_date(_type='hour')} | ", end="")
 
+        _str = f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}"
         if goal == 0:
-            current_bal = int(_sum + WITHDRAWN - BABA)
-            log(
-                f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val} {current_bal} {start} ",
-                "bold",
-            )
+            log(f"{_str} {start}", "b")
         else:
-            log(f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}  {max_in_run} {start}", "bold")
+            log(f"{_str} | [ib]{max_val}  {max_in_run} {start}", "b")
 
         with suppress(Exception):
             sh.sheet1.update("A20:D20", [[_timestamp(), int(bal_brave), int(bal_chrome), _sum]])
 
-        time.sleep(10)
+        time.sleep(15)
 
 
 if __name__ == "__main__":
