@@ -31,9 +31,9 @@ class Strategy:
             if ", (" in data_msg:
                 data_msg = data_msg.split(", (", 1)[0]
 
-            log(data_msg, "bold magenta", end="")
+            log(data_msg, "magenta", end="")
             if not data_msg.endswith(","):
-                log(",", "bold magenta", end="")
+                log(",", "magenta", end="")
 
         try:
             self.parse_msg(data_msg)
@@ -194,19 +194,23 @@ class BotHelper:
             asset_balance = await self.asset_balance()
             order = await self.strategy.exchange.create_limit_sell_order(symbol, asset_balance, limit_price)
             order = order["info"]
-            with suppress(Exception):
-                del order["type"]
-                del order["timeInForce"]
-                del order["status"]
-                del order["executedQty"]
-                del order["cummulativeQuoteQty"]
-                del order["orderListId"]
-                del order["fills"]
-                del order["orderId"]
-                del order["clientOrderId"]
-                del order["transactTime"]
+            for item in [
+                "type",
+                "timeInForce",
+                "status",
+                "executedQty",
+                "cummulativeQuoteQty",
+                "orderListId",
+                "fills",
+                "orderId",
+                "clientOrderId",
+                "transactTime",
+                "selfTradePreventionMode",
+            ]:
+                with suppress(Exception):
+                    del order[item]
 
-            log(f"order={order}", "bold")
+            log(f"order={order}")
         except QuietExit as e:
             raise e
         except Exception as e:
@@ -450,7 +454,7 @@ class BotHelper:
             elif "_bist" in data_msg:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
-                log(f" * {_date()} [bold magenta]{data_msg}")
+                log(f" * {_date()} [magenta]{data_msg}")
                 if "strategy.order.action" not in data_msg:
                     await self.discord_client.send_msg(data_msg, "alpy")
 
@@ -458,8 +462,11 @@ class BotHelper:
 
         self.strategy = Strategy(data_msg)
         if self.strategy.market.lower() == "usdt" and config.btc_wavetrend["30m"] == "red":
-            log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
+            log("30m-RED PASS", "bold orange1")
+            # log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
             return
+        else:
+            log()
 
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")

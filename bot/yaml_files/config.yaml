@@ -1,5 +1,5 @@
 root:
-  balance_silent: True
+  balance_silent: False
   is_manual_trade: True
   is_funding_rate_alert: False
   is_write: False
@@ -11,14 +11,17 @@ root:
   ignore: # for all
     - DREP
     - JOE
+    - OMG
+    - ID
   ignore_warning:
     - DUMMY
   usdt:
-    status: "off" # "on" or "off"
-    auto_buy_bnb:  "off"
+    is_manual_trade: False
+    status: "on" # "on" or "off"
+    auto_buy_bnb:  "on"
     isolated: "off"
     cross: "off"
-    max_pos: 1
+    max_pos: 2
     initial: 10.3
     multiply_ratio: 1.1
     percent_change_to_add: 4.5
@@ -26,9 +29,10 @@ root:
     entry_prices:
       DUMMY_ASSET: 1.0
   btc:
+    is_manual_trade: True
     status: "off"
-    auto_buy_bnb:  "off"
-    isolated: "on"
+    auto_buy_bnb:  "on"
+    isolated: "off"
     cross: "off"
     initial: 0.00011
     max_pos: 1

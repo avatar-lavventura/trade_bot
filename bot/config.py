@@ -7,7 +7,7 @@ from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
 from typing import Dict
-
+from pycoingecko import CoinGeckoAPI
 import ccxt.async_support as ccxt
 from broker._utils._log import log
 from broker._utils.tools import unix_time_millis
@@ -46,9 +46,10 @@ class Exchange:
         self.margin_isolated = None
         self.margin_cross = None
         self._type: str = ""
-        self.binance = ccxt.binance()
-        self.mexc = ccxt.mexc()
-        self.bitmex = ccxt.bitmex()
+        self.binance = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+        self.bitmex = ccxt.bitmex({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+        self.cg = CoinGeckoAPI()
+        # self.mexc = ccxt.mexc({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))
@@ -196,8 +197,8 @@ class Config:
 
     def estimated_balance(self) -> int:
         balance_brave = self.total_balance("usdt")
-        balalance_chrome = self.total_balance("btc")
-        return int(balance_brave + balalance_chrome)
+        balance_chrome = self.total_balance("btc")
+        return int(balance_brave + balance_chrome)
 
     async def get_spot_timestamp(self, asset, symbol=None) -> int:
         """Returns asset's set timestamp and updates if it is not set."""
@@ -288,7 +289,7 @@ class Config:
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
         self.WATCHLIST = self.watchlist["watch"]["list"]
-        self.WATCHLIST_MSG = self.watchlist["watch"]["target"]
+        self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
         self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]

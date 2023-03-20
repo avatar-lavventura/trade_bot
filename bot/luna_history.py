@@ -2,7 +2,7 @@
 
 import ccxt
 
-exchange = ccxt.binance()
+exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 exchange.load_markets()
 
 

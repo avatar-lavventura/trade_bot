@@ -20,12 +20,12 @@ sh = gc.open("guncel_kendime_olan_borclar")
 WITHDRAWN = fetch_withdrawn(sh)
 
 goal = 0
-EKLEME = 2060
+EKLEME = 0
 
 
 async def main():
     max_in_run = 0
-    max_val = 10600
+    max_val = 0
     if goal > 0:
         max_val = goal
 
@@ -43,7 +43,9 @@ async def main():
         max_in_run = _sum
         log(f"{_date(_type='hour')} | ", end="")
 
-        _str = f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}"
+        c1 = "green on black blink"
+        brave_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
+        _str = f"{int(bal_brave)} , {int(bal_chrome)} ([{c1}]${brave_spot_balance}[/{c1}]) => {_sum} | [ib]{max_val}"
         if goal == 0:
             log(f"{_str} {start}", "b")
         else:

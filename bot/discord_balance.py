@@ -36,6 +36,7 @@ class Discord_Alpy:
             config._env = config.env[cfg.TYPE]
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
+            self.constructor()
             self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
@@ -59,9 +60,9 @@ class Discord_Alpy:
             print_tb(e)
             breakpoint()  # DEBUG
 
-    async def constructor(self):
-        output = await helper.exchange.spot.fetch_ticker("BNBUSDT")
-        cfg.BNBUSDT = float(output["last"])
+    def constructor(self):
+        price = helper.exchange.cg.get_price(ids="binancecoin", vs_currencies="usd")
+        cfg.BNBUSDT = price["binancecoin"]["usd"]
 
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
@@ -76,8 +77,6 @@ class Discord_Alpy:
         await helper.exchange.record_balance()
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
-
-        await self.constructor()
 
         # secondly, each 20 seconds
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
@@ -172,7 +171,8 @@ def main():
     except:
         _type = "usdt"
 
-    Discord_Alpy(_type)
+    alpy = Discord_Alpy(_type)
+    breakpoint()  # DEBUG
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ class Fund:
         self.init()
         self.binance = exchange.binance
         self.bitmex = exchange.bitmex
+        self.RECORDS_BAR_1D = {}
 
     def init(self):
         now = datetime.utcnow()
@@ -35,7 +36,7 @@ class Fund:
         date_string = "%Y-%m-%d %H:%M:%S%z"
         return int(datetime.strptime(cls, date_string).timestamp() * 1000)
 
-    async def percent_change_since_day_start(self, symbol, tf):
+    async def _bar_ohlcv(self, symbol, tf):
         times_ts = self.parse_now(datetime.utcnow())
         if symbol == "BTCUSDT":
             _bar = await self.bitmex.fetch_ohlcv(symbol="BTC/USDT:USDT", timeframe=tf, limit=1)
@@ -46,6 +47,8 @@ class Fund:
             self.fund_prices[(symbol, times_ts)] = _bar
             # symbol=symbol, timeframe="1d", since=times_ts, limit=1
 
+        # TODO: check timestamp is it frozen or not >1h relative is unresponsive binance
+        self.RECORDS_BAR_1D[symbol] = _bar
         return _bar
 
     async def percent_change_since_last_fund(self, symbol):  # TODO: check this function?

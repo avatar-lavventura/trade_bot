@@ -13,9 +13,8 @@ from bot.fund_time import Fund
 
 fund = Fund()
 
-
+binance = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 # def percent_change_since_fund(symbol):
-#     binance = ccxt.binance()
 #     now = datetime.utcnow()
 #     _since = 0
 #     for times_ts in fund.fund_times_ts:
@@ -31,7 +30,6 @@ fund = Fund()
 
 
 def one_hr(symbol, _since=60):
-    binance = ccxt.binance()
     now = datetime.utcnow()
     unixtime = calendar.timegm(now.utctimetuple())
     since = (unixtime - _since * _since) * 1000  # UTC timestamp in milliseconds
@@ -48,9 +46,11 @@ def _fetch_ohlcv(ohlcv, is_compact=False):
     if is_compact:
         _ohl = ohlcv[0][1:-2]
         if float(_ohl[0]) > 10000:  # for btc
-            _ohl[0] = int(_ohl[0])
-            _ohl[1] = int(_ohl[1])
-            _ohl[2] = int(_ohl[2])
+            for i in range(0, 3):
+                _ohl[i] = int(_ohl[i])
+        elif float(_ohl[0]) < 0.0001:
+            for i in range(0, 3):
+                _ohl[i] = format(_ohl[i] * 1000, ".5f").replace("0.", "").lstrip("0")
 
         ohlcv = [_ohl]
 
@@ -61,7 +61,6 @@ def _fetch_ohlcv(ohlcv, is_compact=False):
     else:
         df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
 
-    pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
     if not is_compact:
         df["Time"] = [datetime.fromtimestamp(float(time) / 1000) for time in df["Time"]]
         df.set_index("Time", inplace=True)
@@ -70,7 +69,6 @@ def _fetch_ohlcv(ohlcv, is_compact=False):
 
 
 def main(symbol):
-    binance = ccxt.binance()
     # now = datetime.utcnow()
     # _since = 0
     # print(fund.fund_times_ts)

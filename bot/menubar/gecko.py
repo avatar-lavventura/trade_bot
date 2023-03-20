@@ -8,5 +8,5 @@ cg = CoinGeckoAPI()
 price = cg.get_price(ids="cocos-bcx", vs_currencies="btc")
 print(price["cocos-bcx"]["btc"])
 
-_price = cg.get_price(ids="bitcoin", vs_currencies="usd")
-print(_price)
+price = cg.get_price(ids="binancecoin", vs_currencies="usd")
+print(price["binancecoin"]["usd"])

@@ -5,7 +5,7 @@ from datetime import datetime
 import ccxt
 import pandas as pd
 
-binance = ccxt.binance()
+binance = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 
 
 def fetch_ohlcv():

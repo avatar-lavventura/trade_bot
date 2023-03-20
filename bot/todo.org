@@ -88,8 +88,8 @@ Traceback (most recent call last):
   File "/home/alper/trade_bot/bot/bot_helper_async.py", line 173, in _discord_send
     asset_price, percent_1h = await self.fetch_symbol_percent_change(symbol, tf="1h")
   File "/home/alper/trade_bot/bot/bot_helper_async.py", line 55, in fetch_symbol_percent_change
-    bar_price = fund.percent_change_since_day_start(symbol, tf)
-  File "/home/alper/trade_bot/bot/fund_time.py", line 36, in percent_change_since_day_start
+    bar_price = fund._bar_ohlcv(symbol, tf)
+  File "/home/alper/trade_bot/bot/fund_time.py", line 36, in _bar_ohlcv
     _bar = self.binance.fetch_ohlcv(symbol=symbol, timeframe=tf, limit=1)
 raise DDoSProtection(self.id + ' ' + str(code) + ' ' + reason + ' ' + body)
 ccxt.base.errors.DDoSProtection: binance 418 Unknown {"code":-1003,"msg":"Way too many requests;
@@ -98,5 +98,14 @@ An exception of type DDoSProtection occurred. Arguments:
 ('binance 418 Unknown {"code":-1003,"msg":"Way too many requests; IP(13.42.101.163) banned until
 1678851585462. Please use the websocket for live updates to avoid bans."}',)
 Traceback (most recent call last):
-
 #+end_src
+
+** TODO idea
+binance 'da BUSD USDT BTC olan pair leri cikar.
+Aralarinda BUSD ve USDT fiyatlari farkli olanlari cikar, bu kagitlar JOE gibi oynak oluyor.
+JOE biraz uyuz bir kagit satmak istedigin fiyatta satamiyorsun seni dusuk fiyata satmaya zorluyor.
+Demek binance disinda islem yaparlar ile mucadele ediyorsun.
+
+** TODO Today's PNL
+Today's PNL
+-$11.17

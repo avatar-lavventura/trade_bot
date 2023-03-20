@@ -5,7 +5,14 @@ watch:
     - DREPBTC
     - DREPUSDT
     - COCOSUSDT
+    - JOEUSDT
+    - IDUSDT
+    - OAXUSDT
   target:
-    DREPUSDT: 528
+    DREPBTC: 1855
+    IDUSDT: 47
   bar:
     - COCOSUSDT
+    - JOEUSDT
+    - IDUSDT
+    - OAXUSDT

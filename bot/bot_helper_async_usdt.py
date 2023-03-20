@@ -257,10 +257,16 @@ class BotHelperSpotAsync(BotHelperAsync):
                 except:
                     pass
 
-                if timestamp_list[0] > latest_busd_ts:
-                    qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
-                else:
-                    qty, _sum = self.calculate_entry(timestamp_list_busd, ordering_busd, trades_busd, asset, asset_qty)
+                try:
+                    if timestamp_list[0] > latest_busd_ts:
+                        qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
+                    else:
+                        qty, _sum = self.calculate_entry(
+                            timestamp_list_busd, ordering_busd, trades_busd, asset, asset_qty
+                        )
+                except Exception as e:
+                    log(f"warning: [  {asset}{_type.upper()}  ] {e}")
+                    return 0
 
             if asset_qty == 0:
                 log(f"E: float division by zero asset={asset}")
@@ -274,7 +280,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
                 and asset not in config.cfg["root"]["ignore_warning"]
             ):
-                log(f"warning: wrong calculation for {symbol} {asset_qty} == {qty}", is_write=False)
+                log(f"warning: wrong calculation for {symbol} {asset_qty} != {qty}", is_write=False)
 
             qty_to_consider = qty
             if asset_qty > qty:
@@ -363,16 +369,16 @@ class BotHelperSpotAsync(BotHelperAsync):
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
-            _entry_price = format(entry_price * 1000, ".4f").replace("0.", "").lstrip("0")
-            _price = format(asset_price * 1000, ".4f").replace("0.", "").lstrip("0")
+            _entry_price = format(entry_price * 1000, ".5f").replace("0.", "").lstrip("0")
+            _price = format(asset_price * 1000, ".5f").replace("0.", "").lstrip("0")
             msg = f"**{asset}** {_entry_price} p={_price} q={qty_str} "
 
         per_change_str = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}%) `{current_sum}$`\n"
             else:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
         else:
             if per_change_r == 0:
                 msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}% \n"
@@ -399,7 +405,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                     )
 
             cfg.discord_message_full += msg
-            if _type in ["usdt", "busd"] and _sum > config.discord_msg_above_usdt and profit < 0:
+            if _type in ["usdt", "busd"]:
                 cfg.discord_message += msg
             elif _type == "btc":
                 cfg.discord_message += msg
