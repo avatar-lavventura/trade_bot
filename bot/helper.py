@@ -4,6 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
+
 import ccxt.async_support as ccxt
 from broker._utils.tools import unix_time_millis
 from broker._utils.yaml import Yaml

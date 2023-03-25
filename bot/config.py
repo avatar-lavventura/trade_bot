@@ -7,12 +7,13 @@ from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
 from typing import Dict
-from pycoingecko import CoinGeckoAPI
+
 import ccxt.async_support as ccxt
 from broker._utils._log import log
 from broker._utils.tools import unix_time_millis
 from broker._utils.yaml import Yaml
 from filelock import FileLock
+from pycoingecko import CoinGeckoAPI
 from pymongo import MongoClient
 
 from bot import cfg
@@ -25,6 +26,7 @@ class Env:
     def __init__(self) -> None:
         self.multiply_ratio: float = 1.0
         self.percent_change_to_add = None
+        self.is_manual_trade = None
         self.usdt_multiply_ratio = None
         self.positions_alert = None
         self.balance = None
@@ -88,6 +90,10 @@ class Exchange:
             raise Exception("apiKey or secret is {}")
 
         return ops
+
+    def set_bnbusdt(self):
+        price = self.cg.get_price(ids="binancecoin", vs_currencies="usd")
+        cfg.BNBUSDT = price["binancecoin"]["usd"]
 
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])
@@ -231,7 +237,7 @@ class Config:
                 for _, trade in enumerate(_trades):
                     log("config.get_spot_timestamp():", is_write=False)
                     t = trade.copy()
-                    for key in ["info", "fee", "fees", "takerOrMaker", "type"]:
+                    for key in ["info", "fee", "fees", "takerOrMaker", "type", "id", "order", "cost", "side"]:
                         del t[key]
 
                     log(t, is_write=False)
@@ -294,12 +300,12 @@ class Config:
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
-        self.is_manual_trade = self.cfg["root"]["is_manual_trade"]
         self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
             self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
             self.env[_type].percent_change_to_add = -abs(self.cfg["root"][_type]["percent_change_to_add"]) + 0.01
+            self.env[_type].is_manual_trade = self.cfg["root"][_type]["is_manual_trade"]
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
             self.env[_type].positions_alert = self.yaml_wrapper(self.base_dir / f"positions_alert_{_type}.yaml")
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]

@@ -9,6 +9,7 @@ import gspread
 from broker._utils import _log
 from broker._utils._log import log
 from broker._utils.tools import _date, _timestamp
+
 from bot.config import config
 from bot.sheets_lib import fetch_withdrawn
 
@@ -21,6 +22,10 @@ WITHDRAWN = fetch_withdrawn(sh)
 
 goal = 0
 EKLEME = 0
+
+
+def f2(value):
+    return format(value, ".2f")
 
 
 async def main():
@@ -38,14 +43,17 @@ async def main():
             max_val = _sum
 
         if _sum > max_in_run and max_in_run != 0:
-            start = "[green]***********"
+            start = "[green]*****"
 
         max_in_run = _sum
         log(f"{_date(_type='hour')} | ", end="")
-
         c1 = "green on black blink"
-        brave_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
-        _str = f"{int(bal_brave)} , {int(bal_chrome)} ([{c1}]${brave_spot_balance}[/{c1}]) => {_sum} | [ib]{max_val}"
+        chrome_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
+        if chrome_spot_balance > 200:
+            _str = f"{f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}]) => {_sum} | [ib]{max_val}"
+        else:
+            _str = f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}"
+
         if goal == 0:
             log(f"{_str} {start}", "b")
         else:

@@ -8,6 +8,7 @@ from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
 from pymongo import MongoClient
 
+from bot import cfg
 from bot import config as helper
 from bot.bot_helper_async import TP, BotHelperAsync
 from bot.client_helper import DiscordClient
@@ -27,13 +28,13 @@ class Strategy:
         self.size: float = 0
         self.unix_timestamp_ms: int = 0
         if "enter" in data_msg:
-            log(f" * {_date()} ", end="")
+            log(f"* {_date(_format='%m-%d %H:%M:%S')} ", end="")
             if ", (" in data_msg:
                 data_msg = data_msg.split(", (", 1)[0]
 
-            log(data_msg, "magenta", end="")
+            log(data_msg, "magenta", highlight=False, end="")
             if not data_msg.endswith(","):
-                log(",", "magenta", end="")
+                log(",", "magenta", highlight=False, end="")
 
         try:
             self.parse_msg(data_msg)
@@ -126,7 +127,7 @@ class BotHelper:
                 limit_price = TP.get_short_tp(entry_price, isolated_wallet, decimal)
 
             quantity = abs(float(amount))
-            log(f"| limit_price={limit_price} | qty={quantity}", "bold")
+            log(f"| limit_price={limit_price} | qty={quantity}")
             await create_limit_order(self.strategy.symbol, quantity, limit_price, self.strategy.side)
         except TP_calculate as e:
             print_tb(e)
@@ -179,7 +180,7 @@ class BotHelper:
         entry_price = _sum / contracts
         entry_price = f"{entry_price:.{decimal}f}"
         limit_price = f"{float(entry_price) * TP.get_profit_amount():.{decimal}f}"
-        log(f"qty={asset_balance} entry={entry_price} limit={limit_price}", "bold")
+        log(f"qty={asset_balance} entry={entry_price} limit={limit_price}")
         return limit_price, entry_price
 
     async def spot_order_limit(self):
@@ -194,19 +195,7 @@ class BotHelper:
             asset_balance = await self.asset_balance()
             order = await self.strategy.exchange.create_limit_sell_order(symbol, asset_balance, limit_price)
             order = order["info"]
-            for item in [
-                "type",
-                "timeInForce",
-                "status",
-                "executedQty",
-                "cummulativeQuoteQty",
-                "orderListId",
-                "fills",
-                "orderId",
-                "clientOrderId",
-                "transactTime",
-                "selfTradePreventionMode",
-            ]:
+            for item in cfg.order_del_list:
                 with suppress(Exception):
                     del order[item]
 
@@ -219,7 +208,7 @@ class BotHelper:
                 print_tb(e)
 
     async def spot_order(self, quantity: float, symbol=None, side=None):
-        log(f"order_qty={quantity}", "bold")
+        log(f"order_qty={quantity}")
         _type = self.strategy.market.lower()
         if symbol:
             self.strategy.symbol = symbol
@@ -236,17 +225,14 @@ class BotHelper:
             order = order["info"]
             #: creates new item or overwrites on it
             config.timestamp[f"{_type}_timestamp"][self.strategy.asset] = int(order["transactTime"])
+            for item in cfg.order_del_list:
+                with suppress(Exception):
+                    del order[item]
+
             with suppress(Exception):
-                del order["timeInForce"]
-                del order["orderListId"]
-                del order["price"]
-                del order["status"]
-                del order["type"]
-                del order["origQty"]
-                del order["executedQty"]
-                del order["clientOrderId"]
-                del order["orderId"]
-                del order["side"]
+                del order["fills"]["commissionAsset"]
+                del order["fills"]["commission"]
+                # del order["fills"]["tradeId"]
 
             config.env[_type].hit._inc(self.strategy.asset)
             return order
@@ -306,10 +292,10 @@ class BotHelper:
 
     def futues_size_check(self, last_price, size=5.0) -> None:
         """Handle order's notional must be no smaller than 5 USDT."""
-        log(f"p={last_price}", "bold")
+        log(f"p={last_price}")
         if self.strategy.size >= 1.0 and self.strategy.size * last_price < size:
             self.strategy.size += 1
-            log(f"==> size_check: last_price={last_price} size={self.strategy.size}", "bold")
+            log(f"==> size_check: last_price={last_price} size={self.strategy.size}")
 
     async def buy(self):
         # if self.strategy.market == "USDTPERP":
@@ -355,7 +341,7 @@ class BotHelper:
                 end="",
             )
             if self.strategy.size != 0:
-                log(f"| size={self.strategy.size}", "bold")
+                log(f"| size={self.strategy.size}")
 
             if self.strategy.is_buy():
                 await self.buy()
@@ -410,7 +396,7 @@ class BotHelper:
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
                     is_open = True
-                    log("PASS", "bold")
+                    log("PASS")
                     break
 
         if not is_open:
@@ -450,24 +436,23 @@ class BotHelper:
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:
             if "abort" in data_msg:
-                log(f"   ABORT {data_msg}", "bold orange1")
+                log(f"   ABORT {data_msg}", "bold red")
             elif "_bist" in data_msg:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
-                log(f" * {_date()} [magenta]{data_msg}")
+                log(f" * {_date()} ", end="")
+                log(data_msg, "magenta", highlight=False)
                 if "strategy.order.action" not in data_msg:
                     await self.discord_client.send_msg(data_msg, "alpy")
 
             return
 
         self.strategy = Strategy(data_msg)
-        if self.strategy.market.lower() == "usdt" and config.btc_wavetrend["30m"] == "red":
-            log("30m-RED PASS", "bold orange1")
-            # log(f" * {_date()} [bold orange1]{data_msg} 30m-RED PASS")
-            return
-        else:
-            log()
+        # if self.strategy.market.lower() == "usdt" and config.btc_wavetrend["30m"] == "red":
+        #     log("30m-RED PASS", "red")
+        #     return
 
+        log()
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")
 

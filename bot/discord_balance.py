@@ -61,8 +61,7 @@ class Discord_Alpy:
             breakpoint()  # DEBUG
 
     def constructor(self):
-        price = helper.exchange.cg.get_price(ids="binancecoin", vs_currencies="usd")
-        cfg.BNBUSDT = price["binancecoin"]["usd"]
+        helper.exchange.set_bnbusdt()
 
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.

@@ -106,6 +106,15 @@ Aralarinda BUSD ve USDT fiyatlari farkli olanlari cikar, bu kagitlar JOE gibi oy
 JOE biraz uyuz bir kagit satmak istedigin fiyatta satamiyorsun seni dusuk fiyata satmaya zorluyor.
 Demek binance disinda islem yaparlar ile mucadele ediyorsun.
 
-** TODO Today's PNL
+** TODO Today's PNL  // add to footnote stats.py as daily summary
+or right bottom side of the terminal if possible // or output of  bal.py
+#+begin_src text
 Today's PNL
 -$11.17
+#+end_src
+
+** TODO funding den USDT'i spot'a cek kama tarafindan
+
+** TODO kazan.pine cok mesaj atiyor ona onlem al , gecmiste bir sekilde almistin.
+
+** TODO fix calculate entry price

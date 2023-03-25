@@ -19,15 +19,15 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def check_position_to_pass(self, asset, _sum, is_limit, per) -> bool:
         if _sum > config.isolated_wallet_limit:
-            log("pass_a", "bold")
+            log("pass_a")
             return True
 
         if float(per) > 80:
-            log("pass_b", "bold")
+            log("pass_b")
             return True
 
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
-            log("pass_c", "bold")
+            log("pass_c")
             return True
 
         log()
@@ -55,7 +55,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                             if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
-        elif not config.is_manual_trade:
+        elif not config.env[_type].is_manual_trade:
             await self.new_limit_order(asset, limit_price, market)
 
     def get_decimal_count(self, symbol, value) -> int:
@@ -350,7 +350,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             if float(per) == int(float(per.replace(".00", ""))):
                 per = int(float(per.replace(".00", "")))
 
-            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}", end="")
+            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}")
         else:
             if float(per) > 0:
                 if float(per) > 5:
@@ -363,7 +363,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(f"[ib]{format(_sum * 1000, '.4f')}", end="")
+            log(format(_sum * 1000, ".4f"), "ib", end="")
 
         cfg.locked_balance += float(per)
         if _type in ["usdt", "busd"]:
@@ -410,7 +410,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             elif _type == "btc":
                 cfg.discord_message += msg
 
-        if config.is_manual_trade:  # manual trade is on
+        if config.env[_type].is_manual_trade:  # manual trade is on
             return profit
 
         # self.is_cut_loss(asset, profit, qty_to_consider)

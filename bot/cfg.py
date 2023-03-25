@@ -58,3 +58,18 @@ IGNORE_SOLD_QUANTITY = True  # by default True for all
 _IGNORE_SOLD_QUANTITY = {}
 for symbol in ["PNT/USDT", "ORN/USDT"]:
     _IGNORE_SOLD_QUANTITY[symbol] = False
+
+order_del_list = [
+    "timeInForce",
+    "orderListId",
+    "price",
+    "status",
+    "type",
+    "origQty",
+    "executedQty",
+    "clientOrderId",
+    "orderId",
+    "side",
+    "selfTradePreventionMode",
+    "workingTime",
+]

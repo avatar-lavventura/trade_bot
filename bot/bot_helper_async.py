@@ -107,7 +107,7 @@ class BotHelperAsync:
             _total = format(_total, ".5f")
             msg += f"[ib]{_total}[/ib]"
         else:
-            msg += "\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
+            msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
             msg += f"[{c}]{abs(lost)}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:
                 msg = f"{msg}free=[cy]{free}{name}[/cy] "
@@ -224,6 +224,8 @@ class BotHelperAsync:
                         else:
                             msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
 
+                    msg = f"{msg}\n–––––––––––––"
+
                 if flag and msg:
                     if "03:00:" in _time:
                         _time = _time[:-3]
@@ -290,12 +292,13 @@ class BotHelperAsync:
     async def _fetch_margin_cross_balance(self):
         """Fetch margin balance in cross and estimated in btc."""
         balances = await exchange.margin_cross.fetch_balance()
-        cfg.BNB_QTY += balances["total"]["BNB"]
-        if cfg.BNBUSDT == 0:
-            cfg.BNBUSDT = await exchange.spot.fetch_ticker("BNBUSDT")
+        if balances["total"]["BNB"] > 0:
+            cfg.BNB_QTY += balances["total"]["BNB"]
+            if cfg.BNBUSDT == 0:
+                exchange.set_bnbusdt()
 
-        if cfg.BNBUSDT > 0:
-            cfg.BNB_BALANCE += cfg.BNB_QTY * cfg.BNBUSDT
+            if cfg.BNBUSDT > 0:
+                cfg.BNB_BALANCE += cfg.BNB_QTY * cfg.BNBUSDT
 
         return float(balances["info"]["totalNetAssetOfBtc"])
 
@@ -335,6 +338,7 @@ class BotHelperAsync:
                 quantity = float(balance["free"]) + locked
                 if asset == "BTC":
                     only_btc = quantity
+                    # TODO: store only_btc in mongodb for bal.py to fetch from
                     sum_btc += quantity
                     config._env.estimated_balance.add_single_key("only_btc", only_btc)
                 elif asset not in cfg.STABLE_COINS:
@@ -390,7 +394,7 @@ class BotHelperAsync:
         if config._env.cross == "on":
             await self.read_margin_cross_balance()
 
-        if len(config.asset_list) == 0 or config.is_manual_trade:
+        if len(config.asset_list) == 0 or config.env[cfg.TYPE].is_manual_trade:
             config.timestamp[f"{cfg.TYPE}_timestamp"] = {}  #: cleans timestamp.yaml file
             if cfg.TYPE == "usdt":
                 #: estimated balance:
@@ -403,7 +407,7 @@ class BotHelperAsync:
 
                 if config._env.cross == "on":
                     if (
-                        config.is_manual_trade
+                        config.env[cfg.TYPE].is_manual_trade
                         and abs(
                             _total_balance - float(config._env.estimated_balance.find_one("total_balance")["value"])
                         )
@@ -423,7 +427,7 @@ class BotHelperAsync:
             elif cfg.TYPE == "btc":  #: calculating the estimated balance
                 print_str = ":bee: "
                 if only_btc > 0:
-                    print_str += f"[bold]btc={only_btc} [/bold]"
+                    print_str += f"[bold]btc={only_btc}[/bold] "
 
                 if cfg.FIRST_PRINT_CYCLE:
                     if print_str != ":bee: ":
@@ -441,7 +445,7 @@ class BotHelperAsync:
                 own_usdt += sum_busd + only_usdt
                 if config._env.cross == "on":
                     if (
-                        config.is_manual_trade
+                        config.env[cfg.TYPE].is_manual_trade
                         and abs(own_usdt - float(config._env.estimated_balance.find_one("total_balance")["value"]))
                         >= 100
                     ):
@@ -552,7 +556,7 @@ class BotHelperAsync:
         pos_str = ""
         if pos_count > 2:
             pos_str = f" | pos=**{pos_count}**"
-        elif pos_count == 0 or (config.is_manual_trade and real_pos_count == 0):
+        elif pos_count == 0 or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
             log()  # to overwrite printed balance
 
         free = float(free)

@@ -18,6 +18,7 @@ logging.getLogger("requests").setLevel(logging.CRITICAL)
 
 
 app = Quart(__name__)
+liner = "======================"
 
 
 async def do_alert(msg):
@@ -66,7 +67,7 @@ async def startup():
     if not config.cfg["root"]["is_write"]:
         _log.IS_WRITE = False
 
-    print(" * s t a r t i n g . . .")
+    print("* s t a r t i n g . . .")
 
 
 @app.after_serving
@@ -90,7 +91,18 @@ async def webhook() -> (str, int):
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
             await do_alert(data_msg)
-            print(f"  wt_30m=[  {data_msg.upper()}  ]   {_date(_type='hour')}", end="\r")
+            text = ""
+            if data_msg.upper() == "RED":
+                text = f"  [red]{data_msg.upper()}[/red]  "
+            elif data_msg.upper() == "GREEN":
+                text = f"  [green]{data_msg.upper()}[/green]  "
+
+            log(
+                f" {liner}  [y]wt_30m[/y]=[{text}]   {_date(_type='hour')}  {liner}",
+                end="\r",
+                is_write=False,
+                highlight=False,
+            )
         else:
             for asset in ["BTC", "USDT", "BUSD"]:
                 if asset in data_msg and config.cfg["root"][asset.lower()]["status"] == "off":

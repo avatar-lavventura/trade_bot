@@ -3,10 +3,12 @@
 import logging
 from contextlib import suppress
 from pathlib import Path
-from bot import cfg
+
 import discord
 from broker._utils.tools import log
 from broker._utils.yaml import Yaml
+
+from bot import cfg
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.CRITICAL)
