@@ -49,7 +49,7 @@ async def main():
         log(f"{_date(_type='hour')} | ", end="")
         c1 = "green on black blink"
         chrome_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
-        if chrome_spot_balance > 200:
+        if chrome_spot_balance > 1000:
             _str = f"{f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}]) => {_sum} | [ib]{max_val}"
         else:
             _str = f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}"

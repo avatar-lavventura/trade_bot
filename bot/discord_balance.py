@@ -5,7 +5,7 @@ import os
 import sys
 from contextlib import suppress
 from pathlib import Path
-
+import time
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
@@ -36,7 +36,11 @@ class Discord_Alpy:
             config._env = config.env[cfg.TYPE]
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
-            self.constructor()
+            try:
+                self.constructor()
+            except Exception as e:
+                log(f"E: {e}")
+
             self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
@@ -61,7 +65,7 @@ class Discord_Alpy:
             breakpoint()  # DEBUG
 
     def constructor(self):
-        helper.exchange.set_bnbusdt()
+        helper.exchange._set_bnbusdt()
 
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.

@@ -91,7 +91,7 @@ async def webhook() -> (str, int):
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
             await do_alert(data_msg)
-            text = ""
+            text = "  NONE  "
             if data_msg.upper() == "RED":
                 text = f"  [red]{data_msg.upper()}[/red]  "
             elif data_msg.upper() == "GREEN":

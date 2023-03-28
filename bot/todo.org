@@ -118,3 +118,9 @@ Today's PNL
 ** TODO kazan.pine cok mesaj atiyor ona onlem al , gecmiste bir sekilde almistin.
 
 ** TODO fix calculate entry price
+
+** TODO FIX
+#+begin_src bash
+E: 403 Client Error: Forbidden for url:
+https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd
+#+end_src

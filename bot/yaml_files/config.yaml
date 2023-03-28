@@ -8,13 +8,10 @@ root:
   locked_percent_limit: 99.99
   sleep_duration: 20
   ignore: # for all
-    - DREP
-    - OMG
     - ID
     - LQTY
     - ATA
     - HIGH
-    - JOE
   ignore_warning:
     - DUMMY
   usdt:
@@ -45,3 +42,8 @@ root:
     stop_trade_wt_30m_red: True
     entry_prices:
       DUMMY_ASSET: 1.0
+    ignore: # for all
+      - ID
+      - LQTY
+      - ATA
+      - HIGH

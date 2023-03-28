@@ -199,6 +199,13 @@ class BotHelper:
                 with suppress(Exception):
                     del order[item]
 
+            with suppress(Exception):
+                if not order["fills"]:
+                    del order["fills"]
+
+                if float(order["cummulativeQuoteQty"]) == 0:
+                    del order["cummulativeQuoteQty"]
+
             log(f"order={order}")
         except QuietExit as e:
             raise e
@@ -333,7 +340,6 @@ class BotHelper:
                 await self.calculate_futures_size()
 
             side_color = "green" if self.strategy.side == "BUY" else "red"
-            log()
             log(
                 f"==> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
                 f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue] "

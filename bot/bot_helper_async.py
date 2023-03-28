@@ -116,8 +116,8 @@ class BotHelperAsync:
             if real_pos_count > 1:
                 log(msg, end="")
             else:
-                log()
-                log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-", "bold black", end="")
+                # log()
+                log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "bold black", end="")
 
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
             if pos_count > 2:
@@ -219,8 +219,9 @@ class BotHelperAsync:
                             ohlcv = fund.RECORDS_BAR_1D[symbol]
                             # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
-                            msg = f"{msg}\n{df}\n                   1h%   24h%\n"
+                            msg = f"{msg}\n                   1h%   24h%\n"
                             msg = f"{msg}{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                            msg = f"{msg}\n{df}"
                         else:
                             msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
 
@@ -295,7 +296,7 @@ class BotHelperAsync:
         if balances["total"]["BNB"] > 0:
             cfg.BNB_QTY += balances["total"]["BNB"]
             if cfg.BNBUSDT == 0:
-                exchange.set_bnbusdt()
+                await exchange.set_bnbusdt()
 
             if cfg.BNBUSDT > 0:
                 cfg.BNB_BALANCE += cfg.BNB_QTY * cfg.BNBUSDT
@@ -368,7 +369,8 @@ class BotHelperAsync:
                 if asset.lower() == "bnb":
                     cfg.BNB_QTY += quantity
                     if cfg.BNBUSDT == 0:
-                        cfg.BNBUSDT = await exchange.spot.fetch_ticker("BNBUSDT")
+                        output = await exchange.spot.fetch_ticker("BNBUSDT")
+                        cfg.BNBUSDT = output["close"]
 
                     if cfg.BNBUSDT > 0:
                         cfg.BNB_BALANCE += quantity * cfg.BNBUSDT
@@ -776,6 +778,8 @@ class BotHelperAsync:
                 del response["orderListId"]
                 del response["executedQty"]
                 del response["fills"]
+                del response["selfTradePreventionMode"]
+                del response["workingTime"]
 
             log(response, "bold cyan")
         except Exception as e:

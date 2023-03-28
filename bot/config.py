@@ -91,9 +91,17 @@ class Exchange:
 
         return ops
 
-    def set_bnbusdt(self):
+    def _set_bnbusdt(self):
         price = self.cg.get_price(ids="binancecoin", vs_currencies="usd")
         cfg.BNBUSDT = price["binancecoin"]["usd"]
+
+    async def set_bnbusdt(self):
+        try:
+            price = self.cg.get_price(ids="binancecoin", vs_currencies="usd")
+            cfg.BNBUSDT = price["binancecoin"]["usd"]
+        except:
+            output = await self.spot.fetch_ticker("BNBUSDT")
+            cfg.BNBUSDT = output["close"]
 
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])

@@ -30,7 +30,6 @@ class BotHelperSpotAsync(BotHelperAsync):
             log("pass_c")
             return True
 
-        log()
         return False
 
     async def is_limit_order_exist(self, asset, limit_price) -> None:
