@@ -308,7 +308,6 @@ def get_first_price(_symbol):
     # agg_trades = client.aggregate_trade_iter(symbol=_symbol, start_str="60 minutes ago UTC")
     flag = False
     for trade in agg_trades:
-        print(trade)
         if flag:
             if first_price > trade["p"]:
                 print("Second price is smaller may decrease abort mission")

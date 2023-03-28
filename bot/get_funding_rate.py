@@ -14,7 +14,13 @@ exchange = ccxt.binanceusdm(
 
 
 def peak_funding_rates():
-    """Print assets in futures that have funding rates at edges."""
+    """Print assets in futures that have funding rates at edges.
+
+    * Funding Rate
+    The payment rate exchanged between the long and short positions for the next
+    funding. If the funding rate is positive, longs pay shorts. If negative, shorts
+    pay longs.
+    """
     ts = None
     funding = {}
     response = exchange.fetchFundingRates()
@@ -41,7 +47,7 @@ def peak_funding_rates():
         log(f"[b]ts={ts}", is_write=False)
         log(funding, is_write=False)
     else:
-        log("#> [white]no funding rate greater than 0.75%", is_write=False)
+        log("#> [white]no funding rate greater than 0.7%", is_write=False)
 
 
 def main():

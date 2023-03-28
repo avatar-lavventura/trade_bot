@@ -1,17 +1,18 @@
 alerts:
   less_than: # <
-    a1:
+    base:
       pair: BTCUSDT
       price: 16000
-      msg: ""
-    a2:
-      pair: DREPBUSD
-      price: 0.495
+      rapid_alert: "on" # more rapid message
+      msg: "💣"
+    a1:
+      pair: COCOSUSDT
+      price: 1.28
       msg: ""
   greater_than: # >
-    a1:
-      pair: DREPBUSD
-      price: 0.59
-      msg: ""
+    base:
+      pair: BTCUSDT
+      price: 28400
+      rapid_alert: "off"
   balance_greater_than:
     value: 10000

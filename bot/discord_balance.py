@@ -31,11 +31,12 @@ class Discord_Alpy:
             else:
                 _log.IS_WRITE = False
 
-            log(f"[cy]**[/cy] bot_type={_type} started [cyan]**", "b")
+            log(f"[cy]**[/cy] bot_type={_type} started [cy]**", "b")
             self._type = cfg.TYPE = _type.lower()
             config._env = config.env[cfg.TYPE]
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
+            self.constructor()
             self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
@@ -58,6 +59,9 @@ class Discord_Alpy:
         except Exception as e:
             print_tb(e)
             breakpoint()  # DEBUG
+
+    def constructor(self):
+        helper.exchange.set_bnbusdt()
 
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
@@ -166,7 +170,8 @@ def main():
     except:
         _type = "usdt"
 
-    Discord_Alpy(_type)
+    alpy = Discord_Alpy(_type)
+    breakpoint()  # DEBUG
 
 
 if __name__ == "__main__":

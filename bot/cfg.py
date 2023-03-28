@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-from broker._utils.tools import _date
 import gspread
+from broker._utils.tools import _date
+
+from bot.sheets_lib import fetch_withdrawn
 
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
@@ -18,12 +20,26 @@ CURRENT_DATE = None  # zone is UTC
 MINIMUM_POSITION = {}
 MINIMUM_POSITION["btc"] = 0.0001
 MINIMUM_POSITION["usdt"] = 10
+
 PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
+BNBUSDT: float = 0.0  # constant set its price only at startup
+
+# TODO: {ts, asset, price} @ mongoDB
+# do not fetch price within 20 seconds for BTCUSDT
+
+
 SUM_BTC: float = 0.0
 BALANCE_FLAG = False
 MARGIN_BAL_BTC = 0
 MARGIN_BAL = 0
+FIRST_PRINT_CYCLE = True
+
+gc = gspread.service_account()
+sh = gc.open("guncel_kendime_olan_borclar")
+
+WITHDRAWN = fetch_withdrawn(sh)
+
 
 """
 * IGNORE_SOLD_QUANTITY
@@ -43,6 +59,17 @@ _IGNORE_SOLD_QUANTITY = {}
 for symbol in ["PNT/USDT", "ORN/USDT"]:
     _IGNORE_SOLD_QUANTITY[symbol] = False
 
-gc = gspread.service_account()
-sh = gc.open("guncel_kendime_olan_borclar")
-TOTAL_WITHDRAW = float(sh.sheet1.get("L2")[0][0])
+order_del_list = [
+    "timeInForce",
+    "orderListId",
+    "price",
+    "status",
+    "type",
+    "origQty",
+    "executedQty",
+    "clientOrderId",
+    "orderId",
+    "side",
+    "selfTradePreventionMode",
+    "workingTime",
+]

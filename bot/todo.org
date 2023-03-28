@@ -53,3 +53,68 @@ response = exchange.fetch_ohlcv("BTC/USDT", "5m", 1652395049528, 1)
 ** TODO conditinal-workflow order: ex: if this is sold buy 10$ of BTC from market
 chain of orders with condition:
 if total balance reach x : sell x then if price of y is this buy y with all
+
+** TODO about <pair> diye bir fonksiyon yap. 
+Kagidim tum pair lerini gostersin. Fikir acisindan faydali olabilir.
++ Current funding rate if there is...
++ =Market Cap =Volume= da onemli coingeicko dan
+historical data kismindan cekebilirsin.
+market cap ve volume azaldikca genelde fiyat dusuyor sanirim
++ does it have isolated or margin pair?
++ does it have a btc pair in binance?
+ex: [[https://www.coingecko.com/en/coins/cocos-bcx/historical_data#panel]]
+
+** TODO fetch BTCUSDT price from somewhere else than binance and record in mongodb
+https://github.com/ccxt/ccxt/issues/1177
+
+Tum process ler mongodb den ceksin, 1 dakika gecmiste cektiyse hangisi
+race de once talep ederse fiyati update etsin.
+
+That's because you make too much requests. Under the hood fetchTickers uses ticker/24h, which is quite "heavy" request. And you're limited to 1200 points per minute, when fetchTickers takes 242 points at this moment:
+
+[{'rateLimitType': 'REQUESTS', 'interval': 'MINUTE', 'limit': 1200},
+{'rateLimitType': 'ORDERS', 'interval': 'SECOND', 'limit': 10},
+{'rateLimitType': 'ORDERS', 'interval': 'DAY', 'limit': 100000}]
+Add sleep(X) to avoid this. Also count your requests:
+https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md
+
+There's also another problem: Binance should return 429 first, not 418. But AFAIU, it's a known bug for this moment.
+Binance is quite strict about API usage..
+
+
+
+#+begin_src bash
+Traceback (most recent call last):
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 173, in _discord_send
+    asset_price, percent_1h = await self.fetch_symbol_percent_change(symbol, tf="1h")
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 55, in fetch_symbol_percent_change
+    bar_price = fund._bar_ohlcv(symbol, tf)
+  File "/home/alper/trade_bot/bot/fund_time.py", line 36, in _bar_ohlcv
+    _bar = self.binance.fetch_ohlcv(symbol=symbol, timeframe=tf, limit=1)
+raise DDoSProtection(self.id + ' ' + str(code) + ' ' + reason + ' ' + body)
+ccxt.base.errors.DDoSProtection: binance 418 Unknown {"code":-1003,"msg":"Way too many requests;
+IP(13.42.101.163) banned until 1678851585462. Please use the websocket for live updates to avoid bans."}
+An exception of type DDoSProtection occurred. Arguments:
+('binance 418 Unknown {"code":-1003,"msg":"Way too many requests; IP(13.42.101.163) banned until
+1678851585462. Please use the websocket for live updates to avoid bans."}',)
+Traceback (most recent call last):
+#+end_src
+
+** TODO idea
+binance 'da BUSD USDT BTC olan pair leri cikar.
+Aralarinda BUSD ve USDT fiyatlari farkli olanlari cikar, bu kagitlar JOE gibi oynak oluyor.
+JOE biraz uyuz bir kagit satmak istedigin fiyatta satamiyorsun seni dusuk fiyata satmaya zorluyor.
+Demek binance disinda islem yaparlar ile mucadele ediyorsun.
+
+** TODO Today's PNL  // add to footnote stats.py as daily summary
+or right bottom side of the terminal if possible // or output of  bal.py
+#+begin_src text
+Today's PNL
+-$11.17
+#+end_src
+
+** TODO funding den USDT'i spot'a cek kama tarafindan
+
+** TODO kazan.pine cok mesaj atiyor ona onlem al , gecmiste bir sekilde almistin.
+
+** TODO fix calculate entry price

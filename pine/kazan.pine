@@ -14,7 +14,7 @@ fromMonth = 3
 fromDay = 1
 thruMonth = 1
 thruDay = 1
-fromYear = 2022
+fromYear = 2023 // 2022
 thruYear = 3000
 testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
@@ -212,7 +212,7 @@ plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.st
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
 BASE = 1000 // equal to 1 second in unix epoc
-SLEEP_DUR = 40 * BASE // 40 seconds
+SLEEP_DUR = 60 * BASE // 60 seconds
 _timenow = (timenow - 1000000000000)
 is_sleep_pass = _timenow > math.abs(strategy.position_size) + SLEEP_DUR
 if not IS_BROWSER and strategy.position_size[0] != 0 and window() and is_sleep_pass
@@ -354,17 +354,18 @@ if not base_cond
     is_buy := false
 
 // "l": "long"
-if IS_BROWSER
-    if is_buy and window()
-        strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
-else if is_buy
-    if strategy.opentrades[0] == 0 or strategy.position_size < 0 and window()
-        if is_sleep_pass  // final timenow check, alerts should sleep for given seconds
+if window()
+    if IS_BROWSER
+        if is_buy
             strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
-    else if strategy.position_size[0] != 0 and window()
-        strategy.close_all()
-    else if window() and is_sleep_pass
-        strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+    else if is_buy
+        if strategy.opentrades[0] == 0 or strategy.position_size < 0
+            if is_sleep_pass  // final timenow check, alerts should in sleep for given seconds
+                strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+        else if strategy.position_size[0] != 0
+            strategy.close_all()
+        else if is_sleep_pass
+            strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)
 // if (strategy.position_size > 0)

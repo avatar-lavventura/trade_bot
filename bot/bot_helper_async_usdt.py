@@ -5,7 +5,6 @@ from typing import Tuple
 
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
-from broker.errors import QuietExit
 
 from bot import cfg
 from bot import config as helper
@@ -20,15 +19,15 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def check_position_to_pass(self, asset, _sum, is_limit, per) -> bool:
         if _sum > config.isolated_wallet_limit:
-            log("pass_a", "bold")
+            log("pass_a")
             return True
 
         if float(per) > 80:
-            log("pass_b", "bold")
+            log("pass_b")
             return True
 
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
-            log("pass_c", "bold")
+            log("pass_c")
             return True
 
         log()
@@ -56,7 +55,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                             if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
-        elif not config.is_manual_trade:
+        elif not config.env[_type].is_manual_trade:
             await self.new_limit_order(asset, limit_price, market)
 
     def get_decimal_count(self, symbol, value) -> int:
@@ -142,8 +141,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", qty)
             order = order["info"]
             with suppress(Exception):
-                for name in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
-                    del order[name]
+                for key in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
+                    del order[key]
 
             log(f"## CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
@@ -258,10 +257,16 @@ class BotHelperSpotAsync(BotHelperAsync):
                 except:
                     pass
 
-                if timestamp_list[0] > latest_busd_ts:
-                    qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
-                else:
-                    qty, _sum = self.calculate_entry(timestamp_list_busd, ordering_busd, trades_busd, asset, asset_qty)
+                try:
+                    if timestamp_list[0] > latest_busd_ts:
+                        qty, _sum = self.calculate_entry(timestamp_list, ordering, trades, asset, asset_qty)
+                    else:
+                        qty, _sum = self.calculate_entry(
+                            timestamp_list_busd, ordering_busd, trades_busd, asset, asset_qty
+                        )
+                except Exception as e:
+                    log(f"warning: [  {asset}{_type.upper()}  ] {e}")
+                    return 0
 
             if asset_qty == 0:
                 log(f"E: float division by zero asset={asset}")
@@ -275,7 +280,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
                 and asset not in config.cfg["root"]["ignore_warning"]
             ):
-                log(f"warning: wrong calculation for {symbol} {asset_qty} == {qty}", is_write=False)
+                log(f"warning: wrong calculation for {symbol} {asset_qty} != {qty}", is_write=False)
 
             qty_to_consider = qty
             if asset_qty > qty:
@@ -334,9 +339,6 @@ class BotHelperSpotAsync(BotHelperAsync):
                 )
                 per_change_r = float(format(per_change_r, ".2f"))
 
-        # if config.is_manual_trade:
-        #     log()
-
         current_sum = format(_sum + profit, ".2f")
         c = "yellow on black blink"
         if _type in ["usdt", "busd"]:
@@ -345,7 +347,10 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 c1 = "green on black blink"
 
-            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}", end="")
+            if float(per) == int(float(per.replace(".00", ""))):
+                per = int(float(per.replace(".00", "")))
+
+            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}")
         else:
             if float(per) > 0:
                 if float(per) > 5:
@@ -358,22 +363,22 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(f"[ib]{format(_sum * 1000, '.4f')}", end="")
+            log(format(_sum * 1000, ".4f"), "ib", end="")
 
         cfg.locked_balance += float(per)
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
-            _entry_price = format(entry_price * 1000, ".4f").replace("0.", "").lstrip("0")
-            _price = format(asset_price * 1000, ".4f").replace("0.", "").lstrip("0")
+            _entry_price = format(entry_price * 1000, ".5f").replace("0.", "").lstrip("0")
+            _price = format(asset_price * 1000, ".5f").replace("0.", "").lstrip("0")
             msg = f"**{asset}** {_entry_price} p={_price} q={qty_str} "
 
         per_change_str = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}%) `{current_sum}$`\n"
             else:
-                msg = f"{msg}`{format(profit, '.1f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
         else:
             if per_change_r == 0:
                 msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}% \n"
@@ -400,12 +405,12 @@ class BotHelperSpotAsync(BotHelperAsync):
                     )
 
             cfg.discord_message_full += msg
-            if _type in ["usdt", "busd"] and _sum > config.discord_msg_above_usdt and profit < 0:
+            if _type in ["usdt", "busd"]:
                 cfg.discord_message += msg
             elif _type == "btc":
                 cfg.discord_message += msg
 
-        if config.is_manual_trade:  # manual trade is on
+        if config.env[_type].is_manual_trade:  # manual trade is on
             return profit
 
         # self.is_cut_loss(asset, profit, qty_to_consider)

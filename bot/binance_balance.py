@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+import time
 from contextlib import suppress
 
 from broker._utils._async import _sleep
@@ -22,6 +23,14 @@ IS_FUTURES = False
 bot_async = BotHelperSpotAsync()
 
 
+async def is_rapid_alert(msg, alert):
+    if "rapid_alert" in alert:
+        if alert["rapid_alert"] == "on":
+            for _ in range(1, 10):
+                await bot_async.channel_alerts.send(msg, delete_after=1)
+                time.sleep(0.2)
+
+
 async def discord_send_alert():
     alert_track = {}
     asset_price_dict = {}
@@ -32,7 +41,7 @@ async def discord_send_alert():
             _pair = alert["pair"]
             asset_price_dict[_pair] = _asset_price = await bot_async.spot_fetch_ticker(_pair)
             if _asset_price == 0:
-                log("warning: asset_price is 0 , something is wrong")
+                log("warning: asset_price is 0, something is wrong")
                 return
 
             if (alert_key == "greater_than" and float(_asset_price) >= alert["price"]) or (
@@ -47,7 +56,9 @@ async def discord_send_alert():
                     asset = _pair[:-4]
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
-                    msg = f"{_pair}={_asset_price} {_date(_format='%m-%d %H:%M:%S')}"
+                    await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup.", alert)
+                    msg = f"{_pair}={_asset_price} {_date(_format='%m-%d %H:%M:%S')} Alper, wakeup."
+                    # https://discordpy.readthedocs.io/en/neo-docs/api.html#discord.abc.Messageable.send
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
                     alert_track[asset] = True
 
