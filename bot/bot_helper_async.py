@@ -150,7 +150,7 @@ class BotHelperAsync:
             with suppress(Exception):
                 await cfg.discord_sent_msg.delete()
 
-            cfg.discord_message = f"`{_date()}`\n"
+            cfg.discord_message = f"`{_date(_format='%m-%d %H:%M:%S')}`\n"
             cfg.discord_sent_msg = None
 
     async def _discord_send(self, msg, lost, pos_count, name, free) -> None:
@@ -177,28 +177,38 @@ class BotHelperAsync:
                         asset_price, percent_1h = await self.fetch_symbol_percent_change(symbol, tf="1h")
                         time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
                         asset_price, percent_1d = await self.fetch_symbol_percent_change(symbol, tf="1d")
+                        if percent_1h:
+                            per_str_1h = f"{percent_1h}" if percent_1h < 0 else f"+{percent_1h}"
+
+                        if percent_1d:
+                            per_str_1d = f"{percent_1d}" if percent_1d < 0 else f"+{percent_1d}"
+
+                        if percent_1h and percent_1d:
+                            per_str = f"{per_str_1h}  {per_str_1d}"
+                        else:
+                            per_str = ""
                     except Exception as e:
                         log(f"E: {symbol} {e}")
                         # print_tb(e)
 
-                    if percent_1h:
-                        per_str_1h = f"{percent_1h}" if percent_1h < 0 else f"+{percent_1h}"
-
-                    if percent_1d:
-                        per_str_1d = f"{percent_1d}" if percent_1d < 0 else f"+{percent_1d}"
-
-                    if percent_1h and percent_1d:
-                        per_str = f"{per_str_1h}  {per_str_1d}"
-                    else:
-                        per_str = ""
-
                     if symbol in "BTCUSDT":
-                        per_str_c_1h = f"([red]{percent_1h}%[/red])" if percent_1h < 0 else f"([g]+{percent_1h}%[/g])"
-                        per_str_c_1d = f"([red]{percent_1d}%[/red])" if percent_1d < 0 else f"([g]+{percent_1d}%[/g])"
-                        c = "m" if symbol == "BTCUSDT" else "cy"
-                        if float(lost) > 0:
+                        if percent_1h and percent_1d:
+                            per_str_c_1h = (
+                                f"([red]{percent_1h}%[/red])" if percent_1h < 0 else f"([g]+{percent_1h}%[/g])"
+                            )
+                            per_str_c_1d = (
+                                f"([red]{percent_1d}%[/red])" if percent_1d < 0 else f"([g]+{percent_1d}%[/g])"
+                            )
+                            c = "m" if symbol == "BTCUSDT" else "cy"
+                            if float(lost) > 0:
+                                log(
+                                    f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+                                    end="",
+                                    is_write=False,
+                                )
+                        elif float(lost) > 0:
                             log(
-                                f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+                                f" * {symbol}=[{c}]{asset_price}[/{c}]",
                                 end="",
                                 is_write=False,
                             )
@@ -424,7 +434,8 @@ class BotHelperAsync:
                     _total_balance += await self._fetch_isolated_balance() * cfg.PRICES["BTCUSDT"]
 
                 _total_balance = format(_total_balance, ".2f")
-                log(f":heavy_dollar_sign: [cy]${_total_balance}[/cy] | {_da} [italic cyan]{_timestamp()}", "bold")
+                _bnb = f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}[/cy]"
+                log(f":heavy_dollar_sign: [cy]${_total_balance}[/cy] | {_bnb} | {_da} [italic cyan]{_timestamp()}")
                 config._env.estimated_balance.add_single_key("total_balance", _total_balance)
             elif cfg.TYPE == "btc":  #: calculating the estimated balance
                 print_str = ":bee: "
@@ -484,7 +495,7 @@ class BotHelperAsync:
             config._env.estimated_balance.add_single_key("total_balance", _sum_usdt)
             log(
                 f" * usdt={_sum_usdt} {busd_str}[blue]*[/blue] "
-                f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}$[/cy] | {_da} {ts}"
+                f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}[/cy] | {_da} {ts}"
             )
 
         if cfg.BNB_BALANCE < 0.5 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on":
@@ -720,8 +731,11 @@ class BotHelperAsync:
 
         try:
             if asset == "BTCUSDT":
-                #: helps to reduce request load to binance
-                price_ticker = await exchange.bitmex.fetch_ticker("BTC/USDT:USDT")
+                try:
+                    #: helps to reduce request load to binance
+                    price_ticker = await exchange.bitmex.fetch_ticker("BTC/USDT:USDT")
+                except:
+                    price_ticker = await exchange.spot.fetch_ticker(asset)
             else:
                 price_ticker = await exchange.spot.fetch_ticker(asset)
 

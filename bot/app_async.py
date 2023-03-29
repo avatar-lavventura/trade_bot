@@ -67,7 +67,7 @@ async def startup():
     if not config.cfg["root"]["is_write"]:
         _log.IS_WRITE = False
 
-    print("* s t a r t i n g . . .")
+    print("* s t a r t i n g  . . .")
 
 
 @app.after_serving
@@ -98,7 +98,7 @@ async def webhook() -> (str, int):
                 text = f"  [green]{data_msg.upper()}[/green]  "
 
             log(
-                f" {liner}  [y]wt_30m[/y]=[{text}]   {_date(_type='hour')}  {liner}",
+                f"  {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]",
                 end="\r",
                 is_write=False,
                 highlight=False,
