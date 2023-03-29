@@ -185,7 +185,7 @@ class Config:
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
         self.btc_wavetrend = {}  # type: Dict[str, str]
-        self.locked_per_limit_usdtperp = None
+        # self.locked_per_limit_usdtperp = None
         self.asset_list = []
         self.btc_quantity = {}
         self._env = None  #: shorted name
@@ -241,26 +241,32 @@ class Config:
                 else:
                     raise e
 
+            to_set_ts = _ts
             with suppress(Exception):
                 for _, trade in enumerate(_trades):
-                    log("config.get_spot_timestamp():", is_write=False)
-                    t = trade.copy()
-                    for key in ["info", "fee", "fees", "takerOrMaker", "type", "id", "order", "cost", "side"]:
-                        del t[key]
+                    if cfg.ENTRY_PRICE_VERBOSE:
+                        log("config.get_spot_timestamp():", is_write=False)
 
-                    log(t, is_write=False)
+                    t = trade.copy()
+                    for k in ["info", "fee", "fees", "takerOrMaker", "type", "id", "order", "cost", "side"]:
+                        del t[k]
+
+                    if cfg.ENTRY_PRICE_VERBOSE:
+                        log(t, is_write=False)
+
                     if trade["info"]["isBuyer"]:
                         order_id = trade["info"]["orderId"]
                         first_orders = await exchange.spot.fetch_order_trades(order_id, symbol=symbol)
                         # at exact 20 seconds cycle large trades splitted and partially made
                         first_orders_ts = first_orders[0]["timestamp"]
+                        if 0 < first_orders_ts < _ts:
+                            # update few seconds behind such as ts - 9
+                            to_set_ts = first_orders_ts
+
                         break
 
-                if 0 < first_orders_ts < _ts:
-                    # update few seconds behind such as ts - 9
-                    ts = first_orders_ts
-
-            self.timestamp[key][asset] = ts
+            # TODO: check
+            self.timestamp[key][asset] = to_set_ts
 
         return int(self.timestamp[key][asset])
 
@@ -297,7 +303,7 @@ class Config:
         self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
         self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
         self.watchlist = self.yaml_wrapper(self.base_dir / "watchlist.yaml", auto_dump=False)
-        self.cfg_usdtperp = self.yaml_wrapper(self.base_dir / "config_usdtperp.yaml")
+        # self.cfg_usdtperp = self.yaml_wrapper(self.base_dir / "config_usdtperp.yaml")
         self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
         self.reload_wavetrend()
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
@@ -335,6 +341,7 @@ class Config:
 
         return int(self.timestamp[key][asset])
 
+    """
     # USDTPERP
     # ========
     def _reload_usdtperp(self) -> None:
@@ -356,6 +363,7 @@ class Config:
         self.USDTPERP_MAX_POSITION["9m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos"]
         self.USDTPERP_MAX_POSITION["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos"]
         self.USDTPERP_MAX_POSITION["21m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos_21m"]
+    """
 
 
 config: Config = Config()

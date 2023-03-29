@@ -12,6 +12,7 @@ root:
     - LQTY
     - ATA
     - HIGH
+    - OAX
   ignore_warning:
     - DUMMY
   usdt:
@@ -26,12 +27,10 @@ root:
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
     entry_prices:
-      ATA: 0.1499
-      HIGH: 2.067
       DUMMY_ASSET: 1.0
   btc:
     is_manual_trade: True
-    status: "on"
+    status: "off"
     auto_buy_bnb:  "on"
     isolated: "off"
     cross: "off"
@@ -41,9 +40,11 @@ root:
     percent_change_to_add: 4.49
     stop_trade_wt_30m_red: True
     entry_prices:
+      OAX: 0.30
       DUMMY_ASSET: 1.0
-    ignore: # for all
+    ignore:
       - ID
       - LQTY
       - ATA
       - HIGH
+      - OAX

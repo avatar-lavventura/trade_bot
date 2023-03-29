@@ -3,13 +3,14 @@
 import logging
 import os
 import sys
+import time
 from contextlib import suppress
 from pathlib import Path
-import time
+
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
-from broker._utils._log import log
+from broker._utils._log import _console_clear, log
 from broker._utils.tools import _date, print_tb
 from broker._utils.yaml import Yaml
 
@@ -84,7 +85,7 @@ class Discord_Alpy:
         # secondly, each 20 seconds
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if config.cfg["root"][cfg.TYPE]["status"] == "on":
-            scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
+            scheduler.add_job(self.fetch_balance, "cron", second="*/20", timezone=tz)
 
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
@@ -161,9 +162,12 @@ class Discord_Alpy:
         """Restart at 03:00:00."""
         log()
         log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        _console_clear()
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
+        # if config.cfg["root"][cfg.TYPE]["status"] == "on":
+        #     await self.fetch_balance()
         await self.pre_discord_setup()
         await process_main(self)
 
@@ -174,8 +178,7 @@ def main():
     except:
         _type = "usdt"
 
-    alpy = Discord_Alpy(_type)
-    breakpoint()  # DEBUG
+    Discord_Alpy(_type)
 
 
 if __name__ == "__main__":

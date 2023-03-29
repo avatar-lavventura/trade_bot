@@ -12,7 +12,11 @@ alerts:
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 28400
+      price: 29000
       rapid_alert: "off"
+    a1:
+      pair: OAXUSDT
+      price: 0.30
+      rapid_alert: "on"
   balance_greater_than:
     value: 10000

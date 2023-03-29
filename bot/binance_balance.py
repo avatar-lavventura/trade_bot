@@ -129,7 +129,7 @@ async def main():
     while True:
         try:
             await process_main(bot_async)
-            await _sleep(22)
+            await _sleep(cfg.SLEEP_INTERVAL + 2)
         except KeyboardInterrupt:
             break
         except Exception as e:

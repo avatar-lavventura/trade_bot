@@ -406,6 +406,9 @@ class BotHelper:
                     break
 
         if not is_open:
+            log()
+
+        if not is_open:
             try:
                 await self.trade_async()
                 config.env[self.strategy.market.lower()]._status._inc("count")
@@ -458,7 +461,6 @@ class BotHelper:
         #     log("30m-RED PASS", "red")
         #     return
 
-        log()
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")
 

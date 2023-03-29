@@ -6,7 +6,7 @@ import time
 from contextlib import suppress
 from typing import Tuple
 
-from broker._utils._log import log, ok  # flake8: noqa
+from broker._utils._log import _console_clear, log, ok  # flake8: noqa
 from broker._utils.tools import _date, _timestamp, decimal_count, print_tb
 from broker.errors import QuietExit
 
@@ -107,7 +107,7 @@ class BotHelperAsync:
             _total = format(_total, ".5f")
             msg += f"[ib]{_total}[/ib]"
         else:
-            msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
+            msg += "[ib]-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[/ib] "
             msg += f"[{c}]{abs(lost)}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:
                 msg = f"{msg}free=[cy]{free}{name}[/cy] "
@@ -116,7 +116,6 @@ class BotHelperAsync:
             if real_pos_count > 1:
                 log(msg, end="")
             else:
-                # log()
                 log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "bold black", end="")
 
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
@@ -153,6 +152,22 @@ class BotHelperAsync:
             cfg.discord_message = f"`{_date(_format='%m-%d %H:%M:%S')}`\n"
             cfg.discord_sent_msg = None
 
+    async def per_str(percent):
+        return f"([red]{percent}%[/red])" if percent < 0 else f"([g]+{percent}%[/g])"
+
+    async def carry_me_to_run_app(self, percent_1h, percent_1d):
+        # TODO: carry this function to run_app print BTC change
+        if percent_1h and percent_1d:
+            per_str_c_1h = per_str(percent_1h)
+            per_str_c_1d = per_str(percent_1d)
+            c = "m" if symbol == "BTCUSDT" else "cy"
+            if float(lost) > 0:
+                log(
+                    f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+                    end="",
+                    is_write=False,
+                )
+
     async def _discord_send(self, msg, lost, pos_count, name, free) -> None:
         _time = _date(_format="%m-%d %H:%M:%S")
         cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.3 else format(cfg.locked_balance, ".2f")
@@ -170,6 +185,7 @@ class BotHelperAsync:
                         flag = True
                         msg = f"{msg}\n```"
 
+                    # TODO: store percent_1h and percent_1d in mongodb for BTC
                     percent_1h = ""
                     percent_1d = ""
                     try:
@@ -200,12 +216,12 @@ class BotHelperAsync:
                                 f"([red]{percent_1d}%[/red])" if percent_1d < 0 else f"([g]+{percent_1d}%[/g])"
                             )
                             c = "m" if symbol == "BTCUSDT" else "cy"
-                            if float(lost) > 0:
-                                log(
-                                    f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
-                                    end="",
-                                    is_write=False,
-                                )
+                            # if float(lost) > 0:
+                            #     log(
+                            #         f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+                            #         end="",
+                            #         is_write=False,
+                            #     )
                         elif float(lost) > 0:
                             log(
                                 f" * {symbol}=[{c}]{asset_price}[/{c}]",
@@ -229,8 +245,10 @@ class BotHelperAsync:
                             ohlcv = fund.RECORDS_BAR_1D[symbol]
                             # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
-                            msg = f"{msg}\n                   1h%   24h%\n"
-                            msg = f"{msg}{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                            # msg = f"{msg}\n                   1h%   24h%\n"
+                            # msg = f"{msg}{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                            msg = f"{msg}\n"
+                            msg = f"{msg}{symbol} {asset_price:>{6}} {per_str}"
                             msg = f"{msg}\n{df}"
                         else:
                             msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
@@ -389,6 +407,10 @@ class BotHelperAsync:
         config._env.estimated_balance.add_single_key("only_usdt", only_usdt)
         own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
         pos_count: int = config._env._status.find_one("count")["value"]
+        real_pos_count: int = config._env._status.find_one("real_pos_count")["value"]
+        if real_pos_count == 0:
+            _console_clear()
+
         if sum_btc > 0.00002 and pos_count > 0:
             log(
                 f" * btc=[m]%.8f[/m] [blue]==[/blue] [m]%.2f$[/m] [blue]*[/blue] "
@@ -435,13 +457,21 @@ class BotHelperAsync:
 
                 _total_balance = format(_total_balance, ".2f")
                 _bnb = f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}[/cy]"
-                log(f":heavy_dollar_sign: [cy]${_total_balance}[/cy] | {_bnb} | {_da} [italic cyan]{_timestamp()}")
+                perf_str = ""
+                output = config._env.stats.find_one(cfg.CURRENT_DATE)
+                if output:
+                    perf_str = f"perf=[blue]{output['value']}[/blue]"
+
+                log(
+                    f":heavy_dollar_sign: [cy]${_total_balance}[/cy] | {_bnb} | {perf_str} | {_da} [italic cyan]{_timestamp()}"
+                )
                 config._env.estimated_balance.add_single_key("total_balance", _total_balance)
             elif cfg.TYPE == "btc":  #: calculating the estimated balance
                 print_str = ":bee: "
                 if only_btc > 0:
-                    print_str += f"[bold]btc={only_btc}[/bold] "
+                    print_str += f"btc={only_btc} "
 
+                # print(cfg.FIRST_PRINT_CYCLE)  # delete me
                 if cfg.FIRST_PRINT_CYCLE:
                     if print_str != ":bee: ":
                         log(f"{print_str}| {_date()}")
@@ -521,8 +551,8 @@ class BotHelperAsync:
 
         lost: float = 0
         cfg.locked_balance: float = 0
-        cfg.discord_message = f"`{_date()}`\n"
-        cfg.discord_message_full = f"`{_date()}`\n"
+        cfg.discord_message = f"`{_date(_type='compact')}`\n"
+        cfg.discord_message_full = f"`{_date(_type='compact')}`\n"
         if cfg.BALANCES:
             new_asset_list = []  # TODO: order asset based on their position size sort the list based on its size
             for asset in config.asset_list:
@@ -565,11 +595,10 @@ class BotHelperAsync:
             else:
                 locked_per = f":lock:=`{format(cfg.locked_balance, '.2f')}%`"
 
-        real_pos_count = config._env._status.find_one("real_pos_count")["value"]
         pos_str = ""
         if pos_count > 2:
             pos_str = f" | pos=**{pos_count}**"
-        elif pos_count == 0 or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
+        elif real_pos_count == 0:  # or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
             log()  # to overwrite printed balance
 
         free = float(free)
@@ -596,14 +625,15 @@ class BotHelperAsync:
                     )
             elif int(sum_usdt) > 0:
                 goal = round(float(sum_usdt) + float(abs(lost)))
-                _lost = ""
+                pnl = ""
                 if lost > 0:
-                    _lost = f"lost=**`{format(lost, '.2f')}` "
+                    pnl = f"gain=`+{format(lost, '.2f')}` "
+                    # pnl = f"lost=`{format(lost, '.2f')}` "
 
-                if round(sum_usdt) != round(goal):
-                    msg = f"{_msg}**:lion_face: `{round(sum_usdt)}$`** {_lost}:dart:=`{goal}` {_free}" f"{locked_per}"
+                if round(sum_usdt) != round(goal) and lost < 0:
+                    msg = f"{_msg}**:lion_face: `{round(sum_usdt)}$`** {pnl}:dart:=`{goal}` {_free}{locked_per}"
                 else:
-                    msg = f"{_msg}**:lion_face: `{round(sum_usdt)}$`**"
+                    msg = f"{_msg}**:lion_face: `{round(sum_usdt)}$`** {pnl} {_free}{locked_per}"
             else:
                 if _msg[-1] == "\n":
                     msg = f"{_msg[:-1]}"
@@ -647,8 +677,8 @@ class BotHelperAsync:
         if cfg.TYPE == "usdt":
             await self._discord_send(msg, format(lost, ".2f"), pos_count, "$", free)
         else:
-            _lost = format(lost * 1000, ".5f")
-            await self._discord_send(msg, _lost, pos_count, " mBTC", free)
+            pnl = format(lost * 1000, ".5f")
+            await self._discord_send(msg, pnl, pos_count, " mBTC", free)
 
         cfg.FIRST_PRINT_CYCLE = False
         config._env._status.add_single_key("count", count)
@@ -779,6 +809,7 @@ class BotHelperAsync:
 
         try:
             balance = await self.fetch_balance(asset)
+            # TODO: also call fetch_balance on discord balance
             response = await exchange.spot.create_limit_sell_order(symbol, balance, limit_price)
             log("==> [green]new_limit_order[/green]=", end="")
             if "info" in response:
@@ -802,5 +833,29 @@ class BotHelperAsync:
                 raise e
 
     async def fetch_balance(self, code) -> float:
-        balance = await exchange.spot.fetch_balance()
-        return balance[code]["total"]
+        self._fetch_balance()
+        return cfg.BALANCES[code]["total"]
+
+    async def _fetch_balance(self):
+        key = f"{cfg.TYPE}_timestamp"
+        pos_count = 0
+        del_list = []
+        ongoing_positions = []
+        try:
+            cfg.BALANCES = await exchange.spot.fetch_balance()
+            for symbol in cfg.BALANCES:
+                if symbol not in cfg.ignore_list and cfg.BALANCES[symbol]["total"] > 0:
+                    ongoing_positions.append(symbol)
+                    if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
+                        pos_count += 1
+
+            for asset_timestamp in config.timestamp[key]:
+                if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
+                    del_list.append(asset_timestamp)
+
+            for asset in del_list:
+                del config.timestamp[key][asset]
+
+            config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
+        except Exception as e:
+            log(f"E: {e}")

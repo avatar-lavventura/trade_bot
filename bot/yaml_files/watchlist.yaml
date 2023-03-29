@@ -5,11 +5,12 @@ watch:
     - COCOSUSDT
     - JOEUSDT
     - IDUSDT
+    - OAXBTC
     - OAXUSDT
     - DREPBTC
     - DREPUSDT
-  # target:
-  #   IDUSDT: 47
+  target:
+    OAXUSDT: 0.305
   bar:
     - COCOSUSDT
     - JOEUSDT

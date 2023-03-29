@@ -72,8 +72,8 @@ async def startup():
 
 @app.after_serving
 async def _finally():
-    for key in config.btc_wavetrend:
-        config.btc_wavetrend[key] = "none"
+    for item in config.btc_wavetrend:
+        config.btc_wavetrend[item] = "none"
 
 
 @app.route("/")
@@ -115,7 +115,7 @@ async def webhook() -> (str, int):
                 return "OK", 0
             except (QuietExit, KeyError) as e:
                 if e:
-                    log(str(e), "bold")
+                    log(str(e))
             except Exception as e:
                 print_tb(e)
         return "", 200

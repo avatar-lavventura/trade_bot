@@ -5,6 +5,7 @@ from typing import Tuple
 
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
+from broker.errors import QuietExit
 
 from bot import cfg
 from bot import config as helper
@@ -30,6 +31,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             log("pass_c")
             return True
 
+        log()  # end of each position line
         return False
 
     async def is_limit_order_exist(self, asset, limit_price) -> None:
@@ -54,7 +56,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                             if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
-        elif not config.env[_type].is_manual_trade:
+        elif not config.env[cfg.TYPE].is_manual_trade:
             await self.new_limit_order(asset, limit_price, market)
 
     def get_decimal_count(self, symbol, value) -> int:
@@ -140,8 +142,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", qty)
             order = order["info"]
             with suppress(Exception):
-                for key in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
-                    del order[key]
+                for k in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
+                    del order[k]
 
             log(f"## CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
@@ -187,6 +189,18 @@ class BotHelperSpotAsync(BotHelperAsync):
                 decimal: int = helper.exchange.spot_markets[symbol]["precision"]["price"]
             else:
                 raise e
+
+        if asset == "OAX":
+            _type = "usdt"
+
+        # for _asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
+        #     if  == _asset:
+        #         _type = "usdt"
+        #         entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
+        #         qty_to_consider = asset_qty
+        #         _sum = float(entry_price) * asset_qty
+        #     elif f"{asset}BTC" == _asset:
+        #         _type = "btc"
 
         if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
             entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
@@ -300,15 +314,15 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".4f"))
 
-        log(f"[green]**[/green] {asset} q={qty_str} e={self.ll(entry_price)} ", "bold", end="")
+        log(f"[bold][green]**[/green] {asset}[/bold] q={qty_str} e={self.ll(entry_price)} ", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"l={self.ll(limit_price)} ", "bold", end="")
+            log(f"l={self.ll(limit_price)} ", end="")
 
         if entry_price == limit_price:
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
 
         asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
-        log(f"p={self.ll(asset_price)} ", "bold", end="")
+        log(f"p={self.ll(asset_price)} ", end="")
         per = format((100.0 * qty_to_consider * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * qty_to_consider
         per_change_r = 0.0
@@ -319,7 +333,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 initial=entry_price, change=asset_price - entry_price, end="", is_arrow=False, is_sign=False
             )
             if _type in ["usdt", "busd"]:
-                log(format(abs(profit), ".2f"), "bold green" if profit > 0 else "bold red", end="")
+                log(format(abs(profit), ".2f"), "green" if profit > 0 else "red", end="")
                 log(" ", end="")
             else:
                 _usd = format(abs(profit) * cfg.PRICES["BTCUSDT"], ".2f")
@@ -330,7 +344,12 @@ class BotHelperSpotAsync(BotHelperAsync):
                 log(f" {format(abs(profit) * 1000, '.2f')} ", "italic green" if profit > 0 else "italic red", end="")
 
             if asset not in config.SPOT_IGNORE_LIST and per_change > 20:
-                raise Exception(f"per_change={per_change} is too large; qty of the entry price is calculated wrong")
+                cfg.FIRST_PRINT_CYCLE = False
+                if cfg.ENTRY_PRICE_VERBOSE:
+                    msg = f"per_change={per_change} is too large; qty of the entry price is calculated wrong"
+                    raise Exception(msg)
+                else:
+                    raise QuietExit(f"per_change={int(per_change)} is too large")
 
             if float(per_change) < -10:
                 per_change_r = percent_change(
@@ -349,7 +368,10 @@ class BotHelperSpotAsync(BotHelperAsync):
             if float(per) == int(float(per.replace(".00", ""))):
                 per = int(float(per.replace(".00", "")))
 
-            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}")
+            if float(per) > 150:
+                log(f"| [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
+            else:
+                log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
         else:
             if float(per) > 0:
                 if float(per) > 5:
@@ -362,7 +384,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(format(_sum * 1000, ".4f"), "ib", end="")
+            log(format(_sum * 1000, ".4f"), "ib")
 
         cfg.locked_balance += float(per)
         if _type in ["usdt", "busd"]:
@@ -375,15 +397,16 @@ class BotHelperSpotAsync(BotHelperAsync):
         per_change_str = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}%) `{current_sum}$`"
             else:
-                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`"
         else:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}%"
             else:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}% **↑**{per_change_r}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}% **↑**{per_change_r}%) | {per}%"
 
+        msg = f"{msg}\n"
         if _type == "btc":
             _sum = _sum * cfg.PRICES["BTCUSDT"]  # total usdt if type is btc will be used for addition check
 
