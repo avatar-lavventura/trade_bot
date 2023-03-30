@@ -57,7 +57,7 @@ async def discord_send_alert():
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
                     await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup.", alert)
-                    msg = f"{_pair}={_asset_price} {_date(_format='%m-%d %H:%M:%S')} Alper, wakeup."
+                    msg = f"{_pair}={_asset_price} {_date(_type='compact')} Alper, wakeup."
                     # https://discordpy.readthedocs.io/en/neo-docs/api.html#discord.abc.Messageable.send
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
                     alert_track[asset] = True

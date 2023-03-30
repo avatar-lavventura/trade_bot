@@ -62,7 +62,7 @@ async def main():
         with suppress(Exception):
             sh.sheet1.update("A20:D20", [[_timestamp(), int(bal_brave), int(bal_chrome), _sum]])
 
-        time.sleep(15)
+        time.sleep(20)
 
 
 if __name__ == "__main__":

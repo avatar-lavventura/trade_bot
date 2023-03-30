@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-import ccxt
-
 from bot import cfg
 from bot.config import exchange
 

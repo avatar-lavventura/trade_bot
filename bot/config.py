@@ -37,6 +37,7 @@ class Env:
         self._status = None
         self._ts = None
         self.max_pos = None
+        self.timestamps = None
 
 
 class Exchange:
@@ -48,10 +49,12 @@ class Exchange:
         self.margin_isolated = None
         self.margin_cross = None
         self._type: str = ""
-        self.binance = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-        self.bitmex = ccxt.bitmex({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+        args = {"options": {"adustForTimeDifference": True}, "enableRateLimit": True}
+        self.binance = ccxt.binance(args)
+        self.bitmex = ccxt.bitmex(args)
+        self.hitbtc = ccxt.hitbtc(args)
         self.cg = CoinGeckoAPI()
-        # self.mexc = ccxt.mexc({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+        # self.mexc = ccxt.mexc(args)
 
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))
@@ -216,8 +219,7 @@ class Config:
 
     async def get_spot_timestamp(self, asset, symbol=None) -> int:
         """Returns asset's set timestamp and updates if it is not set."""
-        key = f"{cfg.TYPE}_timestamp"
-        if self.timestamp[key][asset] == {}:
+        if asset not in self.env[cfg.TYPE].timestamps["root"]:
             if not symbol:
                 symbol = f"{asset}{cfg.TYPE.upper()}"
 
@@ -265,10 +267,9 @@ class Config:
 
                         break
 
-            # TODO: check
-            self.timestamp[key][asset] = to_set_ts
+            self.env[cfg.TYPE].timestamps["root"][asset] = to_set_ts
 
-        return int(self.timestamp[key][asset])
+        return int(self.env[cfg.TYPE].timestamps["root"][asset])
 
     def _yaml_wrapper(self, path, dirname, fn, auto_dump=True):
         _fn = f"initialize_{fn}.lock"
@@ -299,25 +300,13 @@ class Config:
     def reload_wavetrend(self) -> None:
         self.btc_wavetrend = self.yaml_wrapper(self.base_dir / "btc_wavetrend.yaml")
 
-    def _reload(self) -> None:
+    def _reload_cfg(self) -> None:
         self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
-        self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
-        self.watchlist = self.yaml_wrapper(self.base_dir / "watchlist.yaml", auto_dump=False)
-        # self.cfg_usdtperp = self.yaml_wrapper(self.base_dir / "config_usdtperp.yaml")
-        self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
-        self.reload_wavetrend()
-        self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
-        self.ALERTS = self.alerts["alerts"]
-        self.WATCHLIST = self.watchlist["watch"]["list"]
-        self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
-        self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
         self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
         for _type in ["usdt", "btc"]:  # "busd"
-            self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
-            self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
             self.env[_type].percent_change_to_add = -abs(self.cfg["root"][_type]["percent_change_to_add"]) + 0.01
             self.env[_type].is_manual_trade = self.cfg["root"][_type]["is_manual_trade"]
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
@@ -325,6 +314,7 @@ class Config:
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
             self.env[_type].cross = self.cfg["root"][_type]["cross"]
             self.env[_type].isolated = self.cfg["root"][_type]["isolated"]
+            self.env[_type].timestamps = self.yaml_wrapper(self.base_dir / f"timestamp_{_type}.yaml")
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
@@ -332,14 +322,27 @@ class Config:
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
         self.initial_btc_quantity = self.cfg["root"]["btc"]["initial"]
 
+    def _reload(self) -> None:
+        self._reload_cfg()
+        self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
+        self.watchlist = self.yaml_wrapper(self.base_dir / "watchlist.yaml", auto_dump=False)
+        self.reload_wavetrend()
+        self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
+        self.ALERTS = self.alerts["alerts"]
+        self.WATCHLIST = self.watchlist["watch"]["list"]
+        self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
+        self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
+        for _type in ["usdt", "btc"]:  # "busd"
+            self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
+            self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
+
     # BUSD
     # ====
     def get_spot_timestamp_busd(self, asset) -> int:
-        key = "busd_timestamp"
-        if self.timestamp[key][asset] == {}:
-            self.timestamp[key][asset] = config.env["busd"].status["timestamp"]
+        if self.env[cfg.TYPE].timestamps["root"][asset] == {}:
+            self.env[cfg.TYPE].timestamps["root"][asset] = config.env["busd"].status["timestamp"]
 
-        return int(self.timestamp[key][asset])
+        return int(self.env[cfg.TYPE].timestamps["root"][asset])
 
     """
     # USDTPERP

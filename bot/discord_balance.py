@@ -3,7 +3,6 @@
 import logging
 import os
 import sys
-import time
 from contextlib import suppress
 from pathlib import Path
 
@@ -127,7 +126,6 @@ class Discord_Alpy:
             self.channel_notifications = discord.utils.get(self.client.get_all_channels(), name="notifications")
 
     async def fetch_balance(self):
-        key = f"{cfg.TYPE}_timestamp"
         pos_count = 0
         del_list = []
         ongoing_positions = []
@@ -139,12 +137,12 @@ class Discord_Alpy:
                     if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
                         pos_count += 1
 
-            for asset_timestamp in config.timestamp[key]:
-                if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
-                    del_list.append(asset_timestamp)
+            for asset in config._env.timestamps["root"]:
+                if asset != "base" and asset not in ongoing_positions:
+                    del_list.append(asset)
 
             for asset in del_list:
-                del config.timestamp[key][asset]
+                del config._env.timestamps["root"][asset]
 
             config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
         except Exception as e:

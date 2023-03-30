@@ -713,3 +713,23 @@ CLOSED: [2023-02-13 Mon 08:37]
 :ARCHIVE_TODO: DONE
 :END:
 Link: [[https://github.com/burnash/gspread]]
+
+* DONE split btc and usdt from each other in timestamp.yaml
+CLOSED: [2023-03-31 Fri 14:43]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-03-31 Fri 14:43
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE btc tarafi surekli timestamp uztune yaziyor.
+CLOSED: [2023-03-31 Fri 14:42]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-03-31 Fri 14:43
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:

@@ -87,6 +87,7 @@ async def webhook() -> (str, int):
     if request.method != "POST":
         abort(400)
 
+    config._reload_cfg()
     data_msg = request.get_data(as_text=True)
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
@@ -101,7 +102,7 @@ async def webhook() -> (str, int):
                 f"  {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]",
                 end="\r",
                 is_write=False,
-                highlight=False,
+                h=False,
             )
         else:
             for asset in ["BTC", "USDT", "BUSD"]:

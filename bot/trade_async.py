@@ -32,9 +32,9 @@ class Strategy:
             if ", (" in data_msg:
                 data_msg = data_msg.split(", (", 1)[0]
 
-            log(data_msg, "magenta", highlight=False, end="")
+            log(data_msg, "magenta", h=False, end="")
             if not data_msg.endswith(","):
-                log(",", "magenta", highlight=False, end="")
+                log(",", "magenta", h=False, end="")
 
         try:
             self.parse_msg(data_msg)
@@ -231,7 +231,7 @@ class BotHelper:
             order = await self.strategy.exchange.create_market_buy_order(symbol, quantity)
             order = order["info"]
             #: creates new item or overwrites on it
-            config.timestamp[f"{_type}_timestamp"][self.strategy.asset] = int(order["transactTime"])
+            config.env[_type].timestamps["root"][self.strategy.asset] = int(order["transactTime"])
             for item in cfg.order_del_list:
                 with suppress(Exception):
                     del order[item]
@@ -318,10 +318,16 @@ class BotHelper:
         elif self.strategy.market in ["USDT", "BUSD"]:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             last_price = output["last"]
+
             initial_amount = config.cfg["root"]["usdt"]["initial"] / last_price
+
             self.strategy.size = self.get_initial_amount(initial_amount, self.strategy.market)
             decimal = self.get_decimal_count(self.strategy.size)
             self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
+            if 0 < float(self.strategy.size) < 10 and float(self.strategy.size) * last_price < 10:
+                self.strategy.size = float(self.strategy.size) + 1
+                self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
+
             if float(self.strategy.size) == 0:
                 self.strategy.size = 0.1
                 amount = last_price * self.strategy.size
@@ -356,7 +362,9 @@ class BotHelper:
 
             time.sleep(0.2)  # helps to wait belence show up for the limit order
         except Exception as e:
-            log(f"E: {e}")
+            print_tb(e)  # DELETEME
+            if e:
+                log(f"E: {e}")
 
     def get_decimal_count(self, value) -> int:
         try:
@@ -450,7 +458,7 @@ class BotHelper:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
                 log(f" * {_date()} ", end="")
-                log(data_msg, "magenta", highlight=False)
+                log(data_msg, "magenta", h=False)
                 if "strategy.order.action" not in data_msg:
                     await self.discord_client.send_msg(data_msg, "alpy")
 

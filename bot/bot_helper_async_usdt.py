@@ -108,7 +108,8 @@ class BotHelperSpotAsync(BotHelperAsync):
                                 # TODO: in 10 seconds if ts not updated entry calculated wrong
                                 # and the gain may added && maliyet azalmis oluyor
                                 #: sets timestamp for the asset
-                                config.timestamp[f"{cfg.TYPE}_timestamp"][asset] = latest_ts
+                                if latest_ts != config._env.timestamps["root"][asset]:
+                                    config._env.timestamps["root"][asset] = latest_ts
 
                             return (quantity, _sum)
 
@@ -158,7 +159,12 @@ class BotHelperSpotAsync(BotHelperAsync):
         log(f"==> new_order_qty={new_qty} | {format(float(per), '.2f')}% of the total asset")
         order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
-            log(order["info"])
+            order = order["info"]
+            for item in cfg.order_del_list:
+                with suppress(Exception):
+                    del order[item]
+
+            log(f"market_order={order}")
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
 
     def ll(self, value):

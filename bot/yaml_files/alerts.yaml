@@ -14,9 +14,13 @@ alerts:
       pair: BTCUSDT
       price: 29000
       rapid_alert: "off"
-    a1:
-      pair: OAXUSDT
-      price: 0.30
-      rapid_alert: "on"
+    # a1:
+    #   pair: OAXUSDT
+    #   price: 0.304
+    #   rapid_alert: "on"
+    # a2:
+    #   pair: OAXBTC
+    #   price: 0.0000103
+    #   rapid_alert: "off"
   balance_greater_than:
     value: 10000
