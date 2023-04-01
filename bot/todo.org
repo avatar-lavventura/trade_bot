@@ -157,3 +157,16 @@ def btc_price_per(self, percent_1h, percent_1d):
 	    is_write=False,
 	)
 #+end_src
+
+** TODO
+#+begin_src bash
+E: FTMUSDT binance 418 Unknown {"code":-1003,"msg":"Way too many requests; IP(5.9.147.198)
+banned until 1680455087105. Please use the websocket for live updates to avoid bans."}
+#+end_src
+
+
+** TODO if there is live open order and given entry price asset
+fetch that limit order
+
+
+** TODO store BTCUSDT price at mongodb

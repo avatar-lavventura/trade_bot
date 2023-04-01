@@ -39,7 +39,8 @@ FIRST_PRINT_CYCLE = True
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
 
-WITHDRAWN = fetch_withdrawn(sh)
+WITHDRAWN = fetch_withdrawn(sh, "usdt")
+WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
 
 order_del_list = [
     "timeInForce",

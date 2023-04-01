@@ -1,5 +1,7 @@
 //@version=5
 // Created by AlperAlimoglu on 01-01-2022 * prepared for "5m"
+// Note: "1m" at usdt-spot is risky
+
 strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
      shorttitle="alpy_vix",
      calc_on_order_fills=true,  // order immediate action

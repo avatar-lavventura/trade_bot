@@ -196,8 +196,9 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 raise e
 
-        if asset == "OAX":
-            _type = "usdt"
+        if "change_type" in config.cfg["root"][cfg.TYPE]:
+            if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
+                _type = "usdt"
 
         # for _asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
         #     if  == _asset:
@@ -320,9 +321,9 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".4f"))
 
-        log(f"[bold][green]**[/green] {asset}[/bold] q={qty_str} e={self.ll(entry_price)} ", end="")
+        log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"l={self.ll(limit_price)} ", end="")
+            log(f"t={self.ll(limit_price)} ", end="")
 
         if entry_price == limit_price:
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")

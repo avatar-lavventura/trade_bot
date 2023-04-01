@@ -48,6 +48,8 @@ async def main():
             with suppress(Exception):
                 total_balance[_key] += float(item["value"]["usdt"])
 
+        if symbol == "usdt":
+            log("========================================")
     # print_total_balance(total_balance)
     #
     # log(f"highet={max_val}")

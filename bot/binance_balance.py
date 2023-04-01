@@ -66,6 +66,8 @@ async def discord_send_alert():
 async def clean_for_new_cycle() -> None:
     cfg.PRICES = {}
     cfg.PRICES["BTCUSDT"] = await bot_async.spot_fetch_ticker("BTCUSDT")
+    config.prices.add_single_key("BTCUSDT", int(cfg.PRICES["BTCUSDT"]))
+    # TODO: store this at mongoDB along with its ts
 
 
 async def process(unix_timestamp_ms):

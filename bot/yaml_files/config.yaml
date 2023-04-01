@@ -4,21 +4,21 @@ root:
   is_write: False
   isolated_wallet_limit: 100
   discord_msg_above_usdt: 150
-  take_profit: 0.005
+  take_profit: 0.0048
   locked_percent_limit: 99.99
   sleep_duration: 20
   ignore: # for all
     - ID
     - LQTY
-    - ATA
-    - HIGH
-    # - OAX
+    - DCR
   ignore_warning:
     - DUMMY
+  # ignore_position_log:
+  #   - OAX
   usdt:
     status: "on" # "on" or "off"
     is_manual_trade: False
-    auto_buy_bnb:  "on"
+    auto_buy_bnb:  "off"
     isolated: "off"
     cross: "off"
     max_pos: 2
@@ -27,7 +27,10 @@ root:
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
     entry_prices:
+      DCR: 22.8
       DUMMY_ASSET: 1.0
+    change_type:  # to btc
+      - DUMMY
   btc:
     status: "on"
     is_manual_trade: True
@@ -40,10 +43,10 @@ root:
     percent_change_to_add: 4.49
     stop_trade_wt_30m_red: True
     entry_prices:
+      DCR: 22
       DUMMY_ASSET: 1.0
+    change_type:  # to usdt
+      - DCR
     ignore:
       - ID
       - LQTY
-      - ATA
-      - HIGH
-      - OAX

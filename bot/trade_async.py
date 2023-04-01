@@ -443,7 +443,7 @@ class BotHelper:
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
         if self.strategy.market.lower() == "usdt" and free_balance < config.cfg["root"]["usdt"]["initial"]:
-            raise QuietExit(f"not enough free usdt([cyan]{round(free_balance)}$[/cyan])")
+            raise QuietExit(f"not enough free usdt([cyan]${round(free_balance)}[/cyan])")
 
         # if self.strategy.market == "USDTPERP":
         #     self.pre_check_usdtperp(

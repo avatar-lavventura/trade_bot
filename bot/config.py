@@ -131,7 +131,8 @@ class Exchange:
         usdt_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c
         if float(format(btc_asset, ".8f")) > 0.0001:
             _only_btc = float(config.env[cfg.TYPE].estimated_balance.find_one("only_btc")["value"])
-            if _only_btc > 0:
+            # if _only_btc > 0:
+            if cfg.TYPE == "btc":
                 remaining_asset_in_usdt = (
                     float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"])
                     - float(_only_btc) * cfg.PRICES["BTCUSDT"]
@@ -144,6 +145,7 @@ class Exchange:
                         "o_usdt": float(format(remaining_asset_in_usdt, ".2f")),
                         "btc": float(format(btc_asset, ".8f")),
                         "usdt": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
+                        "bnb": float(format(cfg.BNB_BALANCE, ".2f")),
                     },
                 )
             else:
@@ -151,8 +153,10 @@ class Exchange:
                     cfg.CURRENT_DATE,
                     {
                         "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                        "btc": float(format(btc_asset, ".8f")),
+                        "o_btc": _only_btc,
+                        # "btc": float(format(btc_asset, ".8f")),
                         "usdt": float(format(usdt_asset, ".2f")),
+                        "bnb": float(format(cfg.BNB_BALANCE, ".2f")),
                     },
                 )
         else:
@@ -193,14 +197,18 @@ class Config:
         self.btc_quantity = {}
         self._env = None  #: shorted name
         self.env = {}  # type: Dict[str, Env]
+        self.prices = {}  # type: Dict[str, Env]
         for idx in ["usdt", "btc"]:  # "busd"
             self.env[idx] = Env()  # should be initialized before reload()
 
         self._reload()
+        self.prices = Mongo(mc, mc["shared"]["prices"])
+
         # self.watchlist_mb = Mongo(mc, mc["watchlist"])
         for asset in ["usdt", "btc"]:
             self.env[asset].balance = Mongo(mc, mc[asset]["balance"])
-            self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])
+            self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])  # # TODO: ? same as balance check
+
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
@@ -329,9 +337,12 @@ class Config:
         self.reload_wavetrend()
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
-        self.WATCHLIST = self.watchlist["watch"]["list"]
         self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
         self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
+        self.WATCHLIST = self.watchlist["watch"]["list"]
+        self.WATCHLIST = list(set(self.WATCHLIST + self.WATCHLIST_BAR))
+        self.WATCHLIST.sort()
+        self.WATCHLIST = ["BTCUSDT"] + self.WATCHLIST
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
             self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]

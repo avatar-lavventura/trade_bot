@@ -99,7 +99,7 @@ async def webhook() -> (str, int):
                 text = f"  [green]{data_msg.upper()}[/green]  "
 
             log(
-                f"  {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]",
+                f"  {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]  ",
                 end="\r",
                 is_write=False,
                 h=False,

@@ -1,11 +1,11 @@
 portfolio:
-    BTC: 0.0522 mBTC
-    SILVER:
-        gr: 140.20
-        troy_ounce: 4.507570199999999
-        USD: 85.64
-    GOLD:
-        gr: 1.79
-        troy_ounce: 0.0576
-        USD: 101.33
-    _TOTAL: 0.0
+  BTC: 0.0522 mBTC
+  SILVER:
+    gr: 140.20
+    troy_ounce: 4.507570199999999
+    USD: 85.64
+  GOLD:
+    gr: 1.79
+    troy_ounce: 0.0576
+    USD: 101.33
+  _TOTAL: 0.0

@@ -18,7 +18,7 @@ class TakeProfit:
     def get_profit_amount(self, amount=0) -> float:
         amount = abs(float(amount))
         if self.take_profit < 0.006:
-            if (cfg.TYPE == "usdt" and amount > 1000) or (cfg.TYPE == "btc" and amount > 0.005):
+            if (cfg.TYPE == "usdt" and amount > 1500) or (cfg.TYPE == "btc" and amount > 0.005):
                 return 1.000 + 0.0095  # 0.95% profit
 
         return 1.000 + self.take_profit
