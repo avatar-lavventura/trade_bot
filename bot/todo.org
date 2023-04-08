@@ -170,3 +170,81 @@ fetch that limit order
 
 
 ** TODO store BTCUSDT price at mongodb
+
+** TODO ban
+
+#+begin_src bash
+Traceback (most recent call last):
+  File "/home/alper/trade_bot/bot/binance_balance.py", line 110, in process_main
+    await process(unix_timestamp_ms)
+  File "/home/alper/trade_bot/bot/binance_balance.py", line 77, in process
+    *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 380, in spot_balance
+    await self.read_margin_cross_balance()
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 291, in read_margin_cross_balance
+    cfg.MARGIN_BAL_BTC = await self._fetch_margin_cross_balance()
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 276, in _fetch_margin_cross_balance
+    balances = await exchange.margin_cross.fetch_balance()
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 2282, in fetch_balance
+    await self.load_markets()
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 211, in
+load_markets
+    raise e
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 207, in
+load_markets
+    result = await self.markets_loading
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 197, in
+load_markets_helper
+    markets = await self.fetch_markets(params)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 1812, in fetch_markets
+    promises = await asyncio.gather(*promises)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 6986, in request
+    response = await self.fetch2(path, api, method, params, headers, body, config, context)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 1610, in fetch2
+    return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 180, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response,
+request_headers, request_body)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 6913, in handle_errors
+    raise DDoSProtection(self.id + ' ' + str(code) + ' ' + reason + ' ' + body)
+ccxt.base.errors.DDoSProtection: binance 418 Unknown {"code":-1003,"msg":"Way too many requests;
+IP(176.45.48.147) banned until 1680982611798. Please use the websocket for live updates to avoid bans."}
+An exception of type DDoSProtection occurred. Arguments:
+('binance 418 Unknown {"code":-1003,"msg":"Way too many requests; IP(176.45.48.147) banned until 1680982611798.
+Please use the websocket for live updates to avoid bans."}',)
+#+end_src
+
+** TODO ICPUSDT data fetch
+You can adapt the following example to suit your purposes: https://github.com/ccxt/ccxt/blob/master/examples/py/binance-futures-positions.py
+
+With something like the following:
+
+#+begin_src python
+import os
+import sys
+from pprint import pprint
+
+root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(file))))
+sys.path.append(root + '/python')
+
+import ccxt # noqa: E402
+
+print('CCXT Version:', ccxt.version)
+
+exchange = ccxt.binanceusdm({
+'apiKey': 'YOUR_API_KEY',
+'secret': 'YOUR_API_SECRET',
+})
+
+markets = exchange.load_markets()
+
+symbol = 'ICP/USDT:USDT'
+since = DATE_TIME_OF_INTEREST # use datetime.timestamp()*1000 for the start time you need
+limit = 100 #or however many orders you are interested in fetching
+
+order_history = exchange.fetch_orders(symbol, since, limit, {})
+pprint(order_history)`
+#+end_src
+
+
+** TODO DELETE DCR and OC entry_price position since there is no left

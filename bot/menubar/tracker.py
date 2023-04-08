@@ -13,10 +13,11 @@ from pycoingecko import CoinGeckoAPI
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT"]
-assets = assets + ["DCRUSDT"]
+assets = assets + ["DCRBTC", "DCRUSDT"]
 sleep_duration = 20
 is_quote = True
 MSG = "The most important rule in trading is to protect your capital at all cost."
+# We are unable to provide any donation.  // makes you angry
 cg = CoinGeckoAPI()
 
 for idx, asset in enumerate(reversed(assets)):

@@ -34,7 +34,11 @@ class BotHelperSpotAsync(BotHelperAsync):
         log()  # end of each position line
         return False
 
+    def truncate(self, f, n):
+        return math.floor(f * 10**n) / 10**n
+
     async def is_limit_order_exist(self, asset, limit_price) -> None:
+        # TODO: cancel only sell positions or update it , keep buy orders
         market = cfg.TYPE.upper()
         open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/{market}")
         if open_orders:
@@ -53,7 +57,15 @@ class BotHelperSpotAsync(BotHelperAsync):
                                     is_print=False,
                                 )
                             )
-                            if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
+                            #            94.561                         94.5
+                            # # TODO: order["amount"] ile ayni digit sayisi olmali cfg.BALANCES[asset]["total"] kontrol et
+                            # if decimal_count(order["amount"]) == 1:
+                            #     per_change_delta = 0.1  # prevent 0.1% wrong quantity calculations
+                            # else:
+                            #     per_change_delta = 0.02  # prevent 0.02% wrong quantity calculations
+                            per_change_delta = 0.1
+                            if q_per_change == 0 or q_per_change > per_change_delta:
+                                log(f"per_change_delta: {q_per_change} ?= {per_change_delta}")
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
         elif not config.env[cfg.TYPE].is_manual_trade:
@@ -300,7 +312,8 @@ class BotHelperSpotAsync(BotHelperAsync):
                 and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
                 and asset not in config.cfg["root"]["ignore_warning"]
             ):
-                log(f"warning: wrong calculation for {symbol} {asset_qty} != {qty}", is_write=False)
+                # TODO: qty + remaining amount // there could be left over # 84.4262 != 84.4 | left_over: 0.0262
+                log(f"wrong calculation for {symbol} {asset_qty} != {qty}", is_write=False)
 
             qty_to_consider = qty
             if asset_qty > qty:
@@ -323,7 +336,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"t={self.ll(limit_price)} ", end="")
+            log(f"t={self.ll(limit_price)} ", end="")  # prints the target price
 
         if entry_price == limit_price:
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
@@ -393,7 +406,15 @@ class BotHelperSpotAsync(BotHelperAsync):
 
             log(format(_sum * 1000, ".4f"), "ib")
 
-        cfg.locked_balance += float(per)
+        if cfg.TYPE == "btc":
+            if "change_type" in config.cfg["root"][cfg.TYPE] and asset in config.cfg["root"][cfg.TYPE]["change_type"]:
+                cfg.locked_balance += 0.1
+                # pass
+            else:
+                cfg.locked_balance += float(per)
+        else:
+            cfg.locked_balance += float(per)
+
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
@@ -452,9 +473,10 @@ class BotHelperSpotAsync(BotHelperAsync):
         ):
             log()
         elif (
-            not await self.check_position_to_pass(asset, _sum, is_limit, per)
+            profit < 0
             and per_change <= -2
             and per_change <= config.env[_type].percent_change_to_add
+            and not await self.check_position_to_pass(asset, _sum, is_limit, per)
             and config.btc_wavetrend["30m"] == "green"  # wait until wt for btc is green in 30m
         ):
             await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)

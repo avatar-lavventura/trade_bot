@@ -12,15 +12,7 @@ alerts:
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 29000
+      price: 30200
       rapid_alert: "off"
-    a1:
-      pair: DCRUSDT
-      price: 22.01
-      rapid_alert: "on"
-    # a2:
-    #   pair: OAXBTC
-    #   price: 0.0000103
-    #   rapid_alert: "off"
   balance_greater_than:
     value: 10000

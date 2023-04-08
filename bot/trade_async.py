@@ -70,7 +70,10 @@ class Strategy:
                 self.asset = self.symbol[: -len(self.market)]  # removes "BUSD" at the end
                 self.symbol = f"{self.asset}/BUSD"
 
-        if self.asset in config.SPOT_IGNORE_LIST:
+        if (
+            self.asset in config.SPOT_IGNORE_LIST
+            or self.asset in config.cfg["root"][self.market.lower()]["entry_prices"]
+        ):
             raise QuietExit("ignore list PASS")
 
         self.position_alert_msg = self.chunks[2]

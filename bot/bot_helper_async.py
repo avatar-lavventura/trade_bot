@@ -95,7 +95,7 @@ class BotHelperAsync:
             msg += "-=-=-=-=-=-= "
             if lost != 0:
                 lost_usdt = lost / 1000 * cfg.PRICES["BTCUSDT"]
-                msg += f"[{c}]{format(lost_usdt, '.2f')}$({lost})[/{c}] "
+                msg += f"[{c}]${format(lost_usdt, '.2f')}({lost})[/{c}] "
 
             msg += f"locked=[cy]{format(float(cfg.locked_balance), '.2f')}%[/cy] "
             if free > 0:
@@ -110,10 +110,10 @@ class BotHelperAsync:
             msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
             msg += f"[{c}]{abs(lost)}{name}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:
-                msg = f"{msg}free=[cy]{free}{name}[/cy] "
+                msg = f"{msg}free=[cy]{name}{free}[/cy] "
 
         if float(cfg.locked_balance) > 0:
-            if real_pos_count > 1:
+            if real_pos_count > 0:
                 log(msg, end="")
             else:
                 log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ", "bold black", end="")
@@ -240,11 +240,15 @@ class BotHelperAsync:
                         if not config.cfg["root"]["balance_silent"]:
                             msg = f"{msg}=> `{_time}`"
 
+                    _only_btc = float(config.env["btc"].estimated_balance.find_one("only_btc")["value"])
+                    sum_btc_all = float(format(cfg.WITHDRAWN_BTC + _only_btc, ".8f"))
                     if config.estimated_balance() and ("03:00:" in _time or not config.cfg["root"]["balance_silent"]):
                         btc_wallet_balance = cfg.WITHDRAWN_BTC * cfg.PRICES["BTCUSDT"]
                         msg = f"{msg}  :moneybag:`{config.estimated_balance()}`"
                         msg = f"{msg} w=`${int(cfg.WITHDRAWN)}`\n\t\t"
+                        # breakpoint()  # DEBUG
                         msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN + btc_wallet_balance)}`"
+                        msg = f"{msg} | btc=`{sum_btc_all}`"
 
             if "03:00:" in _time:
                 if config.estimated_balance():
@@ -365,9 +369,9 @@ class BotHelperAsync:
 
         if sum_btc > 0.00002 and pos_count > 0:
             log(
-                f" * btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f| "
+                f" * btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f| "
                 f"bnb=[cy]$%.2f[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}"
-                % (sum_btc, own_usdt, only_usdt, cfg.BNB_BALANCE)
+                % (sum_btc, own_usdt, only_usdt, only_btc * 1000, cfg.BNB_BALANCE)
             )
             cfg.SUM_BTC = sum_btc
 
@@ -384,7 +388,8 @@ class BotHelperAsync:
         if len(config.asset_list) == 0:
             config._env.timestamps["root"] = {}  #: cleans timestamp_<type>.yaml file
 
-        if len(config.asset_list) == 0 or config.env[cfg.TYPE].is_manual_trade:
+        # if len(config.asset_list) == 0 or config.env[cfg.TYPE].is_manual_trade:
+        if True:
             if cfg.TYPE == "usdt":
                 #: estimated balance:
                 _total_balance = float(_sum_usdt) + float(sum_busd)
@@ -421,8 +426,8 @@ class BotHelperAsync:
                 config._env.estimated_balance.add_single_key("total_balance", _total_balance)
             elif cfg.TYPE == "btc":  #: calculating the estimated balance
                 print_str = ":bee: "
-                if only_btc > 0:  # DELETEME
-                    print_str += f"btc={only_btc} "  # DELETEME
+                if only_btc > 0 and len(config.asset_list) == 0:
+                    print_str = f"btc={only_btc} "
 
                 if cfg.FIRST_PRINT_CYCLE:
                     if print_str != ":bee: " and pos_count == 0:
@@ -452,7 +457,9 @@ class BotHelperAsync:
                 if config._env.isolated == "on":
                     own_usdt += await self._fetch_isolated_balance() * cfg.PRICES["BTCUSDT"]
 
-                log(print_str, end="")
+                if len(config.asset_list) == 0:
+                    log(print_str, end="")
+
                 if sum_busd > 0:
                     log(
                         "%.8f BTC[blue] ≈[/blue] [cy]$%.2f[/cy]"
@@ -465,16 +472,22 @@ class BotHelperAsync:
                     onlyu = ""
                     _perf = ""
                     if pos_count == 0:
-                        onlyu = f"+ [g]${format(only_usdt, '.2f')}[/g]"
-                        _perf = f"perf={output['value']}"
+                        if only_usdt > 0:
+                            onlyu = f"+ [g]${format(only_usdt, '.2f')}[/g]"
 
-                    log(
-                        f"{onlyu} total=[cy]$%.2f[/cy] {_perf}" % (own_usdt),
-                        end="",
-                    )
+                        with suppress(Exception):
+                            _perf = f"perf={output['value']}"
+
+                        if len(config.asset_list) == 0:
+                            log(
+                                f"{onlyu} total=[cy]$%.2f[/cy] {_perf}" % (own_usdt),
+                                end="",
+                            )
 
                 # log(f"| bnb={format(cfg.BNB_BALANCE, '.2f')} | [bold]{_da}")  # TODO: check me
-                log()
+                if len(config.asset_list) == 0:
+                    log()
+
                 config._env.estimated_balance.add_single_key("total_balance", own_usdt)
         elif cfg.TYPE == "usdt":
             busd_str = ""
@@ -524,6 +537,10 @@ class BotHelperAsync:
                 if balance > 0 and asset != "DUMMY":  # TODO: asset in PASS or ignore
                     try:
                         output = await self.spot_limit(asset, balance, _sum, is_limit)
+                        if cfg.TYPE == "btc" and "change_type" in config.cfg["root"][cfg.TYPE]:
+                            if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
+                                output = output / cfg.PRICES["BTCUSDT"]
+
                         lost += float(output)
                     except Exception as e:
                         log(e)
@@ -798,6 +815,7 @@ class BotHelperAsync:
                 del response["fills"]
                 del response["selfTradePreventionMode"]
                 del response["workingTime"]
+                del response["type"]
 
             log(response, "bold cyan")
         except Exception as e:

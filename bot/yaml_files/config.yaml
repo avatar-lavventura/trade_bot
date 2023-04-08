@@ -8,9 +8,9 @@ root:
   locked_percent_limit: 99.99
   sleep_duration: 20
   ignore: # for all
-    - ID
-    - LQTY
     - DCR
+    # - ID
+    # - LQTY
   ignore_warning:
     - DUMMY
   # ignore_position_log:
@@ -27,13 +27,13 @@ root:
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: True
     entry_prices:
-      DCR: 22.8
+      DCR: 22.7
       DUMMY_ASSET: 1.0
     change_type:  # to btc
       - DUMMY
   btc:
     status: "on"
-    is_manual_trade: True
+    is_manual_trade: False
     auto_buy_bnb:  "on"
     isolated: "off"
     cross: "off"
@@ -43,10 +43,9 @@ root:
     percent_change_to_add: 4.49
     stop_trade_wt_30m_red: True
     entry_prices:
-      DCR: 22
+      DCR: 21.90
       DUMMY_ASSET: 1.0
-    change_type:  # to usdt
-      - DCR
+    # change_type:  # to usdt
+    #   - DCR
     ignore:
-      - ID
-      - LQTY
+      - DUMMY
