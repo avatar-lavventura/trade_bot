@@ -2,6 +2,8 @@
 
 import time
 
+from broker._utils._log import log
+
 
 def fetch_withdrawn(sh, asset) -> float:
     column = ""
@@ -13,5 +15,6 @@ def fetch_withdrawn(sh, asset) -> float:
     while True:
         try:
             return float(sh.sheet1.get(column)[0][0])
-        except:
+        except Exception as e:
+            log(f"Fetching from google sheets... {e}", end="\r")
             time.sleep(2)

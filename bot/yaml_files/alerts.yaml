@@ -8,11 +8,11 @@ alerts:
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 30500
+      price: 31000
       rapid_alert: "off"
     a1:
       pair: DCRUSDT
       price: 22
-      msg: ""
+      msg: "on"
   balance_greater_than:
     value: 10000

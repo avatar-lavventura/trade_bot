@@ -43,9 +43,11 @@ async def main():
         _sum = int(bal_brave + bal_chrome + WITHDRAWN + (WITHDRAWN_BTC * BTCUSDT) - EKLEME)
         if _sum > max_val:
             max_val = _sum
+            start = "[blue]*****"
 
         if _sum > max_sum and max_sum != 0:
-            start = "[green]*****"
+            if not start:
+                start = "[green]*****"
 
         max_sum = _sum
         log(f"{_date(_type='compact')} | ", h=False, end="")
@@ -56,11 +58,13 @@ async def main():
             time.sleep(20)
             continue
 
-        if chrome_spot_balance > 1000:
-            _str = f"{f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}]) => {_sum} | [ib]{max_val}"
+        hot_sum = f2(bal_brave + bal_chrome)
+        if chrome_spot_balance > 500:
+            _str = f"{f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}]) => {hot_sum} {_sum}"
         else:
-            _str = f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}"
+            _str = f"{int(bal_brave)} , {int(bal_chrome)} => [[orange]{hot_sum}[/orange] {_sum}]"
 
+        _str = f"{_str} | [ib]{max_val}"
         if goal == 0:
             log(f"{_str} {start}", "b")
         else:

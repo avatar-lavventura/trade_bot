@@ -9,6 +9,7 @@ root:
   sleep_duration: 20
   ignore: # for all
     - DCR
+    # - OG
     # - ID
     # - LQTY
   ignore_warning:
@@ -27,7 +28,7 @@ root:
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: true
     entry_prices:
-      DCR: 22.7
+      DCR: 22.3
       DUMMY: 1.0
     change_type:  # to btc
       - DUMMY
@@ -40,11 +41,11 @@ root:
     initial: 0.00011
     max_pos: 2
     multiply_ratio: 1.1
-    percent_change_to_add: 4.49
-    stop_trade_wt_30m_red: true
+    percent_change_to_add: 4.3
+    stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0
     # change_type:  # to usdt
-    #   - DCR
+    #   - OG
     ignore:
       - DUMMY

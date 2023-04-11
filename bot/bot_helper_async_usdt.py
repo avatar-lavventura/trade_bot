@@ -2,9 +2,11 @@
 
 from contextlib import suppress
 from typing import Tuple
+
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
 from broker.errors import QuietExit
+
 from bot import cfg
 from bot import config as helper
 from bot.bot_helper_async import TP, BotHelperAsync
@@ -163,7 +165,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             new_qty = qty * 1.05
 
         per = (100.0 * new_qty * asset_price) / sum_bal
-        log(f"==> new_order_qty={new_qty} | {format(float(per), '.2f')}% of the total asset")
+        log(f"==> new_order_qty={new_qty} | [cy]%{format(float(per), '.2f')}[/cy] of the total asset")
         order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
             order = order["info"]
@@ -218,7 +220,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
             entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
-            qty_to_consider = asset_qty
+            qty_to_consider_locked_per = qty_to_consider = asset_qty
             _sum = float(entry_price) * asset_qty
         else:
             trades = await helper.exchange.spot.fetch_my_trades(symbol, since=since)
@@ -315,6 +317,8 @@ class BotHelperSpotAsync(BotHelperAsync):
                 #: could be additional gain from the margin trading.
                 qty_to_consider = asset_qty
 
+            # TODO: CHECKME
+            qty_to_consider_locked_per = asset_qty
             entry_price = _sum / qty_to_consider
             entry_price = float(f"{entry_price:.{decimal}f}")
 
@@ -329,16 +333,17 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".4f"))
 
-        log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")
-        if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"t={self.ll(limit_price)} ", end="")  # prints the target price
-
         if entry_price == limit_price:
+            log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
 
         asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
-        log(f"p={self.ll(asset_price)} ", end="")
+        log(f"** {asset} {self.ll(asset_price)} e={self.ll(entry_price)} q={qty_str} ", "b", end="")
+        if is_limit and asset not in config.SPOT_IGNORE_LIST:
+            log(f"t={self.ll(limit_price)} ", end="")  # prints the target price
+
         per = format((100.0 * qty_to_consider * asset_price) / sum_bal, ".2f")
+        per_locked = format((100.0 * qty_to_consider_locked_per * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * qty_to_consider
         per_change_r = 0.0
         if profit == 0:
@@ -380,22 +385,22 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 c1 = "green on black blink"
 
-            if float(per) == int(float(per.replace(".00", ""))):
-                per = int(float(per.replace(".00", "")))
+            if float(per_locked) == int(float(per_locked.replace(".00", ""))):
+                per_locked = int(float(per_locked.replace(".00", "")))
 
-            if float(per) > 150:
+            if float(per_locked) > 150:
                 log(f"| [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
             else:
-                log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
+                log(f"[{c}]{per_locked}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
         else:
-            if float(per) > 0:
-                if float(per) > 5:
-                    if float(per) >= 100:
-                        per = "100"
+            if float(per_locked) > 0:
+                if float(per_locked) > 5:
+                    if float(per_locked) >= 100:
+                        per_locked = "100"
                     else:
-                        per = int(round(float(per)))
+                        per_locked = int(round(float(per_locked)))
                 else:
-                    per = float(per)
+                    per_locked = float(per)
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
@@ -406,9 +411,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                 cfg.locked_balance += 0.1
                 # pass
             else:
-                cfg.locked_balance += float(per)
+                cfg.locked_balance += float(per_locked)
         else:
-            cfg.locked_balance += float(per)
+            cfg.locked_balance += float(per_locked)
 
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
@@ -472,9 +477,13 @@ class BotHelperSpotAsync(BotHelperAsync):
             and per_change <= -2
             and per_change <= config.env[_type].percent_change_to_add
             and not await self.check_position_to_pass(asset, _sum, is_limit, per)
-            and config.btc_wavetrend["30m"] == "green"  # wait until wt for btc is green in 30m
         ):
-            await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)
+            if config.env[_type].stop_trade_wt_30m_red:
+                if config.btc_wavetrend["30m"] == "green":
+                    #: wait until wt for btc is green in 30m
+                    await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)
+            else:
+                await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)
 
         # if config.btc_wavetrend["30m"] == "red":
         #     log("PASS: btc_wavetrend is red nothing to do", "red")

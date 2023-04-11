@@ -118,6 +118,9 @@ class Exchange:
     async def get_isolated_balance(self):
         return await self.margin_isolated.fetch_balance()
 
+    def f(self, value, decimal):
+        return float(format(value, f".{decimal}f"))
+
     async def record_balance(self):
         # await bot_async.read_margin_cross_balance()
         # binance_balance.bot_async
@@ -137,14 +140,18 @@ class Exchange:
                     float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"])
                     - float(_only_btc) * cfg.PRICES["BTCUSDT"]
                 )
+                o_usdt = float(format(remaining_asset_in_usdt, ".2f"))
+                if abs(o_usdt) == 0:
+                    o_usdt = 0
+
                 config.env[cfg.TYPE].balance.add_single_key(
                     cfg.CURRENT_DATE,
                     {
                         "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                        "o_btc": _only_btc + cfg.WITHDRAWN_BTC,
-                        "o_usdt": float(format(remaining_asset_in_usdt, ".2f")),
-                        "btc": float(format(btc_asset, ".8f")),
-                        "usdt": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
+                        "o_btc": self.f(_only_btc + cfg.WITHDRAWN_BTC, 8),
+                        "o_usdt": o_usdt,
+                        "btc": self.f(btc_asset, 8),
+                        "total": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
                         "bnb": float(format(cfg.BNB_BALANCE, ".2f")),
                     },
                 )
@@ -208,7 +215,6 @@ class Config:
         for asset in ["usdt", "btc"]:
             self.env[asset].balance = Mongo(mc, mc[asset]["balance"])
             self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])  # # TODO: ? same as balance check
-
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
@@ -322,6 +328,7 @@ class Config:
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
             self.env[_type].cross = self.cfg["root"][_type]["cross"]
             self.env[_type].isolated = self.cfg["root"][_type]["isolated"]
+            self.env[_type].stop_trade_wt_30m_red = self.cfg["root"][_type]["stop_trade_wt_30m_red"]
             self.env[_type].timestamps = self.yaml_wrapper(self.base_dir / f"timestamp_{_type}.yaml")
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
