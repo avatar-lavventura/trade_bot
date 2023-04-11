@@ -5,14 +5,14 @@ alerts:
       price: 16000
       rapid_alert: "on" # more rapid message
       msg: "💣"
-    a1:
-      pair: COCOSUSDT
-      price: 1.28
-      msg: ""
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 30200
+      price: 30500
       rapid_alert: "off"
+    a1:
+      pair: DCRUSDT
+      price: 22
+      msg: ""
   balance_greater_than:
     value: 10000

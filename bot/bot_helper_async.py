@@ -54,10 +54,13 @@ class BotHelperAsync:
         #     self._update_timestamp_status("busd_timestamp")
 
     async def fetch_symbol_percent_change(self, symbol, tf, price=None):
+        """Fetch bar.
+
+        bar: time, open, high, low, close, volume
+        """
         bar_price = await fund._bar_ohlcv(symbol, tf)
-        # print(bar_price)
         try:
-            bar_price = bar_price[0]  # time, open, high, low, close, volume
+            bar_price = bar_price[0]  #
         except Exception as e:
             raise KeyboardInterrupt from e
 
@@ -74,6 +77,7 @@ class BotHelperAsync:
 
         high = bar_price[2]
         low = bar_price[3]
+        # print(bar_price) # DELETEME
         # TODO: check here
         if asset_price < low:
             bar_price = high  # high
@@ -85,6 +89,47 @@ class BotHelperAsync:
 
         percent = ((asset_price - bar_price) / bar_price) * 100
         return asset_price, float(format(percent, ".2f"))
+
+    def calc_per(self, bar, asset_price):
+        bar_price = ""
+        high = bar[2]
+        low = bar[3]
+        # print(bar_price) # DELETEME
+        # TODO: check here
+        if asset_price < low:
+            bar_price = high  # high
+        else:
+            bar_price = low  # low
+
+        # if tf == "1d":
+        #     bar_price = low  # low
+
+        percent = ((asset_price - bar_price) / bar_price) * 100
+        return percent
+
+    async def fetch_symbol_percent_change_1d(self, symbol, price=None):
+        """Fetch bar.
+
+        bar: time, open, high, low, close, volume
+        """
+        bar_1h, bar_1d = await fund._bar_ohlcv_1d(symbol)
+        if not bar_1h or not bar_1d:
+            raise KeyboardInterrupt
+
+        if price:
+            asset_price = price
+        else:
+            if symbol in cfg.PRICES:
+                if symbol == "BTCUSDT":
+                    asset_price = int(cfg.PRICES[symbol])
+                else:
+                    asset_price = cfg.PRICES[symbol]
+            else:
+                asset_price = await self.spot_fetch_ticker(symbol)
+
+        percent_1h = self.calc_per(bar_1h, asset_price)
+        percent_1d = self.calc_per(bar_1d, asset_price)
+        return asset_price, float(format(percent_1h, ".2f")), float(format(percent_1d, ".2f"))
 
     async def analyze_positions(self, name, lost, pos_count, free, only_btc) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
@@ -155,6 +200,19 @@ class BotHelperAsync:
             cfg.discord_message = f"`{_date(_format='%m-%d %H:%M:%S')}`\n"
             cfg.discord_sent_msg = None
 
+    def per_str_color(self, percent):
+        return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
+
+    def btc_price_per(self, symbol, asset_price, percent_1h, percent_1d):
+        per_str_c_1h = self.per_str_color(percent_1h)
+        per_str_c_1d = self.per_str_color(percent_1d)
+        c = "m" if symbol == "BTCUSDT" else "cy"
+        log(
+            f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+            end="\r",
+            is_write=False,
+        )
+
     async def _discord_send(self, msg, lost, pos_count, name, free, only_btc) -> None:
         _time = _date(_format="%m-%d %H:%M:%S")
         cfg.locked_balance = 100 if float(cfg.locked_balance) > 99.3 else format(cfg.locked_balance, ".2f")
@@ -167,7 +225,7 @@ class BotHelperAsync:
             if cfg.TYPE == "usdt":
                 flag = False
                 width1 = max(len(v) for v in config.WATCHLIST)
-                for symbol in config.WATCHLIST or symbol:
+                for symbol in config.WATCHLIST:
                     if not flag:
                         flag = True
                         msg = f"{msg}\n```"
@@ -176,10 +234,8 @@ class BotHelperAsync:
                     percent_1h = ""
                     percent_1d = ""
                     try:
+                        asset_price, percent_1h, percent_1d = await self.fetch_symbol_percent_change_1d(symbol)
                         time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
-                        asset_price, percent_1h = await self.fetch_symbol_percent_change(symbol, tf="1h")
-                        time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
-                        asset_price, percent_1d = await self.fetch_symbol_percent_change(symbol, tf="1d")
                         if percent_1h:
                             per_str_1h = f"{percent_1h}" if percent_1h < 0 else f"+{percent_1h}"
 
@@ -192,9 +248,10 @@ class BotHelperAsync:
                             per_str = ""
                     except Exception as e:
                         log(f"E: {symbol} {e}")
-                        # print_tb(e)
+                        print_tb(e)
 
                     if symbol in "BTCUSDT":
+                        self.btc_price_per(symbol, asset_price, percent_1h, percent_1d)  # TODO print this in bal.py
                         if not (percent_1h and percent_1d) and float(lost) > 0:
                             log(
                                 f" * {symbol}=[m]{asset_price}[/m]",
@@ -420,9 +477,9 @@ class BotHelperAsync:
                 perf_str = ""
                 output = config._env.stats.find_one(cfg.CURRENT_DATE)
                 if output:
-                    perf_str = f"perf=[blue]{output['value']}[/blue]"
+                    perf_str = f" perf=[blue]{output['value']}[/blue] |"
 
-                log(f":lion_face: [g]${_total_balance}[/g] | {_bnb} | {perf_str} | {_da} [italic cyan]{_timestamp()}")
+                log(f":lion_face: [g]${_total_balance}[/g] | {_bnb} |{perf_str} {_da} [italic cyan]{_timestamp()}")
                 config._env.estimated_balance.add_single_key("total_balance", _total_balance)
             elif cfg.TYPE == "btc":  #: calculating the estimated balance
                 print_str = ":bee: "
@@ -845,6 +902,12 @@ class BotHelperAsync:
                     real_pos_count += 1
                     if symbol not in config.SPOT_IGNORE_LIST:
                         pos_count += 1
+
+        for asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
+            if asset != "DUMMY":
+                if asset not in ongoing_positions:
+                    del config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
+                    config.cfg.dump()
 
         for asset in config._env.timestamps["root"]:
             if asset != "base" and asset not in ongoing_positions:
