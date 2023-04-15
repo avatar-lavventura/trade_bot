@@ -12,8 +12,8 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTCUSDT"]
-assets = assets + ["DCRBTC", "DCRUSDT"]
+assets = ["DCRUSDT", "DCRBTC"]
+assets += ["BTCUSDT"]
 sleep_duration = 20
 is_quote = True
 MSG = "The most important rule in trading is to protect your capital at all cost."

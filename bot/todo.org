@@ -215,3 +215,23 @@ pprint(order_history)`
 #+end_src
 
 ** TODO config split for BTC and USDT
+
+** TODO new_limit_order can be same with enterance price no gain?
+
+#+begin_src python
+QLC 0.00077 e=0.00079 q=38569 t=0.00079 (2.53%) $-23.45 0.77 72.31% 30.4695
+==> new_limit_order={
+│   'symbol': 'QLCBTC',
+│   'orderId': '77550848',
+│   'transactTime': '1681523626939',
+│   'price': '0.00000079',
+│   'origQty': '38569.00000000',
+│   'side': 'SELL'
+}
+e=0.00079 == 'price': '0.00000079', instead should be 0.00080
+#+end_src
+
+** TODO ignore since its balance was < $1
+
+[  bot_helper_async.py:839  ] E: binance does not have market symbol QLCUSDT
+[  bot_helper_async.py:839  ] E: binance does not have market symbol QLCBUSD

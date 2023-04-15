@@ -13,6 +13,11 @@ alerts:
     a1:
       pair: DCRUSDT
       price: 22
-      msg: "on"
+      msg: ""
+      rapid_alert: "on"
+    a2:
+      pair: QLCBTC
+      price: 0.0000006
+      msg: ""
   balance_greater_than:
     value: 10000
