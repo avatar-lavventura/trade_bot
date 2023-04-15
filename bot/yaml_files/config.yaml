@@ -39,7 +39,7 @@ root:
     isolated: off
     cross: off
     initial: 0.00011
-    max_pos: 2
+    max_pos: 3
     multiply_ratio: 1.1
     percent_change_to_add: 4.3
     stop_trade_wt_30m_red: false

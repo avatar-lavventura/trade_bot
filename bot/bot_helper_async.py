@@ -157,6 +157,7 @@ class BotHelperAsync:
             _total = format(_total, ".5f")
             msg += f"[ib]{_total}[/ib] "
         else:
+            log()
             msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
             msg += f"[{c}]{name}{lost}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
             if free > 1:

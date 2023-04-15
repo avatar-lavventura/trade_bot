@@ -55,7 +55,7 @@ async def main():
         c1 = "green on black blink"
         chrome_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
         if chrome_spot_balance > 20000:  # over-calculated
-            log(f"chrome_spot_balance={chrome_spot_balance} -- overflow")
+            log(f"chrome_spot_balance={chrome_spot_balance} => overflow")
             time.sleep(20)
             continue
 

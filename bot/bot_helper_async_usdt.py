@@ -31,7 +31,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             log("pass_c")
             return True
 
-        log()  # end of each position line
+        # log()  # end of each position line
         return False
 
     async def is_limit_order_exist(self, asset, limit_price) -> None:
@@ -359,10 +359,11 @@ class BotHelperSpotAsync(BotHelperAsync):
                 _usd = format(abs(profit) * cfg.PRICES["BTCUSDT"], ".2f")
                 if profit < 0:
                     _usd = f"-{_usd}"
+                elif _usd == "0.00":  # float(_usd) == 0
+                    _usd = format(abs(profit) * cfg.PRICES["BTCUSDT"], ".3f")
 
                 log(f"${_usd}", "green on black blink" if profit > 0 else "red on black blink", end="")
                 log(f" {format(abs(profit) * 1000, '.2f')} ", "italic green" if profit > 0 else "italic red", end="")
-
             if asset not in config.SPOT_IGNORE_LIST and per_change > 20:
                 cfg.FIRST_PRINT_CYCLE = False
                 if cfg.ENTRY_PRICE_VERBOSE:
@@ -466,12 +467,13 @@ class BotHelperSpotAsync(BotHelperAsync):
         # self.is_cut_loss(asset, profit, qty_to_consider)
         config.reload_wavetrend()
         if asset in config.SPOT_IGNORE_LIST:
-            log()
+            # log()
             return profit
-        elif (_type in ["usdt", "busd"] and config.env[_type].status["free"] < 15) or (
+
+        if (_type in ["usdt", "busd"] and config.env[_type].status["free"] < 15) or (
             _type == "btc" and float(config.env["btc"].status["free"]) < 0.0003
         ):
-            log()
+            pass  # log()
         elif (
             profit < 0
             and per_change <= -2

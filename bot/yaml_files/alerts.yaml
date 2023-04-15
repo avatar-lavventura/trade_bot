@@ -12,7 +12,7 @@ alerts:
       rapid_alert: "off"
     a1:
       pair: DCRUSDT
-      price: 22
+      price: 22.3
       msg: ""
       rapid_alert: "on"
     a2:
