@@ -15,3 +15,6 @@ toplam yapacagim kar azaldi. Islem sirasinda `repay` yapmak karli degil.
 The payment rate exchanged between the long and short positions for the next
 funding. If the funding rate is positive, longs pay shorts. If negative, shorts
 pay longs.
+
+* Kuveyt Bankasi
+=> Saat 17:00'den sonra islem yaparsan hayvan gibi makas oluyor dikkat et.

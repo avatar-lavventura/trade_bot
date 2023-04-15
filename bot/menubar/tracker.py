@@ -12,11 +12,12 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTCUSDT"]
-assets = assets + ["COCOSUSDT", "COCOSBTC"]
+assets = ["DCRUSDT", "DCRBTC"]
+assets += ["BTCUSDT"]
 sleep_duration = 20
 is_quote = True
 MSG = "The most important rule in trading is to protect your capital at all cost."
+# We are unable to provide any donation.  // makes you angry
 cg = CoinGeckoAPI()
 
 for idx, asset in enumerate(reversed(assets)):
@@ -46,6 +47,8 @@ def tracker_clock_string():
                 price = output["last"]
                 if 1 <= price <= 10:
                     price = "{:.3f}".format(price)
+                elif 10 <= price <= 100:
+                    price = "{:.2f}".format(price)
                 else:
                     asset = asset.replace("USDT", "")
                     if price < 0.1:
@@ -69,7 +72,7 @@ def tracker_clock_string():
     if is_quote:
         msg = f"{MSG} {msg}"
 
-    return f"{msg} "
+    return f"{msg} # "
 
 
 class OrgClockStatusBarApp(rumps.App):

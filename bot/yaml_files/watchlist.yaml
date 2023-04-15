@@ -1,19 +1,17 @@
 watch:
   list:
-    - BTCUSDT
     - FTMUSDT
-    - COCOSUSDT
     - JOEUSDT
-    - IDUSDT
+    - OAXBTC
     - OAXUSDT
-    - DREPBTC
-    - DREPUSDT
+    # - LQTYUSDT
+    # - IDUSDT
   # target:
-  #   IDUSDT: 47
+  #   OAXUSDT: 0.305
   bar:
-    - COCOSUSDT
     - JOEUSDT
-    - IDUSDT
     - OAXUSDT
-    - DREPBTC
-    - DREPUSDT
+    - DCRBTC
+    - DCRUSDT
+    # - LQTYUSDT
+    # - IDUSDT

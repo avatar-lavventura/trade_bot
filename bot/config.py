@@ -37,6 +37,7 @@ class Env:
         self._status = None
         self._ts = None
         self.max_pos = None
+        self.timestamps = None
 
 
 class Exchange:
@@ -48,10 +49,12 @@ class Exchange:
         self.margin_isolated = None
         self.margin_cross = None
         self._type: str = ""
-        self.binance = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-        self.bitmex = ccxt.bitmex({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+        args = {"options": {"adustForTimeDifference": True}, "enableRateLimit": True}
+        self.binance = ccxt.binance(args)
+        self.bitmex = ccxt.bitmex(args)
+        self.hitbtc = ccxt.hitbtc(args)
         self.cg = CoinGeckoAPI()
-        # self.mexc = ccxt.mexc({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+        # self.mexc = ccxt.mexc(args)
 
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))
@@ -91,9 +94,17 @@ class Exchange:
 
         return ops
 
-    def set_bnbusdt(self):
+    def _set_bnbusdt(self):
         price = self.cg.get_price(ids="binancecoin", vs_currencies="usd")
         cfg.BNBUSDT = price["binancecoin"]["usd"]
+
+    async def set_bnbusdt(self):
+        try:
+            price = self.cg.get_price(ids="binancecoin", vs_currencies="usd")
+            cfg.BNBUSDT = price["binancecoin"]["usd"]
+        except:
+            output = await self.spot.fetch_ticker("BNBUSDT")
+            cfg.BNBUSDT = output["close"]
 
     def get_spot_timestamp(self):
         parsed_date = parsedate(self.spot.last_response_headers["Date"])
@@ -106,6 +117,9 @@ class Exchange:
 
     async def get_isolated_balance(self):
         return await self.margin_isolated.fetch_balance()
+
+    def f(self, value, decimal):
+        return float(format(value, f".{decimal}f"))
 
     async def record_balance(self):
         # await bot_async.read_margin_cross_balance()
@@ -120,19 +134,25 @@ class Exchange:
         usdt_asset = float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]) + _u + _c
         if float(format(btc_asset, ".8f")) > 0.0001:
             _only_btc = float(config.env[cfg.TYPE].estimated_balance.find_one("only_btc")["value"])
-            if _only_btc > 0:
+            # if _only_btc > 0:
+            if cfg.TYPE == "btc":
                 remaining_asset_in_usdt = (
                     float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"])
                     - float(_only_btc) * cfg.PRICES["BTCUSDT"]
                 )
+                o_usdt = float(format(remaining_asset_in_usdt, ".2f"))
+                if abs(o_usdt) == 0:
+                    o_usdt = 0
+
                 config.env[cfg.TYPE].balance.add_single_key(
                     cfg.CURRENT_DATE,
                     {
                         "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                        "o_btc": _only_btc,
-                        "o_usdt": float(format(remaining_asset_in_usdt, ".2f")),
-                        "btc": float(format(btc_asset, ".8f")),
-                        "usdt": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
+                        "o_btc": self.f(_only_btc + cfg.WITHDRAWN_BTC, 8),
+                        "o_usdt": o_usdt,
+                        "btc": self.f(btc_asset, 8),
+                        "total": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),
+                        "bnb": float(format(cfg.BNB_BALANCE, ".2f")),
                     },
                 )
             else:
@@ -140,8 +160,10 @@ class Exchange:
                     cfg.CURRENT_DATE,
                     {
                         "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                        "btc": float(format(btc_asset, ".8f")),
+                        "o_btc": _only_btc,
+                        # "btc": float(format(btc_asset, ".8f")),
                         "usdt": float(format(usdt_asset, ".2f")),
+                        "bnb": float(format(cfg.BNB_BALANCE, ".2f")),
                     },
                 )
         else:
@@ -177,19 +199,22 @@ class Config:
         self.initial_usdt_qty_short = {}  # type: Dict[str, int]
         self.initial_usdt_qty_long = {}  # type: Dict[str, int]
         self.btc_wavetrend = {}  # type: Dict[str, str]
-        self.locked_per_limit_usdtperp = None
+        # self.locked_per_limit_usdtperp = None
         self.asset_list = []
         self.btc_quantity = {}
         self._env = None  #: shorted name
         self.env = {}  # type: Dict[str, Env]
+        self.prices = {}  # type: Dict[str, Env]
         for idx in ["usdt", "btc"]:  # "busd"
             self.env[idx] = Env()  # should be initialized before reload()
 
         self._reload()
+        self.prices = Mongo(mc, mc["shared"]["prices"])
+
         # self.watchlist_mb = Mongo(mc, mc["watchlist"])
         for asset in ["usdt", "btc"]:
             self.env[asset].balance = Mongo(mc, mc[asset]["balance"])
-            self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])
+            self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])  # # TODO: ? same as balance check
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
             self.env[asset].stats = Mongo(mc, mc[asset]["stats"])
             self.env[asset]._status = Mongo(mc, mc[asset]["status"])
@@ -208,8 +233,7 @@ class Config:
 
     async def get_spot_timestamp(self, asset, symbol=None) -> int:
         """Returns asset's set timestamp and updates if it is not set."""
-        key = f"{cfg.TYPE}_timestamp"
-        if self.timestamp[key][asset] == {}:
+        if asset not in self.env[cfg.TYPE].timestamps["root"]:
             if not symbol:
                 symbol = f"{asset}{cfg.TYPE.upper()}"
 
@@ -233,28 +257,33 @@ class Config:
                 else:
                     raise e
 
+            to_set_ts = _ts
             with suppress(Exception):
                 for _, trade in enumerate(_trades):
-                    log("config.get_spot_timestamp():", is_write=False)
-                    t = trade.copy()
-                    for key in ["info", "fee", "fees", "takerOrMaker", "type", "id", "order", "cost", "side"]:
-                        del t[key]
+                    if cfg.ENTRY_PRICE_VERBOSE:
+                        log("config.get_spot_timestamp():", is_write=False)
 
-                    log(t, is_write=False)
+                    t = trade.copy()
+                    for k in ["info", "fee", "fees", "takerOrMaker", "type", "id", "order", "cost", "side"]:
+                        del t[k]
+
+                    if cfg.ENTRY_PRICE_VERBOSE:
+                        log(t, is_write=False)
+
                     if trade["info"]["isBuyer"]:
                         order_id = trade["info"]["orderId"]
                         first_orders = await exchange.spot.fetch_order_trades(order_id, symbol=symbol)
                         # at exact 20 seconds cycle large trades splitted and partially made
                         first_orders_ts = first_orders[0]["timestamp"]
+                        if 0 < first_orders_ts < _ts:
+                            # update few seconds behind such as ts - 9
+                            to_set_ts = first_orders_ts
+
                         break
 
-                if 0 < first_orders_ts < _ts:
-                    # update few seconds behind such as ts - 9
-                    ts = first_orders_ts
+            self.env[cfg.TYPE].timestamps["root"][asset] = to_set_ts
 
-            self.timestamp[key][asset] = ts
-
-        return int(self.timestamp[key][asset])
+        return int(self.env[cfg.TYPE].timestamps["root"][asset])
 
     def _yaml_wrapper(self, path, dirname, fn, auto_dump=True):
         _fn = f"initialize_{fn}.lock"
@@ -285,25 +314,13 @@ class Config:
     def reload_wavetrend(self) -> None:
         self.btc_wavetrend = self.yaml_wrapper(self.base_dir / "btc_wavetrend.yaml")
 
-    def _reload(self) -> None:
+    def _reload_cfg(self) -> None:
         self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
-        self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
-        self.watchlist = self.yaml_wrapper(self.base_dir / "watchlist.yaml", auto_dump=False)
-        self.cfg_usdtperp = self.yaml_wrapper(self.base_dir / "config_usdtperp.yaml")
-        self.timestamp = self.yaml_wrapper(self.base_dir / "timestamp.yaml")
-        self.reload_wavetrend()
-        self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
-        self.ALERTS = self.alerts["alerts"]
-        self.WATCHLIST = self.watchlist["watch"]["list"]
-        self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
-        self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
         self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
         for _type in ["usdt", "btc"]:  # "busd"
-            self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
-            self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
             self.env[_type].percent_change_to_add = -abs(self.cfg["root"][_type]["percent_change_to_add"]) + 0.01
             self.env[_type].is_manual_trade = self.cfg["root"][_type]["is_manual_trade"]
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
@@ -311,6 +328,8 @@ class Config:
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
             self.env[_type].cross = self.cfg["root"][_type]["cross"]
             self.env[_type].isolated = self.cfg["root"][_type]["isolated"]
+            self.env[_type].stop_trade_wt_30m_red = self.cfg["root"][_type]["stop_trade_wt_30m_red"]
+            self.env[_type].timestamps = self.yaml_wrapper(self.base_dir / f"timestamp_{_type}.yaml")
 
         self.SPOT_IGNORE_LIST = self.cfg["root"]["ignore"]
         self.SPOT_PERCENT_CHANGE_TO_ADD = -abs(self.cfg["root"]["btc"]["percent_change_to_add"]) + 0.01
@@ -318,15 +337,32 @@ class Config:
         self.SPOT_MULTIPLY_RATIO = self.cfg["root"]["btc"]["multiply_ratio"]
         self.initial_btc_quantity = self.cfg["root"]["btc"]["initial"]
 
+    def _reload(self) -> None:
+        self._reload_cfg()
+        self.alerts = self.yaml_wrapper(self.base_dir / "alerts.yaml", auto_dump=False)
+        self.watchlist = self.yaml_wrapper(self.base_dir / "watchlist.yaml", auto_dump=False)
+        self.reload_wavetrend()
+        self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
+        self.ALERTS = self.alerts["alerts"]
+        self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
+        self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
+        self.WATCHLIST = self.watchlist["watch"]["list"]
+        self.WATCHLIST = list(set(self.WATCHLIST + self.WATCHLIST_BAR))
+        self.WATCHLIST.sort()
+        self.WATCHLIST = ["BTCUSDT"] + self.WATCHLIST
+        for _type in ["usdt", "btc"]:  # "busd"
+            self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
+            self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
+
     # BUSD
     # ====
     def get_spot_timestamp_busd(self, asset) -> int:
-        key = "busd_timestamp"
-        if self.timestamp[key][asset] == {}:
-            self.timestamp[key][asset] = config.env["busd"].status["timestamp"]
+        if self.env[cfg.TYPE].timestamps["root"][asset] == {}:
+            self.env[cfg.TYPE].timestamps["root"][asset] = config.env["busd"].status["timestamp"]
 
-        return int(self.timestamp[key][asset])
+        return int(self.env[cfg.TYPE].timestamps["root"][asset])
 
+    """
     # USDTPERP
     # ========
     def _reload_usdtperp(self) -> None:
@@ -348,6 +384,7 @@ class Config:
         self.USDTPERP_MAX_POSITION["9m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos"]
         self.USDTPERP_MAX_POSITION["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos"]
         self.USDTPERP_MAX_POSITION["21m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos_21m"]
+    """
 
 
 config: Config = Config()

@@ -32,9 +32,9 @@ class Strategy:
             if ", (" in data_msg:
                 data_msg = data_msg.split(", (", 1)[0]
 
-            log(data_msg, "magenta", highlight=False, end="")
+            log(data_msg, "magenta", h=False, end="")
             if not data_msg.endswith(","):
-                log(",", "magenta", highlight=False, end="")
+                log(",", "magenta", h=False, end="")
 
         try:
             self.parse_msg(data_msg)
@@ -70,7 +70,10 @@ class Strategy:
                 self.asset = self.symbol[: -len(self.market)]  # removes "BUSD" at the end
                 self.symbol = f"{self.asset}/BUSD"
 
-        if self.asset in config.SPOT_IGNORE_LIST:
+        if (
+            self.asset in config.SPOT_IGNORE_LIST
+            or self.asset in config.cfg["root"][self.market.lower()]["entry_prices"]
+        ):
             raise QuietExit("ignore list PASS")
 
         self.position_alert_msg = self.chunks[2]
@@ -199,6 +202,13 @@ class BotHelper:
                 with suppress(Exception):
                     del order[item]
 
+            with suppress(Exception):
+                if not order["fills"]:
+                    del order["fills"]
+
+                if float(order["cummulativeQuoteQty"]) == 0:
+                    del order["cummulativeQuoteQty"]
+
             log(f"order={order}")
         except QuietExit as e:
             raise e
@@ -224,7 +234,7 @@ class BotHelper:
             order = await self.strategy.exchange.create_market_buy_order(symbol, quantity)
             order = order["info"]
             #: creates new item or overwrites on it
-            config.timestamp[f"{_type}_timestamp"][self.strategy.asset] = int(order["transactTime"])
+            config.env[_type].timestamps["root"][self.strategy.asset] = int(order["transactTime"])
             for item in cfg.order_del_list:
                 with suppress(Exception):
                     del order[item]
@@ -311,10 +321,16 @@ class BotHelper:
         elif self.strategy.market in ["USDT", "BUSD"]:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             last_price = output["last"]
+
             initial_amount = config.cfg["root"]["usdt"]["initial"] / last_price
+
             self.strategy.size = self.get_initial_amount(initial_amount, self.strategy.market)
             decimal = self.get_decimal_count(self.strategy.size)
             self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
+            if 0 < float(self.strategy.size) < 10 and float(self.strategy.size) * last_price < 10:
+                self.strategy.size = float(self.strategy.size) + 1
+                self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
+
             if float(self.strategy.size) == 0:
                 self.strategy.size = 0.1
                 amount = last_price * self.strategy.size
@@ -333,7 +349,6 @@ class BotHelper:
                 await self.calculate_futures_size()
 
             side_color = "green" if self.strategy.side == "BUY" else "red"
-            log()
             log(
                 f"==> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
                 f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue] "
@@ -350,7 +365,9 @@ class BotHelper:
 
             time.sleep(0.2)  # helps to wait belence show up for the limit order
         except Exception as e:
-            log(f"E: {e}")
+            print_tb(e)  # DELETEME
+            if e:
+                log(f"E: {e}")
 
     def get_decimal_count(self, value) -> int:
         try:
@@ -400,6 +417,9 @@ class BotHelper:
                     break
 
         if not is_open:
+            log()
+
+        if not is_open:
             try:
                 await self.trade_async()
                 config.env[self.strategy.market.lower()]._status._inc("count")
@@ -426,7 +446,7 @@ class BotHelper:
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
         if self.strategy.market.lower() == "usdt" and free_balance < config.cfg["root"]["usdt"]["initial"]:
-            raise QuietExit(f"not enough free usdt([cyan]{round(free_balance)}$[/cyan])")
+            raise QuietExit(f"not enough free usdt([cyan]${round(free_balance)}[/cyan])")
 
         # if self.strategy.market == "USDTPERP":
         #     self.pre_check_usdtperp(
@@ -441,7 +461,7 @@ class BotHelper:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
                 log(f" * {_date()} ", end="")
-                log(data_msg, "magenta", highlight=False)
+                log(data_msg, "magenta", h=False)
                 if "strategy.order.action" not in data_msg:
                     await self.discord_client.send_msg(data_msg, "alpy")
 
@@ -452,7 +472,6 @@ class BotHelper:
         #     log("30m-RED PASS", "red")
         #     return
 
-        log()
         if not hasattr(self.strategy, "position_alert_msg"):
             raise QuietExit("E: position_alert_msg is empty")
 

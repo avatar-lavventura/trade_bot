@@ -713,3 +713,63 @@ CLOSED: [2023-02-13 Mon 08:37]
 :ARCHIVE_TODO: DONE
 :END:
 Link: [[https://github.com/burnash/gspread]]
+
+* DONE split btc and usdt from each other in timestamp.yaml
+CLOSED: [2023-03-31 Fri 14:43]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-03-31 Fri 14:43
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE btc tarafi surekli timestamp uztune yaziyor.
+CLOSED: [2023-03-31 Fri 14:42]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-03-31 Fri 14:43
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE stats bnb de hesapla
+CLOSED: [2023-04-02 Sun 16:00]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-04-02 Sun 16:00
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE DELETE DCR and OC entry_price position since there is no left
+CLOSED: [2023-04-11 Tue 12:03]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-04-11 Tue 12:03
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE store BTCUSDT price at mongodb
+CLOSED: [2023-04-11 Tue 12:08]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-04-11 Tue 12:08
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE fetch 1h inside 1h as using 24h
+CLOSED: [2023-04-11 Tue 13:41]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-04-11 Tue 13:41
+:ARCHIVE_FILE: ~/trade_bot/bot/todo.org
+:ARCHIVE_OLPATH: ALPY-BOT
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:

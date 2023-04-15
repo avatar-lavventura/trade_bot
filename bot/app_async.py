@@ -67,13 +67,13 @@ async def startup():
     if not config.cfg["root"]["is_write"]:
         _log.IS_WRITE = False
 
-    print("* s t a r t i n g . . .")
+    print("* s t a r t i n g  . . .")
 
 
 @app.after_serving
 async def _finally():
-    for key in config.btc_wavetrend:
-        config.btc_wavetrend[key] = "none"
+    for item in config.btc_wavetrend:
+        config.btc_wavetrend[item] = "none"
 
 
 @app.route("/")
@@ -87,21 +87,22 @@ async def webhook() -> (str, int):
     if request.method != "POST":
         abort(400)
 
+    config._reload_cfg()
     data_msg = request.get_data(as_text=True)
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
             await do_alert(data_msg)
-            text = ""
+            text = "  NONE  "
             if data_msg.upper() == "RED":
                 text = f"  [red]{data_msg.upper()}[/red]  "
             elif data_msg.upper() == "GREEN":
                 text = f"  [green]{data_msg.upper()}[/green]  "
 
             log(
-                f" {liner}  [y]wt_30m[/y]=[{text}]   {_date(_type='hour')}  {liner}",
+                f"  {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]  ",
                 end="\r",
                 is_write=False,
-                highlight=False,
+                h=False,
             )
         else:
             for asset in ["BTC", "USDT", "BUSD"]:
@@ -115,7 +116,7 @@ async def webhook() -> (str, int):
                 return "OK", 0
             except (QuietExit, KeyError) as e:
                 if e:
-                    log(str(e), "bold")
+                    log(str(e))
             except Exception as e:
                 print_tb(e)
         return "", 200

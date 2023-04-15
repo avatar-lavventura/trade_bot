@@ -25,9 +25,10 @@ PRICES = {}  # last price for the assets
 PRICES["BTCUSDT"] = 0.0
 BNBUSDT: float = 0.0  # constant set its price only at startup
 
+ENTRY_PRICE_VERBOSE = False
+
 # TODO: {ts, asset, price} @ mongoDB
 # do not fetch price within 20 seconds for BTCUSDT
-
 
 SUM_BTC: float = 0.0
 BALANCE_FLAG = False
@@ -38,8 +39,23 @@ FIRST_PRINT_CYCLE = True
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
 
-WITHDRAWN = fetch_withdrawn(sh)
+WITHDRAWN = fetch_withdrawn(sh, "usdt")
+WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
 
+order_del_list = [
+    "timeInForce",
+    "orderListId",
+    "price",
+    "status",
+    "type",
+    "origQty",
+    "executedQty",
+    "clientOrderId",
+    "orderId",
+    "side",
+    "selfTradePreventionMode",
+    "workingTime",
+]
 
 """
 * IGNORE_SOLD_QUANTITY
@@ -56,20 +72,5 @@ genel kar gostergesi bir anda artiyor onceki kari dikkate aldigi icin
 """
 IGNORE_SOLD_QUANTITY = True  # by default True for all
 _IGNORE_SOLD_QUANTITY = {}
-for symbol in ["PNT/USDT", "ORN/USDT"]:
-    _IGNORE_SOLD_QUANTITY[symbol] = False
-
-order_del_list = [
-    "timeInForce",
-    "orderListId",
-    "price",
-    "status",
-    "type",
-    "origQty",
-    "executedQty",
-    "clientOrderId",
-    "orderId",
-    "side",
-    "selfTradePreventionMode",
-    "workingTime",
-]
+# for symbol in ["PNT/USDT", "ORN/USDT"]:
+#     _IGNORE_SOLD_QUANTITY[symbol] = False

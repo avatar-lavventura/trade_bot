@@ -5,6 +5,7 @@ from typing import Tuple
 
 from broker._utils._log import log
 from broker._utils.tools import decimal_count, percent_change, remove_trailing_zeros, round_float
+from broker.errors import QuietExit
 
 from bot import cfg
 from bot import config as helper
@@ -30,10 +31,11 @@ class BotHelperSpotAsync(BotHelperAsync):
             log("pass_c")
             return True
 
-        log()
+        log()  # end of each position line
         return False
 
     async def is_limit_order_exist(self, asset, limit_price) -> None:
+        # TODO: cancel only sell positions or update it , keep buy orders
         market = cfg.TYPE.upper()
         open_orders = await helper.exchange.spot.fetch_open_orders(f"{asset}/{market}")
         if open_orders:
@@ -52,10 +54,18 @@ class BotHelperSpotAsync(BotHelperAsync):
                                     is_print=False,
                                 )
                             )
-                            if q_per_change == 0 or q_per_change > 0.01:  # prevent 0.01% wrong quantity calculations
+                            #            94.561                         94.5
+                            # # TODO: order["amount"] ile ayni digit sayisi olmali cfg.BALANCES[asset]["total"] kontrol et
+                            # if decimal_count(order["amount"]) == 1:
+                            #     per_change_delta = 0.1  # prevent 0.1% wrong quantity calculations
+                            # else:
+                            #     per_change_delta = 0.02  # prevent 0.02% wrong quantity calculations
+                            per_change_delta = 0.1
+                            if q_per_change == 0 or q_per_change > per_change_delta:
+                                log(f"per_change_delta: {q_per_change} ?= {per_change_delta}")
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
-        elif not config.env[_type].is_manual_trade:
+        elif not config.env[cfg.TYPE].is_manual_trade:
             await self.new_limit_order(asset, limit_price, market)
 
     def get_decimal_count(self, symbol, value) -> int:
@@ -107,7 +117,8 @@ class BotHelperSpotAsync(BotHelperAsync):
                                 # TODO: in 10 seconds if ts not updated entry calculated wrong
                                 # and the gain may added && maliyet azalmis oluyor
                                 #: sets timestamp for the asset
-                                config.timestamp[f"{cfg.TYPE}_timestamp"][asset] = latest_ts
+                                if latest_ts != config._env.timestamps["root"][asset]:
+                                    config._env.timestamps["root"][asset] = latest_ts
 
                             return (quantity, _sum)
 
@@ -141,8 +152,8 @@ class BotHelperSpotAsync(BotHelperAsync):
             order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", qty)
             order = order["info"]
             with suppress(Exception):
-                for key in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
-                    del order[key]
+                for k in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
+                    del order[k]
 
             log(f"## CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
@@ -154,10 +165,15 @@ class BotHelperSpotAsync(BotHelperAsync):
             new_qty = qty * 1.05
 
         per = (100.0 * new_qty * asset_price) / sum_bal
-        log(f"==> new_order_qty={new_qty} | {format(float(per), '.2f')}% of the total asset")
+        log(f"==> new_order_qty={new_qty} | [cy]%{format(float(per), '.2f')}[/cy] of the total asset")
         order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
-            log(order["info"])
+            order = order["info"]
+            for item in cfg.order_del_list:
+                with suppress(Exception):
+                    del order[item]
+
+            log(f"market_order={order}")
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
 
     def ll(self, value):
@@ -189,9 +205,22 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 raise e
 
+        if "change_type" in config.cfg["root"][cfg.TYPE]:
+            if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
+                _type = "usdt"
+
+        # for _asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
+        #     if  == _asset:
+        #         _type = "usdt"
+        #         entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
+        #         qty_to_consider = asset_qty
+        #         _sum = float(entry_price) * asset_qty
+        #     elif f"{asset}BTC" == _asset:
+        #         _type = "btc"
+
         if asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
             entry_price = config.cfg["root"][cfg.TYPE]["entry_prices"][asset]
-            qty_to_consider = asset_qty
+            qty_to_consider_locked_per = qty_to_consider = asset_qty
             _sum = float(entry_price) * asset_qty
         else:
             trades = await helper.exchange.spot.fetch_my_trades(symbol, since=since)
@@ -280,13 +309,16 @@ class BotHelperSpotAsync(BotHelperAsync):
                 and asset not in config.cfg["root"][cfg.TYPE]["entry_prices"]
                 and asset not in config.cfg["root"]["ignore_warning"]
             ):
-                log(f"warning: wrong calculation for {symbol} {asset_qty} != {qty}", is_write=False)
+                # TODO: qty + remaining amount // there could be left over # 84.4262 != 84.4 | left_over: 0.0262
+                log(f"wrong calculation for {symbol} {asset_qty} != {qty}", is_write=False)
 
             qty_to_consider = qty
             if asset_qty > qty:
                 #: could be additional gain from the margin trading.
                 qty_to_consider = asset_qty
 
+            # TODO: CHECKME
+            qty_to_consider_locked_per = asset_qty
             entry_price = _sum / qty_to_consider
             entry_price = float(f"{entry_price:.{decimal}f}")
 
@@ -301,16 +333,17 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".4f"))
 
-        log(f"[green]**[/green] {asset} q={qty_str} e={self.ll(entry_price)} ", "bold", end="")
-        if is_limit and asset not in config.SPOT_IGNORE_LIST:
-            log(f"l={self.ll(limit_price)} ", "bold", end="")
-
         if entry_price == limit_price:
+            log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
 
         asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
-        log(f"p={self.ll(asset_price)} ", "bold", end="")
+        log(f"** {asset} {self.ll(asset_price)} e={self.ll(entry_price)} q={qty_str} ", "b", end="")
+        if is_limit and asset not in config.SPOT_IGNORE_LIST:
+            log(f"t={self.ll(limit_price)} ", end="")  # prints the target price
+
         per = format((100.0 * qty_to_consider * asset_price) / sum_bal, ".2f")
+        per_locked = format((100.0 * qty_to_consider_locked_per * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * qty_to_consider
         per_change_r = 0.0
         if profit == 0:
@@ -320,7 +353,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 initial=entry_price, change=asset_price - entry_price, end="", is_arrow=False, is_sign=False
             )
             if _type in ["usdt", "busd"]:
-                log(format(abs(profit), ".2f"), "bold green" if profit > 0 else "bold red", end="")
+                log(format(abs(profit), ".2f"), "green" if profit > 0 else "red", end="")
                 log(" ", end="")
             else:
                 _usd = format(abs(profit) * cfg.PRICES["BTCUSDT"], ".2f")
@@ -331,7 +364,12 @@ class BotHelperSpotAsync(BotHelperAsync):
                 log(f" {format(abs(profit) * 1000, '.2f')} ", "italic green" if profit > 0 else "italic red", end="")
 
             if asset not in config.SPOT_IGNORE_LIST and per_change > 20:
-                raise Exception(f"per_change={per_change} is too large; qty of the entry price is calculated wrong")
+                cfg.FIRST_PRINT_CYCLE = False
+                if cfg.ENTRY_PRICE_VERBOSE:
+                    msg = f"per_change={per_change} is too large; qty of the entry price is calculated wrong"
+                    raise Exception(msg)
+                else:
+                    raise QuietExit(f"per_change={int(per_change)} is too large")
 
             if float(per_change) < -10:
                 per_change_r = percent_change(
@@ -347,25 +385,36 @@ class BotHelperSpotAsync(BotHelperAsync):
             else:
                 c1 = "green on black blink"
 
-            if float(per) == int(float(per.replace(".00", ""))):
-                per = int(float(per.replace(".00", "")))
+            if float(per_locked) == int(float(per_locked.replace(".00", ""))):
+                per_locked = int(float(per_locked.replace(".00", "")))
 
-            log(f"[{c}]{per}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')}")
+            if float(per_locked) > 150:
+                log(f"| [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
+            else:
+                log(f"[{c}]{per_locked}%[/{c}] | [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
         else:
-            if float(per) > 0:
-                if float(per) > 5:
-                    if float(per) >= 100:
-                        per = "100"
+            if float(per_locked) > 0:
+                if float(per_locked) > 5:
+                    if float(per_locked) >= 100:
+                        per_locked = "100"
                     else:
-                        per = int(round(float(per)))
+                        per_locked = int(round(float(per_locked)))
                 else:
-                    per = float(per)
+                    per_locked = float(per)
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(format(_sum * 1000, ".4f"), "ib", end="")
+            log(format(_sum * 1000, ".4f"), "ib")
 
-        cfg.locked_balance += float(per)
+        if cfg.TYPE == "btc":
+            if "change_type" in config.cfg["root"][cfg.TYPE] and asset in config.cfg["root"][cfg.TYPE]["change_type"]:
+                cfg.locked_balance += 0.1
+                # pass
+            else:
+                cfg.locked_balance += float(per_locked)
+        else:
+            cfg.locked_balance += float(per_locked)
+
         if _type in ["usdt", "busd"]:
             msg = f"**{asset}** {entry_price} p={asset_price} q={qty_str} "
         else:
@@ -376,15 +425,16 @@ class BotHelperSpotAsync(BotHelperAsync):
         per_change_str = format(per_change, ".2f")
         if _type in ["usdt", "busd"]:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}%) `{current_sum}$`"
             else:
-                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`\n"
+                msg = f"{msg}`{format(profit, '.2f')}` ({per_change_str}% **↑**{per_change_r}%) `{current_sum}$`"
         else:
             if per_change_r == 0:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}%) | {per}%"
             else:
-                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}% **↑**{per_change_r}%) | {per}% \n"
+                msg = f"{msg}`{format(profit * 1000, '.5')}` ({per_change_str}% **↑**{per_change_r}%) | {per}%"
 
+        msg = f"{msg}\n"
         if _type == "btc":
             _sum = _sum * cfg.PRICES["BTCUSDT"]  # total usdt if type is btc will be used for addition check
 
@@ -423,12 +473,17 @@ class BotHelperSpotAsync(BotHelperAsync):
         ):
             log()
         elif (
-            not await self.check_position_to_pass(asset, _sum, is_limit, per)
+            profit < 0
             and per_change <= -2
             and per_change <= config.env[_type].percent_change_to_add
-            and config.btc_wavetrend["30m"] == "green"  # wait until wt for btc is green in 30m
+            and not await self.check_position_to_pass(asset, _sum, is_limit, per)
         ):
-            await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)
+            if config.env[_type].stop_trade_wt_30m_red:
+                if config.btc_wavetrend["30m"] == "green":
+                    #: wait until wt for btc is green in 30m
+                    await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)
+            else:
+                await self.add_to_position(asset, qty_to_consider, asset_price, sum_bal, limit_price)
 
         # if config.btc_wavetrend["30m"] == "red":
         #     log("PASS: btc_wavetrend is red nothing to do", "red")

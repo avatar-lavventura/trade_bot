@@ -118,3 +118,120 @@ Today's PNL
 ** TODO kazan.pine cok mesaj atiyor ona onlem al , gecmiste bir sekilde almistin.
 
 ** TODO fix calculate entry price
+
+** TODO FIX
+#+begin_src bash
+E: 403 Client Error: Forbidden for url:
+https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd
+#+end_src
+
+
+** TODO carry this function to run_app print BTC change from =bot_helper_async.py=
+
+** TODO
+#+begin_src bash
+E: FTMUSDT binance 418 Unknown {"code":-1003,"msg":"Way too many requests; IP(5.9.147.198)
+banned until 1680455087105. Please use the websocket for live updates to avoid bans."}
+#+end_src
+
+
+** TODO if there is live open order and given entry price asset
+fetch that limit order
+
+
+** TODO ban
+
+#+begin_src bash
+Traceback (most recent call last):
+  File "/home/alper/trade_bot/bot/binance_balance.py", line 110, in process_main
+    await process(unix_timestamp_ms)
+  File "/home/alper/trade_bot/bot/binance_balance.py", line 77, in process
+    *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 380, in spot_balance
+    await self.read_margin_cross_balance()
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 291, in read_margin_cross_balance
+    cfg.MARGIN_BAL_BTC = await self._fetch_margin_cross_balance()
+  File "/home/alper/trade_bot/bot/bot_helper_async.py", line 276, in _fetch_margin_cross_balance
+    balances = await exchange.margin_cross.fetch_balance()
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 2282, in fetch_balance
+    await self.load_markets()
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 211, in
+load_markets
+    raise e
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 207, in
+load_markets
+    result = await self.markets_loading
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 197, in
+load_markets_helper
+    markets = await self.fetch_markets(params)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 1812, in fetch_markets
+    promises = await asyncio.gather(*promises)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 6986, in request
+    response = await self.fetch2(path, api, method, params, headers, body, config, context)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 1610, in fetch2
+    return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/base/exchange.py", line 180, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response,
+request_headers, request_body)
+  File "/home/alper/venv/lib/python3.8/site-packages/ccxt/async_support/binance.py", line 6913, in handle_errors
+    raise DDoSProtection(self.id + ' ' + str(code) + ' ' + reason + ' ' + body)
+ccxt.base.errors.DDoSProtection: binance 418 Unknown {"code":-1003,"msg":"Way too many requests;
+IP(176.45.48.147) banned until 1680982611798. Please use the websocket for live updates to avoid bans."}
+An exception of type DDoSProtection occurred. Arguments:
+('binance 418 Unknown {"code":-1003,"msg":"Way too many requests; IP(176.45.48.147) banned until 1680982611798.
+Please use the websocket for live updates to avoid bans."}',)
+#+end_src
+
+** TODO ICPUSDT data fetch
+You can adapt the following example to suit your purposes: https://github.com/ccxt/ccxt/blob/master/examples/py/binance-futures-positions.py
+
+With something like the following:
+
+#+begin_src python
+import os
+import sys
+from pprint import pprint
+
+root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(file))))
+sys.path.append(root + '/python')
+
+import ccxt # noqa: E402
+
+print('CCXT Version:', ccxt.version)
+
+exchange = ccxt.binanceusdm({
+'apiKey': 'YOUR_API_KEY',
+'secret': 'YOUR_API_SECRET',
+})
+
+markets = exchange.load_markets()
+
+symbol = 'ICP/USDT:USDT'
+since = DATE_TIME_OF_INTEREST # use datetime.timestamp()*1000 for the start time you need
+limit = 100 #or however many orders you are interested in fetching
+
+order_history = exchange.fetch_orders(symbol, since, limit, {})
+pprint(order_history)`
+#+end_src
+
+** TODO config split for BTC and USDT
+
+** TODO new_limit_order can be same with enterance price no gain?
+
+#+begin_src python
+QLC 0.00077 e=0.00079 q=38569 t=0.00079 (2.53%) $-23.45 0.77 72.31% 30.4695
+==> new_limit_order={
+│   'symbol': 'QLCBTC',
+│   'orderId': '77550848',
+│   'transactTime': '1681523626939',
+│   'price': '0.00000079',
+│   'origQty': '38569.00000000',
+│   'side': 'SELL'
+}
+e=0.00079 == 'price': '0.00000079', instead should be 0.00080
+#+end_src
+
+** TODO ignore since its balance was < $1
+
+[  bot_helper_async.py:839  ] E: binance does not have market symbol QLCUSDT
+[  bot_helper_async.py:839  ] E: binance does not have market symbol QLCBUSD

@@ -1,47 +1,51 @@
 root:
-  balance_silent: False
-  is_funding_rate_alert: False
-  is_write: False
-  isolated_wallet_limit: 25
+  balance_silent: false
+  is_funding_rate_alert: false
+  is_write: false
+  isolated_wallet_limit: 100
   discord_msg_above_usdt: 150
-  take_profit: 0.005
+  take_profit: 0.0048
   locked_percent_limit: 99.99
   sleep_duration: 20
   ignore: # for all
-    - DREP
-    - OMG
-    - ID
-    - LQTY
-    - ATA
-    - HIGH
-    - JOE
+    - DCR
+    # - OG
+    # - ID
+    # - LQTY
   ignore_warning:
     - DUMMY
+  # ignore_position_log:
+  #   - OAX
   usdt:
-    is_manual_trade: False
-    status: "on" # "on" or "off"
-    auto_buy_bnb:  "on"
-    isolated: "off"
-    cross: "off"
-    max_pos: 1
-    initial: 10.3
+    status: on   # "on" or "off"
+    is_manual_trade: false
+    auto_buy_bnb: off
+    isolated: off
+    cross: off
+    max_pos: 2
+    initial: 10.35
     multiply_ratio: 1.1
     percent_change_to_add: 4.5
-    stop_trade_wt_30m_red: True
+    stop_trade_wt_30m_red: true
     entry_prices:
-      ATA: 0.1499
-      HIGH: 2.067
-      DUMMY_ASSET: 1.0
+      DCR: 22.3
+      DUMMY: 1.0
+    change_type:  # to btc
+      - DUMMY
   btc:
-    is_manual_trade: True
-    status: "on"
-    auto_buy_bnb:  "on"
-    isolated: "off"
-    cross: "off"
+    status: on
+    is_manual_trade: false
+    auto_buy_bnb: on
+    isolated: off
+    cross: off
     initial: 0.00011
     max_pos: 2
     multiply_ratio: 1.1
-    percent_change_to_add: 4.49
-    stop_trade_wt_30m_red: True
+    percent_change_to_add: 4.3
+    stop_trade_wt_30m_red: false
     entry_prices:
-      DUMMY_ASSET: 1.0
+      DUMMY: 1.0
+    # change_type:  # to usdt
+    #   - OG
+    ignore:
+      - DUMMY

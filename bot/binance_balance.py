@@ -57,7 +57,7 @@ async def discord_send_alert():
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
                     await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup.", alert)
-                    msg = f"{_pair}={_asset_price} {_date(_format='%m-%d %H:%M:%S')} Alper, wakeup."
+                    msg = f"{_pair}={_asset_price} {_date(_type='compact')} Alper, wakeup."
                     # https://discordpy.readthedocs.io/en/neo-docs/api.html#discord.abc.Messageable.send
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
                     alert_track[asset] = True
@@ -66,6 +66,8 @@ async def discord_send_alert():
 async def clean_for_new_cycle() -> None:
     cfg.PRICES = {}
     cfg.PRICES["BTCUSDT"] = await bot_async.spot_fetch_ticker("BTCUSDT")
+    config.prices.add_single_key("BTCUSDT", int(cfg.PRICES["BTCUSDT"]))
+    # TODO: store this at mongoDB along with its ts
 
 
 async def process(unix_timestamp_ms):
@@ -129,7 +131,7 @@ async def main():
     while True:
         try:
             await process_main(bot_async)
-            await _sleep(22)
+            await _sleep(cfg.SLEEP_INTERVAL + 2)
         except KeyboardInterrupt:
             break
         except Exception as e:

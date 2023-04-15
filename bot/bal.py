@@ -18,7 +18,8 @@ exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRat
 _log.IS_WRITE = False
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
-WITHDRAWN = fetch_withdrawn(sh)
+WITHDRAWN = fetch_withdrawn(sh, "usdt")
+WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
 
 goal = 0
 EKLEME = 0
@@ -29,40 +30,53 @@ def f2(value):
 
 
 async def main():
-    max_in_run = 0
+    max_sum = 0
     max_val = 0
     if goal > 0:
         max_val = goal
 
     while True:
+        BTCUSDT = int(config.prices.find_one("BTCUSDT")["value"])
         start = ""
         bal_brave = config.total_balance("usdt")
         bal_chrome = config.total_balance("btc")
-        _sum = int(bal_brave + bal_chrome + WITHDRAWN - EKLEME)
+        _sum = int(bal_brave + bal_chrome + WITHDRAWN + (WITHDRAWN_BTC * BTCUSDT) - EKLEME)
+        all_btc_asset = format(float(config.env["btc"].balance_sum.find_one("usdt")["value"]) / BTCUSDT, ".8f")
         if _sum > max_val:
             max_val = _sum
+            start = "[blue]*****"
 
-        if _sum > max_in_run and max_in_run != 0:
-            start = "[green]*****"
+        if _sum > max_sum and max_sum != 0:
+            if not start:
+                start = "[green]*****"
 
-        max_in_run = _sum
-        log(f"{_date(_type='hour')} | ", end="")
+        max_sum = _sum
+        log(f"{_date(_type='compact')} ", h=False, end="")
         c1 = "green on black blink"
         chrome_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
-        if chrome_spot_balance > 200:
-            _str = f"{f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}]) => {_sum} | [ib]{max_val}"
-        else:
-            _str = f"{int(bal_brave)} , {int(bal_chrome)} => {_sum} | [ib]{max_val}"
+        if chrome_spot_balance > 20000:  # over-calculated
+            log(f"chrome_spot_balance={chrome_spot_balance} -- overflow")
+            time.sleep(20)
+            continue
 
-        if goal == 0:
-            log(f"{_str} {start}", "b")
+        hot_sum = f2(bal_brave + bal_chrome)
+        hot_btc_sum = format(WITHDRAWN_BTC + float(all_btc_asset), ".8f")
+        _str = f"[w]{hot_btc_sum} {all_btc_asset}[/w] |"
+        if chrome_spot_balance > 500:
+            _str = f"{_str} {f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}])"
         else:
-            log(f"{_str} | [ib]{max_val}  {max_in_run} {start}", "b")
+            _str = f"{_str} {int(bal_brave)} , {int(bal_chrome)}"
+
+        _str = f"{_str} => [[orange]{hot_sum}[/orange] {_sum}] [ib]{max_val}"
+        if goal == 0:
+            log(f"{_str} {start}")
+        else:
+            log(f"{_str} | [ib]{max_val}  {max_sum} {start}")
 
         with suppress(Exception):
             sh.sheet1.update("A20:D20", [[_timestamp(), int(bal_brave), int(bal_chrome), _sum]])
 
-        time.sleep(15)
+        time.sleep(20)
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ from pathlib import Path
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
-from broker._utils._log import log
+from broker._utils._log import _console_clear, log
 from broker._utils.tools import _date, print_tb
 from broker._utils.yaml import Yaml
 
@@ -36,7 +36,11 @@ class Discord_Alpy:
             config._env = config.env[cfg.TYPE]
             helper.exchange.init(_type)
             _config = Yaml(Path.home() / ".binance.yaml")
-            self.constructor()
+            try:
+                self.constructor()
+            except Exception as e:
+                log(f"E: {e}")
+
             self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
@@ -53,7 +57,7 @@ class Discord_Alpy:
                 self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
 
             self.client.loop.close()
-            log("## program is ended", is_write=False)
+            log("## program is ended\t\t\t", is_write=False)
         except SystemExit:
             pass
         except Exception as e:
@@ -61,7 +65,7 @@ class Discord_Alpy:
             breakpoint()  # DEBUG
 
     def constructor(self):
-        helper.exchange.set_bnbusdt()
+        helper.exchange._set_bnbusdt()
 
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
@@ -80,7 +84,7 @@ class Discord_Alpy:
         # secondly, each 20 seconds
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if config.cfg["root"][cfg.TYPE]["status"] == "on":
-            scheduler.add_job(self.fetch_balance, "cron", second="*/10", timezone=tz)
+            scheduler.add_job(self.fetch_balance, "cron", second="*/20", timezone=tz)
 
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
@@ -122,7 +126,6 @@ class Discord_Alpy:
             self.channel_notifications = discord.utils.get(self.client.get_all_channels(), name="notifications")
 
     async def fetch_balance(self):
-        key = f"{cfg.TYPE}_timestamp"
         pos_count = 0
         del_list = []
         ongoing_positions = []
@@ -134,12 +137,12 @@ class Discord_Alpy:
                     if symbol not in cfg.STABLE_COINS and symbol not in config.SPOT_IGNORE_LIST:
                         pos_count += 1
 
-            for asset_timestamp in config.timestamp[key]:
-                if asset_timestamp != "base" and asset_timestamp not in ongoing_positions:
-                    del_list.append(asset_timestamp)
+            for asset in config._env.timestamps["root"]:
+                if asset != "base" and asset not in ongoing_positions:
+                    del_list.append(asset)
 
             for asset in del_list:
-                del config.timestamp[key][asset]
+                del config._env.timestamps["root"][asset]
 
             config.env[cfg.TYPE]._status.add_single_key("count", pos_count)
         except Exception as e:
@@ -157,9 +160,12 @@ class Discord_Alpy:
         """Restart at 03:00:00."""
         log()
         log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        _console_clear()
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
+        # if config.cfg["root"][cfg.TYPE]["status"] == "on":
+        #     await self.fetch_balance()
         await self.pre_discord_setup()
         await process_main(self)
 
@@ -170,8 +176,7 @@ def main():
     except:
         _type = "usdt"
 
-    alpy = Discord_Alpy(_type)
-    breakpoint()  # DEBUG
+    Discord_Alpy(_type)
 
 
 if __name__ == "__main__":

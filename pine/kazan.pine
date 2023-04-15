@@ -1,5 +1,7 @@
 //@version=5
 // Created by AlperAlimoglu on 01-01-2022 * prepared for "5m"
+// Note: "1m" at usdt-spot is risky
+
 strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
      shorttitle="alpy_vix",
      calc_on_order_fills=true,  // order immediate action
@@ -212,9 +214,11 @@ plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.st
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
 BASE = 1000 // equal to 1 second in unix epoc
-SLEEP_DUR = 60 * BASE // 60 seconds
-_timenow = (timenow - 1000000000000)
-is_sleep_pass = _timenow > math.abs(strategy.position_size) + SLEEP_DUR
+SLEEP_DUR = 20 * BASE // 60 seconds
+_timenow = timenow - 1600000000000
+is_sleep_pass = _timenow > (math.abs(strategy.position_size) + SLEEP_DUR)
+// mini_is_sleep_pass = _timenow > (math.abs(strategy.position_size) + 10 * BASE)
+
 if not IS_BROWSER and strategy.position_size[0] != 0 and window() and is_sleep_pass
     strategy.close_all()
 
@@ -356,13 +360,15 @@ if not base_cond
 // "l": "long"
 if window()
     if IS_BROWSER
+        // if strategy.position_size[0] != 0
+        //     strategy.close_all()
         if is_buy
-            strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+            strategy.entry("l", strategy.long, qty=1, alert_message=msg)
     else if is_buy
         if strategy.opentrades[0] == 0 or strategy.position_size < 0
             if is_sleep_pass  // final timenow check, alerts should in sleep for given seconds
                 strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
-        else if strategy.position_size[0] != 0
+        else if strategy.position_size[0] != 0 and is_sleep_pass
             strategy.close_all()
         else if is_sleep_pass
             strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
