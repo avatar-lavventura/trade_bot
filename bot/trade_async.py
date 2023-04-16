@@ -57,9 +57,7 @@ class Strategy:
             self.symbol = f"{self.asset}/BTC"
             self.exchange = helper.exchange.spot_btc
         else:
-            if "USDTPERP" in self.symbol:
-                self.market = "USDTPERP"
-            elif "USDT" in self.symbol:
+            if "USDT" in self.symbol or "USDTPERP" in self.symbol:
                 self.market = "USDT"  # spot
                 self.exchange = helper.exchange.spot_usdt
                 self.asset = self.symbol[: -len(self.market)]  # removes "USDT" at the end
@@ -74,7 +72,7 @@ class Strategy:
             self.asset in config.SPOT_IGNORE_LIST
             or self.asset in config.cfg["root"][self.market.lower()]["entry_prices"]
         ):
-            raise QuietExit("ignore list PASS")
+            raise QuietExit("ignore list pass")
 
         self.position_alert_msg = self.chunks[2]
         msg_list = self.position_alert_msg.rsplit("_", 1)
@@ -266,7 +264,7 @@ class BotHelper:
 
                         raise e
 
-                log(f"==> re-opening {side} order | ", end="")
+                log(f"#> re-opening {side} order | ", end="")
                 if float(config.env[_type].status["free"]) < config.cfg["root"][_type]["initial"]:
                     raise QuietExit("not enough balance") from None
 
@@ -335,7 +333,7 @@ class BotHelper:
                 self.strategy.size = 0.1
                 amount = last_price * self.strategy.size
                 if last_price * self.strategy.size > 20:
-                    log(f"E: order_amount={round(amount)} PASS")
+                    log(f"E: order_amount={round(amount)} pass")
                     return
 
         log(await self.spot_order(float(self.strategy.size)))
@@ -350,7 +348,7 @@ class BotHelper:
 
             side_color = "green" if self.strategy.side == "BUY" else "red"
             log(
-                f"==> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
+                f"#> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
                 f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue] "
                 f"{self.strategy.symbol} ",
                 end="",
@@ -413,7 +411,7 @@ class BotHelper:
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
                     is_open = True
-                    log("PASS")
+                    log("pass")
                     break
 
         if not is_open:
@@ -469,7 +467,7 @@ class BotHelper:
 
         self.strategy = Strategy(data_msg)
         # if self.strategy.market.lower() == "usdt" and config.btc_wavetrend["30m"] == "red":
-        #     log("30m-RED PASS", "red")
+        #     log("30m-RED pass", "red")
         #     return
 
         if not hasattr(self.strategy, "position_alert_msg"):

@@ -44,6 +44,7 @@ class Discord_Alpy:
             self.client = discord.Client()
             self.channel: str = ""
             self.channel_alerts: str = ""
+            self.channel_log: str = ""
             self.channel_notifications: str = ""
             self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
             self.TOKEN = str(_config["discord"]["TOKEN"])
@@ -121,6 +122,9 @@ class Discord_Alpy:
 
         if not self.channel_alerts:
             self.channel_alerts = discord.utils.get(self.client.get_all_channels(), name="alerts")
+
+        if not self.channel_log:
+            self.channel_log = discord.utils.get(self.client.get_all_channels(), name="alpy_trade_log")
 
         if not self.channel_notifications:
             self.channel_notifications = discord.utils.get(self.client.get_all_channels(), name="notifications")

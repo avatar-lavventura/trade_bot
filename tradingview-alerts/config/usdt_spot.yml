@@ -1,7 +1,7 @@
 files:
   input: pairs_usdt.csv
 tradingview:
-  chartUrl: https://www.tradingview.com/chart/vJo45W0J/
+  chartUrl: https://www.tradingview.com/chart/bHXZrXAy/?symbol=BINANCE%3ABTCUSDT
   interval: 5m
 alert:
   condition:

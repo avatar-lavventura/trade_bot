@@ -18,8 +18,6 @@ exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRat
 _log.IS_WRITE = False
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
-WITHDRAWN = fetch_withdrawn(sh, "usdt")
-WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
 
 goal = 0
 EKLEME = 0
@@ -36,6 +34,9 @@ async def main():
         max_val = goal
 
     while True:
+        WITHDRAWN = fetch_withdrawn(sh, "usdt")
+        WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
+        #
         BTCUSDT = int(config.prices.find_one("BTCUSDT")["value"])
         start = ""
         bal_brave = config.total_balance("usdt")
@@ -61,7 +62,7 @@ async def main():
 
         hot_sum = f2(bal_brave + bal_chrome)
         hot_btc_sum = format(WITHDRAWN_BTC + float(all_btc_asset), ".8f")
-        _str = f"[w]{hot_btc_sum} {all_btc_asset}[/w] |"
+        _str = f"[w][{WITHDRAWN_BTC} + {all_btc_asset} => {hot_btc_sum}][/w] |"
         if chrome_spot_balance > 500:
             _str = f"{_str} {f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}])"
         else:
@@ -76,7 +77,7 @@ async def main():
         with suppress(Exception):
             sh.sheet1.update("A20:D20", [[_timestamp(), int(bal_brave), int(bal_chrome), _sum]])
 
-        time.sleep(20)
+        time.sleep(19)
 
 
 if __name__ == "__main__":

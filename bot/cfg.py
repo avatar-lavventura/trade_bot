@@ -45,16 +45,16 @@ WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
 order_del_list = [
     "timeInForce",
     "orderListId",
-    "price",
     "status",
     "type",
-    "origQty",
     "executedQty",
     "clientOrderId",
-    "orderId",
     "side",
     "selfTradePreventionMode",
     "workingTime",
+    # "orderId",
+    # "origQty",
+    # "price",
 ]
 
 """

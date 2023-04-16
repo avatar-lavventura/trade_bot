@@ -2,9 +2,9 @@ root:
   balance_silent: false
   is_funding_rate_alert: false
   is_write: false
-  isolated_wallet_limit: 100
+  isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
-  take_profit: 0.0048
+  take_profit: 0.0047
   locked_percent_limit: 99.99
   sleep_duration: 20
   ignore: # for all
@@ -22,9 +22,9 @@ root:
     auto_buy_bnb: off
     isolated: off
     cross: off
-    max_pos: 2
-    initial: 10.35
-    multiply_ratio: 1.1
+    max_pos: 3
+    initial: 11
+    multiply_ratio: 1.13
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: true
     entry_prices:
@@ -38,9 +38,9 @@ root:
     auto_buy_bnb: on
     isolated: off
     cross: off
-    initial: 0.00011
-    max_pos: 3
-    multiply_ratio: 1.1
+    initial: 0.00012
+    max_pos: 5
+    multiply_ratio: 1.13
     percent_change_to_add: 4.3
     stop_trade_wt_30m_red: false
     entry_prices:

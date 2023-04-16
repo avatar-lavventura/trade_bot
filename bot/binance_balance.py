@@ -103,6 +103,7 @@ async def process_main(obj):
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
     bot_async.channel = obj.channel
+    bot_async.channel_log = obj.channel_log
     bot_async.channel_alerts = obj.channel_alerts
     config._reload()
     try:

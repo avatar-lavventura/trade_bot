@@ -9,5 +9,5 @@ if [[ -d $DIR ]]; then
     $GIT_TOPLEVEL/bot/scripts/filter.sh
     #
     cd $CURRENT_DIR
-    printf "pre-commit.sh  [  OK  ]  "
+    printf "update_binance_assets.sh  [  OK  ]  "
 fi

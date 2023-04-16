@@ -16,6 +16,7 @@ from bot.config import config
 class BotHelperSpotAsync(BotHelperAsync):
     def __init__(self) -> None:
         self.channel = None
+        self.channel_log = None
         self.channel_alerts = None
 
     async def check_position_to_pass(self, asset, _sum, is_limit, per) -> bool:
@@ -406,6 +407,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
             log(format(_sum * 1000, ".4f"), "ib")
+
+        if _type in ["usdt", "busd"]:
+            log()  # newline
 
         if cfg.TYPE == "btc":
             if "change_type" in config.cfg["root"][cfg.TYPE] and asset in config.cfg["root"][cfg.TYPE]["change_type"]:

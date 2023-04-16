@@ -12,7 +12,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      pyramiding=100000)
 
 IS_BROWSER = false  // should be `false` while adding alerts
-fromMonth = 3
+fromMonth = 4
 fromDay = 1
 thruMonth = 1
 thruDay = 1
@@ -81,8 +81,7 @@ if countH==p
 if countL==p
     pivotL = low[period]
     sell := 1
-
-// bomba ends
+// bomba ends -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 // buying volume and selling volume
 buyVolume = 0.0
@@ -213,14 +212,16 @@ plot(wvf ? wvf * -1 : na, title="williams vix fix", style=plot.style_columns, li
 plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
-BASE = 1000 // equal to 1 second in unix epoc
-SLEEP_DUR = 20 * BASE // 60 seconds
+BASE_DURATION = 1000 // equal to 1 second in unix epoc
+SLEEP_DUR = 40 * BASE_DURATION // 40 seconds
 _timenow = timenow - 1600000000000
-is_sleep_pass = _timenow > (math.abs(strategy.position_size) + SLEEP_DUR)
-// mini_is_sleep_pass = _timenow > (math.abs(strategy.position_size) + 10 * BASE)
 
-if not IS_BROWSER and strategy.position_size[0] != 0 and window() and is_sleep_pass
-    strategy.close_all()
+is_sleep_pass = false
+if strategy.position_size[0] != 0
+    is_sleep_pass = _timenow > (math.abs(strategy.position_size) + SLEEP_DUR)
+
+// if not IS_BROWSER and strategy.position_size[0] != 0 and is_sleep_pass
+//     strategy.close_all()
 
 // buy alerts
 // ==========
@@ -365,13 +366,16 @@ if window()
         if is_buy
             strategy.entry("l", strategy.long, qty=1, alert_message=msg)
     else if is_buy
-        if strategy.opentrades[0] == 0 or strategy.position_size < 0
-            if is_sleep_pass  // final timenow check, alerts should in sleep for given seconds
-                strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
-        else if strategy.position_size[0] != 0 and is_sleep_pass
+        //: needed to close first postion before alerts start
+        if _timenow - strategy.position_size > 100000
             strategy.close_all()
-        else if is_sleep_pass
+
+        if strategy.opentrades[0] == 0
             strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+        else if is_sleep_pass
+            strategy.close_all()
+        // else if is_sleep_pass
+        //     strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)
 // if (strategy.position_size > 0)
