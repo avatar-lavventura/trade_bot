@@ -148,11 +148,6 @@ class BotHelperAsync:
             else:
                 msg += f"locked=[cy]{int(float(cfg.locked_balance))}%[/cy] "
 
-            if free > 0:
-                _free_usdt = float(free) * cfg.PRICES["BTCUSDT"]
-                free = format(only_btc * 1000, ".4f")
-                msg = f"{msg}f_btc=[cy]{free}[/cy]([cy]${format(_free_usdt, '.2f')}[/cy]) "
-
             _total = cfg.SUM_BTC + abs(lost) / 1000
             _total = format(_total, ".5f")
             msg += f"[ib]{_total}[/ib] "
@@ -216,7 +211,7 @@ class BotHelperAsync:
         per_str_c_1d = self.per_str_color(percent_1d)
         c = "m" if symbol == "BTCUSDT" else "cy"
         log(
-            f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d}",
+            f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t",
             end="\r",
             is_write=False,
         )
@@ -302,18 +297,19 @@ class BotHelperAsync:
                         msg = f"=> `{_time}`"
                     else:
                         msg = f"{msg}\n```"
-                        if not config.cfg["root"]["balance_silent"]:
+                        if not config.cfg["root"]["is_balance_silent"]:
                             msg = f"{msg}=> `{_time}`"
 
-                    _btc_sum = float(config.env["btc"].balance_sum.value("btc"))
+                    _btc_sum = float(config.env["btc"].balance_sum.find_one("btc")["value"])
                     # _only_btc = float(config.env["btc"].estimated_balance.find_one("only_btc")["value"])
                     sum_btc_all = format(cfg.WITHDRAWN_BTC + _btc_sum, ".8f")
-                    if config.estimated_balance() and ("03:00:" in _time or not config.cfg["root"]["balance_silent"]):
+                    if config.estimated_balance() and (
+                        "03:00:" in _time or not config.cfg["root"]["is_balance_silent"]
+                    ):
                         btc_wallet_balance = cfg.WITHDRAWN_BTC * cfg.PRICES["BTCUSDT"]
                         msg = f"{msg}  :moneybag:`{config.estimated_balance()}`"
                         msg = f"{msg} w=`${int(cfg.WITHDRAWN)}`\n\t\t"
-                        # breakpoint()  # DEBUG
-                        msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN + btc_wallet_balance)}`"
+                        msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN + btc_wallet_balance + cfg.WITHDRAWN_USDT)}`"
                         msg = f"{msg} | btc=`{sum_btc_all}`"
 
             if "03:00:" in _time:
@@ -434,10 +430,16 @@ class BotHelperAsync:
             _console_clear()
 
         if sum_btc > 0.00002 and pos_count > 0:
+            _free_usdt = float(only_btc) * cfg.PRICES["BTCUSDT"]
+            if cfg.TYPE == "usdt":
+                bug = ":lion_face:"
+            else:
+                bug = ":bee:"
+
             log(
-                f":bee: btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f| "
+                f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f)| "
                 f"bnb=[cy]$%.2f[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}"
-                % (sum_btc, own_usdt, only_usdt, only_btc * 1000, cfg.BNB_BALANCE)
+                % (sum_btc, own_usdt, only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE)
             )
             cfg.SUM_BTC = sum_btc
 
@@ -490,7 +492,6 @@ class BotHelperAsync:
             config._env.estimated_balance.add_single_key("total_balance", _total_balance)
         elif cfg.TYPE == "btc":  #: calculating the estimated balance
             _da = f"[blue]{_date(_type='hour')}[/blue]"
-            # print_str = ":bee: "
             print_str = ""
             print_str += f"f_btc={format(only_btc, '.8f')} | usdt=[g]{format(only_usdt, '.2f')}[/g] bnb={format(cfg.BNB_BALANCE, '.2f')} |"
             if cfg.FIRST_PRINT_CYCLE:
@@ -589,11 +590,11 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
-        if float(sum_btc) > 0:
-            if sum_btc == only_btc:
-                log(f"{_da} [ic]{_timestamp()}")
-            elif real_pos_count == 0:
-                log(f"total_btc={format(sum_btc, '.8f')} | {_da} [ic]{_timestamp()}")
+        # if float(sum_btc) > 0:
+        #     if sum_btc == only_btc:
+        #         log(f"{_da} [ic]{_timestamp()}")
+        #     elif real_pos_count == 0:
+        #         log(f"total_btc={format(sum_btc, '.8f')} | {_da} [ic]{_timestamp()}")
 
         lost: float = 0
         cfg.locked_balance: float = 0
@@ -702,7 +703,7 @@ class BotHelperAsync:
         else:
             msg = _msg
             if free > 0:
-                msg = f"{msg}free=`{free}` (`${format(free * cfg.PRICES['BTCUSDT'], '.2f')}`) "
+                msg = f"{msg}:bee: free=`{free}` (`${format(free * cfg.PRICES['BTCUSDT'], '.2f')}`) "
 
             lost_usdt = format(float(lost) * cfg.PRICES["BTCUSDT"], ".2f")
             s_btc = format(sum_btc, ".5f")
@@ -764,7 +765,17 @@ class BotHelperAsync:
         order = await exchange.spot.create_market_buy_order(asset, _amount)
         log(ok(), is_write=False)
         order = order["info"]
-        for item in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
+        for item in [
+            "timeInForce",
+            "orderListId",
+            "price",
+            "status",
+            "type",
+            "origQty",
+            "executedQty",
+            "transactTime",
+            "orderId",
+        ]:
             with suppress(Exception):
                 del order[item]
 
@@ -879,7 +890,7 @@ class BotHelperAsync:
             if "info" in response:
                 response = response["info"]
 
-            for item in cfg.order_del_list + ["fills", "cummulativeQuoteQty"]:
+            for item in cfg.order_del_list + ["fills", "cummulativeQuoteQty", "fills"]:
                 with suppress(Exception):
                     del response[item]
 
@@ -887,8 +898,7 @@ class BotHelperAsync:
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
                 if "greater than minimum amount precision of" in str(e):
-                    log(f"warning: {e} // already closed position :beer:")
-                    # raise e kills the cycle maybe just ignore to continue from other assets
+                    log(f"// already closed position for {asset}{cfg.TYPE.upper()} :beer:", end="")
                     raise QuietExit
                 else:
                     log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")

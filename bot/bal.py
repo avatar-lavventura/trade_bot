@@ -10,6 +10,7 @@ from broker._utils import _log
 from broker._utils._log import log
 from broker._utils.tools import _date, _timestamp
 
+from bot import cfg
 from bot.config import config
 from bot.sheets_lib import fetch_withdrawn
 
@@ -33,13 +34,14 @@ async def main():
     if goal > 0:
         max_val = goal
 
+    WITHDRAWN_USDT = cfg.WITHDRAWN_USDT
     while True:
         WITHDRAWN = fetch_withdrawn(sh, "usdt")
         WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
         #
         BTCUSDT = int(config.prices.find_one("BTCUSDT")["value"])
         start = ""
-        bal_brave = config.total_balance("usdt")
+        bal_brave = config.total_balance("usdt") + WITHDRAWN_USDT
         bal_chrome = config.total_balance("btc")
         _sum = int(bal_brave + bal_chrome + WITHDRAWN + (WITHDRAWN_BTC * BTCUSDT) - EKLEME)
         all_btc_asset = format(float(config.env["btc"].balance_sum.find_one("usdt")["value"]) / BTCUSDT, ".8f")

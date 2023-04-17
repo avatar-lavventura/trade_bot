@@ -12,7 +12,7 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["DCRUSDT", "DCRBTC"]
+assets = ["BTTCUSDT", "OGBTC"]
 assets += ["BTCUSDT"]
 sleep_duration = 20
 is_quote = True
@@ -38,21 +38,24 @@ def run(cmd):
 def tracker_clock_string():
     msg = ""
     for _, asset in enumerate(reversed(assets)):
+        if asset == "":
+            continue
+
         if asset == "COCOSBTC":
             price = cg.get_price(ids="cocos-bcx", vs_currencies="btc")
             price = "{:.8f}".format(price["cocos-bcx"]["btc"]).strip("0.").lstrip("0")
         else:
             try:
                 output = exchange.fetch_ticker(asset)
+                asset = asset.replace("USDT", "")
                 price = output["last"]
                 if 1 <= price <= 10:
                     price = "{:.3f}".format(price)
                 elif 10 <= price <= 100:
                     price = "{:.2f}".format(price)
                 else:
-                    asset = asset.replace("USDT", "")
                     if price < 0.1:
-                        price = "{:.8f}".format(price).strip("0.").lstrip("0")
+                        price = "{:.8f}".format(price).lstrip("0.").lstrip("0")
                     elif price > 1000:
                         price = round(price)
                     elif price > 1:
@@ -67,7 +70,10 @@ def tracker_clock_string():
             else:
                 msg = f"{asset} {price} | {msg}"
         else:
-            msg = f"{asset} {price}"
+            if asset == "BTC":
+                msg = f"{price}"
+            else:
+                msg = f"{asset} {price}"
 
     if is_quote:
         msg = f"{MSG} {msg}"

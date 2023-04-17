@@ -365,17 +365,18 @@ if window()
         //     strategy.close_all()
         if is_buy
             strategy.entry("l", strategy.long, qty=1, alert_message=msg)
-    else if is_buy
-        //: needed to close first postion before alerts start
+    else
         if _timenow - strategy.position_size > 100000
             strategy.close_all()
 
-        if strategy.opentrades[0] == 0
-            strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
-        else if is_sleep_pass
-            strategy.close_all()
-        // else if is_sleep_pass
-        //     strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+        if is_buy
+            //: needed to close first postion before alerts start
+            if strategy.opentrades[0] == 0
+                strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+            else if is_sleep_pass
+                strategy.close_all()
+            // else if is_sleep_pass
+            //     strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)
 // if (strategy.position_size > 0)

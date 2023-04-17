@@ -92,8 +92,8 @@ class Discord_Alpy:
         scheduler.add_job(helper.exchange.record_balance, "cron", hour="*", timezone=tz)
 
         # daily
-        scheduler.add_job(
-            self.restart, "cron", year="*", month="*", day="*", hour="03", minute="01", second="0", timezone=tz
+        scheduler.add_job(  #: restart at fund times
+            self.restart, "cron", year="*", month="*", day="*", hour="11,03,19", minute="01", second="0", timezone=tz
         )
 
         if cfg.TYPE == "usdt":

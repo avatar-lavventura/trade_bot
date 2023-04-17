@@ -32,6 +32,16 @@ async def is_rapid_alert(msg, alert):
 
 
 async def discord_send_alert():
+    #: TODO: check this also for brave-btc?
+    if len(config._c["alert_if_position_closed"]) > 0:
+        for symbol in cfg.BALANCES:
+            if symbol not in cfg.ignore_list and cfg.BALANCES[symbol]["total"] == 0:
+                if symbol in config._c["alert_if_position_closed"]:
+                    msg = f"{symbol} is closed :beer:"
+                    await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
+                    config._c["alert_if_position_closed"].remove(symbol)
+                    config.cfg.dump()
+
     alert_track = {}
     asset_price_dict = {}
     alert_key = "greater_than"

@@ -63,6 +63,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                             #     per_change_delta = 0.02  # prevent 0.02% wrong quantity calculations
                             per_change_delta = 0.1
                             if q_per_change == 0 or q_per_change > per_change_delta:
+                                # TODO: arta kalan bakiye kucuk alimda isi bozuyor
                                 log(f"per_change_delta: {q_per_change} ?= {per_change_delta}")
                                 # Note that `q_per_change` may end up 0, which prevent new order to be created
                                 await self.new_limit_order(asset, limit_price, market)
@@ -339,10 +340,11 @@ class BotHelperSpotAsync(BotHelperAsync):
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
 
         asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
-        log(f"** {asset} {self.ll(asset_price)} e={self.ll(entry_price)} q={qty_str} ", "b", end="")
+        log(f"** {asset} {self.ll(asset_price)} e={self.ll(entry_price)} ", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"t={self.ll(limit_price)} ", end="")  # prints the target price
 
+        log(f"q={qty_str} ", end="")
         per = format((100.0 * qty_to_consider * asset_price) / sum_bal, ".2f")
         per_locked = format((100.0 * qty_to_consider_locked_per * asset_price) / sum_bal, ".2f")
         profit = (asset_price - entry_price) * qty_to_consider
@@ -408,7 +410,8 @@ class BotHelperSpotAsync(BotHelperAsync):
 
             log(format(_sum * 1000, ".4f"), "ib")
 
-        if _type in ["usdt", "busd"]:
+        real_pos_count = config._env._status.find_one("real_pos_count")["value"]
+        if _type in ["usdt", "busd"] and real_pos_count > 0:
             log()  # newline
 
         if cfg.TYPE == "btc":

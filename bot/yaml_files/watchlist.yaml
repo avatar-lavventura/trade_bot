@@ -4,6 +4,7 @@ watch:
     - JOEUSDT
     - OAXBTC
     - OAXUSDT
+    - BTTCUSDT
     # - LQTYUSDT
     # - IDUSDT
   # target:
@@ -11,7 +12,8 @@ watch:
   bar:
     - JOEUSDT
     - OAXUSDT
-    - DCRBTC
-    - DCRUSDT
-    # - LQTYUSDT
-    # - IDUSDT
+    - LQTYUSDT
+    - IDUSDT
+    - BTTCUSDT
+    - OGBTC
+    - OGUSDT

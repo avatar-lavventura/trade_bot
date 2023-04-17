@@ -41,6 +41,7 @@ sh = gc.open("guncel_kendime_olan_borclar")
 
 WITHDRAWN = fetch_withdrawn(sh, "usdt")
 WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
+WITHDRAWN_USDT = 0
 
 order_del_list = [
     "timeInForce",
@@ -72,5 +73,5 @@ genel kar gostergesi bir anda artiyor onceki kari dikkate aldigi icin
 """
 IGNORE_SOLD_QUANTITY = True  # by default True for all
 _IGNORE_SOLD_QUANTITY = {}
-# for symbol in ["PNT/USDT", "ORN/USDT"]:
-#     _IGNORE_SOLD_QUANTITY[symbol] = False
+for symbol in ["PNT/USDT", "ORN/USDT"]:
+    _IGNORE_SOLD_QUANTITY[symbol] = False

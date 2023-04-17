@@ -44,6 +44,14 @@ if [ $(is_running "[p]ython3 discord_balance.py $1") -ge 1 ]; then
     exit
 fi
 
+
+if [[ $1 == "usdt" ]] ; then
+    rm -f /home/alper/.bot/.*.yaml.lock
+    echo "rm -f /home/alper/.bot/.*.yaml.lock  done"
+fi
+
+
+
 clear -x
 # check_app
 while true; do

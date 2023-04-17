@@ -32,9 +32,14 @@ class Strategy:
             if ", (" in data_msg:
                 data_msg = data_msg.split(", (", 1)[0]
 
-            log(data_msg, "magenta", h=False, end="")
+            if "USDT" in data_msg:
+                c = "blue"
+            else:
+                c = "magenta"
+
+            log(data_msg, c, h=False, end="")
             if not data_msg.endswith(","):
-                log(",", "magenta", h=False, end="")
+                log(",", c, h=False, end="")
 
         try:
             self.parse_msg(data_msg)
@@ -272,7 +277,7 @@ class BotHelper:
                     return await self.spot_order(float(_quantity))
                 else:
                     log("E: Quantity less than or equal to zero, nothing to do")
-            elif "Filter failure: MIN_NOTIONAL" in str(e) and quantity >= 1:
+            elif ("Filter failure: MIN_NOTIONAL" in str(e) or "Filter failure: NOTIONAL" in str(e)) and quantity >= 1:
                 quantity += 0.1
                 quantity = float("{:.1f}".format(quantity))  # sometimes overround 1.2000000000000002
                 log(f" *  re-opening [green]{side}[/green] ", end="")
@@ -444,7 +449,7 @@ class BotHelper:
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
         if self.strategy.market.lower() == "usdt" and free_balance < config.cfg["root"]["usdt"]["initial"]:
-            raise QuietExit(f"not enough free usdt([cyan]${round(free_balance)}[/cyan])")
+            raise QuietExit(f"not enough free USDT([cy]${round(free_balance)}[/cy])")
 
         # if self.strategy.market == "USDTPERP":
         #     self.pre_check_usdtperp(
@@ -458,8 +463,13 @@ class BotHelper:
             elif "_bist" in data_msg:
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
+                if "USDT" in data_msg:
+                    c = "blue"
+                else:
+                    c = "magenta"
+
                 log(f" * {_date()} ", end="")
-                log(data_msg, "magenta", h=False)
+                log(data_msg, c, h=False)
                 if "strategy.order.action" not in data_msg:
                     await self.discord_client.send_msg(data_msg, "alpy")
 

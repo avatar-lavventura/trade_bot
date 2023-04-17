@@ -235,3 +235,51 @@ e=0.00079 == 'price': '0.00000079', instead should be 0.00080
 
 [  bot_helper_async.py:839  ] E: binance does not have market symbol QLCUSDT
 [  bot_helper_async.py:839  ] E: binance does not have market symbol QLCBUSD
+
+
+** TODO arta kalan bakiye olursa <1$ onu isolated veya margin'e transfer et.
+hatta bu islemi yeterli BNB yoksa force olarak yap
+
+** TODO delta_per
+
+#+begin_src org
+#> opening BUY order in the USDT market for OAX OAX/USDT order_qty=29.0
+{
+│   'symbol': 'OAXUSDT',
+│   'orderId': '14335628',
+│   'transactTime': '1681741396316',
+│   'price': '0.00000000',
+│   'origQty': '29.00000000',
+│   'cummulativeQuoteQty': '10.88370000',
+│   'fills': [
+│   │   {
+│   │   │   'price': '0.37530000',
+│   │   │   'qty': '29.00000000',
+│   │   │   'commission': '0.02900000',
+│   │   │   'commissionAsset': 'OAX',
+│   │   │   'tradeId': '1718510'
+│   │   }
+│   ]
+}
+
+----
+
+wrong calculation for OAX/USDT 29.668 != 29.0
+** OAX 0.378 e=0.3693 q=29.67 t=0.3711 (2.36%) 0.26 0.57% | 11.21 10.96
+per_change_delta: 2.2515842 ?= 0.1
+==> new_limit_order={
+│   'symbol': 'OAXUSDT',
+│   'orderId': '14336570',
+│   'transactTime': '1681741488092',
+│   'price': '0.37110000',
+│   'origQty': '29.00000000'
+}
+#+end_src
+
+
+** TODO entry_price asset 1$ den az pozisyon varsa config den sil
+
+** TODO something wrong with ~/.bot/*.yaml.lock fix it
+
+
+** TODO 50% cikan kagit olursa alarm yolla robot ile ozel operasyon yap

@@ -11,7 +11,7 @@ with open("requirements.txt", "r") as f:
 setup(
     name="bot",
     packages=find_packages(),
-    setup_requires=["wheel", "ccxt", "ipdb"],
+    setup_requires=["wheel", "ccxt", "ipdb", "rich"],
     version="1.0.0",  # don't change this manually, use bumpversion instead
     license="MIT",
     description="Alpy trade bot.",  # noqa: E501

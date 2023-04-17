@@ -316,6 +316,7 @@ class Config:
 
     def _reload_cfg(self) -> None:
         self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
+        self._c = self.cfg["root"][cfg.TYPE]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
@@ -361,30 +362,6 @@ class Config:
             self.env[cfg.TYPE].timestamps["root"][asset] = config.env["busd"].status["timestamp"]
 
         return int(self.env[cfg.TYPE].timestamps["root"][asset])
-
-    """
-    # USDTPERP
-    # ========
-    def _reload_usdtperp(self) -> None:
-        self.initialize_usdtperp()
-
-    def initialize_usdtperp(self) -> None:
-        self.USDTPERP_MULTIPLY_RATIO = None
-        self.USDTPERP_MAX_POSITION = {}  # type: Dict[str, int]
-        self.status_usdtperp = self.yaml_wrapper(self.base_dir / "usdtperp_pos_count.yaml")
-        self._initial_usdt_qty_short = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["short"]["base"]
-        self.initial_usdt_qty_short["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["short"]["1m"]
-        self._initial_usdt_qty_long = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["long"]["base"]
-        self.initial_usdt_qty_long["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["pos"]["long"]["1m"]
-        self.USDTPERP_PERCENT_CHANGE_TO_ADD = (
-            -abs(self.cfg_usdtperp["root"]["usdtperp"]["percent_change_to_add"]) + 0.01
-        )
-        self.locked_per_limit_usdtperp = self.cfg_usdtperp["root"]["locked_percent_limit"]
-        self.USDTPERP_MULTIPLY_RATIO = self.cfg_usdtperp["root"]["usdtperp"]["multiply_ratio"]
-        self.USDTPERP_MAX_POSITION["9m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos"]
-        self.USDTPERP_MAX_POSITION["1m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos"]
-        self.USDTPERP_MAX_POSITION["21m"] = self.cfg_usdtperp["root"]["usdtperp"]["max_pos_21m"]
-    """
 
 
 config: Config = Config()
