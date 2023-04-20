@@ -12,12 +12,17 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      pyramiding=100000)
 
 IS_BROWSER = false  // should be `false` while adding alerts
+
 fromMonth = 4
 fromDay = 1
 thruMonth = 1
 thruDay = 1
-fromYear = 2023 // 2022
 thruYear = 3000
+fromYear = 2023
+if IS_BROWSER
+    fromYear := 2021
+    fromMonth := 1
+
 testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
 start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
@@ -26,6 +31,14 @@ msg = timeframe.period + "_enter"
 msg_aggr = msg + "_aggr"
 window() =>
     time >= start and time <= finish ? true : false
+
+BASE_DURATION = 1000 // equal to 1 second in unix epoc
+SLEEP_DUR = 60 * BASE_DURATION // hopefully 60 seconds?
+_now = timenow - 1600000000000
+
+is_sleep_pass = false
+if strategy.position_size[0] != 0
+    is_sleep_pass := _now > (math.abs(strategy.position_size) + SLEEP_DUR)
 
 // bomba: https://www.tradingview.com/script/ZfDaDkHX-Quadratic-Semaphore/
 p = input(6)
@@ -64,15 +77,15 @@ buy=0
 sell=0
 for i = 1 to period-1
     if qr[i]<hh
-        countH:=countH+1
+        countH := countH+1
     if qrl[i]>ll
-        countL:=countL+1
+        countL := countL+1
 
 for i = period+1 to p+1
     if qr[i]<hh
-        countH:=countH+1
+        countH := countH+1
     if qrl[i]>ll
-        countL:=countL+1
+        countL := countL+1
 
 if countH==p
     pivotH = high[period]
@@ -212,16 +225,6 @@ plot(wvf ? wvf * -1 : na, title="williams vix fix", style=plot.style_columns, li
 plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
-BASE_DURATION = 1000 // equal to 1 second in unix epoc
-SLEEP_DUR = 40 * BASE_DURATION // 40 seconds
-_timenow = timenow - 1600000000000
-
-is_sleep_pass = false
-if strategy.position_size[0] != 0
-    is_sleep_pass = _timenow > (math.abs(strategy.position_size) + SLEEP_DUR)
-
-// if not IS_BROWSER and strategy.position_size[0] != 0 and is_sleep_pass
-//     strategy.close_all()
 
 // buy alerts
 // ==========
@@ -320,14 +323,10 @@ else
             if count == 100 and close > high[1]
                 is_buy := true
 
-        // if (is_wt_cross_green and wt2 <= -53) and col == color.gray and col[1] == color.gray and col[2] == color.lime
-        //     is_buy := true
-
-        // if (is_wt_cross_green and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray
-        //     is_buy := true
-
-        // if (is_wt_cross_green and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray
-        //     is_buy := true
+        if ((is_wt_cross_green and wt2 <= -53) and col == color.gray and col[1] == color.gray and col[2] == color.lime) or
+           ((is_wt_cross_green and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray) or
+           ((is_wt_cross_green and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray)
+            is_buy := true
 
         for i = 2 to 72
             if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
@@ -349,34 +348,24 @@ else
     else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
         is_buy := true
 
-    // if col_aggr == color.orange
-    //     msg := msg_aggr
-
-    // (col[1] == color.lime and col == color.gray)
-    // col_aggr == color.orange
-
 if not base_cond
     is_buy := false
 
-// "l": "long"
 if window()
     if IS_BROWSER
         // if strategy.position_size[0] != 0
         //     strategy.close_all()
         if is_buy
-            strategy.entry("l", strategy.long, qty=1, alert_message=msg)
+            strategy.entry("l", strategy.long, qty=1, alert_message=msg)  // "l": "long"
     else
-        if _timenow - strategy.position_size > 100000
+        if _now - strategy.position_size > 100000
             strategy.close_all()
 
         if is_buy
-            //: needed to close first postion before alerts start
-            if strategy.opentrades[0] == 0
-                strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
+            if strategy.opentrades[0] == 0  //: needed to close first postion before alerts start
+                strategy.entry("l", strategy.long, qty=_now, alert_message=msg)
             else if is_sleep_pass
                 strategy.close_all()
-            // else if is_sleep_pass
-            //     strategy.entry("l", strategy.long, qty=_timenow, alert_message=msg)
 
 // longExitPrice  = strategy.position_avg_price * (1 + 0.005)
 // if (strategy.position_size > 0)

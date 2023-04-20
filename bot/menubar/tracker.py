@@ -12,8 +12,8 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTTCUSDT", "BTTCTRY"]
-assets += ["BTCUSDT"]
+assets = ["BTCUSDT"]
+assets += ["BTTCUSDT", "BTTCTRY"]
 sleep_duration = 20
 is_quote = True
 MSG = "The most important rule in trading is to protect your capital at all cost."
@@ -54,6 +54,7 @@ def orderbook() -> str:
 
 def tracker_clock_string():
     msg = ""
+    text = ""
     for _, asset in enumerate(reversed(assets)):
         if asset == "":
             continue
@@ -81,7 +82,6 @@ def tracker_clock_string():
                 if "binance does not have market symbol" in str(e):
                     print(f"E' {e}")
 
-        text = ""
         if asset == "BTTC":
             text = orderbook()
 
