@@ -171,7 +171,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
             order = order["info"]
-            for item in cfg.order_del_list:
+            for item in cfg.order_del_list + ["fills"]:
                 with suppress(Exception):
                     del order[item]
 

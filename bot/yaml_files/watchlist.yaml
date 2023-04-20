@@ -5,6 +5,7 @@ watch:
     - OAXBTC
     - OAXUSDT
     - BTTCUSDT
+    - BTTCTRY
     # - LQTYUSDT
     # - IDUSDT
   # target:
@@ -15,5 +16,6 @@ watch:
     - LQTYUSDT
     - IDUSDT
     - BTTCUSDT
+    - BTTCTRY
     - OGBTC
     - OGUSDT

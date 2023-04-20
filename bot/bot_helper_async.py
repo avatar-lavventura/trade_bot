@@ -438,8 +438,9 @@ class BotHelperAsync:
 
             log(
                 f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f)| "
-                f"bnb=[cy]$%.2f[/cy] | [blue]{_date(_type='hour')}[/blue] {ts}"
-                % (sum_btc, own_usdt, only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE)
+                f"bnb=[cy]$%.2f[/cy] | [blue]{_date(_type='hour')}[/blue] "  # {ts}
+                % (sum_btc, own_usdt, only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
+                end="",
             )
             cfg.SUM_BTC = sum_btc
 
@@ -488,7 +489,8 @@ class BotHelperAsync:
             if output:
                 perf_str = f" perf=[blue]{output['value']}[/blue] |"
 
-            log(f":lion_face: [g]${_total_balance}[/g] | {_bnb} |{perf_str} {_da} [italic cyan]{_timestamp()}")
+            log(f"[g]${_total_balance}[/g]")
+            # log(f":lion_face: [g]${_total_balance}[/g] | {_bnb} |{perf_str} {_da} [italic cyan]{_timestamp()}")
             config._env.estimated_balance.add_single_key("total_balance", _total_balance)
         elif cfg.TYPE == "btc":  #: calculating the estimated balance
             _da = f"[blue]{_date(_type='hour')}[/blue]"

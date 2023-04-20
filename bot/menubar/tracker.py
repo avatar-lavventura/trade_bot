@@ -12,7 +12,7 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTTCUSDT", "OGBTC"]
+assets = ["BTTCUSDT", "BTTCTRY"]
 assets += ["BTCUSDT"]
 sleep_duration = 20
 is_quote = True
@@ -33,6 +33,23 @@ for idx, asset in enumerate(reversed(assets)):
 
 def run(cmd):
     return subprocess.check_output(cmd, shell=True).strip()
+
+
+def orderbook() -> str:
+    order_book_struct = exchange.fetch_order_book("BTTCUSDT")
+    bid_px, bid_amount = order_book_struct["bids"][0]
+    ask_px, ask_amount = order_book_struct["asks"][0]
+    ##
+    order_book_struct = exchange.fetch_order_book("BTTCBUSD")
+    bid_px, bid_amount_busd = order_book_struct["bids"][0]
+    ask_px, ask_amount_busd = order_book_struct["asks"][0]
+
+    _amount = int((bid_amount + bid_amount_busd) * bid_px)
+    _ask = int((ask_amount + ask_amount_busd) * bid_px)
+    _bid_px = "{:.8f}".format(bid_px).lstrip("0.").lstrip("0")
+    _ask_px = "{:.8f}".format(ask_px).lstrip("0.").lstrip("0")
+    text = f"{_bid_px}({_amount}) ?= {_ask_px}({_ask})"
+    return text
 
 
 def tracker_clock_string():
@@ -64,6 +81,10 @@ def tracker_clock_string():
                 if "binance does not have market symbol" in str(e):
                     print(f"E' {e}")
 
+        text = ""
+        if asset == "BTTC":
+            text = orderbook()
+
         if msg:
             if asset == "BTC":
                 msg = f"{price} | {msg}"
@@ -76,7 +97,7 @@ def tracker_clock_string():
                 msg = f"{asset} {price}"
 
     if is_quote:
-        msg = f"{MSG} {msg}"
+        msg = f"{MSG} {msg} // {text}"
 
     return f"{msg} # "
 
