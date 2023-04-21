@@ -72,4 +72,4 @@ if __name__ == "__main__":
     # mongo.find_all(sort_str="timestamp")
     #
     get_latest_ts()
-    print("end")
+    print("done")
