@@ -12,8 +12,8 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTCUSDT"]
-assets += ["BTTCUSDT", "BTTCTRY"]
+assets = ["BTCUSDT"]  # + ["USDTTRY"]
+assets += ["HIFIUSDT"]
 sleep_duration = 20
 is_quote = True
 MSG = "The most important rule in trading is to protect your capital at all cost."
@@ -56,6 +56,7 @@ def tracker_clock_string():
     msg = ""
     text = ""
     for _, asset in enumerate(reversed(assets)):
+        price = ""
         if asset == "":
             continue
 
@@ -64,16 +65,25 @@ def tracker_clock_string():
             price = "{:.8f}".format(price["cocos-bcx"]["btc"]).strip("0.").lstrip("0")
         else:
             try:
-                output = exchange.fetch_ticker(asset)
+                if asset == "BTTCUSDT":
+                    # here price is fetched from BTTCTRY pair since its more correct
+                    asset_price = exchange.fetch_ticker("BTTCTRY")
+                    USDTTRY = exchange.fetch_ticker("USDTTRY")
+                    price = float(format(asset_price["last"] / USDTTRY["last"], ".10f"))
+                else:
+                    price = exchange.fetch_ticker(asset)["last"]
+
                 asset = asset.replace("USDT", "")
-                price = output["last"]
                 if 1 <= price <= 10:
                     price = "{:.3f}".format(price)
                 elif 10 <= price <= 100:
                     price = "{:.2f}".format(price)
                 else:
                     if price < 0.1:
-                        price = "{:.8f}".format(price).lstrip("0.").lstrip("0")
+                        if asset == "BTTC":
+                            price = "{:.10f}".format(price).lstrip("0.").lstrip("0")
+                        else:
+                            price = "{:.8f}".format(price).lstrip("0.").lstrip("0")
                     elif price > 1000:
                         price = round(price)
                     elif price > 1:

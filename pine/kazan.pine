@@ -33,7 +33,7 @@ window() =>
     time >= start and time <= finish ? true : false
 
 BASE_DURATION = 1000 // equal to 1 second in unix epoc
-SLEEP_DUR = 60 * BASE_DURATION // hopefully 60 seconds?
+SLEEP_DUR = 120 * BASE_DURATION // ~120 seconds
 _now = timenow - 1600000000000
 
 is_sleep_pass = false
