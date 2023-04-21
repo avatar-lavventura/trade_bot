@@ -336,10 +336,17 @@ class BotHelperSpotAsync(BotHelperAsync):
             qty_str = remove_trailing_zeros(format(qty_to_consider, ".4f"))
 
         if entry_price == limit_price:
-            log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")
+            log(f"** {asset} q={qty_str} e={self.ll(entry_price)} ", "b", end="")  # entry price
             raise Exception(f"entry_price and limit_price are same and equal to {entry_price}")
 
-        asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
+        if asset == "BTTC":
+            # here price is fetched from BTTCTRY pair since its more correct
+            asset_price = await self.spot_fetch_ticker(f"{asset}TRY")
+            USDTTRY = await self.spot_fetch_ticker("USDTTRY")
+            cfg.PRICES[asset] = asset_price = float(format(asset_price / USDTTRY, ".10f"))
+        else:
+            asset_price = await self.spot_fetch_ticker(f"{asset}{_type.upper()}")
+
         log(f"** {asset} {self.ll(asset_price)} e={self.ll(entry_price)} ", end="")
         if is_limit and asset not in config.SPOT_IGNORE_LIST:
             log(f"t={self.ll(limit_price)} ", end="")  # prints the target price

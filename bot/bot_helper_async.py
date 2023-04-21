@@ -7,7 +7,7 @@ from contextlib import suppress
 from typing import Tuple
 
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
-from broker._utils.tools import _date, _timestamp, decimal_count, print_tb
+from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
 
 from bot import cfg
@@ -127,9 +127,9 @@ class BotHelperAsync:
             else:
                 asset_price = await self.spot_fetch_ticker(symbol)
 
-        percent_1h = self.calc_per(bar_1h, asset_price)
-        percent_1d = self.calc_per(bar_1d, asset_price)
-        return asset_price, float(format(percent_1h, ".2f")), float(format(percent_1d, ".2f"))
+        per_1h = self.calc_per(bar_1h, asset_price)
+        per_1d = self.calc_per(bar_1d, asset_price)
+        return asset_price, float(format(per_1h, ".2f")), float(format(per_1d, ".2f"))
 
     async def analyze_positions(self, name, lost, pos_count, free, only_btc) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
@@ -206,9 +206,9 @@ class BotHelperAsync:
     def per_str_color(self, percent):
         return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
 
-    def btc_price_per(self, symbol, asset_price, percent_1h, percent_1d):
-        per_str_c_1h = self.per_str_color(percent_1h)
-        per_str_c_1d = self.per_str_color(percent_1d)
+    def btc_price_per(self, symbol, asset_price, per_1h, per_1d):
+        per_str_c_1h = self.per_str_color(per_1h)
+        per_str_c_1d = self.per_str_color(per_1d)
         c = "m" if symbol == "BTCUSDT" else "cy"
         log(
             f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t",
@@ -233,19 +233,19 @@ class BotHelperAsync:
                         flag = True
                         msg = f"{msg}\n```"
 
-                    # TODO: store percent_1h and percent_1d in mongodb for BTC
-                    percent_1h = ""
-                    percent_1d = ""
+                    # TODO: store per_1h and per_1d in mongodb for BTC
+                    per_1h = ""
+                    per_1d = ""
                     try:
-                        asset_price, percent_1h, percent_1d = await self.fetch_symbol_percent_change_1d(symbol)
+                        asset_price, per_1h, per_1d = await self.fetch_symbol_percent_change_1d(symbol)
                         time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
-                        if percent_1h:
-                            per_str_1h = f"{percent_1h}" if percent_1h < 0 else f"+{percent_1h}"
+                        if per_1h:
+                            per_str_1h = f"{per_1h}" if per_1h < 0 else f"+{per_1h}"
 
-                        if percent_1d:
-                            per_str_1d = f"{percent_1d}" if percent_1d < 0 else f"+{percent_1d}"
+                        if per_1d:
+                            per_str_1d = f"{per_1d}" if per_1d < 0 else f"+{per_1d}"
 
-                        if percent_1h and percent_1d:
+                        if per_1h and per_1d:
                             per_str = f"{per_str_1h}  {per_str_1d}"
                         else:
                             per_str = ""
@@ -254,8 +254,8 @@ class BotHelperAsync:
                         print_tb(e)
 
                     if symbol in "BTCUSDT":
-                        self.btc_price_per(symbol, asset_price, percent_1h, percent_1d)  # TODO print this in bal.py
-                        if not (percent_1h and percent_1d) and float(lost) > 0:
+                        self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
+                        if not (per_1h and per_1d) and float(lost) > 0:
                             log(
                                 f" * {symbol}=[m]{asset_price}[/m]",
                                 end="",
@@ -602,6 +602,7 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
+        # from broker._utils.tools import _timestamp
         # if float(sum_btc) > 0:
         #     if sum_btc == only_btc:
         #         log(f"{_da} [ic]{_timestamp()}")
@@ -835,9 +836,8 @@ class BotHelperAsync:
                 raise e
 
     async def spot_fetch_ticker(self, asset, is_bid_price=False) -> float:
-        if not is_bid_price and asset in cfg.PRICES:
-            if cfg.PRICES[asset] != 0:
-                return cfg.PRICES[asset]
+        if (not is_bid_price and asset in cfg.PRICES) and cfg.PRICES[asset] != 0:
+            return cfg.PRICES[asset]
 
         try:
             if asset == "BTCUSDT":
@@ -859,9 +859,17 @@ class BotHelperAsync:
             if is_bid_price:
                 return float(price_ticker["info"]["bidPrice"])
 
-            #: record prices in case could be used in the same cycle
-            cfg.PRICES[asset] = price_ticker["last"]
-            return float(price_ticker["last"])
+            if asset == "BTTCUSDT":
+                _asset = asset.replace("USDT", "")
+                # here price is fetched from BTTCTRY pair since its more correct
+                asset_price = await self.spot_fetch_ticker(f"{_asset}TRY")
+                USDTTRY = await self.spot_fetch_ticker("USDTTRY")
+                cfg.PRICES[asset] = float(format(asset_price / USDTTRY, ".10f"))
+            else:
+                #: record prices in case could be used in the same cycle
+                cfg.PRICES[asset] = price_ticker["last"]
+
+            return float(cfg.PRICES[asset])
         except Exception as e:
             log(f"E: {e}")
             if "binance does not have market symbol" in str(e):

@@ -12,7 +12,7 @@ alerts:
       rapid_alert: "on"
     a1:
       pair: BTTCUSDT
-      price: 0.0000007
+      price: 0.00000065
       rapid_alert: "on"
   balance_greater_than:
     value: 10000
