@@ -166,9 +166,9 @@ class BotHelperAsync:
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
             if pos_count > 2:
                 if output:
-                    log(f"[w]pos={pos_count}[/w] [bold][y]perf[y]=[blue]{output['value']}[/blue][/bold]", h=False)
+                    log(f"[w]pos={pos_count}[/w] [bold][y]perf[/y]=[blue]{output['value']}[/blue][/bold]", h=False)
                 else:
-                    log(f"[w]pos={pos_count}[/w] perf=[blue]0[/blue]", h=False)
+                    log(f"[w]pos={pos_count}[/w] [y]perf[/y]=[blue]0[/blue]", h=False)
             elif output:
                 log(f"perf=[blue]{output['value']}[/blue]")
             else:

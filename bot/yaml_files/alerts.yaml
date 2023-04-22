@@ -10,5 +10,9 @@ alerts:
       pair: BTCUSDT
       price: 29000
       rapid_alert: "on"
+    # a1:
+    #   pair: HIFIUSDT
+    #   price: 0.4670
+    #   rapid_alert: "on"
   balance_greater_than:
     value: 10000

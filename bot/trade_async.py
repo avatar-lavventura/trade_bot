@@ -351,7 +351,7 @@ class BotHelper:
             log(
                 f"#> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
                 f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue] "
-                f"{self.strategy.symbol} ",
+                f"symbol={self.strategy.symbol} ",
                 end="",
             )
             if self.strategy.size != 0:

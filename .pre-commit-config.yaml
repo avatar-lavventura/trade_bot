@@ -26,16 +26,13 @@ repos:
     hooks:
       - id: black
         name: black
-        exclude: |
-          (?x)^(
-              \.old_work/|
-              \.depreciated/
-          )$
+        exclude: "(.old_work/.*|.depreciated)/.*"
 
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
     hooks:
       - id: flake8
+        exclude: "(.old_work/.*|.depreciated)/.*"
 
 default_language_version:
   python: python3

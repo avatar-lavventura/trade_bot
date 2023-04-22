@@ -14,7 +14,6 @@ is_running () {
     ps auxww | grep -E "$1" | grep -v -e "grep" -e "emacsclient" -e "flycheck_" | wc -l
 }
 
-
 if [ $(is_running "[m]ongodb") -eq 0 ]; then
     echo "warning: mongodb is not running in the background. Do:\n"
     echo "systemctl enable mongod.service\nsudo systemctl start mongod"

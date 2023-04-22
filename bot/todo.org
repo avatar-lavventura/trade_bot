@@ -289,3 +289,6 @@ per_change_delta: 2.2515842 ?= 0.1
 
 
 ** TODO stats fetch balance for given day
+
+
+** TODO record withdrawn BTC as well at stats total_btc maybe?

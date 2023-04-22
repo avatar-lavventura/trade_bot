@@ -50,8 +50,6 @@ if [[ $1 == "usdt" ]] ; then
     echo "rm -f /home/alper/.bot/.*.yaml.lock  done"
 fi
 
-
-
 clear -x
 # check_app
 while true; do

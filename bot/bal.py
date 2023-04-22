@@ -15,7 +15,8 @@ from bot.sheets_lib import fetch_withdrawn
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 
-_log.IS_WRITE = False
+_log.IS_WRITE = True
+# _log.ll.LOG_FILENAME = "bal.log"
 gc = gspread.service_account()
 sh = gc.open("guncel_kendime_olan_borclar")
 
