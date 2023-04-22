@@ -1,5 +1,5 @@
 root:
-  is_balance_silent: false
+  is_balance_silent: true
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
   take_profit: 0.0047
@@ -8,13 +8,12 @@ root:
   is_write: false
   is_funding_rate_alert: false
   ignore: # for all
-    - BTTC
+    - HIFI
     - OG
     - ROSE
     - DUMMY
   ignore_warning:
     - OG
-    - BTTC
     - DUMMY
   # ignore_position_log:
   #   - OAX
@@ -24,16 +23,17 @@ root:
     auto_buy_bnb: on
     isolated: off
     cross: off
-    max_pos: 5
+    max_pos: 4
     initial: 11
     multiply_ratio: 1.13
     percent_change_to_add: 4.5
-    stop_trade_wt_30m_red: true
+    stop_trade_wt_30m_red: false
     entry_prices:
+      HIFI: 0.4685
       DUMMY: 1.0
     change_type:  # to btc
       - DUMMY
-    alert_if_position_closed: []
+    alert_if_position_closed: []  # HIFI
   btc:
     status: on
     is_manual_trade: false
@@ -41,7 +41,7 @@ root:
     isolated: off
     cross: off
     initial: 0.00011
-    max_pos: 5
+    max_pos: 10
     multiply_ratio: 1.13
     percent_change_to_add: 4
     stop_trade_wt_30m_red: false

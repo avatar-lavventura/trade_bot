@@ -283,3 +283,9 @@ per_change_delta: 2.2515842 ?= 0.1
 
 
 ** TODO 50% cikan kagit olursa alarm yolla robot ile ozel operasyon yap
+
+
+** TODO GREEN: max pos 10 red max pos 5
+
+
+** TODO stats fetch balance for given day

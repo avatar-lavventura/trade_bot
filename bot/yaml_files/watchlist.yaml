@@ -1,11 +1,11 @@
 watch:
   list:
     - FTMUSDT
-    - JOEUSDT
-    - OAXBTC
-    - OAXUSDT
-    - BTTCUSDT
-    - BTTCTRY
+    # - JOEUSDT
+    # - OAXBTC
+    # - OAXUSDT
+    # - BTTCUSDT
+    # - BTTCTRY
     # - LQTYUSDT
     # - IDUSDT
   # target:
@@ -13,9 +13,7 @@ watch:
   bar:
     - JOEUSDT
     - OAXUSDT
-    - LQTYUSDT
-    - IDUSDT
-    - BTTCUSDT
-    - BTTCTRY
-    - OGBTC
-    - OGUSDT
+    # - LQTYUSDT
+    # - IDUSDT
+    # - OGBTC
+    # - OGUSDT

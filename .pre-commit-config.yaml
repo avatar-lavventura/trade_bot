@@ -26,7 +26,11 @@ repos:
     hooks:
       - id: black
         name: black
-        exclude: ^\.old_work/
+        exclude: |
+          (?x)^(
+              \.old_work/|
+              \.depreciated/
+          )$
 
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
@@ -34,4 +38,4 @@ repos:
       - id: flake8
 
 default_language_version:
-    python: python3
+  python: python3

@@ -311,10 +311,6 @@ class BotHelper:
             log(f"==> size_check: last_price={last_price} size={self.strategy.size}")
 
     async def buy(self):
-        # if self.strategy.market == "USDTPERP":
-        #     await self.both_side_order()
-        #     await self.futures_limit_order()
-        #     return
         if self.strategy.market == "BTC":
             output = await self.symbol_price(self.strategy.symbol, "spot")
             initial_amount = config.initial_btc_quantity / output["last"]
@@ -409,9 +405,7 @@ class BotHelper:
             raise QuietExit("not enough balance")
 
         is_open = False
-        if self.strategy.market == "USDTPERP":
-            is_open = await self.is_usdt_open(self.strategy.symbol)
-        elif self.strategy.market.lower() in ["btc", "usdt", "busd"]:
+        if self.strategy.market.lower() in ["btc", "usdt", "busd"]:
             balances = await self._fetch_balance()
             for balance in balances["info"]["balances"]:
                 if balance["asset"] == self.strategy.asset and float(balance["locked"]) > 0:
@@ -518,31 +512,3 @@ class BotHelper:
                     return await self._order(self.strategy.size)
 
                 raise e
-
-    async def both_side_order(self) -> None:
-        """Both side order for futures."""
-        symbol = self.strategy.symbol.replace("/USDT", "USDT")
-        if await self.is_usdt_open(symbol):
-            raise Exception(f"already open position for {symbol}")
-
-        try:
-            if self.strategy.size == 0:
-                raise Exception("position size is less than zero")
-
-            await self._order(quantity=self.strategy.size)
-        except Exception as e:
-            print_tb(str(e))
-            raise e
-
-    # async def is_usdt_open(self, symbol=None) -> bool:
-    #     if not symbol:
-    #         return False
-
-    #     positions = await helper.exchange.future.fetch_positions()
-    #     self.get_exchange_future_timestamp()
-    #     for position in positions:
-    #         initial_margin = abs(float(position["info"]["isolatedWallet"]))
-    #         if initial_margin > 0 and symbol.replace("/", "") == position["symbol"].replace("/", ""):
-    #             return True
-
-    #     return False

@@ -148,7 +148,7 @@ class Exchange:
                     cfg.CURRENT_DATE,
                     {
                         "BTCUSDT": int(cfg.PRICES["BTCUSDT"]),
-                        "o_btc": self.f(_only_btc + cfg.WITHDRAWN_BTC, 8),
+                        "o_btc": self.f(_only_btc + cfg.TRBINANCE_BTC, 8),
                         "o_usdt": o_usdt,
                         "btc": self.f(btc_asset, 8),
                         "total": float(config.env[cfg.TYPE].balance_sum.find_one("usdt")["value"]),

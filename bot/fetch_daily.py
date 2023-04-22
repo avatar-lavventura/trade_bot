@@ -31,8 +31,8 @@ def fetch_ohlcv_perp():
 
 
 def main():
-    # fetcch_ohlcv()
     try:
+        # fetch_ohlcv()
         fetch_ohlcv_perp()
     except Exception as e:
         print_tb(e)

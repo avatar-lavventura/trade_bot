@@ -7,7 +7,7 @@ from contextlib import suppress
 from typing import Tuple
 
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
-from broker._utils.tools import _date, _timestamp, decimal_count, print_tb
+from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
 
 from bot import cfg
@@ -127,9 +127,9 @@ class BotHelperAsync:
             else:
                 asset_price = await self.spot_fetch_ticker(symbol)
 
-        percent_1h = self.calc_per(bar_1h, asset_price)
-        percent_1d = self.calc_per(bar_1d, asset_price)
-        return asset_price, float(format(percent_1h, ".2f")), float(format(percent_1d, ".2f"))
+        per_1h = self.calc_per(bar_1h, asset_price)
+        per_1d = self.calc_per(bar_1d, asset_price)
+        return asset_price, float(format(per_1h, ".2f")), float(format(per_1d, ".2f"))
 
     async def analyze_positions(self, name, lost, pos_count, free, only_btc) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
@@ -166,9 +166,9 @@ class BotHelperAsync:
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
             if pos_count > 2:
                 if output:
-                    log(f"pos=[blue]{pos_count}[/blue] perf=[blue]{output['value']}[/blue]")
+                    log(f"[w]pos={pos_count}[/w] [bold][y]perf[y]=[blue]{output['value']}[/blue][/bold]", h=False)
                 else:
-                    log(f"pos=[blue]{pos_count}[/blue] perf=[blue]0[/blue]")
+                    log(f"[w]pos={pos_count}[/w] perf=[blue]0[/blue]", h=False)
             elif output:
                 log(f"perf=[blue]{output['value']}[/blue]")
             else:
@@ -176,9 +176,6 @@ class BotHelperAsync:
                     log("perf=[blue]0[/blue]")
                 else:
                     log()
-
-        # if pos_count == 0:
-        #     log()
 
     async def restart(self):
         log()
@@ -206,9 +203,9 @@ class BotHelperAsync:
     def per_str_color(self, percent):
         return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
 
-    def btc_price_per(self, symbol, asset_price, percent_1h, percent_1d):
-        per_str_c_1h = self.per_str_color(percent_1h)
-        per_str_c_1d = self.per_str_color(percent_1d)
+    def btc_price_per(self, symbol, asset_price, per_1h, per_1d):
+        per_str_c_1h = self.per_str_color(per_1h)
+        per_str_c_1d = self.per_str_color(per_1d)
         c = "m" if symbol == "BTCUSDT" else "cy"
         log(
             f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t",
@@ -233,19 +230,19 @@ class BotHelperAsync:
                         flag = True
                         msg = f"{msg}\n```"
 
-                    # TODO: store percent_1h and percent_1d in mongodb for BTC
-                    percent_1h = ""
-                    percent_1d = ""
+                    # TODO: store per_1h and per_1d in mongodb for BTC
+                    per_1h = ""
+                    per_1d = ""
                     try:
-                        asset_price, percent_1h, percent_1d = await self.fetch_symbol_percent_change_1d(symbol)
+                        asset_price, per_1h, per_1d = await self.fetch_symbol_percent_change_1d(symbol)
                         time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
-                        if percent_1h:
-                            per_str_1h = f"{percent_1h}" if percent_1h < 0 else f"+{percent_1h}"
+                        if per_1h:
+                            per_str_1h = f"{per_1h}" if per_1h < 0 else f"+{per_1h}"
 
-                        if percent_1d:
-                            per_str_1d = f"{percent_1d}" if percent_1d < 0 else f"+{percent_1d}"
+                        if per_1d:
+                            per_str_1d = f"{per_1d}" if per_1d < 0 else f"+{per_1d}"
 
-                        if percent_1h and percent_1d:
+                        if per_1h and per_1d:
                             per_str = f"{per_str_1h}  {per_str_1d}"
                         else:
                             per_str = ""
@@ -254,8 +251,8 @@ class BotHelperAsync:
                         print_tb(e)
 
                     if symbol in "BTCUSDT":
-                        self.btc_price_per(symbol, asset_price, percent_1h, percent_1d)  # TODO print this in bal.py
-                        if not (percent_1h and percent_1d) and float(lost) > 0:
+                        self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
+                        if not (per_1h and per_1d) and float(lost) > 0:
                             log(
                                 f" * {symbol}=[m]{asset_price}[/m]",
                                 end="",
@@ -302,14 +299,14 @@ class BotHelperAsync:
 
                     _btc_sum = float(config.env["btc"].balance_sum.find_one("btc")["value"])
                     # _only_btc = float(config.env["btc"].estimated_balance.find_one("only_btc")["value"])
-                    sum_btc_all = format(cfg.WITHDRAWN_BTC + _btc_sum, ".8f")
+                    sum_btc_all = format(cfg.TRBINANCE_BTC + _btc_sum, ".8f")
                     if config.estimated_balance() and (
                         "03:00:" in _time or not config.cfg["root"]["is_balance_silent"]
                     ):
-                        btc_wallet_balance = cfg.WITHDRAWN_BTC * cfg.PRICES["BTCUSDT"]
+                        btc_wallet_balance = cfg.TRBINANCE_BTC * cfg.PRICES["BTCUSDT"]
                         msg = f"{msg}  :moneybag:`{config.estimated_balance()}`"
-                        msg = f"{msg} w=`${int(cfg.WITHDRAWN)}`\n\t\t"
-                        msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN + btc_wallet_balance + cfg.WITHDRAWN_USDT)}`"
+                        msg = f"{msg} w=`${int(cfg.WITHDRAWN_USDT)}`\n\t\t"
+                        msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN_USDT + btc_wallet_balance + cfg.TRBINANCE_USDT)}`"
                         msg = f"{msg} | btc=`{sum_btc_all}`"
 
             if "03:00:" in _time:
@@ -446,6 +443,9 @@ class BotHelperAsync:
             _end = ""
             if cfg.FIRST_PRINT_CYCLE:
                 _end = "[green]++++++++++[/green]"
+
+            if only_usdt < 0.10:
+                only_usdt = 0
 
             if sum_btc == only_btc:
                 if only_btc == 0:
@@ -602,6 +602,7 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
+        # from broker._utils.tools import _timestamp
         # if float(sum_btc) > 0:
         #     if sum_btc == only_btc:
         #         log(f"{_da} [ic]{_timestamp()}")
@@ -609,7 +610,7 @@ class BotHelperAsync:
         #         log(f"total_btc={format(sum_btc, '.8f')} | {_da} [ic]{_timestamp()}")
 
         lost: float = 0
-        cfg.locked_balance: float = 0
+        cfg.locked_balance = 0
         cfg.discord_message = f"`{_date(_type='compact')}`\n"
         cfg.discord_message_full = f"`{_date(_type='compact')}`\n"
         if cfg.BALANCES:
@@ -667,7 +668,7 @@ class BotHelperAsync:
 
         pos_str = ""
         if pos_count > 2:
-            pos_str = f" | pos=**{pos_count}**"
+            pos_str = f" | pos={pos_count}"
         elif real_pos_count == 0:  # or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
             log()  # to overwrite printed balance
 
@@ -835,9 +836,8 @@ class BotHelperAsync:
                 raise e
 
     async def spot_fetch_ticker(self, asset, is_bid_price=False) -> float:
-        if not is_bid_price and asset in cfg.PRICES:
-            if cfg.PRICES[asset] != 0:
-                return cfg.PRICES[asset]
+        if (not is_bid_price and asset in cfg.PRICES) and cfg.PRICES[asset] != 0:
+            return cfg.PRICES[asset]
 
         try:
             if asset == "BTCUSDT":
@@ -859,9 +859,17 @@ class BotHelperAsync:
             if is_bid_price:
                 return float(price_ticker["info"]["bidPrice"])
 
-            #: record prices in case could be used in the same cycle
-            cfg.PRICES[asset] = price_ticker["last"]
-            return float(price_ticker["last"])
+            if asset == "BTTCUSDT":
+                _asset = asset.replace("USDT", "")
+                # here price is fetched from BTTCTRY pair since its more correct
+                asset_price = await self.spot_fetch_ticker(f"{_asset}TRY")
+                USDTTRY = await self.spot_fetch_ticker("USDTTRY")
+                cfg.PRICES[asset] = float(format(asset_price / USDTTRY, ".10f"))
+            else:
+                #: record prices in case could be used in the same cycle
+                cfg.PRICES[asset] = price_ticker["last"]
+
+            return float(cfg.PRICES[asset])
         except Exception as e:
             log(f"E: {e}")
             if "binance does not have market symbol" in str(e):
@@ -910,7 +918,7 @@ class BotHelperAsync:
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
                 if "greater than minimum amount precision of" in str(e):
-                    log(f"// already closed position for {asset}{cfg.TYPE.upper()} :beer:", end="")
+                    log(f":beer: already closed position for {asset}{cfg.TYPE.upper()}", end="")
                     raise QuietExit
                 else:
                     log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")
