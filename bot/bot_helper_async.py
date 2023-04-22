@@ -668,7 +668,7 @@ class BotHelperAsync:
 
         pos_str = ""
         if pos_count > 2:
-            pos_str = f" | [w]pos[/w]=**{pos_count}**"
+            pos_str = f" | pos={pos_count}"
         elif real_pos_count == 0:  # or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
             log()  # to overwrite printed balance
 
@@ -918,7 +918,7 @@ class BotHelperAsync:
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
                 if "greater than minimum amount precision of" in str(e):
-                    log(f"// already closed position for {asset}{cfg.TYPE.upper()} :beer:", end="")
+                    log(f":beer: already closed position for {asset}{cfg.TYPE.upper()}", end="")
                     raise QuietExit
                 else:
                     log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")

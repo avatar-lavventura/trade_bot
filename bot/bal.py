@@ -66,7 +66,7 @@ async def main():
         else:
             _str = f"{_str} {int(bal_brave)} , {int(bal_chrome)}"
 
-        _str = f"{_str} => [[orange]{hot_sum}[/orange] {_sum}] [ib]{max_val}"
+        _str = f"{_str} => [[orange]{hot_sum}[/orange] [green]{_sum}[/green]] [ib]{max_val}"
         if goal == 0:
             log(f"{_str} {start}")
         else:
