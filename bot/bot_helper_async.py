@@ -166,9 +166,9 @@ class BotHelperAsync:
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
             if pos_count > 2:
                 if output:
-                    log(f"pos=[blue]{pos_count}[/blue] perf=[blue]{output['value']}[/blue]")
+                    log(f"[w]pos={pos_count}[/w] [bold][y]perf[y]=[blue]{output['value']}[/blue][/bold]", h=False)
                 else:
-                    log(f"pos=[blue]{pos_count}[/blue] perf=[blue]0[/blue]")
+                    log(f"[w]pos={pos_count}[/w] perf=[blue]0[/blue]", h=False)
             elif output:
                 log(f"perf=[blue]{output['value']}[/blue]")
             else:
@@ -176,9 +176,6 @@ class BotHelperAsync:
                     log("perf=[blue]0[/blue]")
                 else:
                     log()
-
-        # if pos_count == 0:
-        #     log()
 
     async def restart(self):
         log()
@@ -302,14 +299,14 @@ class BotHelperAsync:
 
                     _btc_sum = float(config.env["btc"].balance_sum.find_one("btc")["value"])
                     # _only_btc = float(config.env["btc"].estimated_balance.find_one("only_btc")["value"])
-                    sum_btc_all = format(cfg.WITHDRAWN_BTC + _btc_sum, ".8f")
+                    sum_btc_all = format(cfg.TRBINANCE_BTC + _btc_sum, ".8f")
                     if config.estimated_balance() and (
                         "03:00:" in _time or not config.cfg["root"]["is_balance_silent"]
                     ):
-                        btc_wallet_balance = cfg.WITHDRAWN_BTC * cfg.PRICES["BTCUSDT"]
+                        btc_wallet_balance = cfg.TRBINANCE_BTC * cfg.PRICES["BTCUSDT"]
                         msg = f"{msg}  :moneybag:`{config.estimated_balance()}`"
-                        msg = f"{msg} w=`${int(cfg.WITHDRAWN)}`\n\t\t"
-                        msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN + btc_wallet_balance + cfg.WITHDRAWN_USDT)}`"
+                        msg = f"{msg} w=`${int(cfg.WITHDRAWN_USDT)}`\n\t\t"
+                        msg = f"{msg}:dollar:`{int(config.estimated_balance() + cfg.WITHDRAWN_USDT + btc_wallet_balance + cfg.TRBINANCE_USDT)}`"
                         msg = f"{msg} | btc=`{sum_btc_all}`"
 
             if "03:00:" in _time:
@@ -446,6 +443,9 @@ class BotHelperAsync:
             _end = ""
             if cfg.FIRST_PRINT_CYCLE:
                 _end = "[green]++++++++++[/green]"
+
+            if only_usdt < 0.10:
+                only_usdt = 0
 
             if sum_btc == only_btc:
                 if only_btc == 0:
@@ -668,7 +668,7 @@ class BotHelperAsync:
 
         pos_str = ""
         if pos_count > 2:
-            pos_str = f" | pos=**{pos_count}**"
+            pos_str = f" | [w]pos[/w]=**{pos_count}**"
         elif real_pos_count == 0:  # or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
             log()  # to overwrite printed balance
 

@@ -10,7 +10,6 @@ from broker._utils import _log
 from broker._utils._log import log
 from broker._utils.tools import _date, _timestamp
 
-from bot import cfg
 from bot.config import config
 from bot.sheets_lib import fetch_withdrawn
 
@@ -34,16 +33,13 @@ async def main():
     if goal > 0:
         max_val = goal
 
-    WITHDRAWN_USDT = cfg.WITHDRAWN_USDT
     while True:
-        WITHDRAWN = fetch_withdrawn(sh, "usdt")
-        WITHDRAWN_BTC = fetch_withdrawn(sh, "btc")
-        #
+        WITHDRAWN_USDT, TRBINANCE_BTC, TRBINANCE_USDT = fetch_withdrawn(sh)
         BTCUSDT = int(config.prices.find_one("BTCUSDT")["value"])
         start = ""
-        bal_brave = config.total_balance("usdt") + WITHDRAWN_USDT
+        bal_brave = config.total_balance("usdt") + TRBINANCE_USDT
         bal_chrome = config.total_balance("btc")
-        _sum = int(bal_brave + bal_chrome + WITHDRAWN + (WITHDRAWN_BTC * BTCUSDT) - EKLEME)
+        _sum = int(bal_brave + bal_chrome + WITHDRAWN_USDT + (TRBINANCE_BTC * BTCUSDT) - EKLEME)
         all_btc_asset = format(float(config.env["btc"].balance_sum.find_one("usdt")["value"]) / BTCUSDT, ".8f")
         if _sum > max_val:
             max_val = _sum
@@ -63,8 +59,8 @@ async def main():
             continue
 
         hot_sum = f2(bal_brave + bal_chrome)
-        hot_btc_sum = format(WITHDRAWN_BTC + float(all_btc_asset), ".8f")
-        _str = f"[w][{WITHDRAWN_BTC} + {all_btc_asset} => {hot_btc_sum}][/w] |"
+        hot_btc_sum = format(TRBINANCE_BTC + float(all_btc_asset), ".8f")
+        _str = f"[w][{TRBINANCE_BTC} + {all_btc_asset} => {hot_btc_sum}][/w] |"
         if chrome_spot_balance > 500:
             _str = f"{_str} {f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}])"
         else:

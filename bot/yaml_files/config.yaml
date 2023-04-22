@@ -8,27 +8,25 @@ root:
   is_write: false
   is_funding_rate_alert: false
   ignore: # for all
-    - BTTC
     - OG
     - ROSE
     - DUMMY
   ignore_warning:
     - OG
-    - BTTC
     - DUMMY
   # ignore_position_log:
   #   - OAX
   usdt:
-    status: off   # "on" or "off"
+    status: on   # "on" or "off"
     is_manual_trade: false
     auto_buy_bnb: on
     isolated: off
     cross: off
-    max_pos: 5
+    max_pos: 4
     initial: 11
     multiply_ratio: 1.13
     percent_change_to_add: 4.5
-    stop_trade_wt_30m_red: true
+    stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0
     change_type:  # to btc
