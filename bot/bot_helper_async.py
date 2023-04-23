@@ -237,10 +237,10 @@ class BotHelperAsync:
                         asset_price, per_1h, per_1d = await self.fetch_symbol_percent_change_1d(symbol)
                         time.sleep(exchange.binance.rateLimit / 1000)  # time.sleep wants seconds
                         if per_1h:
-                            per_str_1h = f"{per_1h}" if per_1h < 0 else f"+{per_1h}"
+                            per_str_1h = f"{per_1h}" if float(per_1h) < 0 else f"+{per_1h}"
 
                         if per_1d:
-                            per_str_1d = f"{per_1d}" if per_1d < 0 else f"+{per_1d}"
+                            per_str_1d = f"{per_1d}" if float(per_1d) < 0 else f"+{per_1d}"
 
                         if per_1h and per_1d:
                             per_str = f"{per_str_1h}  {per_str_1d}"
@@ -354,6 +354,53 @@ class BotHelperAsync:
             if cfg.MARGIN_BAL_BTC:
                 cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
 
+    async def _spot_balance(self, balance, sum_btc, sum_usdt, sum_busd):
+        # TODO: run me as thread
+        only_usdt: float = 0
+        asset = balance["asset"]
+        locked = float(balance["locked"])
+        if float(balance["free"]) != 0 or locked != 0:
+            quantity = float(balance["free"]) + locked
+            if asset == "BTC":
+                only_btc = quantity
+                # TODO: store only_btc in mongodb for bal.py to fetch from
+                sum_btc += quantity
+                config._env.estimated_balance.add_single_key("only_btc", only_btc)
+            elif asset not in cfg.STABLE_COINS:
+                price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
+                if cfg.TYPE == "usdt":
+                    usdt_amount = quantity * float(price)
+                    if usdt_amount > 1:  # below 1$ would not be count as open position
+                        config.btc_quantity[asset] = float(balance["free"]) + locked
+                        config.asset_list.append(asset)
+                        if asset not in config.SPOT_IGNORE_LIST:
+                            self.count += 1
+                elif cfg.TYPE == "btc":
+                    sum_btc += quantity * float(price)
+                    usdt_amount = quantity * float(price) * cfg.PRICES["BTCUSDT"]
+                    if usdt_amount > 1:
+                        config.btc_quantity[asset] = float(balance["free"]) + locked
+                        config.asset_list.append(asset)
+                        if asset not in config.SPOT_IGNORE_LIST:
+                            self.count += 1
+
+                sum_usdt += usdt_amount
+            elif asset.lower() == "usdt":
+                only_usdt = quantity
+                sum_usdt += quantity
+            elif asset.lower() == "busd":
+                sum_busd += quantity
+            if asset.lower() == "bnb":
+                cfg.BNB_QTY += quantity
+                if cfg.BNBUSDT == 0:
+                    output = await exchange.spot.fetch_ticker("BNBUSDT")
+                    cfg.BNBUSDT = output["close"]
+
+                if cfg.BNBUSDT > 0:
+                    cfg.BNB_BALANCE += quantity * cfg.BNBUSDT
+
+        return (sum_btc, sum_usdt, sum_busd, only_usdt)
+
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
         self.CROSS_READ_FLAG = False
@@ -365,7 +412,7 @@ class BotHelperAsync:
         sum_btc: float = 0
         only_usdt: float = 0
         only_btc: float = 0
-        count: int = 0
+        self.count: int = 0
         config.asset_list = []
         try:
             await self._fetch_balance()
@@ -376,47 +423,7 @@ class BotHelperAsync:
             log(f"E: {e}", is_write=False)
 
         for balance in cfg.BALANCES["info"]["balances"]:
-            asset = balance["asset"]
-            locked = float(balance["locked"])
-            if float(balance["free"]) != 0 or locked != 0:
-                quantity = float(balance["free"]) + locked
-                if asset == "BTC":
-                    only_btc = quantity
-                    # TODO: store only_btc in mongodb for bal.py to fetch from
-                    sum_btc += quantity
-                    config._env.estimated_balance.add_single_key("only_btc", only_btc)
-                elif asset not in cfg.STABLE_COINS:
-                    price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
-                    if cfg.TYPE == "usdt":
-                        usdt_amount = quantity * float(price)
-                        if usdt_amount > 1:  # below 1$ would not be count as open position
-                            config.btc_quantity[asset] = float(balance["free"]) + locked
-                            config.asset_list.append(asset)
-                            if asset not in config.SPOT_IGNORE_LIST:
-                                count += 1
-                    elif cfg.TYPE == "btc":
-                        sum_btc += quantity * float(price)
-                        usdt_amount = quantity * float(price) * cfg.PRICES["BTCUSDT"]
-                        if usdt_amount > 1:
-                            config.btc_quantity[asset] = float(balance["free"]) + locked
-                            config.asset_list.append(asset)
-                            if asset not in config.SPOT_IGNORE_LIST:
-                                count += 1
-
-                    sum_usdt += usdt_amount
-                elif asset.lower() == "usdt":
-                    only_usdt = quantity
-                    sum_usdt += quantity
-                elif asset.lower() == "busd":
-                    sum_busd += quantity
-                if asset.lower() == "bnb":
-                    cfg.BNB_QTY += quantity
-                    if cfg.BNBUSDT == 0:
-                        output = await exchange.spot.fetch_ticker("BNBUSDT")
-                        cfg.BNBUSDT = output["close"]
-
-                    if cfg.BNBUSDT > 0:
-                        cfg.BNB_BALANCE += quantity * cfg.BNBUSDT
+            sum_btc, sum_usdt, sum_busd, only_usdt = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
 
         # ts = config._env.status["timestamp"]
         config._env.estimated_balance.add_single_key("only_usdt", only_usdt)
@@ -442,7 +449,7 @@ class BotHelperAsync:
 
             _end = ""
             if cfg.FIRST_PRINT_CYCLE:
-                _end = "[green]++++++++++[/green]"
+                _end = "[green]+++++++++[/green]"
 
             if only_usdt < 0.10:
                 only_usdt = 0
@@ -752,7 +759,7 @@ class BotHelperAsync:
             await self._discord_send(msg, pnl, pos_count, " mBTC", free, only_btc)
 
         cfg.FIRST_PRINT_CYCLE = False
-        config._env._status.add_single_key("count", count)
+        config._env._status.add_single_key("count", self.count)
         self.update_timestamp_status()
         return own_usdt, sum_usdt, only_usdt, only_btc
 

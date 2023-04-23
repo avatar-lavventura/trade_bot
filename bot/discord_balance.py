@@ -85,7 +85,7 @@ class Discord_Alpy:
         # secondly, each 20 seconds
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if config.cfg["root"][cfg.TYPE]["status"] == "on":
-            scheduler.add_job(self.fetch_balance, "cron", second="*/20", timezone=tz)
+            scheduler.add_job(self.fetch_balance, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
 
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)

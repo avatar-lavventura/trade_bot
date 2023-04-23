@@ -200,13 +200,11 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
                 if futures_usd != 0 and float(futures_usd) > FUTURE_AMOUNT_TO_TRADE:
                     try:
                         transfer_futures_to_spot(float(futures_usd) - FUTURE_AMOUNT_TO_TRADE)
-                        time.sleep(0.25)
                     except Exception as e:
                         log(f"futures=>spot {e}", "red")
 
                     try:
                         # transfer_spot_to_futures(FUTURE_AMOUNT_TO_TRADE)
-                        # time.sleep(0.25)
                         futures_usd = client_helper.get_futures_usdt(is_both=False)
                         log(f"==> Futures={futures_usd} USD")
                     except Exception as e:
@@ -218,7 +216,6 @@ def _trade_cont(seperate_line_line, funding_dict, daily_progress, latest_symbol_
             else:
                 pass
                 # # TODO: here when there is no position, update with new positon if opened
-                # time.sleep(0.25)
                 # futures_usd = get_futures_usdt(is_both=False)
                 # if futures_usd != 0 and float(futures_usd) > FUTURE_AMOUNT_TO_TRADE:
                 #     transfer_futures_to_spot(float(futures_usd) - FUTURE_AMOUNT_TO_TRADE)

@@ -7,7 +7,7 @@ from bot.sheets_lib import fetch_withdrawn
 
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
-SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
+SLEEP_INTERVAL: int = 1  # seconds to sleep for next balance check
 discord_message_full = discord_message = f"`{_date()}`\n"
 discord_print: bool = False
 locked_balance: float = 0

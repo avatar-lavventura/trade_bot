@@ -1,20 +1,18 @@
 root:
-  is_balance_silent: false
+  fast: true
+  is_balance_silent: true
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
   take_profit: 0.0047
   locked_percent_limit: 99
-  sleep_duration: 20
   is_write: false
   is_funding_rate_alert: false
   ignore: # for all
     - DUMMY
-    # - HIFI
     # - OG
-    # - ROSE
   ignore_warning:
+    - BOND
     - DUMMY
-    # - OG
   # ignore_position_log:
   #   - OAX
   usdt:
@@ -32,7 +30,7 @@ root:
       DUMMY: 1.0
     change_type:  # to btc
       - DUMMY
-    alert_if_position_closed: []  # HIFI
+    alert_if_position_closed: []  # OAX
   btc:
     status: on
     is_manual_trade: false
