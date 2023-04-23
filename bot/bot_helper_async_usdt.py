@@ -75,7 +75,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         except:
             return decimal_count(value)
 
-    def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float, int]:
+    def calculate_entry(self, timestamp_list, ordering, trades, asset, asset_qty) -> Tuple[float, float]:
         """Calculates entry price for the position."""
         verbose = False
         _sum = 0.0
@@ -144,7 +144,6 @@ class BotHelperSpotAsync(BotHelperAsync):
                 if verbose:
                     log(f"qty={quantity_real}")
 
-        # breakpoint()  # DEBUG
         return (quantity, _sum)
 
     async def is_cut_loss(self, asset, profit, qty) -> None:
@@ -190,7 +189,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
         __ https://stackoverflow.com/questions/70318352/how-to-get-the-price-of-a-crypto-at-a-given-time-in-the-past
         """
-        # TODO: could be done in thread
+        # TODO: maybe could be done in thread
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
         since = await config.get_spot_timestamp(asset, symbol)
@@ -228,6 +227,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             trades = await helper.exchange.spot.fetch_my_trades(symbol, since=since)
             timestamp_list = None
             if trades:
+                """
                 if _type == "btc":
                     with suppress(Exception):
                         _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/USDT", since=since)
@@ -239,16 +239,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                                     trade["cost"] = trade["cost"] / float(response[0][1])
                                     trade["ignore_sold"] = True
                                     trades.append(trade)
-                # else:
-                #     _trades = await helper.exchange.spot.fetch_my_trades(f"{asset}/BTC", since=since)
-                #     with suppress(Exception):
-                #         for idx, trade in enumerate(_trades):
-                #             if not trade["info"]["isBuyer"]:
-                #                 ts = int(trade["info"]["time"])
-                #                 response = await helper.exchange.spot.fetch_ohlcv("BTC/USDT", "1m", ts, 1)
-                #                 trade["cost"] = trade["cost"] * float(response[0][1])
-                #                 trade["ignore_sold"] = True
-                #                 trades.append(trade)
+                """
                 ordering = {}
                 for idx, trade in enumerate(trades):
                     try:
@@ -273,7 +264,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                 timestamp_list = sorted(ordering, reverse=True)
                 latest_busd_ts = 0
-                try:
+                with suppress(Exception):
                     if "/USDT" in symbol:
                         trades_busd = await helper.exchange.spot.fetch_my_trades(symbol.replace("/USDT", "/BUSD"))
                         ordering_busd = {}
@@ -285,8 +276,6 @@ class BotHelperSpotAsync(BotHelperAsync):
 
                         timestamp_list_busd = sorted(ordering_busd, reverse=True)
                         latest_busd_ts = timestamp_list_busd[0]
-                except:
-                    pass
 
                 try:
                     if timestamp_list[0] > latest_busd_ts:

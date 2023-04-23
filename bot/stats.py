@@ -6,7 +6,7 @@ from contextlib import suppress
 from broker._utils import _log
 from broker._utils._log import log
 from pymongo import MongoClient
-
+from broker._utils._log import console_ruler
 from bot.mongodb import Mongo
 
 _log.IS_WRITE = False
@@ -49,7 +49,7 @@ async def main():
                 total_balance[_key] += float(item["value"]["usdt"])
 
         if symbol == "usdt":
-            log("========================================")
+            console_ruler()
     # print_total_balance(total_balance)
     #
     # log(f"highet={max_val}")

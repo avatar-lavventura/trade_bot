@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+import asyncio
 import os
 import sys
 import time
 from contextlib import suppress
 from typing import Tuple
-
+from threading import Thread
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
@@ -355,7 +356,6 @@ class BotHelperAsync:
                 cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
 
     async def _spot_balance(self, balance, sum_btc, sum_usdt, sum_busd):
-        # TODO: run me as thread
         only_usdt: float = 0
         asset = balance["asset"]
         locked = float(balance["locked"])
@@ -467,11 +467,18 @@ class BotHelperAsync:
                         % (only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
                     )
             else:
-                log(
-                    f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) | "
-                    f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"  # {ts}
-                    % (sum_btc, own_usdt, only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
-                )
+                if only_btc == 0:
+                    log(
+                        f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=0 | "
+                        f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"  # {ts}
+                        % (sum_btc, own_usdt, only_usdt, cfg.BNB_BALANCE),
+                    )
+                else:
+                    log(
+                        f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) | "
+                        f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
+                        % (sum_btc, own_usdt, only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
+                    )
 
             cfg.SUM_BTC = sum_btc
 
@@ -627,10 +634,9 @@ class BotHelperAsync:
                 if balance > 0:
                     new_asset_list.append(asset)
 
-            for asset in config.asset_list:
-                balance = cfg.BALANCES[asset]["total"]
                 if balance > 0 and asset != "DUMMY":  # TODO: asset in PASS or ignore
                     try:
+                        # TODO: takes long time!!
                         output = await self.spot_limit(asset, balance, _sum, is_limit)
                         if cfg.TYPE == "btc" and "change_type" in config.cfg["root"][cfg.TYPE]:
                             if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
@@ -722,7 +728,7 @@ class BotHelperAsync:
             config._env.balance_sum.add_single_key("usdt", format(sum_usdt, ".2f"))
         else:
             msg = _msg
-            if free > 0:
+            if float(free) > 0:
                 msg = f"{msg}:bee: free=`{free}` (`${format(free * cfg.PRICES['BTCUSDT'], '.2f')}`) "
 
             lost_usdt = format(float(lost) * cfg.PRICES["BTCUSDT"], ".2f")
@@ -770,7 +776,7 @@ class BotHelperAsync:
             amount: float = 0.0001104088
         else:
             asset = "BNBUSDT"
-            amount: float = 10.3
+            amount = 10.3
 
         if float(config._env.status["free"]) < amount:
             return False

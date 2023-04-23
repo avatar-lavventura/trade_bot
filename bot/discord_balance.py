@@ -82,7 +82,7 @@ class Discord_Alpy:
         await self.fetch_balance()
         scheduler = AsyncIOScheduler()
 
-        # secondly, each 20 seconds
+        # secondly, each given seconds in cfg.py
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
         if config.cfg["root"][cfg.TYPE]["status"] == "on":
             scheduler.add_job(self.fetch_balance, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
