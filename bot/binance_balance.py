@@ -24,11 +24,10 @@ bot_async = BotHelperSpotAsync()
 
 
 async def is_rapid_alert(msg, alert):
-    if "rapid_alert" in alert:
-        if alert["rapid_alert"] == "on":
-            for _ in range(1, 10):
-                await bot_async.channel_alerts.send(msg, delete_after=1)
-                time.sleep(0.2)
+    if "rapid_alert" in alert and alert["rapid_alert"] == "on":
+        for _ in range(1, 10):
+            await bot_async.channel_alerts.send(msg, delete_after=0.1)
+            await asyncio.sleep(0.1)
 
 
 async def discord_send_alert():
@@ -66,7 +65,7 @@ async def discord_send_alert():
                     asset = _pair[:-4]
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
-                    await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup.", alert)
+                    await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup !!!IMPORTANT!!!", alert)
                     msg = f"{_pair}={_asset_price} {_date(_type='compact')} Alper, wakeup."
                     # https://discordpy.readthedocs.io/en/neo-docs/api.html#discord.abc.Messageable.send
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)

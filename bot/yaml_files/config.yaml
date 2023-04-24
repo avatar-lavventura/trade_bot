@@ -1,5 +1,4 @@
 root:
-  fast: true
   is_balance_silent: true
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
@@ -8,6 +7,7 @@ root:
   is_write: false
   is_funding_rate_alert: false
   ignore: # for all
+    - BOND
     - DUMMY
     # - OG
   ignore_warning:
@@ -27,22 +27,24 @@ root:
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: false
     entry_prices:
+      BOND: 5.4
       DUMMY: 1.0
     change_type:  # to btc
       - DUMMY
     alert_if_position_closed: []  # OAX
   btc:
-    status: on
+    status: off
     is_manual_trade: false
     auto_buy_bnb: on
     isolated: off
-    cross: off
+    cross: on
     initial: 0.00011
     max_pos: 10
     multiply_ratio: 1.13
     percent_change_to_add: 4
     stop_trade_wt_30m_red: false
     entry_prices:
+      BOND: 0.000189
       DUMMY: 1.0
     # change_type:  # to usdt
     #   - OG

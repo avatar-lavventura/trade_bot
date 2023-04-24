@@ -11,8 +11,11 @@ watch:
   # target:
   #   OAXUSDT: 0.305
   bar:
-    - JOEUSDT
-    - OAXUSDT
+    - BONDBTC
+    - BONDUSDT
+    # - JOEUSDT
+    # - OAXUSDT
+    # - BONDUSDT
     # - LQTYUSDT
     # - IDUSDT
     # - OGBTC

@@ -4,9 +4,9 @@ import asyncio
 from contextlib import suppress
 
 from broker._utils import _log
-from broker._utils._log import log
+from broker._utils._log import console_ruler, log
 from pymongo import MongoClient
-from broker._utils._log import console_ruler
+
 from bot.mongodb import Mongo
 
 _log.IS_WRITE = False

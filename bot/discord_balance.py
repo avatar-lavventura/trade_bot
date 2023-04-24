@@ -41,7 +41,7 @@ class Discord_Alpy:
             except Exception as e:
                 log(f"E: {e}")
 
-            self.client = discord.Client()
+            self.client = discord.Client(intents=discord.Intents.default())
             self.channel: str = ""
             self.channel_alerts: str = ""
             self.channel_log: str = ""
@@ -62,8 +62,8 @@ class Discord_Alpy:
         except SystemExit:
             pass
         except Exception as e:
-            print_tb(e)
             breakpoint()  # DEBUG
+            print_tb(e)
 
     def constructor(self):
         helper.exchange._set_bnbusdt()
@@ -71,9 +71,9 @@ class Discord_Alpy:
     async def task(self, tz="Europe/Istanbul"):
         """Add task in order to schedule discord to send messages.
 
-        - runs every minute: 10th second (..., minute="*", second="10")
-        - runs every 30 seconds (..., second="*/30")
-        - runs at the 30th second (..., second="30")
+        - runs every minute: Nth second (..., minute="*", second="N")
+        - runs every N seconds (..., second="*/N")
+        - runs at the Nth second (..., second="N")
         """
         await self.update_current_date()
         await helper.exchange.set_markets()
@@ -93,7 +93,7 @@ class Discord_Alpy:
 
         # daily
         scheduler.add_job(  #: restart at fund times
-            self.restart, "cron", year="*", month="*", day="*", hour="11,03,19", minute="01", second="0", timezone=tz
+            self.restart, "cron", year="*", month="*", day="*", hour="03,11,19", minute="01", second="0", timezone=tz
         )
 
         if cfg.TYPE == "usdt":

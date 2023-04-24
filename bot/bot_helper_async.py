@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-import asyncio
 import os
 import sys
 import time
 from contextlib import suppress
 from typing import Tuple
-from threading import Thread
+
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
@@ -226,7 +225,7 @@ class BotHelperAsync:
             if cfg.TYPE == "usdt":
                 flag = False
                 width1 = max(len(v) for v in config.WATCHLIST)
-                for symbol in config.WATCHLIST:
+                for idx, symbol in enumerate(config.WATCHLIST):
                     if not flag:
                         flag = True
                         msg = f"{msg}\n```"
@@ -287,7 +286,10 @@ class BotHelperAsync:
                         else:
                             msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
 
-                    msg = f"{msg}\n–––––––––––––"
+                    if idx < len(config.WATCHLIST) - 1:
+                        msg = f"{msg}\n–––––––––––––"
+                    else:
+                        msg = f"{msg}\n"
 
                 if flag and msg:
                     if "03:00:" in _time:
@@ -449,7 +451,7 @@ class BotHelperAsync:
 
             _end = ""
             if cfg.FIRST_PRINT_CYCLE:
-                _end = "[green]+++++++++[/green]"
+                _end = "[green]\n++++++++++++++++++++++++++++++++++++++++++++++++++[/green]"
 
             if only_usdt < 0.10:
                 only_usdt = 0
