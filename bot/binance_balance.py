@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import asyncio
-import time
 from contextlib import suppress
 
 from broker._utils._async import _sleep
@@ -65,7 +64,7 @@ async def discord_send_alert():
                     asset = _pair[:-4]
 
                 if asset not in alert_track:  #: allows only 1 alert per asset
-                    await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup !!!IMPORTANT!!!", alert)
+                    await is_rapid_alert(f"{_pair}={_asset_price}\nAlper, wakeup !!! IMPORTANT !!!", alert)
                     msg = f"{_pair}={_asset_price} {_date(_type='compact')} Alper, wakeup."
                     # https://discordpy.readthedocs.io/en/neo-docs/api.html#discord.abc.Messageable.send
                     await bot_async.channel_alerts.send(msg, delete_after=cfg.SLEEP_INTERVAL)
@@ -84,14 +83,6 @@ async def process(unix_timestamp_ms):
     await clean_for_new_cycle()
     update_spot_timestamps(unix_timestamp_ms)  # current ts is saved
     *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
-    # if usdt_bal > 0.125:
-    #     log()
-
-    # if IS_FUTURES:
-    #     bot_async.futures_balance = await helper.exchange.future.fetch_balance()
-    #     unix_timestamp_ms = helper.exchange.get_future_timestamp()
-    #     config.status["root"][cfg.TYPE]["free"] = futures_bal("free", "USDT") + usdt_bal
-    #     usdt_bal += futures_bal("total", "USDT") + futures_bal("total", "BUSD")
     if cfg.TYPE == "usdt":
         config.env[cfg.TYPE].status["balance"] = usdt_bal
         config.env[cfg.TYPE].status["free"] = free_usdt
@@ -102,8 +93,8 @@ async def process(unix_timestamp_ms):
         config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
     pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
-    if pos_count == 0 and float(cfg.locked_balance) <= 10:
-        delete_multiple_lines(2)
+    if pos_count == 0:
+        delete_multiple_lines(1)
 
 
 async def process_main(obj):

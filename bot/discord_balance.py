@@ -58,7 +58,7 @@ class Discord_Alpy:
                 self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
 
             self.client.loop.close()
-            log("## program is ended\t\t\t", is_write=False)
+            log("\n## program is ended\t\t\t", is_write=False)
         except SystemExit:
             pass
         except Exception as e:

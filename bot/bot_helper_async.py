@@ -23,6 +23,7 @@ fund = Fund()
 class BotHelperAsync:
     def __init__(self) -> None:
         self.CROSS_READ_FLAG = False
+        self.only_usdt: float = 0
 
     async def close(self):
         """Close the async function.
@@ -77,7 +78,6 @@ class BotHelperAsync:
 
         high = bar_price[2]
         low = bar_price[3]
-        # print(bar_price) # DELETEME
         # TODO: check here
         if asset_price < low:
             bar_price = high  # high
@@ -94,7 +94,6 @@ class BotHelperAsync:
         bar_price = ""
         high = bar[2]
         low = bar[3]
-        # print(bar_price) # DELETEME
         # TODO: check here
         if asset_price < low:
             bar_price = high  # high
@@ -358,7 +357,6 @@ class BotHelperAsync:
                 cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
 
     async def _spot_balance(self, balance, sum_btc, sum_usdt, sum_busd):
-        only_usdt: float = 0
         asset = balance["asset"]
         locked = float(balance["locked"])
         if float(balance["free"]) != 0 or locked != 0:
@@ -388,7 +386,7 @@ class BotHelperAsync:
 
                 sum_usdt += usdt_amount
             elif asset.lower() == "usdt":
-                only_usdt = quantity
+                self.only_usdt = quantity
                 sum_usdt += quantity
             elif asset.lower() == "busd":
                 sum_busd += quantity
@@ -401,7 +399,7 @@ class BotHelperAsync:
                 if cfg.BNBUSDT > 0:
                     cfg.BNB_BALANCE += quantity * cfg.BNBUSDT
 
-        return (sum_btc, sum_usdt, sum_busd, only_usdt)
+        return (sum_btc, sum_usdt, sum_busd)
 
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
@@ -412,7 +410,7 @@ class BotHelperAsync:
         sum_usdt: float = 0
         sum_busd: float = 0
         sum_btc: float = 0
-        only_usdt: float = 0
+        self.only_usdt: float = 0
         only_btc: float = 0
         self.count: int = 0
         config.asset_list = []
@@ -425,10 +423,10 @@ class BotHelperAsync:
             log(f"E: {e}", is_write=False)
 
         for balance in cfg.BALANCES["info"]["balances"]:
-            sum_btc, sum_usdt, sum_busd, only_usdt = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
+            sum_btc, sum_usdt, sum_busd = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
 
         # ts = config._env.status["timestamp"]
-        config._env.estimated_balance.add_single_key("only_usdt", only_usdt)
+        config._env.estimated_balance.add_single_key("only_usdt", self.only_usdt)
         own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
         pos_count: int = config._env._status.find_one("count")["value"]
         real_pos_count: int = config._env._status.find_one("real_pos_count")["value"]
@@ -445,7 +443,10 @@ class BotHelperAsync:
             _total_bal_str = ""
             if cfg.TYPE == "usdt":
                 bug = ":lion_face:"
-                _total_bal_str = f"[g]${_total_balance}[/g] "
+                if float(_total_balance) < 0.10:
+                    _total_bal_str = "[g]$0[/g] "
+                else:
+                    _total_bal_str = f"[g]${_total_balance}[/g] "
             else:
                 bug = ":bee:"
 
@@ -453,33 +454,39 @@ class BotHelperAsync:
             if cfg.FIRST_PRINT_CYCLE:
                 _end = "[green]\n++++++++++++++++++++++++++++++++++++++++++++++++++[/green]"
 
-            if only_usdt < 0.10:
-                only_usdt = 0
+            if float(self.only_usdt) < 0.10:
+                self.only_usdt = 0
 
             if sum_btc == only_btc:
                 if only_btc == 0:
-                    log(
-                        f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
-                        % (only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
-                    )
+                    if self.only_usdt == _total_bal_str:
+                        log(
+                            f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | [blue]{_date(_type='hour')}[/blue] {_end}"
+                            % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                        )
+                    else:
+                        log(
+                            f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
+                            % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                        )
                 else:
                     log(
                         f"{bug} usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) bnb=[cy]$%.2f[/cy] "
                         f"{_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
-                        % (only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
+                        % (self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
                     )
             else:
                 if only_btc == 0:
                     log(
                         f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=0 | "
                         f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"  # {ts}
-                        % (sum_btc, own_usdt, only_usdt, cfg.BNB_BALANCE),
+                        % (sum_btc, own_usdt, self.only_usdt, cfg.BNB_BALANCE),
                     )
                 else:
                     log(
                         f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) | "
                         f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
-                        % (sum_btc, own_usdt, only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
+                        % (sum_btc, own_usdt, self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
                     )
 
             cfg.SUM_BTC = sum_btc
@@ -524,7 +531,7 @@ class BotHelperAsync:
         elif cfg.TYPE == "btc":  #: calculating the estimated balance
             _da = f"[blue]{_date(_type='hour')}[/blue]"
             print_str = ":bee: "
-            print_str += f"f_btc={format(only_btc, '.8f')} | usdt=[g]{format(only_usdt, '.2f')}[/g] bnb={format(cfg.BNB_BALANCE, '.2f')} |"
+            print_str += f"f_btc={format(only_btc, '.8f')} | usdt=[g]{format(self.only_usdt, '.2f')}[/g] bnb={format(cfg.BNB_BALANCE, '.2f')} |"
             if real_pos_count == 0:
                 log(f"{print_str} ", end="")
 
@@ -541,7 +548,7 @@ class BotHelperAsync:
             else:
                 cfg.MARGIN_BAL = 0
 
-            own_usdt += sum_busd + only_usdt
+            own_usdt += sum_busd + self.only_usdt
             if config._env.cross == "on":
                 if (
                     config.env[cfg.TYPE].is_manual_trade
@@ -569,8 +576,8 @@ class BotHelperAsync:
                 onlyu = ""
                 _perf = ""
                 if pos_count == 0:
-                    if only_usdt > 0:
-                        onlyu = f"+ [g]${format(only_usdt, '.2f')}[/g] "
+                    if self.only_usdt > 0:
+                        onlyu = f"+ [g]${format(self.only_usdt, '.2f')}[/g] "
 
                     with suppress(Exception):
                         _perf = f"perf={output['value']} "
@@ -617,13 +624,6 @@ class BotHelperAsync:
             _sum = sum_usdt + sum_busd
         else:
             _sum = sum_btc
-
-        # from broker._utils.tools import _timestamp
-        # if float(sum_btc) > 0:
-        #     if sum_btc == only_btc:
-        #         log(f"{_da} [ic]{_timestamp()}")
-        #     elif real_pos_count == 0:
-        #         log(f"total_btc={format(sum_btc, '.8f')} | {_da} [ic]{_timestamp()}")
 
         lost: float = 0
         cfg.locked_balance = 0
@@ -769,7 +769,7 @@ class BotHelperAsync:
         cfg.FIRST_PRINT_CYCLE = False
         config._env._status.add_single_key("count", self.count)
         self.update_timestamp_status()
-        return own_usdt, sum_usdt, only_usdt, only_btc
+        return own_usdt, sum_usdt, self.only_usdt, only_btc
 
     async def buy_bnb(self) -> bool:
         cfg.BNB_BALANCE = float(format(cfg.BNB_BALANCE, ".6f"))

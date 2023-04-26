@@ -18,7 +18,7 @@ root:
   usdt:
     status: off   # "on" or "off"
     is_manual_trade: false
-    auto_buy_bnb: on
+    auto_buy_bnb: off
     isolated: off
     cross: off
     max_pos: 2
@@ -27,7 +27,6 @@ root:
     percent_change_to_add: 4.5
     stop_trade_wt_30m_red: false
     entry_prices:
-      BOND: 5.4
       DUMMY: 1.0
     change_type:  # to btc
       - DUMMY

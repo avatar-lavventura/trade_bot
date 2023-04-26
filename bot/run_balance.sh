@@ -11,10 +11,11 @@ if ! [[ $1 == "usdt" || $1 == "btc" ]] ; then
     exit 1
 fi
 
+
 countdown () {  # https://superuser.com/a/611582/723632
     _date=$((`date +%s` + $(expr $1 - 1)))
     while [ "$_date" -ge `date +%s` ]; do
-        echo -ne "$(date -u --date @$(($_date - `date +%s`)) +%H:%M:%S)                                             \r"
+        echo -ne "#> countdown for 30 seconds\t\t$(date -u --date @$(($_date - `date +%s`)) +%H:%M:%S)\r"
         sleep 0.1
     done
 }
@@ -54,10 +55,10 @@ clear -x
 # check_app
 while true; do
     python3 discord_balance.py $1
-    echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    printf "#> countdown for 30 seconds                                            "
+    echo ""
     countdown 30
-    echo "[  OK  ]"
+    echo "countdown [  OK  ]"
+    echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
 done
 
 # LOG_FILE=_binance_balance.log

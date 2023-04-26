@@ -5,7 +5,7 @@ RED="\033[1;31m"; GREEN="\033[0;32m"; NC="\033[0m"
 countdown () {  # https://superuser.com/a/611582/723632
     _date=$((`date +%s` + $(expr $1 - 1)))
     while [ "$_date" -ge `date +%s` ]; do
-        echo -ne "$(date -u --date @$(($_date - `date +%s`)) +%H:%M:%S)\t\t\t\r"
+        echo -ne "#> countdown for 30 seconds\t\t$(date -u --date @$(($_date - `date +%s`)) +%H:%M:%S)\r"
         sleep 0.1
     done
 }
@@ -28,10 +28,10 @@ fi
 while true; do
     # clear -x
     hypercorn app_async:app -b 0.0.0.0:5000  # --reload
-    echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
-    printf "#> countdown for 30 seconds                                            "
+    echo ""
     countdown 30
-    echo "[  OK  ]"
+    echo "countdown [  OK  ]"
+    echo -e "${GREEN}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-${NC}"
 done
 
 # LOG_FILE=trade.log

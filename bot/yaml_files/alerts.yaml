@@ -8,7 +8,7 @@ alerts:
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 29000
+      price: 31000
       rapid_alert: "on"
     a1:
       pair: BONDBTC
