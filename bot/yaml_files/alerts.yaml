@@ -5,11 +5,15 @@ alerts:
       price: 16000
       rapid_alert: "on" # more rapid message
       msg: "💣"
+    a1:
+      pair: BONDBTC
+      price: 0.00015
+      rapid_alert: "on"
   greater_than: # >
     base:
       pair: BTCUSDT
       price: 31000
-      rapid_alert: "on"
+      rapid_alert: "off"
     a1:
       pair: BONDBTC
       price: 0.00017

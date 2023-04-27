@@ -182,14 +182,30 @@ class BotHelperSpotAsync(BotHelperAsync):
         else:
             return format(float(value) * 1000, ".5f")
 
-    async def spot_limit(self, asset, asset_qty, sum_bal, is_limit=True) -> float:
+    async def _spot_check_target_order(self, asset, _sum, is_limit):
+        balance = cfg.BALANCES[asset]["total"]
+        if balance > 0 and asset != "DUMMY":  # TODO: asset in PASS or ignore
+            try:
+                # TODO: takes long time, try to make is faster!!
+                output = await self.spot_check_target_order(asset, balance, _sum, is_limit)
+                if cfg.TYPE == "btc" and "change_type" in config.cfg["root"][cfg.TYPE]:
+                    if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
+                        output = output / cfg.PRICES["BTCUSDT"]
+
+                self.lost += float(output)
+            except Exception as e:
+                log(e)
+        else:
+            log(f"{asset} balance is zero")
+
+    async def spot_check_target_order(self, asset, asset_qty, sum_bal, is_limit=True) -> float:
         """Give limit order on the spot market.
 
         :param asset_qty: complete quantity of the asset, could be left over due the 0 BNB
 
         __ https://stackoverflow.com/questions/70318352/how-to-get-the-price-of-a-crypto-at-a-given-time-in-the-past
         """
-        # TODO: maybe could be done in thread
+        # TODO: maybe could be done in thread to make the process much much faster
         _type = cfg.TYPE
         symbol: str = f"{asset}/{_type.upper()}"
         since = await config.get_spot_timestamp(asset, symbol)

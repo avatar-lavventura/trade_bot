@@ -63,6 +63,7 @@ market cap ve volume azaldikca genelde fiyat dusuyor sanirim
 + does it have isolated or margin pair?
 + does it have a btc pair in binance?
 ex: [[https://www.coingecko.com/en/coins/cocos-bcx/historical_data#panel]]
++ AlanSantana nin yorumu varsa en guncel yorumunu cek
 
 ** TODO fetch BTCUSDT price from somewhere else than binance and record in mongodb
 https://github.com/ccxt/ccxt/issues/1177
@@ -292,3 +293,6 @@ per_change_delta: 2.2515842 ?= 0.1
 
 
 ** TODO record withdrawn BTC as well at stats total_btc maybe?
+
+** TODO USDT tarafinda son 3 ayin haftalik volume'unu cikar ever en buyuk degere geldiyse alip yap // yuklu gir
+# BONDUSDT (Barnbridge) is producing a volume breakout this week with the highest volume since July 2022.

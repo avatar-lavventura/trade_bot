@@ -5,8 +5,7 @@ from broker._utils.tools import _date
 
 from bot.sheets_lib import fetch_withdrawn
 
-SLEEP_INTERVAL: int = 1  # seconds to sleep for next balance check
-
+SLEEP_INTERVAL: int = 20  # seconds to sleep for next balance check
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
 discord_message_full = discord_message = f"`{_date()}`\n"
