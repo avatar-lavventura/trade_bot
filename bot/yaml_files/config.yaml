@@ -43,7 +43,6 @@ root:
     percent_change_to_add: 4
     stop_trade_wt_30m_red: false
     entry_prices:
-      BOND: 0.000189
       DUMMY: 1.0
     # change_type:  # to usdt
     #   - OG

@@ -95,19 +95,22 @@ class BotHelperAsync:
         percent = ((asset_price - bar_price) / bar_price) * 100
         return asset_price, float(format(percent, ".2f"))
 
-    def calc_per(self, bar, asset_price):
+    def calc_per(self, bar, asset_price, _type) -> float:
         bar_price = ""
         high = bar[2]
         low = bar[3]
-        if asset_price <= low:
-            bar_price = high
-        else:
-            bar_price = low
-
-        # if tf == "1d":
-        #     bar_price = low  # low
+        if _type == "1h":
+            if asset_price <= low:
+                bar_price = high
+            else:
+                bar_price = low
+        else:  # "1d"
+            bar_price = bar[1]  # open
 
         percent = ((asset_price - bar_price) / bar_price) * 100
+        if percent == 0:
+            return 0.01
+
         return percent
 
     async def fetch_symbol_percent_change_1d(self, symbol, price=None):
@@ -130,8 +133,8 @@ class BotHelperAsync:
             else:
                 asset_price = await self.spot_fetch_ticker(symbol)
 
-        per_1h = self.calc_per(bar_1h, asset_price)
-        per_1d = self.calc_per(bar_1d, asset_price)
+        per_1h = self.calc_per(bar_1h, asset_price, "1h")
+        per_1d = self.calc_per(bar_1d, asset_price, "1d")
         return asset_price, float(format(per_1h, ".2f")), float(format(per_1d, ".2f"))
 
     async def analyze_positions(self, name, lost, pos_count, free, only_btc) -> None:
