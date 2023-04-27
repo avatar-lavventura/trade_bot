@@ -5,6 +5,7 @@ import sys
 import time
 from contextlib import suppress
 from typing import Tuple
+from multiprocessing import Process
 
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
 from broker._utils.tools import _date, decimal_count, print_tb
@@ -631,7 +632,8 @@ class BotHelperAsync:
         cfg.discord_message_full = f"`{_date(_type='compact')}`\n"
         if cfg.BALANCES:
             new_asset_list = []  # TODO: order asset based on their position size sort the list based on its size
-            for asset in config.asset_list:
+            # async with aiohttp.ClientSession() as session:
+            for idx, asset in enumerate(config.asset_list):
                 balance = cfg.BALANCES[asset]["total"]
                 if balance > 0:
                     new_asset_list.append(asset)
@@ -639,7 +641,7 @@ class BotHelperAsync:
                 if balance > 0 and asset != "DUMMY":  # TODO: asset in PASS or ignore
                     try:
                         # TODO: takes long time!!
-                        output = await self.spot_limit(asset, balance, _sum, is_limit)
+                        output = await self.spot_check_target_order(asset, balance, _sum, is_limit)
                         if cfg.TYPE == "btc" and "change_type" in config.cfg["root"][cfg.TYPE]:
                             if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
                                 output = output / cfg.PRICES["BTCUSDT"]
@@ -653,7 +655,7 @@ class BotHelperAsync:
             for asset in config.asset_list:
                 if asset != "DUMMY":
                     try:
-                        output = await self.spot_limit(asset, config.btc_quantity[asset], _sum, is_limit)
+                        output = await self.spot_check_target_order(asset, config.btc_quantity[asset], _sum, is_limit)
                         lost += float(output)
                     except Exception as e:
                         log(e)
