@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+import asyncio
 import os
 import sys
 import time
 from contextlib import suppress
 from typing import Tuple
-from multiprocessing import Process
 
+import aiohttp
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
 from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
@@ -32,6 +33,9 @@ class BotHelperAsync:
         __ https://stackoverflow.com/a/54528397/2402577
         """
         await exchange.close()
+
+    # async def spot_check_target_order(self, asset, asset_qty, sum_bal, is_limit=True) -> float:
+    #     return 0
 
     def _update_timestamp_status(self, key) -> None:
         #: fetch the timestamp when iteration started
@@ -95,11 +99,10 @@ class BotHelperAsync:
         bar_price = ""
         high = bar[2]
         low = bar[3]
-        # TODO: check here
-        if asset_price < low:
-            bar_price = high  # high
+        if asset_price <= low:
+            bar_price = high
         else:
-            bar_price = low  # low
+            bar_price = low
 
         # if tf == "1d":
         #     bar_price = low  # low
@@ -507,7 +510,7 @@ class BotHelperAsync:
             #: estimated balance:
             if cfg.MARGIN_BAL > 0.1:
                 _total_balance += float(cfg.MARGIN_BAL)
-                log(f"cross_usdt={cfg.MARGIN_BAL} | ", end="")
+                log(f"cross_usdt={cfg.MARGIN_BAL} ", end="")
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -525,7 +528,7 @@ class BotHelperAsync:
             if float(_total_balance) < 1 and config._env.isolated == "on":
                 _total_balance += await self._fetch_isolated_balance() * cfg.PRICES["BTCUSDT"]
 
-            _total_balance = format(_total_balance, ".2f")
+            _total_balance = float(format(_total_balance, ".2f"))
             # _bnb = f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}[/cy]"
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
             config._env.estimated_balance.add_single_key("total_balance", _total_balance)
@@ -537,9 +540,6 @@ class BotHelperAsync:
                 log(f"{print_str} ", end="")
 
             print_str = ""
-            # elif only_btc > 0 and len(config.asset_list) == 0:
-            #     print_str += f"btc={format(only_btc, '.8f')}"
-
             if cfg.MARGIN_BAL > 0.1:
                 own_usdt += float(cfg.MARGIN_BAL)
                 if sum_busd > 0.1:
@@ -589,21 +589,7 @@ class BotHelperAsync:
                             end="",
                         )
 
-            # if len(config.asset_list) == 0:
-            #     log(f"| bnb={format(cfg.BNB_BALANCE, '.2f')} | ", end="")
-
             config._env.estimated_balance.add_single_key("total_balance", own_usdt)
-
-        # if cfg.TYPE == "usdt":
-        #     busd_str = ""
-        #     if sum_busd > 0.1:
-        #         busd_str = f"| busd={sum_busd} "
-
-        #     config._env.estimated_balance.add_single_key("total_balance", _sum_usdt)
-        #     log(
-        #         f" * usdt={_sum_usdt} {busd_str}[blue]*[/blue] "
-        #         f"bnb=[cy]{format(cfg.BNB_BALANCE, '.2f')}[/cy] | {_da} {ts}"
-        #     )
 
         if cfg.BNB_BALANCE < 0.5 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on":
             try:
@@ -626,40 +612,37 @@ class BotHelperAsync:
         else:
             _sum = sum_btc
 
-        lost: float = 0
+        losts = None
+        self.lost: float = 0
         cfg.locked_balance = 0
         cfg.discord_message = f"`{_date(_type='compact')}`\n"
         cfg.discord_message_full = f"`{_date(_type='compact')}`\n"
-        if cfg.BALANCES:
-            new_asset_list = []  # TODO: order asset based on their position size sort the list based on its size
-            # async with aiohttp.ClientSession() as session:
-            for idx, asset in enumerate(config.asset_list):
-                balance = cfg.BALANCES[asset]["total"]
-                if balance > 0:
-                    new_asset_list.append(asset)
+        #: https://stackoverflow.com/a/53022415/2402577
+        # Asynchronous context manager. Prefer this rather than using a different session
+        # for each target order check request
+        async with aiohttp.ClientSession() as _:
+            tasks = []
+            if cfg.BALANCES:
+                for asset in config.asset_list:
+                    # asyncio.gather() will wait on the entire task set to be completed.
+                    tasks.append(self._spot_check_target_order(asset, _sum, is_limit))  # type: ignore
+            else:
+                for asset in config.asset_list:
+                    if asset != "DUMMY":
+                        # asyncio.gather() will wait on the entire task set to be completed.
+                        losts = tasks.append(
+                            self.spot_check_target_order(asset, config.btc_quantity[asset], _sum, is_limit)  # type: ignore
+                        )  # type: ignore
+                        # self.lost += float(output)
+                        # TODO: record lost
 
-                if balance > 0 and asset != "DUMMY":  # TODO: asset in PASS or ignore
-                    try:
-                        # TODO: takes long time!!
-                        output = await self.spot_check_target_order(asset, balance, _sum, is_limit)
-                        if cfg.TYPE == "btc" and "change_type" in config.cfg["root"][cfg.TYPE]:
-                            if asset in config.cfg["root"][cfg.TYPE]["change_type"]:
-                                output = output / cfg.PRICES["BTCUSDT"]
+            if tasks:
+                losts = await asyncio.gather(*tasks, return_exceptions=True)
+                if losts[0]:
+                    self.lost += sum(losts)
 
-                        lost += float(output)
-                    except Exception as e:
-                        log(e)
-                else:
-                    log(f"{asset} balance is zero")
-        else:
-            for asset in config.asset_list:
-                if asset != "DUMMY":
-                    try:
-                        output = await self.spot_check_target_order(asset, config.btc_quantity[asset], _sum, is_limit)
-                        lost += float(output)
-                    except Exception as e:
-                        log(e)
-
+        # breakpoint()  # DEBUG
+        lost = self.lost
         if cfg.TYPE == "usdt":
             free = format(float(config.env["usdt"].status["free"]), ".2f")
             if lost > -5:
@@ -905,7 +888,7 @@ class BotHelperAsync:
 
             if "Connection reset by peer" in str(e):
                 # TODO: maybe restart again or recall the function
-                time.sleep(5)
+                time.sleep(5)  # at exception catched
                 return await self.spot_fetch_ticker(asset, is_bid_price)
 
             raise e

@@ -15,7 +15,6 @@ async def main():
         order_book_struct = await exchange.fetch_order_book("BTTCUSDT")
         bid_px, bid_amount = order_book_struct["bids"][0]
         ask_px, ask_amount = order_book_struct["asks"][0]
-
         ##
         order_book_struct = await exchange.fetch_order_book("BTTCBUSD")
         bid_px, bid_amount_busd = order_book_struct["bids"][0]
@@ -24,7 +23,7 @@ async def main():
         _amount = int((bid_amount + bid_amount_busd) * bid_px)
         _ask = int((ask_amount + ask_amount_busd) * bid_px)
         print(f"{_amount} bid at {bid_px!r}, {_ask} offered at {ask_px!r}")
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
 
 
 if __name__ == "__main__":

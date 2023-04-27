@@ -48,9 +48,9 @@ def _fetch_ohlcv(ohlcv, is_compact=False):
         if float(_ohl[0]) > 10000:  # for btc
             for i in range(0, 3):
                 _ohl[i] = int(_ohl[i])
-        elif float(_ohl[0]) < 0.0001:
+        elif float(_ohl[0]) < 0.1:
             for i in range(0, 3):
-                _ohl[i] = format(_ohl[i] * 1000, ".5f").replace("0.", "").lstrip("0")
+                _ohl[i] = str(_ohl[i]).lstrip("0.").lstrip("0")
 
         ohlcv = [_ohl]
 
@@ -82,16 +82,15 @@ def main(symbol):
     # _since = fund.midnight
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="4h", limit=24)
     df = _fetch_ohlcv(ohlcv)
-    print(df)
-    print()
 
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1h", limit=1)
     df = _fetch_ohlcv(ohlcv, is_compact=True)
-    print(df)
 
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
     df = _fetch_ohlcv(ohlcv, is_compact=True)
+
     print(df)
+    print()
 
 
 if __name__ == "__main__":
