@@ -171,10 +171,11 @@ class BotHelperAsync:
 
             output = config._env.stats.find_one(cfg.CURRENT_DATE)
             if pos_count > 2:
+                log(f"[w]pos={pos_count}[/w] ", h=False, end="")
                 if output:
-                    log(f"[w]pos={pos_count}[/w] [bold][y]perf[/y]=[blue]{output['value']}[/blue][/bold]", h=False)
+                    log(f"[bold][y]perf[/y]=[blue]{output['value']}[/blue][/bold]", h=False)
                 else:
-                    log(f"[w]pos={pos_count}[/w] [y]perf[/y]=[blue]0[/blue]", h=False)
+                    log("[y]perf[/y]=[blue]0[/blue]", h=False)
             elif output:
                 log(f"perf=[blue]{output['value']}[/blue]")
             else:
@@ -184,27 +185,45 @@ class BotHelperAsync:
                     log()
 
     async def restart(self):
+        with suppress(Exception):
+            await cfg.discord_sent_msg.delete()
+
         log()
+        _console_clear()
         log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def _discord_sent_msg(self, msg):
+        """Sent discord message.
+
+        All bots can make up to 50 requests per second to our API.
+        Link: https://discord.com/developers/docs/topics/rate-limits#header-format
+
+        :param msg: Message to be sent
+        """
         try:
             if cfg.discord_sent_msg:
                 await cfg.discord_sent_msg.edit(content=msg)
             else:
                 cfg.discord_sent_msg = await self.channel.send(msg)
         except Exception as e:
-            sub_str = str(e).partition("\n")[0]
-            log(f"E: discord: {sub_str}")
-            if "Service Unavailable" in str(e):
-                self.restart()
-
             with suppress(Exception):
                 await cfg.discord_sent_msg.delete()
 
+            sub_str = str(e).partition("\n")[0]
+            if "Too Many Requests" not in sub_str:
+                log(f"E: discord: {sub_str}")
+
+            if "Service Unavailable" in str(e):
+                self.restart()
+
             cfg.discord_message = f"`{_date(_format='%m-%d %H:%M:%S')}`\n"
             cfg.discord_sent_msg = None
+            if "Too Many Requests" in sub_str:
+                with suppress(Exception):
+                    await cfg.discord_sent_msg.delete()
+
+                await asyncio.sleep(0.1)
 
     def per_str_color(self, percent):
         return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
@@ -421,6 +440,7 @@ class BotHelperAsync:
         only_btc: float = 0
         self.count: int = 0
         config.asset_list = []
+        is_first_line_printed: bool = False
         try:
             await self._fetch_balance()
         except Exception as e:
@@ -459,41 +479,49 @@ class BotHelperAsync:
 
             _end = ""
             if cfg.FIRST_PRINT_CYCLE:
-                _end = "[green]\n++++++++++++++++++++++++++++++++++++++++++++++++++[/green]"
+                _end = f"[blue]{_date(_type='hour')}[/blue][green]\n++++++++++++++++++++++++++++++++++++++++++++++++++[/green]"
 
             if float(self.only_usdt) < 0.10:
                 self.only_usdt = 0
 
+            is_first_line_printed = False
             if sum_btc == only_btc:
-                if only_btc == 0:
-                    if self.only_usdt == _total_bal_str:
-                        log(
-                            f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | [blue]{_date(_type='hour')}[/blue] {_end}"
-                            % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
-                        )
+                if not (self.only_usdt == 0 and only_btc == 0 and cfg.BNB_BALANCE == 0):
+                    is_first_line_printed = True
+                    if only_btc == 0:
+                        if self.only_usdt == _total_bal_str:
+                            log(
+                                f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | "
+                                % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                end="",
+                            )
+                        else:
+                            log(
+                                f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| "
+                                % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                end="",
+                            )
                     else:
                         log(
-                            f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
-                            % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                            f"{bug} usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) bnb=[cy]$%.2f[/cy] "
+                            f"{_total_bal_str}| " % (self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
+                            end="",
                         )
-                else:
-                    log(
-                        f"{bug} usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) bnb=[cy]$%.2f[/cy] "
-                        f"{_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
-                        % (self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
-                    )
-            else:
+            elif not (sum_btc == 0 and self.only_usdt == 0 and only_btc == 0 and cfg.BNB_BALANCE == 0):
+                is_first_line_printed = True
                 if only_btc == 0:
                     log(
                         f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=0 | "
-                        f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"  # {ts}
+                        f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| "  # {ts}
                         % (sum_btc, own_usdt, self.only_usdt, cfg.BNB_BALANCE),
+                        end="",
                     )
                 else:
                     log(
                         f"{bug} btc=[m]%.8f[/m] [blue]≈[/blue] [m]$%.2f[/m] usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) | "
-                        f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| [blue]{_date(_type='hour')}[/blue] {_end}"
+                        f"bnb=[cy]$%.2f[/cy] {_total_bal_str}| "
                         % (sum_btc, own_usdt, self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
+                        end="",
                     )
 
             cfg.SUM_BTC = sum_btc
@@ -507,13 +535,11 @@ class BotHelperAsync:
         if len(config.asset_list) == 0:
             config._env.timestamps["root"] = {}  #: cleans timestamp_<type>.yaml file
 
-        # if len(config.asset_list) == 0 or config.env[cfg.TYPE].is_manual_trade:
-        # if True:
         if cfg.TYPE == "usdt":
             #: estimated balance:
             if cfg.MARGIN_BAL > 0.1:
                 _total_balance += float(cfg.MARGIN_BAL)
-                log(f"cross_usdt={cfg.MARGIN_BAL} ", end="")
+                log(f"cross_usdt=${cfg.MARGIN_BAL} ", end="")
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -548,7 +574,7 @@ class BotHelperAsync:
                 if sum_busd > 0.1:
                     print_str += f"busd={sum_busd + cfg.MARGIN_BAL} "
                 else:
-                    print_str += f"cross_usdt={cfg.MARGIN_BAL} | "
+                    print_str += f"cross_usdt=${cfg.MARGIN_BAL} "
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -603,6 +629,12 @@ class BotHelperAsync:
                 else:
                     print_tb(e)
 
+        if is_first_line_printed:
+            if _end:
+                log(f" {_end}")
+            else:
+                log(f"[blue]{_date(_type='hour')}[/blue] {_end}")
+
         config.sum_usdt = sum_usdt
         if sum_usdt > 1.0 and pos_count == 0 and config._env.status["balance"] != sum_usdt:
             config._env.status["balance"] = sum_usdt
@@ -644,7 +676,6 @@ class BotHelperAsync:
                 if losts[0]:
                     self.lost += sum(losts)
 
-        # breakpoint()  # DEBUG
         lost = self.lost
         if cfg.TYPE == "usdt":
             free = format(float(config.env["usdt"].status["free"]), ".2f")

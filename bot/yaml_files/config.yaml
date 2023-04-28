@@ -16,7 +16,8 @@ root:
   # ignore_position_log:
   #   - OAX
   usdt:
-    status: off   # "on" or "off"
+    status: off # "on" or "off"
+    sleep_interval: 11
     is_manual_trade: false
     auto_buy_bnb: off
     isolated: off
@@ -24,21 +25,22 @@ root:
     max_pos: 2
     initial: 11
     multiply_ratio: 1.13
-    percent_change_to_add: 4.5
+    percent_change_to_add: 4
     stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0
-    change_type:  # to btc
+    change_type: # to btc
       - DUMMY
-    alert_if_position_closed: []  # OAX
+    alert_if_position_closed: [] # OAX
   btc:
     status: off
+    sleep_interval: 10
     is_manual_trade: false
     auto_buy_bnb: on
     isolated: off
     cross: on
     initial: 0.00011
-    max_pos: 10
+    max_pos: 2
     multiply_ratio: 1.13
     percent_change_to_add: 4
     stop_trade_wt_30m_red: false

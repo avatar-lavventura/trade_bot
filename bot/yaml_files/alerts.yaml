@@ -16,11 +16,11 @@ alerts:
       rapid_alert: "off"
     a1:
       pair: BONDBTC
-      price: 0.00017
+      price: 0.0001672
       rapid_alert: "on"
     a2:
       pair: BONDUSDT
-      price: 4.80
+      price: 5
       rapid_alert: "on"
   balance_greater_than:
     value: 10000

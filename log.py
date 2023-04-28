@@ -22,7 +22,6 @@ client = Client(api_key, api_secret)
 def update():
     future = client.futures_position_information(symbol="GRTUSDT")
     mark = future[0]["markPrice"]
-
     x_data.append(datetime.now())
     y_data.append(float(mark))
     z_data.append(10)
