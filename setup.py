@@ -12,7 +12,7 @@ setup(
     name="bot",
     packages=find_packages(),
     setup_requires=["wheel", "ccxt", "ipdb", "rich", "dbus-python"],
-    version="1.0.0",  # don't change this manually, use bumped version instead
+    version="2.0.0",  # don't change this manually, use bumpversion instead
     license="MIT",
     description="Alpy trade bot.",  # noqa: E501
     long_description=long_description,

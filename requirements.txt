@@ -15,7 +15,7 @@ black==23.3.0
 bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
-ccxt==3.0.83
+ccxt==3.0.84
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0

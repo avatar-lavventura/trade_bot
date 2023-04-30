@@ -1,0 +1,636 @@
+*   [1;34md8ee3ee[m -[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m[m Merge branch 'release/v2.0.2' [32m(20 seconds ago) [m [1;90m2023-05-01 04:05[m
+[31m|[m[32m\[m  
+[31m|[m * [1;34m66f94f8[m -[m[33m ([m[1;32mrelease/v2.0.2[m[33m)[m[m Bumped version number to v2.0.2 [32m(49 seconds ago) [m [1;90m2023-05-01 04:04[m
+[31m|[m * [1;34ma049216[m -[m[m Bumped version number to v2.0.1 [32m(2 minutes ago) [m [1;90m2023-04-30 21:28[m
+* [32m|[m [1;34m0b5fec3[m -[m[m Bumped version number to v2.0.1 [32m(7 hours ago) [m [1;90m2023-04-30 21:28[m
+[32m|[m[32m/[m  
+* [1;34m318d27b[m -[m[m Add minor improvements [32m(7 hours ago) [m [1;90m2023-04-30 21:25[m
+*   [1;34m3fe7401[m -[m[m Merge tag 'v2.0.0' into dev [32m(7 hours ago) [m [1;90m2023-04-30 21:24[m
+[33m|[m[34m\[m  
+[33m|[m *   [1;34m2418b58[m -[m[33m ([m[1;33mtag: v2.0.0[m[33m)[m[m Merge branch 'release/v2.0.0' [32m(7 hours ago) [m [1;90m2023-04-30 21:24[m
+[33m|[m [35m|[m[33m\[m  
+[33m|[m [35m|[m[33m/[m  
+[33m|[m[33m/[m[35m|[m   
+* [35m|[m [1;34mbf26ec9[m -[m[m Bumped version number to v2.0.0 [32m(7 hours ago) [m [1;90m2023-04-30 21:23[m
+* [35m|[m [1;34m06db9c1[m -[m[m Add sleep duration for brave and chrome separatly [32m(7 hours ago) [m [1;90m2023-04-28 16:12[m
+* [35m|[m [1;34md88f2ac[m -[m[m Fix bar percent [32m(3 days ago) [m [1;90m2023-04-27 18:55[m
+[36m|[m * [1;34mcbb30e5[m -[m[m Fix bar percent [32m(7 hours ago) [m [1;90m2023-04-27 18:55[m
+[36m|[m[36m/[m  
+*   [1;34mf572eea[m -[m[m Merge branch 'feature/0' into dev [32m(3 days ago) [m [1;90m2023-04-27 18:41[m
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [1;34m5abe785[m -[m[m Add minor improvements [32m(3 days ago) [m [1;90m2023-04-27 12:37[m
+[1;31m|[m * [1;34m220cbcd[m -[m[m Attemp for multiprocessing [32m(4 days ago) [m [1;90m2023-04-27 09:44[m
+[1;31m|[m[1;31m/[m  
+* [1;34m4ab10b4[m -[m[m Fix countdown in bash script [32m(4 days ago) [m [1;90m2023-04-26 10:50[m
+* [1;34ma0a4840[m -[m[m Add minor improvements [32m(5 days ago) [m [1;90m2023-04-24 09:56[m
+* [1;34m965228b[m -[m[m Add minor improvements [32m(7 days ago) [m [1;90m2023-04-23 13:39[m
+* [1;34m0fb6a4a[m -[m[m Add minor improvements [32m(8 days ago) [m [1;90m2023-04-23 11:37[m
+* [1;34m2b46d13[m -[m[m Log balance track into a file [32m(8 days ago) [m [1;90m2023-04-22 19:48[m
+*   [1;34m04a818c[m -[m[m Merge branch 'dev' into menubar [32m(8 days ago) [m [1;90m2023-04-22 16:46[m
+[1;33m|[m[1;34m\[m  
+[1;33m|[m * [1;34m0f160f7[m -[m[m Add minor improvements [32m(8 days ago) [m [1;90m2023-04-22 14:09[m
+[1;33m|[m * [1;34mdab9923[m -[m[m Add minor improvements [32m(9 days ago) [m [1;90m2023-04-22 11:28[m
+[1;33m|[m * [1;34m56eac14[m -[m[m Fetch BTTCTRY price for the BTTCUSDT [32m(9 days ago) [m [1;90m2023-04-21 13:09[m
+* [1;34m|[m [1;34mb38d8b6[m -[m[m Add minor improvements [32m(8 days ago) [m [1;90m2023-04-21 13:19[m
+* [1;34m|[m [1;34mef77279[m -[m[m Merge branch 'dev' into menubar [32m(10 days ago) [m [1;90m2023-04-21 12:53[m
+[1;35m|[m[1;34m\[m[1;34m|[m 
+[1;35m|[m * [1;34m0050090[m -[m[m Add minor improvements [32m(10 days ago) [m [1;90m2023-04-21 09:16[m
+[1;35m|[m * [1;34mabd3b7e[m -[m[m Add order book into tracker [32m(10 days ago) [m [1;90m2023-04-20 15:18[m
+* [1;36m|[m [1;34m8e53adb[m -[m[m Add minor improvements [32m(10 days ago) [m [1;90m2023-04-20 21:27[m
+* [1;36m|[m [1;34m0d96213[m -[m[m Add order book into tracker [32m(10 days ago) [m [1;90m2023-04-20 15:18[m
+[1;36m|[m[1;36m/[m  
+* [1;34m4f914a2[m -[m[m Alert on positon closed [32m(11 days ago) [m [1;90m2023-04-17 17:04[m
+* [1;34mf545e1a[m -[m[m Update kazan.pine [32m(2 weeks ago) [m [1;90m2023-04-16 08:23[m
+* [1;34me476955[m -[m[m Add minor improvements [32m(2 weeks ago) [m [1;90m2023-04-15 13:31[m
+*   [1;34m056e6d5[m -[m[m Merge branch 'dev' [32m(2 weeks ago) [m [1;90m2023-04-15 13:28[m
+[31m|[m[32m\[m  
+[31m|[m * [1;34mf68651c[m -[m[m Add minor improvements [32m(2 weeks ago) [m [1;90m2023-04-15 02:24[m
+[31m|[m * [1;34md877e41[m -[m[m Add minor improvements [32m(2 weeks ago) [m [1;90m2023-04-11 18:04[m
+[31m|[m * [1;34m0411504[m -[m[m Fetch 1h bar inside 1d=24h bar call save one API request [32m(3 weeks ago) [m [1;90m2023-04-11 13:41[m
+[31m|[m * [1;34macc4a53[m -[m[m Add minor improvements [32m(3 weeks ago) [m [1;90m2023-04-08 11:02[m
+[31m|[m * [1;34mf3438e9[m -[m[m Add minor improvements [32m(3 weeks ago) [m [1;90m2023-04-01 17:06[m
+[31m|[m * [1;34maefbe64[m -[m[m Split timestamp [32m(4 weeks ago) [m [1;90m2023-03-30 20:04[m
+[31m|[m * [1;34m068636e[m -[m[m Add minor improvements [32m(4 weeks ago) [m [1;90m2023-03-29 12:10[m
+[31m|[m * [1;34mc94012e[m -[m[m Add minor improvements [32m(5 weeks ago) [m [1;90m2023-03-29 11:23[m
+[31m|[m * [1;34mcd60b61[m -[m[m Add minor improvements [32m(5 weeks ago) [m [1;90m2023-03-28 11:47[m
+[31m|[m[31m/[m  
+*   [1;34m56b46a8[m -[m[m Merge branch 'dev' [32m(5 weeks ago) [m [1;90m2023-03-28 11:45[m
+[33m|[m[34m\[m  
+[33m|[m * [1;34m935563c[m -[m[m Add minor improvements [32m(5 weeks ago) [m [1;90m2023-03-25 11:45[m
+[33m|[m * [1;34m886b8cd[m -[m[m Update bar fetch prices' compact part [32m(5 weeks ago) [m [1;90m2023-03-20 13:57[m
+[33m|[m * [1;34mcfdbd89[m -[m[m Fetch cocos/btc pair from mexc exchange [32m(6 weeks ago) [m [1;90m2023-03-16 09:49[m
+[33m|[m * [1;34m5dc4dec[m -[m[m Send rapid alerts to discord [32m(7 weeks ago) [m [1;90m2023-03-11 00:22[m
+[33m|[m * [1;34ma567255[m -[m[m Watch bar intervals. [32m(7 weeks ago) [m [1;90m2023-03-02 11:35[m
+[33m|[m * [1;34ma4d8adc[m -[m[m Add minor improvements [32m(9 weeks ago) [m [1;90m2023-02-25 11:20[m
+[33m|[m[33m/[m  
+*   [1;34m4428bec[m -[m[m Merge branch 'dev' [32m(9 weeks ago) [m [1;90m2023-02-25 11:14[m
+[35m|[m[36m\[m  
+[35m|[m * [1;34m89f1b0b[m -[m[m Add new tasks into TODO [32m(9 weeks ago) [m [1;90m2023-02-10 14:40[m
+[35m|[m * [1;34m2021f05[m -[m[m Funding time send notification alerts -3 minutes before. [32m(3 months ago) [m [1;90m2023-01-27 12:16[m
+[35m|[m * [1;34md946d21[m -[m[m Add minor improvements [32m(3 months ago) [m [1;90m2023-01-26 18:43[m
+[35m|[m * [1;34m3004dc7[m -[m[m Add minor improvements [32m(3 months ago) [m [1;90m2023-01-25 13:37[m
+[35m|[m * [1;34m837734e[m -[m[m Log estimated balance in both sides [32m(3 months ago) [m [1;90m2023-01-15 03:24[m
+* [36m|[m [1;34mafdd8fd[m -[m[m Add minor improvements [32m(3 months ago) [m [1;90m2023-01-15 03:24[m
+[36m|[m[36m/[m  
+*   [1;34m0e2a639[m -[m[m Merge branch 'dev' [32m(4 months ago) [m [1;90m2023-01-14 11:46[m
+[1;31m|[m[1;32m\[m  
+[1;31m|[m *   [1;34mb06ce3b[m -[m[m Merge branch 'dev' [32m(4 months ago) [m [1;90m2023-01-14 11:33[m
+[1;31m|[m [1;33m|[m[1;34m\[m  
+[1;31m|[m [1;33m|[m * [1;34m6079d8a[m -[m[m Merge branch 'feature/0' into dev [32m(4 months ago) [m [1;90m2022-12-18 11:24[m
+[1;31m|[m [1;33m|[m *   [1;34m5ff0a18[m -[m[m Merge branch 'menubar' into dev [32m(4 months ago) [m [1;90m2022-12-17 12:30[m
+[1;31m|[m [1;33m|[m [1;35m|[m[1;36m\[m  
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34m26e67f0[m -[m[m Add minor improvements [32m(5 months ago) [m [1;90m2022-12-13 20:04[m
+[1;31m|[m [1;33m|[m [1;35m|[m *   [1;34mdfb38aa[m -[m[m Merge branch 'menubar' into dev [32m(5 months ago) [m [1;90m2022-12-09 10:34[m
+[1;31m|[m [1;33m|[m [1;35m|[m [31m|[m[32m\[m  
+[1;31m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34m357d48f[m -[m[m Merge branch 'menubar' into dev [32m(5 months ago) [m [1;90m2022-12-09 10:34[m
+[1;31m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;31m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;31m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;31m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;31m|[m [1;33m|[m [31m|[m * [1;34m273754d[m -[m[m Add minor improvements [32m(5 months ago) [m [1;90m2022-12-02 21:23[m
+[1;31m|[m [1;33m|[m [31m|[m *   [1;34m680de9b[m -[m[m Merge branch 'feature/0' into menubar [32m(5 months ago) [m [1;90m2022-12-02 21:20[m
+[1;31m|[m [1;33m|[m [31m|[m [35m|[m[36m\[m  
+[1;31m|[m [1;33m|[m [31m|[m * [36m|[m [1;34m48fcaea[m -[m[m Nohup script included [32m(5 months ago) [m [1;90m2022-10-31 13:19[m
+[1;31m|[m [1;33m|[m * [36m|[m [36m|[m [1;34me6e485f[m -[m[m Add minor improvements [32m(5 months ago) [m [1;90m2022-12-07 21:20[m
+[1;31m|[m [1;33m|[m * [36m|[m [36m|[m [1;34m89fe379[m -[m[m Add minor improvements [32m(5 months ago) [m [1;90m2022-12-04 17:16[m
+[1;31m|[m [1;33m|[m * [36m|[m [36m|[m   [1;34m2c9d5fc[m -[m[m Merge remote-tracking branch 'origin/feature/0' into dev [32m(5 months ago) [m [1;90m2022-12-04 14:00[m
+[1;31m|[m [1;33m|[m [1;31m|[m[36m\[m [36m\[m [36m\[m  
+[1;31m|[m [1;33m|[m [1;31m|[m [36m|[m [36m|[m[36m/[m  
+[1;31m|[m [1;33m|[m [1;31m|[m [36m|[m[36m/[m[36m|[m   
+[1;31m|[m [1;33m|[m [1;31m|[m * [36m|[m [1;34m8ca940f[m -[m[m Nohup script included [32m(5 months ago) [m [1;90m2022-10-31 13:19[m
+[1;31m|[m [1;33m|[m [1;31m|[m [36m|[m[36m/[m  
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34mb27ed92[m -[m[m Add minor improvements [32m(6 months ago) [m [1;90m2022-10-30 12:23[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34ma3a15e2[m -[m[m Track multiple assets in the menubar [32m(6 months ago) [m [1;90m2022-10-29 13:08[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m0d9e780[m -[m[m Add minor improvements [32m(5 months ago) [m [1;90m2022-11-22 10:56[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m1d3999c[m -[m[m Add minor improvements [32m(5 months ago) [m [1;90m2022-11-13 10:48[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m1e062f8[m -[m[m Add minor improvements [32m(6 months ago) [m [1;90m2022-11-09 09:20[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m2411796[m -[m[m Carry helper.py into config.py [32m(6 months ago) [m [1;90m2022-11-06 20:11[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34md6b2b83[m -[m[m Move record_balance() function into helper.py [32m(6 months ago) [m [1;90m2022-11-03 12:22[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m7c38c9f[m -[m[m Include fetch balance from isolated balance for stats.sh [32m(6 months ago) [m [1;90m2022-10-30 09:54[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m17f1083[m -[m[m Add minor improvements [32m(6 months ago) [m [1;90m2022-10-20 10:39[m
+[1;31m|[m [1;33m|[m * [1;32m|[m [1;34m1f600e0[m -[m[m Add minor improvements [32m(6 months ago) [m [1;90m2022-10-18 18:23[m
+[1;31m|[m [1;33m|[m [1;32m|[m[1;32m/[m  
+[1;31m|[m [1;33m|[m *   [1;34mb46f8b8[m -[m[m Merge branch 'menubar' into dev [32m(7 months ago) [m [1;90m2022-10-18 11:37[m
+[1;31m|[m [1;33m|[m [1;33m|[m[1;34m\[m  
+[1;31m|[m [1;33m|[m [1;33m|[m * [1;34ma6956b1[m -[m[m Create menubar to keep track of crypto prices [32m(7 months ago) [m [1;90m2022-10-17 15:59[m
+[1;31m|[m [1;33m|[m [1;33m|[m * [1;34m8abe1c5[m -[m[m Fix re-opening limit order for 0.01% qty differences [32m(7 months ago) [m [1;90m2022-09-22 17:01[m
+[1;31m|[m [1;33m|[m * [1;34m|[m [1;34m5fccd8a[m -[m[m Fix re-opening limit order for 0.01% qty differences [32m(7 months ago) [m [1;90m2022-09-22 17:01[m
+[1;31m|[m [1;33m|[m [1;34m|[m[1;34m/[m  
+[1;31m|[m [1;33m|[m * [1;34m899f61c[m -[m[m Fetch latest timestamp record into mongoDB [32m(7 months ago) [m [1;90m2022-09-20 21:53[m
+[1;31m|[m [1;33m|[m * [1;34mcb9a623[m -[m[m Update ts if at exact 20 seconds cycle large trades splitted [32m(7 months ago) [m [1;90m2022-09-20 12:40[m
+[1;31m|[m [1;33m|[m * [1;34m53f4ec1[m -[m[m Print timestamp [32m(7 months ago) [m [1;90m2022-09-17 12:00[m
+[1;31m|[m [1;33m|[m * [1;34m6b96bde[m -[m[m Improve get funding rates function [32m(8 months ago) [m [1;90m2022-09-14 15:14[m
+[1;31m|[m [1;33m|[m *   [1;34m39387f5[m -[m[m Merge branch 'dev' [32m(8 months ago) [m [1;90m2022-09-14 15:11[m
+[1;31m|[m [1;33m|[m [1;35m|[m[1;36m\[m  
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34m9f4e3a6[m -[m[m Re-organize kazan.pine [32m(8 months ago) [m [1;90m2022-09-14 10:00[m
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34m4fd67fe[m -[m[m Fetch margin balance [32m(8 months ago) [m [1;90m2022-09-11 13:47[m
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34m1192419[m -[m[m Check free balance before adding into position [32m(8 months ago) [m [1;90m2022-08-25 00:21[m
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34mec67812[m -[m[m Fetch entry prices from the config file [32m(8 months ago) [m [1;90m2022-08-22 19:30[m
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34m3892045[m -[m[m Add minor improvements [32m(8 months ago) [m [1;90m2022-08-07 16:38[m
+[1;31m|[m [1;33m|[m [1;35m|[m * [1;34me28ae00[m -[m[m Update kazan.pine add moving average check [32m(9 months ago) [m [1;90m2022-07-31 16:59[m
+[1;31m|[m [1;33m|[m [1;35m|[m *   [1;34m7094a19[m -[m[m Merge branch 'dev' [32m(9 months ago) [m [1;90m2022-07-31 10:25[m
+[1;31m|[m [1;33m|[m [1;35m|[m [31m|[m[32m\[m  
+[1;31m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34m9f73f84[m -[m[m Merge branch 'dev' [32m(9 months ago) [m [1;90m2022-07-31 10:25[m
+[1;31m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;31m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;31m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;31m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;31m|[m [1;33m|[m [31m|[m * [1;34m2dbd9ad[m -[m[m Improve calculation of entry positions. [32m(9 months ago) [m [1;90m2022-07-30 21:42[m
+[1;31m|[m [1;33m|[m [31m|[m * [1;34m4d3a05c[m -[m[m Change date location in discord message [32m(9 months ago) [m [1;90m2022-07-07 20:51[m
+[1;31m|[m [1;33m|[m [31m|[m * [1;34ma889a88[m -[m[m Update add-alerts. [32m(10 months ago) [m [1;90m2022-07-02 10:56[m
+[1;31m|[m [1;33m|[m [31m|[m[31m/[m  
+[1;31m|[m [1;33m|[m *   [1;34m02de781[m -[m[m Merge branch 'dev' [32m(10 months ago) [m [1;90m2022-07-02 10:54[m
+[1;31m|[m [1;33m|[m [35m|[m[36m\[m  
+[1;31m|[m [1;33m|[m [35m|[m * [1;34mbb7838c[m -[m[m Update kazan.pine to order fills at the next bar’s open. [32m(10 months ago) [m [1;90m2022-06-19 21:08[m
+[1;31m|[m [1;33m|[m [35m|[m * [1;34m8fa063f[m -[m[m Improve kazan.pine strategy. [32m(11 months ago) [m [1;90m2022-06-10 09:59[m
+[1;31m|[m [1;33m|[m [35m|[m * [1;34m15dbf35[m -[m[m Buy BNB when BNB balance is <1$ for USDT and BTC. [32m(11 months ago) [m [1;90m2022-06-05 22:28[m
+[1;31m|[m [1;33m|[m [35m|[m[35m/[m  
+[1;31m|[m [1;33m|[m * [1;34mf1eb98d[m -[m[m Read on-going position counts from mongodb, better sync between processes. [32m(11 months ago) [m [1;90m2022-05-25 13:20[m
+[1;31m|[m [1;33m|[m * [1;34mdb72cb4[m -[m[m Check BNB balance. [32m(11 months ago) [m [1;90m2022-05-25 09:19[m
+[1;31m|[m [1;33m|[m * [1;34m1f1a9bd[m -[m[m Check timestamps every 5 seconds, delete them if position is ended. [32m(11 months ago) [m [1;90m2022-05-23 23:05[m
+[1;31m|[m [1;33m|[m * [1;34m1357072[m -[m[m Add position add check for btc. [32m(11 months ago) [m [1;90m2022-05-23 21:24[m
+[1;31m|[m [1;33m|[m * [1;34mfa601d8[m -[m[m Fetch stats from mongodb. [32m(11 months ago) [m [1;90m2022-05-23 15:57[m
+[1;31m|[m [1;33m|[m * [1;34m111a970[m -[m[m Move usdtperp from bothelper for cleaner code. [32m(11 months ago) [m [1;90m2022-05-22 23:42[m
+[1;31m|[m [1;33m|[m * [1;34m5b62c13[m -[m[m Fix 1S pine script. [32m(11 months ago) [m [1;90m2022-05-21 20:18[m
+[1;31m|[m [1;33m|[m * [1;34m3e5245d[m -[m[m Watch pairs with percent change. [32m(11 months ago) [m [1;90m2022-05-19 12:36[m
+[1;31m|[m [1;33m|[m *   [1;34m1a455fe[m -[m[m Merge branch 'dev' [32m(12 months ago) [m [1;90m2022-05-19 10:45[m
+[1;31m|[m [1;33m|[m [1;31m|[m[1;32m\[m  
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m0b0fabf[m -[m[m Add watchlist. [32m(12 months ago) [m [1;90m2022-05-17 16:57[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34mee29d19[m -[m[m Remove extra spot_limit() function and save all incoming alerts. [32m(12 months ago) [m [1;90m2022-05-11 13:16[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34maed1c6d[m -[m[m Receive 30m wavetrend alert. [32m(12 months ago) [m [1;90m2022-04-18 12:52[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m54262bc[m -[m[m Update 1S pine script consider [green][gray] bar case. [32m(1 year ago) [m [1;90m2022-04-09 19:15[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m03966f6[m -[m[m Carry TakeProfit class to new file. [32m(1 year, 1 month ago) [m [1;90m2022-04-08 20:17[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m19f2bf8[m -[m[m Update latest timestamp from status.yaml file. [32m(1 year, 1 month ago) [m [1;90m2022-04-07 15:22[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m1a4a554[m -[m[m Cut loss function is added. [32m(1 year, 1 month ago) [m [1;90m2022-04-07 08:24[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m7e86c4c[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-04-06 12:58[m
+[1;31m|[m [1;33m|[m [1;31m|[m *   [1;34mc16db82[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 1 month ago) [m [1;90m2022-04-06 12:15[m
+[1;31m|[m [1;33m|[m [1;31m|[m [1;33m|[m[1;34m\[m  
+[1;31m|[m [1;33m|[m [1;31m|[m [1;33m|[m * [1;34ma15ab82[m -[m[m Load long yaml files single time init __init__ improve speed. [32m(1 year, 1 month ago) [m [1;90m2022-04-06 11:07[m
+[1;31m|[m [1;33m|[m [1;31m|[m [1;33m|[m * [1;34m46f96c2[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-04-06 00:54[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m|[m [1;34m94c5ddd[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-04-06 00:54[m
+[1;31m|[m [1;33m|[m [1;31m|[m [1;34m|[m[1;34m/[m  
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34mc165c31[m -[m[m Updated pine S script, differs from btc-spot. [32m(1 year, 1 month ago) [m [1;90m2022-04-02 15:00[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m5225969[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-04-01 11:46[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34ma497221[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-03-30 11:07[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m2b201ec[m -[m[m Upgrade add-tradingview-alerts-tool script. [32m(1 year, 1 month ago) [m [1;90m2022-03-26 08:33[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34md0fbb4c[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-03-24 10:22[m
+[1;31m|[m [1;33m|[m [1;31m|[m * [1;34m38b1975[m -[m[m Fix minor bugs. [32m(1 year, 1 month ago) [m [1;90m2022-03-18 14:43[m
+[1;31m|[m [1;33m|[m [1;31m|[m *   [1;34m37610f5[m -[m[m Merge branch 'dev' [32m(1 year, 1 month ago) [m [1;90m2022-03-18 14:10[m
+[1;31m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;31m|[m * [1;31m|[m [1;35m|[m [1;36m|[m [1;34mde073e9[m -[m[m Add minor improvements [32m(4 months ago) [m [1;90m2023-01-14 11:31[m
+[1;31m|[m [1;31m|[m[1;31m/[m [1;35m/[m [1;36m/[m  
+* [1;31m/[m [1;35m/[m [1;36m/[m [1;34mea40256[m -[m[m Merge branch 'dev' [32m(4 months ago) [m [1;90m2023-01-14 11:31[m
+[1;31m|[m[1;31m/[m [1;35m/[m [1;36m/[m  
+* [1;35m|[m [1;36m|[m   [1;34mb45feef[m -[m[m Merge branch 'dev' [32m(1 year, 1 month ago) [m [1;90m2022-03-18 14:10[m
+[1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m * [1;34m03e3163[m -[m[m Organize 1 second strategy pine scripts. [32m(1 year, 1 month ago) [m [1;90m2022-02-15 17:29[m
+[1;35m|[m * [1;34md307fca[m -[m[m Keep track of daily open positions in a yaml file. [32m(1 year, 2 months ago) [m [1;90m2022-02-12 09:46[m
+[1;35m|[m * [1;34md28a071[m -[m[m Organize balance_binance.py file. [32m(1 year, 3 months ago) [m [1;90m2022-02-06 20:24[m
+[1;35m|[m *   [1;34m7d6dbd6[m -[m[m Merge BTC and USDT spot from different accounts. [32m(1 year, 3 months ago) [m [1;90m2022-01-31 09:57[m
+[1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [33m|[m *   [1;34m5fe7d71[m -[m[m Merge branch 'dev' [32m(1 year, 3 months ago) [m [1;90m2022-01-30 20:02[m
+[1;35m|[m [33m|[m [35m|[m[36m\[m  
+[1;35m|[m * [35m|[m [36m\[m   [1;34ma563c77[m -[m[m Switch into using spot USDT in binance. [32m(1 year, 3 months ago) [m [1;90m2022-01-30 20:02[m
+[1;35m|[m [35m|[m[36m\[m [35m\[m [36m\[m  
+[1;35m|[m [35m|[m [36m|[m[35m/[m [36m/[m  
+[1;35m|[m [35m|[m[35m/[m[36m|[m [36m/[m   
+[1;35m|[m [35m|[m [36m|[m[36m/[m    
+[1;35m|[m [35m|[m *   [1;34mc6ba013[m -[m[m Merge branch 'dev' [32m(1 year, 3 months ago) [m [1;90m2022-01-30 18:21[m
+[1;35m|[m [35m|[m [1;33m|[m[1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m *   [1;34me694830[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 3 months ago) [m [1;90m2021-10-26 13:52[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34md7b696a[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-26 12:45[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [31m|[m[32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34mb2e0191[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-26 12:45[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m *   [1;34mc09fe13[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-26 12:41[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [35m|[m[36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [35m|[m [36m\[m   [1;34m0abe2b5[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-26 12:41[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[36m\[m [35m\[m [36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[35m/[m [36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[35m/[m[36m|[m [36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m *   [1;34m9e1602c[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-25 00:44[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [1;33m|[m[1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;33m|[m [1;34m\[m   [1;34m5218ce0[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-25 00:44[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m *   [1;34m737ddf9[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-24 19:56[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [31m|[m[32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34mbd18eda[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-24 19:56[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m *   [1;34ma87520f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-23 22:16[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [35m|[m[36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [35m|[m [36m\[m   [1;34m3defebd[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-23 22:16[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[36m\[m [35m\[m [36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[35m/[m [36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[35m/[m[36m|[m [36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m *   [1;34m75a0708[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-23 20:02[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [1;33m|[m[1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;33m|[m [1;34m\[m   [1;34mfda9ab7[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-23 20:02[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m *   [1;34m9fa7cea[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-22 20:20[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [31m|[m[32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34m1dd4cc1[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-22 20:20[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m *   [1;34m2cccece[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-22 17:07[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [35m|[m[36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [35m|[m [36m\[m   [1;34m4afd30b[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-22 17:07[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[36m\[m [35m\[m [36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[35m/[m [36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[35m/[m[36m|[m [36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m *   [1;34m6c0f09f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-22 12:01[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [1;33m|[m[1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;33m|[m [1;34m\[m   [1;34mdfbb54a[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-22 12:01[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m *   [1;34m67077b4[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-21 21:54[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [31m|[m[32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34m6934a50[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-21 21:54[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m *   [1;34m8e25c37[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-21 16:00[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [35m|[m[36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [35m|[m [36m\[m   [1;34mbe2ea4f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-21 16:00[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[36m\[m [35m\[m [36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[35m/[m [36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[35m/[m[36m|[m [36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m *   [1;34mef868db[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-20 16:26[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [1;33m|[m[1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;33m|[m [1;34m\[m   [1;34md36b97e[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-20 16:26[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m *   [1;34ma7f78da[m -[m[m Remove reading api key and secret from binance.txt [32m(1 year, 6 months ago) [m [1;90m2021-10-19 14:51[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [31m|[m[32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34m6c8fb47[m -[m[m Remove reading api key and secret from binance.txt [32m(1 year, 6 months ago) [m [1;90m2021-10-19 14:51[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m *   [1;34m260a16c[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-17 13:11[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [35m|[m[36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [35m|[m [36m\[m   [1;34m871905e[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-17 13:11[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[36m\[m [35m\[m [36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[35m/[m [36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[35m/[m[36m|[m [36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [36m|[m[36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m *   [1;34mca8ef43[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-17 12:25[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [1;33m|[m[1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;33m|[m [1;34m\[m   [1;34mac602c7[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-17 12:25[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [1;34m|[m[1;34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m *   [1;34m9a7afab[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-16 15:59[m
+[1;35m|[m [35m|[m [1;33m|[m [1;33m|[m [31m|[m[32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [31m|[m [32m\[m   [1;34mf108c83[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 6 months ago) [m [1;90m2021-10-16 15:59[m
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[32m\[m [31m\[m [32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[31m/[m [32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m[31m/[m[32m|[m [32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m [32m|[m[32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [31m|[m * [1;34m4786711[m -[m[m Improve [32m(1 year, 6 months ago) [m [1;90m2021-10-14 12:13[m
+[1;35m|[m [35m|[m [1;33m|[m * [34m|[m [1;34md827572[m -[m[m Improve [32m(1 year, 7 months ago) [m [1;90m2021-10-14 12:13[m
+[1;35m|[m [35m|[m [1;33m|[m [34m|[m[34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m *   [1;34mc18aeec[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-14 12:13[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m[36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m *   [1;34m65108f1[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-12 16:43[m
+[1;35m|[m [35m|[m [1;33m|[m [35m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34m19d91e2[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-12 16:43[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34mb63a570[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-11 22:00[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34m281d3ac[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-11 22:00[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34m78d84ff[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-11 21:53[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34meae653b[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-11 21:53[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m *   [1;34m261f93f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-10 22:10[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34m98069df[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-10 22:10[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34m3840c59[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-10 14:30[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34m55efee9[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-10 14:30[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34m7fa10fe[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-08 10:17[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34m1352c07[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-08 10:17[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m *   [1;34mec8060d[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-07 15:01[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34mf0025f5[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-07 15:01[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34m4934003[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-07 10:36[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34m20f8cf8[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-07 10:36[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34m5eda8c8[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-06 22:00[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34m9acffa8[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-06 22:00[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m *   [1;34me2da2e4[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 17:40[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34mf4b366b[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 17:40[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34m61301fe[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 15:29[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34mf2c6569[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 15:29[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34meadd7a5[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 15:08[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34m6b84592[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 15:08[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m *   [1;34m505d766[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 13:56[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34m761aca6[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-05 13:56[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34ma17bca6[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-03 16:57[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34m14a94b5[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-03 16:57[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34m1943c8a[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-02 16:54[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34m6a914ed[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-10-02 16:54[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m *   [1;34m49b5891[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-29 17:14[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34m690667f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-29 17:14[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34mda8e723[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-28 13:52[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34m81f2bfb[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-28 13:52[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34m7585b60[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-27 11:21[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34m5c1d382[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-27 11:21[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m *   [1;34mcc2c5fb[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-26 16:33[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [1;31m|[m[1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;31m|[m [1;32m\[m   [1;34m68b73b8[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-26 16:33[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m *   [1;34m1a2481c[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-24 13:25[m
+[1;35m|[m [35m|[m [1;33m|[m [1;31m|[m [1;35m|[m[1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [1;35m|[m [1;36m\[m   [1;34m7342f98[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-24 13:25[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m *   [1;34m41bd31b[m -[m[m Improve protect mechanism [32m(1 year, 7 months ago) [m [1;90m2021-09-20 12:21[m
+[1;35m|[m [35m|[m [1;33m|[m [1;35m|[m [33m|[m[34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m * [33m|[m [34m\[m   [1;34md8f85db[m -[m[m Improve protect mechanism [32m(1 year, 7 months ago) [m [1;90m2021-09-20 12:21[m
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[34m\[m [33m\[m [34m\[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[33m/[m [34m/[m  
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m[33m/[m[34m|[m [34m/[m   
+[1;35m|[m [35m|[m [1;33m|[m [33m|[m [34m|[m[34m/[m    
+[1;35m|[m [35m|[m * [33m|[m [34m|[m [1;34mf686748[m -[m[m Fetch liq data is added. [32m(1 year, 3 months ago) [m [1;90m2021-10-26 14:31[m
+[1;35m|[m * [36m|[m [33m|[m [34m|[m [1;34m402b90e[m -[m[m Fetch liq data is added. [32m(1 year, 3 months ago) [m [1;90m2021-10-26 14:31[m
+[1;35m|[m [36m|[m[36m/[m [33m/[m [34m/[m  
+* [36m|[m [33m|[m [34m|[m [1;34m7d4c7b8[m -[m[m Fix clean commit. [32m(1 year, 3 months ago) [m [1;90m2022-01-30 20:34[m
+* [36m|[m [33m|[m [34m|[m [1;34m1ca2048[m -[m[m Switch into SPOT USDT trading in Binance and implement it. [32m(1 year, 3 months ago) [m [1;90m2021-10-26 14:31[m
+[36m|[m[36m/[m [33m/[m [34m/[m  
+* [33m|[m [34m|[m [1;34ma77b44a[m -[m[m Add discord into binance_balanace section. [32m(1 year, 6 months ago) [m [1;90m2021-10-19 14:28[m
+* [33m|[m [34m|[m [1;34m75454c1[m -[m[m Add 1 second alerts for spot_usdt [32m(1 year, 7 months ago) [m [1;90m2021-10-05 15:10[m
+* [33m|[m [34m|[m [1;34m74a6e3f[m -[m[m Update [32m(1 year, 7 months ago) [m [1;90m2021-09-23 12:40[m
+* [33m|[m [34m|[m [1;34m93a9286[m -[m[m Disable log messages from the Requests library added. [32m(1 year, 7 months ago) [m [1;90m2021-08-16 03:37[m
+* [33m|[m [34m|[m [1;34m70418bf[m -[m[m New strategy is implemented with RSI [32m(1 year, 7 months ago) [m [1;90m2021-05-22 16:59[m
+* [33m|[m [34m|[m [1;34m203e553[m -[m[m New strategy is implemented with RSI [32m(1 year, 7 months ago) [m [1;90m2021-05-22 16:59[m
+* [33m|[m [34m|[m [1;34md099d6e[m -[m[m Performance from 03.01 => 731% ALL | 518% Long , 213% Short [32m(1 year, 7 months ago) [m [1;90m2021-05-22 16:59[m
+* [33m|[m [34m|[m [1;34me18e2b0[m -[m[m Improve Main.pine [32m(1 year, 7 months ago) [m [1;90m2021-05-18 13:45[m
+* [33m|[m [34m|[m [1;34ma2aa568[m -[m[m Genesis [32m(1 year, 7 months ago) [m [1;90m2021-05-13 18:02[m
+* [33m|[m [34m|[m [1;34m0e14886[m -[m[m update [32m(1 year, 7 months ago) [m [1;90m2021-02-20 13:57[m
+* [33m|[m [34m|[m   [1;34m8647b41[m -[m[m Improve protect mechanism [32m(1 year, 7 months ago) [m [1;90m2021-09-20 12:21[m
+[33m|[m[34m\[m [33m\[m [34m\[m  
+[33m|[m [34m|[m[33m/[m [34m/[m  
+[33m|[m[33m/[m[34m|[m [34m/[m   
+[33m|[m [34m|[m[34m/[m    
+[33m|[m *   [1;34me326703[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-19 16:06[m
+[33m|[m [1;33m|[m[1;34m\[m  
+* [1;33m|[m [1;34m\[m   [1;34m20ee50f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-19 16:06[m
+[1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;33m|[m [1;34m|[m[1;34m/[m    
+[1;33m|[m *   [1;34me57ac4e[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-17 21:32[m
+[1;33m|[m [31m|[m[32m\[m  
+* [31m|[m [32m\[m   [1;34mfbbc2d3[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-17 21:32[m
+[31m|[m[32m\[m [31m\[m [32m\[m  
+[31m|[m [32m|[m[31m/[m [32m/[m  
+[31m|[m[31m/[m[32m|[m [32m/[m   
+[31m|[m [32m|[m[32m/[m    
+[31m|[m *   [1;34mabecc78[m -[m[m Update [32m(1 year, 7 months ago) [m [1;90m2021-09-15 20:00[m
+[31m|[m [35m|[m[36m\[m  
+* [35m|[m [36m\[m   [1;34m851bf1f[m -[m[m Update [32m(1 year, 7 months ago) [m [1;90m2021-09-15 20:00[m
+[35m|[m[36m\[m [35m\[m [36m\[m  
+[35m|[m [36m|[m[35m/[m [36m/[m  
+[35m|[m[35m/[m[36m|[m [36m/[m   
+[35m|[m [36m|[m[36m/[m    
+[35m|[m *   [1;34m4a0222d[m -[m[m Merge branch 'myfeature' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-15 19:58[m
+[35m|[m [1;33m|[m[1;34m\[m  
+* [1;33m|[m [1;34m\[m   [1;34m1b36ae7[m -[m[m Merge branch 'myfeature' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-15 19:58[m
+[1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;33m|[m [1;34m|[m[1;34m/[m    
+[1;33m|[m *   [1;34m3215485[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-15 19:56[m
+[1;33m|[m [31m|[m[32m\[m  
+* [31m|[m [32m\[m   [1;34m3868150[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-15 19:56[m
+[31m|[m[32m\[m [31m\[m [32m\[m  
+[31m|[m [32m|[m[31m/[m [32m/[m  
+[31m|[m[31m/[m[32m|[m [32m/[m   
+[31m|[m [32m|[m[32m/[m    
+[31m|[m *   [1;34mfaeb2a2[m -[m[m Calcualte precision from exchange.load_market() [32m(1 year, 7 months ago) [m [1;90m2021-09-15 19:07[m
+[31m|[m [35m|[m[36m\[m  
+* [35m|[m [36m\[m   [1;34m56fcbeb[m -[m[m Calcualte precision from exchange.load_market() [32m(1 year, 7 months ago) [m [1;90m2021-09-15 19:07[m
+[35m|[m[36m\[m [35m\[m [36m\[m  
+[35m|[m [36m|[m[35m/[m [36m/[m  
+[35m|[m[35m/[m[36m|[m [36m/[m   
+[35m|[m [36m|[m[36m/[m    
+[35m|[m *   [1;34mcf927c0[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-15 14:09[m
+[35m|[m [1;33m|[m[1;34m\[m  
+* [1;33m|[m [1;34m\[m   [1;34mb32a4df[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-15 14:09[m
+[1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;33m|[m [1;34m|[m[1;34m/[m    
+[1;33m|[m *   [1;34m6cfafe7[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-14 21:07[m
+[1;33m|[m [31m|[m[32m\[m  
+* [31m|[m [32m\[m   [1;34m9098caa[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-14 21:07[m
+[31m|[m[32m\[m [31m\[m [32m\[m  
+[31m|[m [32m|[m[31m/[m [32m/[m  
+[31m|[m[31m/[m[32m|[m [32m/[m   
+[31m|[m [32m|[m[32m/[m    
+[31m|[m *   [1;34mfe9cc12[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 7 months ago) [m [1;90m2021-09-13 04:58[m
+[31m|[m [35m|[m[36m\[m  
+* [35m|[m [36m\[m   [1;34m0bd8704[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-13 04:58[m
+[35m|[m[36m\[m [35m\[m [36m\[m  
+[35m|[m [36m|[m[35m/[m [36m/[m  
+[35m|[m[35m/[m[36m|[m [36m/[m   
+[35m|[m [36m|[m[36m/[m    
+[35m|[m *   [1;34mfcf2ea1[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-12 07:40[m
+[35m|[m [1;33m|[m[1;34m\[m  
+* [1;33m|[m [1;34m\[m   [1;34m64f638f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-12 07:40[m
+[1;33m|[m[1;34m\[m [1;33m\[m [1;34m\[m  
+[1;33m|[m [1;34m|[m[1;33m/[m [1;34m/[m  
+[1;33m|[m[1;33m/[m[1;34m|[m [1;34m/[m   
+[1;33m|[m [1;34m|[m[1;34m/[m    
+[1;33m|[m *   [1;34m68c4ee8[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-10 14:22[m
+[1;33m|[m [31m|[m[32m\[m  
+* [31m|[m [32m\[m   [1;34m24398ac[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-10 14:22[m
+[31m|[m[32m\[m [31m\[m [32m\[m  
+[31m|[m [32m|[m[31m/[m [32m/[m  
+[31m|[m[31m/[m[32m|[m [32m/[m   
+[31m|[m [32m|[m[32m/[m    
+[31m|[m *   [1;34mf918d8d[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-10 12:04[m
+[31m|[m [35m|[m[36m\[m  
+* [35m|[m [36m\[m   [1;34m058a384[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-10 12:04[m
+[35m|[m[36m\[m [35m\[m [36m\[m  
+[35m|[m [36m|[m[35m/[m [36m/[m  
+[35m|[m[35m/[m[36m|[m [36m/[m   
+[35m|[m [36m|[m[36m/[m    
+[35m|[m * [1;34m2f4d9f5[m -[m[m Add async call into market buy/sell orders in trade_async.py [32m(1 year, 8 months ago) [m [1;90m2021-09-09 20:35[m
+* [1;32m|[m [1;34m88ebee3[m -[m[m Add async call into market buy/sell orders in trade_async.py [32m(1 year, 8 months ago) [m [1;90m2021-09-09 20:35[m
+[1;32m|[m[1;32m/[m  
+* [1;34m555d6d7[m -[m[m Change limit order from binance-python into ccxt in trade_async.py [32m(1 year, 8 months ago) [m [1;90m2021-09-09 16:10[m
+*   [1;34m7a8f865[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-09 12:53[m
+[1;33m|[m[1;34m\[m  
+[1;33m|[m *   [1;34m2991e4f[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-09 11:16[m
+[1;33m|[m [1;35m|[m[1;36m\[m  
+* [1;35m|[m [1;36m\[m   [1;34m1b12b20[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-09 11:16[m
+[1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m *   [1;34m3d5c179[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-09 10:10[m
+[1;35m|[m [33m|[m[34m\[m  
+* [33m|[m [34m\[m   [1;34m4c1bef7[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-09 10:10[m
+[33m|[m[34m\[m [33m\[m [34m\[m  
+[33m|[m [34m|[m[33m/[m [34m/[m  
+[33m|[m[33m/[m[34m|[m [34m/[m   
+[33m|[m [34m|[m[34m/[m    
+[33m|[m *   [1;34m56abc0c[m -[m[m Read position count from status.yaml [32m(1 year, 8 months ago) [m [1;90m2021-09-08 14:22[m
+[33m|[m [1;31m|[m[1;32m\[m  
+* [1;31m|[m [1;32m\[m   [1;34maa192a7[m -[m[m Read position count from status.yaml [32m(1 year, 8 months ago) [m [1;90m2021-09-08 14:22[m
+[1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;31m|[m [1;32m|[m[1;32m/[m    
+[1;31m|[m *   [1;34m3bff9ae[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-05 19:59[m
+[1;31m|[m [1;35m|[m[1;36m\[m  
+* [1;35m|[m [1;36m\[m   [1;34m6f8e68b[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-05 19:59[m
+[1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m *   [1;34md75381d[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-05 19:53[m
+[1;35m|[m [33m|[m[34m\[m  
+* [33m|[m [34m\[m   [1;34ma6e51f4[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-05 19:53[m
+[33m|[m[34m\[m [33m\[m [34m\[m  
+[33m|[m [34m|[m[33m/[m [34m/[m  
+[33m|[m[33m/[m[34m|[m [34m/[m   
+[33m|[m [34m|[m[34m/[m    
+[33m|[m *   [1;34mca1b80b[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-03 04:54[m
+[33m|[m [1;31m|[m[1;32m\[m  
+* [1;31m|[m [1;32m\[m   [1;34me858d00[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-03 04:54[m
+[1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;31m|[m [1;32m|[m[1;32m/[m    
+[1;31m|[m *   [1;34me7f3547[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-02 17:15[m
+[1;31m|[m [1;35m|[m[1;36m\[m  
+* [1;35m|[m [1;36m\[m   [1;34md51614a[m -[m[m Merge branch 'feature/0' into dev [32m(1 year, 8 months ago) [m [1;90m2021-09-02 17:15[m
+[1;35m|[m[1;36m\[m [1;35m\[m [1;36m\[m  
+[1;35m|[m [1;36m|[m[1;35m/[m [1;36m/[m  
+[1;35m|[m[1;35m/[m[1;36m|[m [1;36m/[m   
+[1;35m|[m [1;36m|[m[1;36m/[m    
+[1;35m|[m * [1;34m94a109d[m -[m[m New strategy is implemented with RSI [32m(1 year, 8 months ago) [m [1;90m2021-05-18 13:45[m
+* [32m|[m [1;34m18e3b6c[m -[m[m New strategy is implemented with RSI [32m(1 year, 8 months ago) [m [1;90m2021-05-18 13:45[m
+* [32m|[m [1;34m6b9f4b7[m -[m[m New strategy is implemented with RSI [32m(1 year, 8 months ago) [m [1;90m2021-05-18 13:45[m
+[32m|[m[32m/[m  
+* [1;34m1646ffc[m -[m[m Alert coming from strategy [32m(1 year, 11 months ago) [m [1;90m2021-05-18 10:05[m
+* [1;34m00b2570[m -[m[m Update main.pin along with squeeze_on for short positions [32m(1 year, 11 months ago) [m [1;90m2021-05-17 14:11[m
+* [1;34md111df1[m -[m[m Genesis [32m(1 year, 11 months ago) [m [1;90m2021-05-13 18:02[m
+* [1;34m5130797[m -[m[m update [32m(2 years, 2 months ago) [m [1;90m2021-02-20 13:57[m

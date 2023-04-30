@@ -160,7 +160,7 @@ class BotHelperAsync:
         else:
             msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
             msg += f"[{c}]{name}{lost}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
-            if free > 1:
+            if float(free) > 1:
                 msg = f"{msg}free=[cy]{name}{free}[/cy] "
 
         if float(cfg.locked_balance) > 0:
@@ -190,7 +190,7 @@ class BotHelperAsync:
 
         log()
         _console_clear()
-        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def _discord_sent_msg(self, msg):
@@ -703,13 +703,14 @@ class BotHelperAsync:
         pos_str = ""
         if pos_count > 2:
             pos_str = f" | pos={pos_count}"
-        elif real_pos_count == 0:  # or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
+        elif (
+            real_pos_count == 0 and cfg.TYPE == "btc"
+        ):  # or (config.env[cfg.TYPE].is_manual_trade and real_pos_count == 0):
             log()  # to overwrite printed balance
 
-        free = float(free)
         if cfg.TYPE == "usdt":
             _free = ""
-            if free > 1:
+            if float(free) > 1:
                 _free = f"| free=`{free}` "
 
             # total = round(abs(lost) + sum_usdt)
