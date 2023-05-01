@@ -402,7 +402,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 c1 = "green on black blink"
 
             if float(per_locked) == int(float(per_locked.replace(".00", ""))):
-                per_locked = int(float(per_locked.replace(".00", "")))
+                per_locked = str(int(float(per_locked.replace(".00", ""))))
 
             if float(per_locked) > 150:
                 log(f"| [{c1}]{current_sum}[/{c1}] [ib]{format(_sum, '.2f')} ", end="")
@@ -414,13 +414,13 @@ class BotHelperSpotAsync(BotHelperAsync):
                     if float(per_locked) >= 100:
                         per_locked = "100"
                     else:
-                        per_locked = int(round(float(per_locked)))
+                        per_locked = str(int(round(float(per_locked))))
                 else:
-                    per_locked = float(per)
+                    per_locked = str(float(per))
 
                 log(f"[{c}]{per}%[/{c}] ", end="")
 
-            log(format(_sum * 1000, ".4f"), "ib")
+            log(format(_sum * 1000, ".4f"), "ib", h=False)
 
         real_pos_count = config._env._status.find_one("real_pos_count")["value"]
         if _type in ["usdt", "busd"] and real_pos_count > 0:

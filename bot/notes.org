@@ -16,5 +16,12 @@ The payment rate exchanged between the long and short positions for the next
 funding. If the funding rate is positive, longs pay shorts. If negative, shorts
 pay longs.
 
-* Kuveyt Bankasi
-=> Saat 17:00'den sonra islem yaparsan hayvan gibi makas oluyor dikkat et.
+* HEADUP at cross sell normal intead of repay in some casees just be careful
+
+* cross'da zararina kapatip alttan alirsan kardasin
+Ornek: 7k 1650 kapatip 1560 (5%) altindan ayni sekilde alabiliyordum. Bunu
+yapmadim 1560' dusunce para 7k den 6k ye dustu onunu yerinde 1k zarar oldu yine.
+Yani zarardayken satip alttan alabilirsen (akilli hesap ile), en azindan dususte
+etkilenmemis oluyorsun.  Spotta olsa zaten oyle yapardin ayni sekilde
+dusunebilirsin. 1k kazanma sansim varken onun yerine altap mini alsatlar ile $50
+kaybettim.

@@ -7,8 +7,6 @@ from pathlib import Path
 from binance.client import Client
 from broker._utils.yaml import Yaml
 
-HOME = str(Path.home())
-
 
 def save_obj(name, client, syms=None):
     balances = client.get_account()
@@ -38,8 +36,7 @@ def check_binance_obj():
     try:
         client = load_obj("binance")
     except:
-        HOME = Path.home()
-        _cfg = Yaml(HOME / ".binance.yaml")
+        _cfg = Yaml(Path.home() / ".binance.yaml")
         api_key = str(_cfg["b"]["key"])
         api_secret = str(_cfg["b"]["secret"])
         client = Client(api_key, api_secret)

@@ -4,17 +4,16 @@ watch:
     # - JOEUSDT
     # - OAXBTC
     # - OAXUSDT
-    # - BTTCUSDT
-    # - BTTCTRY
     # - LQTYUSDT
     # - IDUSDT
-  # target:
-  #   OAXUSDT: 0.305
+  target:
+    BONDUSDT: 5.0
+    BONDBTC: 185
   bar:
     - BONDBTC
     - BONDUSDT
-    # - JOEUSDT
-    # - OAXUSDT
+    - DREPUSDT
+    - COCOSUSDT
     # - BONDUSDT
     # - LQTYUSDT
     # - IDUSDT

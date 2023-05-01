@@ -25,29 +25,34 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 class Discord_Alpy:
     def __init__(self, _type):
+        if config.cfg["root"]["is_write"]:
+            _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
+        else:
+            _log.IS_WRITE = False
+
+        log(f"[cy]**[/cy] bot_type={_type} started [cy]**", "b")
+        self._type = cfg.TYPE = _type.lower()
+        config._env = config.env[cfg.TYPE]
+        helper.exchange.init(_type)
+        _config = Yaml(Path.home() / ".binance.yaml")
         try:
-            if config.cfg["root"]["is_write"]:
-                _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
-            else:
-                _log.IS_WRITE = False
+            self.constructor()
+        except Exception as e:
+            log(f"E: {e}")
 
-            log(f"[cy]**[/cy] bot_type={_type} started [cy]**", "b")
-            self._type = cfg.TYPE = _type.lower()
-            config._env = config.env[cfg.TYPE]
-            helper.exchange.init(_type)
-            _config = Yaml(Path.home() / ".binance.yaml")
-            try:
-                self.constructor()
-            except Exception as e:
-                log(f"E: {e}")
+        self.client = discord.Client(intents=discord.Intents.default())
+        self.channel: str = ""
+        self.channel_alerts: str = ""
+        self.channel_log: str = ""
+        self.channel_notifications: str = ""
+        self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
+        self.TOKEN = str(_config["discord"]["TOKEN"])
 
-            self.client = discord.Client(intents=discord.Intents.default())
-            self.channel: str = ""
-            self.channel_alerts: str = ""
-            self.channel_log: str = ""
-            self.channel_notifications: str = ""
-            self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
-            self.TOKEN = str(_config["discord"]["TOKEN"])
+    def setup_hook(self):
+        self.init_async()
+
+    def init_async(self):
+        try:
             self.client.loop.create_task(self.task())
             self.client.loop.run_until_complete(self.client.start(self.TOKEN))
         except KeyboardInterrupt:
@@ -62,8 +67,8 @@ class Discord_Alpy:
         except SystemExit:
             pass
         except Exception as e:
-            breakpoint()  # DEBUG
             print_tb(e)
+            breakpoint()  # DEBUG
 
     def constructor(self):
         helper.exchange._set_bnbusdt()
@@ -83,8 +88,9 @@ class Discord_Alpy:
         scheduler = AsyncIOScheduler()
 
         # secondly, each given seconds in cfg.py
+        cfg.SLEEP_INTERVAL = config._c["sleep_interval"]
         scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
-        if config.cfg["root"][cfg.TYPE]["status"] == "on":
+        if config._c["status"] == "on":
             scheduler.add_job(self.fetch_balance, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
 
         # hourly
@@ -93,7 +99,7 @@ class Discord_Alpy:
 
         # daily
         scheduler.add_job(  #: restart at fund times
-            self.restart, "cron", year="*", month="*", day="*", hour="03,11,19", minute="01", second="0", timezone=tz
+            self.restart, "cron", year="*", month="*", day="*", hour="03,11,19", minute="00", second="0", timezone=tz
         )
 
         if cfg.TYPE == "usdt":
@@ -161,10 +167,13 @@ class Discord_Alpy:
             # await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>", delete_after=60)
 
     async def restart(self):
-        """Restart at 03:00:00."""
+        """Restart the on going process based on the scheduled time."""
+        with suppress(Exception):
+            await cfg.discord_sent_msg.delete()
+
         log()
-        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         _console_clear()
+        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
@@ -180,7 +189,8 @@ def main():
     except:
         _type = "usdt"
 
-    Discord_Alpy(_type)
+    alpy = Discord_Alpy(_type)
+    alpy.setup_hook()
 
 
 if __name__ == "__main__":
