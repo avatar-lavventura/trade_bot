@@ -47,6 +47,7 @@ class LiqBase:
             "LUNA2BUSD",
             "MANAUSDT",
             "SOLUSDT",
+            "TRXUSDT",
             "XLMUSDT",
             "XRPUSDT",
             "HOTUSDT",
