@@ -539,7 +539,7 @@ class BotHelperAsync:
             #: estimated balance:
             if cfg.MARGIN_BAL > 0.1:
                 _total_balance += float(cfg.MARGIN_BAL)
-                log(f"cross_usdt=${cfg.MARGIN_BAL} ", end="")
+                log(f"cross_usdt=[cy]${cfg.MARGIN_BAL}[/cy] ", end="")
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -574,7 +574,7 @@ class BotHelperAsync:
                 if sum_busd > 0.1:
                     print_str += f"busd={sum_busd + cfg.MARGIN_BAL} "
                 else:
-                    print_str += f"cross_usdt=${cfg.MARGIN_BAL} "
+                    print_str += f"cross_usdt=[cy]${cfg.MARGIN_BAL}[/cy] "
             else:
                 cfg.MARGIN_BAL = 0
 
