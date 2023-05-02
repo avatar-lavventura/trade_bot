@@ -52,6 +52,7 @@ if [[ $1 == "usdt" ]] ; then
 fi
 
 clear -x
+fn="balance_"$1".log"
 # check_app
 while true; do
     python3 discord_balance.py $1
