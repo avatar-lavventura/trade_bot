@@ -32,7 +32,7 @@ msg_aggr = msg + "_aggr"
 window() =>
     time >= start and time <= finish ? true : false
 
-BASE_DURATION = 10000 // equal to 1 second in unix epoc
+BASE_DURATION = 10000 // equal to 1 second
 SLEEP_DUR = 60 * BASE_DURATION // ~60 seconds
 _now = timenow - 1600000000000
 

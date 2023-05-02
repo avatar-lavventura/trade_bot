@@ -187,6 +187,7 @@ class BotHelperAsync:
     async def restart(self):
         with suppress(Exception):
             await cfg.discord_sent_msg.delete()
+            cfg.discord_sent_msg = None
 
         log()
         _console_clear()
@@ -218,12 +219,12 @@ class BotHelperAsync:
                 self.restart()
 
             cfg.discord_message = f"`{_date(_format='%m-%d %H:%M:%S')}`\n"
-            cfg.discord_sent_msg = None
             if "Too Many Requests" in sub_str:
                 with suppress(Exception):
                     await cfg.discord_sent_msg.delete()
+                    await asyncio.sleep(0.1)
 
-                await asyncio.sleep(0.1)
+            cfg.discord_sent_msg = None
 
     def per_str_color(self, percent):
         return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
@@ -325,7 +326,11 @@ class BotHelperAsync:
                         if not config.cfg["root"]["is_balance_silent"]:
                             msg = f"{msg}=> `{_time}`"
 
-                    _btc_sum = float(config.env["btc"].balance_sum.find_one("btc")["value"])
+                    try:
+                        _btc_sum = float(config.env["btc"].balance_sum.find_one("btc")["value"])
+                    except:
+                        _btc_sum = 0
+
                     # _only_btc = float(config.env["btc"].estimated_balance.find_one("only_btc")["value"])
                     sum_btc_all = format(cfg.TRBINANCE_BTC + _btc_sum, ".8f")
                     if config.estimated_balance() and (

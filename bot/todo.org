@@ -303,3 +303,6 @@ per_change_delta: 2.2515842 ?= 0.1
 
 
 ** TODO if cross on print price of that item as well
+
+
+** TODO daily backup mongodb into nextcloud important

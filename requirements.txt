@@ -88,7 +88,6 @@ pyflakes==3.0.1
 Pygments==2.15.0
 pylint==2.10.2
 pymongo==4.3.3
-pyOpenSSL==23.1.1
 pyparsing==2.4.7
 pytest-metadata==2.0.2
 python-binance==1.0.15
@@ -136,3 +135,5 @@ yarl==1.8.1
 yfinance==0.1.63
 zope.event==4.5.0
 zope.interface==5.4.0
+pyOpenSSL==23.1.1
+types-pyOpenSSL==23.0.0.4

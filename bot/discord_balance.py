@@ -170,10 +170,11 @@ class Discord_Alpy:
         """Restart the on going process based on the scheduled time."""
         with suppress(Exception):
             await cfg.discord_sent_msg.delete()
+            cfg.discord_sent_msg = None
 
         log()
         _console_clear()
-        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

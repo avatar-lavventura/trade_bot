@@ -12,8 +12,8 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTCUSDT"]  # + ["USDTTRY"]
-assets += ["HIFIUSDT"]
+assets = ["BTCUSDT" + "USDTTRY"]
+assets += ["BONDUSDT", "BONDBTC"]
 sleep_duration = 20
 is_quote = True
 MSG = "The most important rule in trading is to protect your capital at all cost."
@@ -56,6 +56,7 @@ def tracker_clock_string():
     msg = ""
     text = ""
     for _, asset in enumerate(reversed(assets)):
+        btcusdt = 0
         price = ""
         if asset == "":
             continue
@@ -97,19 +98,27 @@ def tracker_clock_string():
 
         if msg:
             if asset == "BTC":
+                btcusdt = price
                 msg = f"{price} | {msg}"
             else:
                 msg = f"{asset} {price} | {msg}"
         else:
             if asset == "BTC":
+                btcusdt = price
                 msg = f"{price}"
             else:
                 msg = f"{asset} {price}"
 
     if is_quote:
-        msg = f"{MSG} {msg} // {text}"
+        if btcusdt:
+            if text:
+                msg = f"{MSG} {msg} // {text} "
+            else:
+                msg = f"{MSG} {msg} "
+        else:
+            msg = f"{MSG} ❗ no-internet"
 
-    return f"{msg} # "
+    return msg
 
 
 class OrgClockStatusBarApp(rumps.App):

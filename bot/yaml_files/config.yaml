@@ -9,7 +9,6 @@ root:
   ignore: # for all
     - BOND
     - DUMMY
-    # - OG
   ignore_warning:
     - BOND
     - DUMMY
