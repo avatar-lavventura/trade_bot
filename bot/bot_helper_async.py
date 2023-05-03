@@ -6,6 +6,7 @@ import sys
 import time
 from contextlib import suppress
 from typing import Tuple
+from broker._utils.tools import delete_multiple_lines
 
 import aiohttp
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
@@ -230,14 +231,17 @@ class BotHelperAsync:
         return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
 
     def btc_price_per(self, symbol, asset_price, per_1h, per_1d):
+        """Print latext BTCUSDT price."""
         per_str_c_1h = self.per_str_color(per_1h)
         per_str_c_1d = self.per_str_color(per_1d)
         c = "m" if symbol == "BTCUSDT" else "cy"
-        log(
-            f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t",
-            end="\r",
-            is_write=False,
-        )
+        msg_to_print = f" :lion_face:  {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t"
+        if cfg.FIRST_PRINT_CYCLE:
+            log(msg_to_print, is_write=False)
+            time.sleep(0.1)
+            delete_multiple_lines(2)
+        else:
+            log(msg_to_print, end="\r", is_write=False)
 
     async def _discord_send(self, msg, lost, pos_count, name, free, only_btc) -> None:
         _time = _date(_format="%m-%d %H:%M:%S")
@@ -280,7 +284,7 @@ class BotHelperAsync:
                         self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
                         if not (per_1h and per_1d) and float(lost) > 0:
                             log(
-                                f" * {symbol}=[m]{asset_price}[/m]",
+                                f" :lion_face: {symbol}=[m]{asset_price}[/m]",
                                 end="",
                                 is_write=False,
                             )
@@ -304,8 +308,7 @@ class BotHelperAsync:
                             ohlcv = fund.RECORDS_BAR_1D[symbol]
                             # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
-                            # msg = f"{msg}\n                   1h%   24h%\n"
-                            # msg = f"{msg}{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                            # breakpoint()  # DEBUG
                             msg = f"{msg}\n"
                             msg = f"{msg}{symbol} {asset_price:>{6}} {per_str}"
                             msg = f"{msg}\n{df}"

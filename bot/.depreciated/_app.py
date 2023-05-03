@@ -3,6 +3,7 @@
 import asyncio
 import sys  # noqa
 import time
+from contextlib import suppress
 
 from actions import parse_webhook
 from broker._utils.tools import _time, log, print_tb
@@ -64,7 +65,7 @@ async def close():
     https://stackoverflow.com/a/54528397/2402577
     """
     log("Finalizing...")
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
 
 
 async def main():
@@ -96,7 +97,8 @@ if __name__ == "__main__":
     try:
         loop.run_until_complete(main())
     except KeyboardInterrupt:
-        loop.run_until_complete(close())
+        with suppress(Exception):
+            loop.run_until_complete(close())
     except Exception as e:
         print_tb(e)
     finally:

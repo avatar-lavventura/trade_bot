@@ -1,4 +1,7 @@
 watch:
+  target:
+    BONDUSDT: 5.3
+    BONDBTC: 185
   list:
     - FTMUSDT
     # - JOEUSDT
@@ -6,14 +9,12 @@ watch:
     # - OAXUSDT
     # - LQTYUSDT
     # - IDUSDT
-  target:
-    BONDUSDT: 5.0
-    BONDBTC: 185
   bar:
     - BONDBTC
     - BONDUSDT
     - DREPUSDT
     - COCOSUSDT
+    - PEPEUSDT
     # - BONDUSDT
     # - LQTYUSDT
     # - IDUSDT

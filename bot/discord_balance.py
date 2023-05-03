@@ -58,12 +58,11 @@ class Discord_Alpy:
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
+                if cfg.discord_sent_msg:
+                    self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
 
-            if cfg.discord_sent_msg:
-                self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
-
-            self.client.loop.close()
-            log("\n## program is ended\t\t\t", is_write=False)
+                self.client.loop.close()
+                log("\n## program is ended\t\t\t", is_write=False)
         except SystemExit:
             pass
         except Exception as e:
