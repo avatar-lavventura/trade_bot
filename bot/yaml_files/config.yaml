@@ -2,7 +2,7 @@ root:
   is_balance_silent: true
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150
-  take_profit: 0.0047
+  take_profit: 0.0045
   locked_percent_limit: 99
   is_write: false
   is_funding_rate_alert: false
@@ -20,7 +20,7 @@ root:
     is_manual_trade: false
     auto_buy_bnb: off
     isolated: off
-    cross: off
+    cross: on
     max_pos: 2
     initial: 11
     multiply_ratio: 1.13

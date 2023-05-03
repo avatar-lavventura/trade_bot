@@ -306,3 +306,6 @@ per_change_delta: 2.2515842 ?= 0.1
 
 
 ** TODO daily backup mongodb into nextcloud important
+
+** TODO alis ve satis arasindaki yuzde farki fazla ve islem goren kagit
+Yaklasik 2 basamak ~1.5-2% olmali

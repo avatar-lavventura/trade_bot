@@ -9,6 +9,7 @@ from bot.sheets_lib import fetch_withdrawn
 SLEEP_INTERVAL: int
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY", "GBP"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
+pass_list = ["SNMUSDT", "PEPEBTC", "PEPEBUSD"]
 discord_message_full = discord_message = f"`{_date()}`\n"
 discord_print: bool = False
 locked_balance: float = 0

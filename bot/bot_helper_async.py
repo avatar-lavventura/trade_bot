@@ -9,7 +9,7 @@ from typing import Tuple
 
 import aiohttp
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
-from broker._utils.tools import _date, decimal_count, print_tb
+from broker._utils.tools import _date, decimal_count, delete_multiple_lines, print_tb
 from broker.errors import QuietExit
 
 from bot import cfg
@@ -230,14 +230,22 @@ class BotHelperAsync:
         return f"([orange1]{percent}%[/orange1])" if percent < 0 else f"([g]+{percent}%[/g])"
 
     def btc_price_per(self, symbol, asset_price, per_1h, per_1d):
+        """Print latext BTCUSDT price."""
         per_str_c_1h = self.per_str_color(per_1h)
         per_str_c_1d = self.per_str_color(per_1d)
         c = "m" if symbol == "BTCUSDT" else "cy"
-        log(
-            f" * {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t",
-            end="\r",
-            is_write=False,
-        )
+        if cfg.MARGIN_BAL > 0.1:
+            bug = "|"
+        else:
+            bug = " :lion_face: "
+
+        msg_to_print = f"{bug} {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t"
+        if cfg.FIRST_PRINT_CYCLE:
+            log(msg_to_print, is_write=False)
+            time.sleep(0.1)
+            delete_multiple_lines(2)
+        else:
+            log(msg_to_print, end="\r", is_write=False)
 
     async def _discord_send(self, msg, lost, pos_count, name, free, only_btc) -> None:
         _time = _date(_format="%m-%d %H:%M:%S")
@@ -280,7 +288,7 @@ class BotHelperAsync:
                         self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
                         if not (per_1h and per_1d) and float(lost) > 0:
                             log(
-                                f" * {symbol}=[m]{asset_price}[/m]",
+                                f" :lion_face: {symbol}=[m]{asset_price}[/m]",
                                 end="",
                                 is_write=False,
                             )
@@ -304,8 +312,7 @@ class BotHelperAsync:
                             ohlcv = fund.RECORDS_BAR_1D[symbol]
                             # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
-                            # msg = f"{msg}\n                   1h%   24h%\n"
-                            # msg = f"{msg}{symbol:<{width1}} {asset_price:>{6}} {per_str}"
+                            # breakpoint()  # DEBUG
                             msg = f"{msg}\n"
                             msg = f"{msg}{symbol} {asset_price:>{6}} {per_str}"
                             msg = f"{msg}\n{df}"
@@ -544,7 +551,7 @@ class BotHelperAsync:
             #: estimated balance:
             if cfg.MARGIN_BAL > 0.1:
                 _total_balance += float(cfg.MARGIN_BAL)
-                log(f"cross_usdt=[cy]${cfg.MARGIN_BAL}[/cy] ", end="")
+                log(f":lion_face: cross_usdt=[cy]${cfg.MARGIN_BAL}[/cy] ", end="")
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -880,6 +887,9 @@ class BotHelperAsync:
             return cfg.PRICES[asset]
 
         try:
+            if asset in cfg.pass_list:
+                return 0
+
             if asset == "BTCUSDT":
                 try:
                     # TODO: fetch only from one size and read other side from mongo
@@ -889,9 +899,9 @@ class BotHelperAsync:
                     else:
                         price_ticker = await exchange.hitbtc.fetch_ticker("BTC/USDT")
                 except:
-                    price_ticker = await exchange.spot.fetch_ticker(asset)
+                    price_ticker = await exchange.spot.fetch_ticker(asset)  # type: ignore
             else:
-                price_ticker = await exchange.spot.fetch_ticker(asset)
+                price_ticker = await exchange.spot.fetch_ticker(asset)  # type: ignore
 
             if price_ticker["high"] == 0 or price_ticker["close"] == 0:
                 raise Exception(f"binance does not have market symbol for {asset} yet")

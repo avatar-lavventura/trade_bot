@@ -28,7 +28,7 @@ repos:
         name: black
         exclude: "(.old_work/.*|.depreciated)/.*"
 
-  - repo: https://github.com/PyCQA/flake8/tags
+  - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
       - id: flake8
