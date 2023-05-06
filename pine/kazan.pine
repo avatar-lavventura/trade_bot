@@ -12,8 +12,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      pyramiding=100000)
 
 IS_BROWSER = false  // should be `false` while adding alerts
-
-fromMonth = 4
+fromMonth = 5
 fromDay = 1
 thruMonth = 1
 thruDay = 1
