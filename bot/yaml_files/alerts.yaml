@@ -2,7 +2,7 @@ alerts:
   less_than: # <
     base:
       pair: BTCUSDT
-      price: 16000
+      price: 26000
       rapid_alert: "on" # more rapid message
       msg: "💣"
     a1:

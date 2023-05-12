@@ -237,7 +237,7 @@ class BotHelperAsync:
         if cfg.MARGIN_BAL > 0.1:
             bug = "|"
         else:
-            bug = " :lion_face: "
+            bug = ":lion_face: "
 
         msg_to_print = f"{bug} {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t"
         if cfg.FIRST_PRINT_CYCLE:
@@ -282,7 +282,6 @@ class BotHelperAsync:
                             per_str = ""
                     except Exception as e:
                         log(f"E: {symbol} {e}")
-                        print_tb(e)
 
                     if symbol in "BTCUSDT":
                         self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
@@ -441,6 +440,9 @@ class BotHelperAsync:
 
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
+        if cfg.TYPE == "usdt":
+            log(f"\r{_date(_type='hour')} ", end="")
+
         self.CROSS_READ_FLAG = False
         cfg.BNB_QTY = 0
         cfg.BNB_BALANCE = 0
@@ -604,8 +606,11 @@ class BotHelperAsync:
             if config._env.isolated == "on":
                 own_usdt += await self._fetch_isolated_balance() * cfg.PRICES["BTCUSDT"]
 
-            if len(config.asset_list) > 0:
-                log(print_str, end="")
+            if len(config.asset_list) > 0 or cfg.MARGIN_BAL > 0:
+                if config.asset_list == 0:
+                    log(print_str, end="")
+                else:
+                    log(f"\r{_date(_type='hour')} {bug} {print_str}")
 
             if sum_busd > 0:
                 log(

@@ -1,4 +1,5 @@
 root:
+  goal: 10000
   is_balance_silent: true
   isolated_wallet_limit: 150
   discord_msg_above_usdt: 150

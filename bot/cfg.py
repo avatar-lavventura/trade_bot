@@ -6,7 +6,7 @@ from broker._utils.tools import _date
 from bot.sheets_lib import fetch_withdrawn
 
 #: Duration to sleep for next balance check. Fastest ~10 seconds @chrome, ~7 seconds @brave second per cycle.
-SLEEP_INTERVAL: int
+SLEEP_INTERVAL: int = 10  # changes from discord_balance.py
 STABLE_COINS = ["USDT", "BUSD", "TUSD", "USDC", "USDP", "BNB", "ETH", "PAXG", "TRY", "GBP"]
 ignore_list = ["info", "BTC", "BNB", "USDT", "timestamp", "datetime", "free", "used", "total"]
 pass_list = ["SNMUSDT", "PEPEBTC", "PEPEBUSD"]

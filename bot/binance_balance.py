@@ -80,21 +80,25 @@ async def clean_for_new_cycle() -> None:
 
 async def process(unix_timestamp_ms):
     """Start iteration to analyze open positions."""
-    await clean_for_new_cycle()
-    update_spot_timestamps(unix_timestamp_ms)  # current ts is saved
-    *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
-    if cfg.TYPE == "usdt":
-        config.env[cfg.TYPE].status["balance"] = usdt_bal
-        config.env[cfg.TYPE].status["free"] = free_usdt
-    elif cfg.TYPE == "btc":
-        config.env[cfg.TYPE].status["free"] = float(format(free_btc, ".8f"))
+    try:
+        await clean_for_new_cycle()
+        update_spot_timestamps(unix_timestamp_ms)  # current ts is saved
+        *_, usdt_bal, free_usdt, free_btc = await bot_async.spot_balance()
+        if cfg.TYPE == "usdt":
+            config.env[cfg.TYPE].status["balance"] = usdt_bal
+            config.env[cfg.TYPE].status["free"] = free_usdt
+        elif cfg.TYPE == "btc":
+            config.env[cfg.TYPE].status["free"] = float(format(free_btc, ".8f"))
 
-    for idx in range(1, 6):
-        config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
+        for idx in range(1, 6):
+            config.env[cfg.TYPE].risk[f"{idx}_per"] = _percent(config.env[cfg.TYPE].status["balance"], idx)
 
-    pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
-    if pos_count == 0:
-        delete_multiple_lines(1)
+        pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
+        if pos_count == 0:
+            delete_multiple_lines(1)
+    except Exception as e:
+        print_tb(e)
+        raise e
 
 
 async def process_main(obj):
@@ -102,11 +106,12 @@ async def process_main(obj):
 
     __ https://github.com/ccxt/ccxt/issues/9678#issuecomment-889993445
     """
-    bot_async.channel = obj.channel
-    bot_async.channel_log = obj.channel_log
-    bot_async.channel_alerts = obj.channel_alerts
-    config._reload()
     try:
+        bot_async.channel = obj.channel
+        bot_async.channel_log = obj.channel_log
+        bot_async.channel_alerts = obj.channel_alerts
+        config._reload()
+        #
         unix_timestamp_ms = helper.exchange.get_spot_timestamp()
         await process(unix_timestamp_ms)
     except RequestTimeout:

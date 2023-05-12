@@ -22,3 +22,6 @@ docker-compose up -d
 docker ps
 port_setup
 echo -e "\033[33;35m$(curl -s ifconfig.me)"
+
+docker compose up -d
+docker ps

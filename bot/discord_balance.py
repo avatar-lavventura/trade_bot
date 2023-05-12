@@ -177,8 +177,6 @@ class Discord_Alpy:
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
-        # if config.cfg["root"][cfg.TYPE]["status"] == "on":
-        #     await self.fetch_balance()
         await self.pre_discord_setup()
         await process_main(self)
 
