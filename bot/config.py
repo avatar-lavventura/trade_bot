@@ -6,7 +6,7 @@ from contextlib import suppress
 from datetime import datetime
 from email.utils import parsedate
 from pathlib import Path
-from typing import Dict
+from typing import Dict  # noqa: F401
 
 import ccxt.async_support as ccxt
 from broker._utils._log import log
@@ -224,7 +224,10 @@ class Config:
                 self.env[asset]._status.add_single_key("count", 0)
 
     def total_balance(self, _type) -> float:
-        return float(self.env[_type].estimated_balance.find_one("total_balance")["value"])
+        try:
+            return float(self.env[_type].estimated_balance.find_one("total_balance")["value"])
+        except:
+            return 0
 
     def estimated_balance(self) -> int:
         balance_brave = self.total_balance("usdt")

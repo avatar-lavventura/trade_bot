@@ -58,12 +58,11 @@ class Discord_Alpy:
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())
+                if cfg.discord_sent_msg:
+                    self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
 
-            if cfg.discord_sent_msg:
-                self.client.loop.run_until_complete(cfg.discord_sent_msg.delete())
-
-            self.client.loop.close()
-            log("\n## program is ended\t\t\t", is_write=False)
+                self.client.loop.close()
+                log("\n## program is ended\t\t\t", is_write=False)
         except SystemExit:
             pass
         except Exception as e:
@@ -170,15 +169,14 @@ class Discord_Alpy:
         """Restart the on going process based on the scheduled time."""
         with suppress(Exception):
             await cfg.discord_sent_msg.delete()
+            cfg.discord_sent_msg = None
 
         log()
         _console_clear()
-        log(f"#> -=-=-=-=-=-=-=-=-=- [g]RESTARTING[/g] {_date()} -=-=-=-=-=-=-=-=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):
-        # if config.cfg["root"][cfg.TYPE]["status"] == "on":
-        #     await self.fetch_balance()
         await self.pre_discord_setup()
         await process_main(self)
 

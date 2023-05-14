@@ -44,3 +44,6 @@ cpu.log
 tradingview-alerts-home/
 tradingview-alerts/node_modules
 bot/scripts/common_btc_markets.txt
+balance_btc.log
+balance_usdt.log
+*.tar.gz

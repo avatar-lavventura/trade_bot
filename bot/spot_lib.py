@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-from typing import Dict
+from typing import Dict  # noqa: F401
 
 from broker._utils._log import log
 from broker.errors import QuietExit

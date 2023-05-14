@@ -1,28 +1,37 @@
 version: "3"
 services:
-  app:
+  npm-app:
     image: "jc21/nginx-proxy-manager:latest"
-    restart: always
+    container_name: npm-app
+    restart: unless-stopped
     ports:
-      # These ports are in format <host-port>:<container-port>
       - "80:80" # Public HTTP Port
       - "443:443" # Public HTTPS Port
       - "81:81" # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
     environment:
-      DB_MYSQL_HOST: "db"
-      DB_MYSQL_PORT: 3306
-      DB_MYSQL_USER: "npm"
-      DB_MYSQL_PASSWORD: "npm"
-      DB_MYSQL_NAME: "npm"
+      # Mysql/Maria connection parameters:
+      DB_MARIADB_HOST: "db"
+      DB_MARIADB_PORT: 3306
+      DB_MARIADB_USER: "npm"
+      DB_MARIADB_PASSWORD: "npm"
+      DB_MARIADB_NAME: "npm"
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
     depends_on:
-      - db
+      - npm-db
+    networks:
+      - npm-nw
+      - npm-internal
 
-  db:
-    image: "jc21/mariadb-aria:latest"
-    restart: always
+  npm-db:
+    image: "mariadb:latest"
+    container_name: npm-db
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "npm"
       MYSQL_DATABASE: "npm"
@@ -30,3 +39,42 @@ services:
       MYSQL_PASSWORD: "npm"
     volumes:
       - ./data/mysql:/var/lib/mysql
+    networks:
+      - npm-internal
+
+networks:
+  npm-internal:
+  npm-nw:
+    external: true
+# version: "3"
+# services:
+#   app:
+#     image: "jc21/nginx-proxy-manager:latest"
+#     restart: always
+#     ports:
+#       # These ports are in format <host-port>:<container-port>
+#       - "80:80" # Public HTTP Port
+#       - "443:443" # Public HTTPS Port
+#       - "81:81" # Admin Web Port
+#     environment:
+#       DB_MYSQL_HOST: "db"
+#       DB_MYSQL_PORT: 3306
+#       DB_MYSQL_USER: "npm"
+#       DB_MYSQL_PASSWORD: "npm"
+#       DB_MYSQL_NAME: "npm"
+#     volumes:
+#       - ./data:/data
+#       - ./letsencrypt:/etc/letsencrypt
+#     depends_on:
+#       - db
+
+#   db:
+#     image: "jc21/mariadb-aria:latest"
+#     restart: always
+#     environment:
+#       MYSQL_ROOT_PASSWORD: "npm"
+#       MYSQL_DATABASE: "npm"
+#       MYSQL_USER: "npm"
+#       MYSQL_PASSWORD: "npm"
+#     volumes:
+#       - ./data/mysql:/var/lib/mysql
