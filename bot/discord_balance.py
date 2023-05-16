@@ -171,6 +171,9 @@ class Discord_Alpy:
             await cfg.discord_sent_msg.delete()
             cfg.discord_sent_msg = None
 
+        #: erase file contents of the log file '~/.bot/balance_btc.log'
+        fn = Path.home() / ".bot" / f"balance_{cfg.TYPE}.log"
+        open(fn, "w").close()
         log()
         _console_clear()
         log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)

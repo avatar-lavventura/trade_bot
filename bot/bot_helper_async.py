@@ -441,7 +441,7 @@ class BotHelperAsync:
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
         if cfg.TYPE == "usdt":
-            log(f"\r{_date(_type='hour')} ", end="")
+            log(f"\r{_date(_type='hour')} ", end="", is_write=False)
 
         self.CROSS_READ_FLAG = False
         cfg.BNB_QTY = 0
