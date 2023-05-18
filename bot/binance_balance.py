@@ -111,14 +111,13 @@ async def process_main(obj):
         bot_async.channel_log = obj.channel_log
         bot_async.channel_alerts = obj.channel_alerts
         config._reload()
-        #
         unix_timestamp_ms = helper.exchange.get_spot_timestamp()
         await process(unix_timestamp_ms)
     except RequestTimeout:
         _sys_exit("E: Timestamp for this request is outside of the recieve_window=5000")
     except KeyError as e:
         print_tb(e)
-        _sys_exit("KeyError")
+        _sys_exit("KeyError")  # helps to restart the process
     except Exception as e:
         if "quantity is zero" in str(e):
             log(f"#> {e} [green]don't worry")
