@@ -14,7 +14,11 @@ for var in "${strings[@]}"; do
 done
 cd $DIR
 
-# upload
-username=$(grep username ~/.nc | awk -F" " '{print $2}')
-passwd=$(grep password ~/.nc | awk -F" " '{print $2}')
-nextcloudcmd -s -n -u $username -p $passwd -h ~/Nextcloud https://@ppp.woelkli.com
+FILE=~/.nc
+if [ -f "$FILE" ]; then
+    # upload
+    username=$(grep username ~/.nc | awk -F" " '{print $2}')
+    passwd=$(grep password ~/.nc | awk -F" " '{print $2}')
+    nextcloudcmd -s -n -u $username -p $passwd -h ~/Nextcloud https://@ppp.woelkli.com
+    echo "done"
+fi

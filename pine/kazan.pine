@@ -1,7 +1,5 @@
 //@version=5
-// Created by AlperAlimoglu on 01-01-2022 * prepared for "5m"
-// Note: "1m" at usdt-spot is risky
-
+// Created by AlperAlimoglu on 01-01-2022 * was prepared for "5m" ; switched to "45m"
 strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
      shorttitle="alpy_vix",
      calc_on_order_fills=true,  // order immediate action
@@ -32,7 +30,7 @@ window() =>
     time >= start and time <= finish ? true : false
 
 BASE_DURATION = 10000 // equal to 1 second
-SLEEP_DUR = 60 * BASE_DURATION // ~60 seconds
+SLEEP_DUR = 120 * BASE_DURATION // ~120 seconds
 _now = timenow - 1600000000000
 
 is_sleep_pass = false

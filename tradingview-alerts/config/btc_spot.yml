@@ -2,7 +2,7 @@ files:
   input: pairs_btc.csv
 tradingview:
   chartUrl: https://www.tradingview.com/chart/bHXZrXAy/?symbol=BINANCE%3ABTCUSDT
-  interval: 5m # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
+  interval: 45m # examples: 1s | 30s | 1m | 15m | 1h | 1D | 1M
 alert:
   condition:
     primaryLeft: alpy_vix
