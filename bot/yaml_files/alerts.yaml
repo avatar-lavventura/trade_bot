@@ -7,7 +7,7 @@ alerts:
       msg: "💣"
     a1:
       pair: BONDBTC
-      price: 0.000135
+      price: 0.0001342
       rapid_alert: "on"
   greater_than: # >
     base:

@@ -137,3 +137,4 @@ zope.event==4.5.0
 zope.interface==5.4.0
 pyOpenSSL==23.1.1
 types-pyOpenSSL==23.0.0.4
+rumps==0.4.0
