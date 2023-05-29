@@ -6,7 +6,6 @@ import sys
 import time
 from contextlib import suppress
 from typing import Tuple
-from broker._utils.tools import delete_multiple_lines
 
 import aiohttp
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa

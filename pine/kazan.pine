@@ -285,17 +285,20 @@ else
         if col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and close > close[1] and close < close[3] and close < close[4]
             is_buy := true
     else if  timeframe.period == "45"  // 45m
-        if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
-            is_buy := true
+        // if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+        //     is_buy := true
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime
+            if low <= high[1] and low <= high[2]
+                is_buy := true
 
         if wt1 > 53
             is_buy := false
 
         if col == color.gray // and is_wt_cross_green
-            for i = 2 to 30
-                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
-                    if low <= low[i] and low <= low[i + 1]// close < low[i]
-                        is_buy := true
+            for i = 2 to 20
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime and low <= low[i] and low <= low[i + 1]
+                    is_buy := true
+                    break
 
                 if col[i] == color.gray and col[i + 1] == color.lime
                     break
@@ -345,7 +348,7 @@ else
     else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
         is_buy := true
 
-if not base_cond
+if not base_cond and timeframe.period != "45"
     is_buy := false
 
 if window()
