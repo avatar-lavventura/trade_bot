@@ -1,7 +1,5 @@
 //@version=5
-// Created by AlperAlimoglu on 01-01-2022 * prepared for "5m"
-// Note: "1m" at usdt-spot is risky
-
+// Created by AlperAlimoglu on 01-01-2022 * was prepared for "5m" ; switched to "45m"
 strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
      shorttitle="alpy_vix",
      calc_on_order_fills=true,  // order immediate action
@@ -12,8 +10,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      pyramiding=100000)
 
 IS_BROWSER = false  // should be `false` while adding alerts
-
-fromMonth = 4
+fromMonth = 5
 fromDay = 1
 thruMonth = 1
 thruDay = 1
@@ -33,7 +30,7 @@ window() =>
     time >= start and time <= finish ? true : false
 
 BASE_DURATION = 10000 // equal to 1 second
-SLEEP_DUR = 60 * BASE_DURATION // ~60 seconds
+SLEEP_DUR = 120 * BASE_DURATION // ~120 seconds
 _now = timenow - 1600000000000
 
 is_sleep_pass = false
@@ -288,8 +285,11 @@ else
         if col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and close > close[1] and close < close[3] and close < close[4]
             is_buy := true
     else if  timeframe.period == "45"  // 45m
-        if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
-            is_buy := true
+        // if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+        //     is_buy := true
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime
+            if low <= high[1] and low <= high[2]
+                is_buy := true
 
         if wt1 > 53
             is_buy := false
@@ -348,7 +348,7 @@ else
     else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
         is_buy := true
 
-if not base_cond
+if not base_cond and timeframe.period != "45"
     is_buy := false
 
 if window()
