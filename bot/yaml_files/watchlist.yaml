@@ -1,7 +1,7 @@
 watch:
   target:
     BONDUSDT: 5.3
-    BONDBTC: 185
+    BONDBTC: 17
   list:
     - FTMUSDT
     # - JOEUSDT

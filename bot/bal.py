@@ -54,7 +54,12 @@ async def process(max_sum, max_val):
 
     hot_sum = f2(bal_brave + bal_chrome)
     hot_btc_sum = format(TRBINANCE_BTC + float(all_btc_asset), ".8f")
-    _str = f"[w][{TRBINANCE_BTC} + {all_btc_asset} => {hot_btc_sum}][/w] |"
+
+    if all_btc_asset == 0:
+        _str = f"[w][{TRBINANCE_BTC}][/w] |"
+    else:
+        _str = f"[w][{TRBINANCE_BTC} + {all_btc_asset} => {hot_btc_sum}][/w] |"
+
     if chrome_spot_balance > 500:
         _str = f"{_str} {f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}])"
     else:

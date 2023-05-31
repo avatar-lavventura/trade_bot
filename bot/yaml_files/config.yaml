@@ -24,8 +24,8 @@ root:
     cross: on
     max_pos: 2
     initial: 11
-    multiply_ratio: 1.13
-    percent_change_to_add: 4
+    multiply_ratio: 2 # was 1.13
+    percent_change_to_add: 3 # was 4
     stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0
@@ -41,8 +41,8 @@ root:
     cross: on
     initial: 0.00011
     max_pos: 2
-    multiply_ratio: 1.13
-    percent_change_to_add: 4
+    multiply_ratio: 2 # was 1.13
+    percent_change_to_add: 3 # was 4
     stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0

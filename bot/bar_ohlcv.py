@@ -44,20 +44,22 @@ def one_hr(symbol, _since=60):
 
 def _fetch_ohlcv(ohlcv, is_compact=False):
     if is_compact:
-        _ohl = ohlcv[0][1:-2]
+        _ohl = ohlcv[0][1:-2] + ["{:,.0f}".format(ohlcv[0][-1])]
         if float(_ohl[0]) > 10000:  # for btc
-            for i in range(0, 3):
-                _ohl[i] = int(_ohl[i])
+            for i in range(0, 4):
+                if i != 3:
+                    _ohl[i] = int(_ohl[i])
         elif float(_ohl[0]) < 0.1:
-            for i in range(0, 3):
-                _ohl[i] = str(_ohl[i]).lstrip("0.").lstrip("0")
+            for i in range(0, 4):
+                if i != 3:
+                    _ohl[i] = str(_ohl[i]).lstrip("0.").lstrip("0")
 
         ohlcv = [_ohl]
 
     # convert it into Pandas DataFrame
     pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
     if is_compact:
-        df = pd.DataFrame(ohlcv, columns=["Open", "High", "Low"])
+        df = pd.DataFrame(ohlcv, columns=["Open", "High", "Low", "Volume"])
     else:
         df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
 

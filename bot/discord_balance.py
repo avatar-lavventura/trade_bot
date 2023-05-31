@@ -17,6 +17,7 @@ from bot import binance_balance, cfg
 from bot import config as helper
 from bot.binance_balance import process_main
 from bot.config import config
+from scripts.delist_log import _check_url
 
 logging.disable(logging.CRITICAL)
 logging.getLogger("requests").setLevel(logging.CRITICAL)
@@ -95,6 +96,7 @@ class Discord_Alpy:
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(helper.exchange.record_balance, "cron", hour="*", timezone=tz)
+        scheduler.add_job(self.check_delisting, "cron", hour="*", timezone=tz)
 
         # daily
         scheduler.add_job(  #: restart at fund times
@@ -157,6 +159,13 @@ class Discord_Alpy:
         except Exception as e:
             log(f"E: {e}")
 
+    async def check_delisting(self):
+        url = "https://www.binance.com/en/support/announcement/delisting?c=161&navId=161"
+        if _check_url(url, silent=True):
+            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
+            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
+            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
+
     async def update_current_date(self):
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")
 
@@ -171,6 +180,9 @@ class Discord_Alpy:
             await cfg.discord_sent_msg.delete()
             cfg.discord_sent_msg = None
 
+        #: erase file contents of the log file '~/.bot/balance_btc.log'
+        fn = Path.home() / ".bot" / f"balance_{cfg.TYPE}.log"
+        open(fn, "w").close()
         log()
         _console_clear()
         log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)

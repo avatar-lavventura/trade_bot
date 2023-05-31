@@ -284,7 +284,13 @@ class BotHelperAsync:
                         log(f"E: {symbol} {e}")
 
                     if symbol in "BTCUSDT":
-                        self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
+                        try:
+                            self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
+                        except Exception as e:
+                            # asset_price may be not set due to unresponsive Binance
+                            log(f"E: BTCUSDT {e}")
+                            raise QuietExit
+
                         if not (per_1h and per_1d) and float(lost) > 0:
                             log(
                                 f" :lion_face: {symbol}=[m]{asset_price}[/m]",
@@ -303,12 +309,25 @@ class BotHelperAsync:
 
                     if symbol in config.WATCHLIST_TARGET or symbol in config.WATCHLIST_BAR:
                         msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
-                        ohlcv = fund.RECORDS_BAR_1D[symbol]
+                        try:
+                            # it may unable to fetch key and their pricces at fund times like 03:00
+                            ohlcv = fund.RECORDS_BAR_1D[symbol]
+                        except Exception as e:
+                            log(f"E: {e}")
+                            await asyncio.sleep(60)
+                            raise e
+
                         df = _fetch_ohlcv(ohlcv, is_compact=True)
                         msg = f"{msg} {target_str}\n{df}"
                     else:
                         if symbol == "BTCUSDT":
-                            ohlcv = fund.RECORDS_BAR_1D[symbol]
+                            try:
+                                ohlcv = fund.RECORDS_BAR_1D[symbol]
+                            except Exception as e:
+                                log(f"E: {e}")
+                                await asyncio.sleep(60)
+                                raise e
+
                             # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
                             # breakpoint()  # DEBUG
@@ -441,7 +460,7 @@ class BotHelperAsync:
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
         if cfg.TYPE == "usdt":
-            log(f"\r{_date(_type='hour')} ", end="")
+            log(f"\r{_date(_type='hour')} ", end="", is_write=False)
 
         self.CROSS_READ_FLAG = False
         cfg.BNB_QTY = 0
@@ -781,9 +800,11 @@ class BotHelperAsync:
                 )
             elif float(lost_usdt) == 0:
                 # TODO: record this msg and print if a position opens in next cycle
-                msg = (
-                    f":bee: btc=`{s_btc}` ≈ {u_btc} + `${int(float(own_usdt) -_b)}` => **`${format(own_usdt, '.2f')}`**"
-                )
+                value = int(float(own_usdt) - _b)
+                if abs(value) < 0.1:
+                    msg = f":bee: btc=`{s_btc}` ≈ **{u_btc}**"
+                else:
+                    msg = f":bee: btc=`{s_btc}` ≈ {u_btc} + `${value}` => **`${format(own_usdt, '.2f')}`**"
             else:
                 msg = (
                     f"{msg}btc=**`{format(sum_btc, '.5f')}`** (:moneybag:**`{format(own_usdt, '.2f')}`**)\n"
