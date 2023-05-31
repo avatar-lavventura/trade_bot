@@ -9,7 +9,6 @@
 # TODO: check real occured leverage value
 # TODO: >3% profit put take-profit or trailing stop no matter what and always close the position in gain
 # TODO: For now play with 2x at max or 1x (normal).
-# TODO: Fetch signals and if line is red alert for reverse position or visa versa
 
 import sys
 import time

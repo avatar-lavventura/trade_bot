@@ -284,7 +284,13 @@ class BotHelperAsync:
                         log(f"E: {symbol} {e}")
 
                     if symbol in "BTCUSDT":
-                        self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
+                        try:
+                            self.btc_price_per(symbol, asset_price, per_1h, per_1d)  # TODO print this in bal.py
+                        except Exception as e:
+                            # asset_price may be not set due to unresponsive Binance
+                            log(f"E: BTCUSDT {e}")
+                            raise QuietExit
+
                         if not (per_1h and per_1d) and float(lost) > 0:
                             log(
                                 f" :lion_face: {symbol}=[m]{asset_price}[/m]",

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import math
 import os
 import pickle
@@ -7,6 +8,8 @@ import re
 import subprocess
 import sys
 import time
+import urllib  # the lib that handles the url stuff
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import requests
@@ -199,8 +202,43 @@ def load_obj(name):
         return pickle.load(f)
 
 
+def _check_url(url):
+    # response = urlopen(url).read()
+    data = urllib.request.urlopen(url)  # it's a file like object and works just like a file
+    for line in data:  # files are iterable
+        if "Will Delist" in line.decode("utf-8"):
+            _line = line.decode("utf-8")
+            result = re.search("Delisting(.*)catalogs", _line)
+            ralper = result.group(0)
+            d = ralper.split('"title"')
+            for myline in d:
+                try:
+                    rrr = re.search(':"(.*)type', myline)
+                    output = rrr.group(0)
+                    output = output.replace(':"', "").replace('","type', "")
+                    print(output)
+                except:
+                    pass
+
+
 def check_url(url):
     # response = urlopen(url).read()
+    data = urllib.request.urlopen(url)  # it's a file like object and works just like a file
+    for line in data:  # files are iterable
+        if "Will Delist" in line.decode("utf-8"):
+            _line = line.decode("utf-8")
+            result = re.search("Delisting(.*)catalogs", _line)
+            ralper = result.group(0)
+            d = ralper.split('"title"')
+            for myline in d:
+                try:
+                    rrr = re.search(':"(.*)type', myline)
+                    output = rrr.group(0)
+                    output = output.replace(':"', "").replace('","type', "")
+                    print(output)
+                except:
+                    pass
+
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95"
@@ -208,10 +246,12 @@ def check_url(url):
         )
     }
 
-    # download the homepage
-    _response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(_response.text, "lxml")
-    announcements = soup.find_all("a", {"class": "css-1neg3js"})  #
+    # # download the homepage
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "lxml")
+    # soup.find_all('a')
+    announcements = soup.find_all("a", {"class": "css-1txs1yu"})  #
+    breakpoint()  # DEBUG
     for ann in announcements:
         announcement = ann.text.strip()
         find_between(announcement, "(", ")")
@@ -297,23 +337,7 @@ def run():
 
 
 if __name__ == "__main__":
-    print("To run: nohup python -u ./binance_track.py > cmd.log & \n")
-    HOME = Path.home()
-    _cfg = Yaml(HOME / ".binance.yaml")
-    api_key = str(_cfg["b"]["key"])
-    api_secret = str(_cfg["b"]["secret"])
-    client = Client(api_key, api_secret)
-
-    # get latest price from Binance API
-    btc_price = client.get_symbol_ticker(symbol="BTCUSDT")
-    # print full output (dictionary)
-    print(btc_price)
-    print(client.futures_account_balance())
-
-    # print(client.get_margin_account())
-    for d in client.get_margin_account()["userAssets"]:
-        if d["free"] != "0":
-            print(d)
-
-    # ua = {d['asset']: d for d in data['userAssets']}
-    # print(ua['BTC']['free'])
+    # url = "https://www.binance.com/en/support/announcement/c-49"
+    url = "https://www.binance.com/en/support/announcement/delisting?c=161&navId=161"
+    print(f"Link={url}\n")
+    _check_url(url)

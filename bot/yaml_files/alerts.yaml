@@ -20,7 +20,7 @@ alerts:
       rapid_alert: "off"
     a2:
       pair: BONDUSDT
-      price: 4.05
+      price: 3.70
       rapid_alert: "off"
   balance_greater_than:
     value: 10000
