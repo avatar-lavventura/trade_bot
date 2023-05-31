@@ -16,7 +16,7 @@ The payment rate exchanged between the long and short positions for the next
 funding. If the funding rate is positive, longs pay shorts. If negative, shorts
 pay longs.
 
-* HEADUP at cross sell normal intead of repay in some casees just be careful
+* HEADSUP at cross sell normal intead of repay in some casees just be careful
 
 * cross'da zararina kapatip alttan alirsan kardasin
 Ornek: 7k 1650 kapatip 1560 (5%) altindan ayni sekilde alabiliyordum. Bunu

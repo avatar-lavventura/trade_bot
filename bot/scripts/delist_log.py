@@ -5,7 +5,9 @@ import urllib  # the lib that handles the url stuff
 
 import requests  # noqa
 
-LATEST_STRING = "Notice of Removal of Trading Pairs - 2023-06-01"
+LATEST_STRING = (
+    "Binance Futures Will Delist and Update the Leverage Margin Tiers of USDⓈ-M 1000LUNCBUSD Perpetual Contract"
+)
 
 
 def _check_url(url, silent=False) -> bool:
@@ -26,7 +28,7 @@ def _check_url(url, silent=False) -> bool:
                     if "2022-" in output:
                         break
 
-                    if output == LATEST_STRING:
+                    if LATEST_STRING in output:
                         new_alerts = False
                         if not silent:
                             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -50,4 +52,5 @@ if __name__ == "__main__":
     # url = "https://www.binance.com/en/support/announcement/c-49"
     url = "https://www.binance.com/en/support/announcement/delisting?c=161&navId=161"
     print(f"__ {url}\n")
-    _check_url(url)
+    output = _check_url(url)
+    print(output)

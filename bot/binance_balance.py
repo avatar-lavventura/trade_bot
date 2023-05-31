@@ -95,7 +95,8 @@ async def process(unix_timestamp_ms):
 
         pos_count = config.env[cfg.TYPE]._status.find_one("count")["value"]
         if pos_count == 0:
-            delete_multiple_lines(1)
+            print("")
+            delete_multiple_lines(2)  # delete_lines
     except Exception as e:
         print_tb(e)
         raise e

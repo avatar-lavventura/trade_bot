@@ -4,13 +4,8 @@ from broker._utils._log import log
 from tradingview_ta import Interval, TA_Handler
 
 
-"""
-https://github.com/brian-the-dev/python-tradingview-ta
-https://www.tradingview.com/chart/bHXZrXAy/?symbol=BINANCE%3ACOCOSUSDT
-"""
-
-
 def main():
+    # https://github.com/brian-the-dev/python-tradingview-ta
     # https://tvdb.brianthe.dev
     tesla = TA_Handler(
         symbol="YKBNK",

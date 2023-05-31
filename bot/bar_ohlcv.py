@@ -96,7 +96,7 @@ def main(symbol):
 
 
 if __name__ == "__main__":
-    symbol = "COCOSUSDT"
+    symbol = "BONDUSDT"
     symbol = "BTCUSDT"
     main(symbol)
     # symbol = "FTMUSDT"
