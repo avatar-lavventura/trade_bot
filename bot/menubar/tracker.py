@@ -15,12 +15,11 @@ is_motivation_msg = True
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT", "USDTTRY"]
 assets += ["BONDUSDT", "BONDBTC"]
-sleep_duration = 20
+
 # MSG = "binance: We are unable to provide any donation -- makes you angry."
 MSG = "The most important rule in trading is to protect your capital at all cost."
 
 cg = CoinGeckoAPI()
-
 for idx, asset in enumerate(reversed(assets)):
     try:
         output = exchange.fetch_ticker(asset)
@@ -62,7 +61,7 @@ def tracker_clock_string():
         if asset == "":
             continue
 
-        if asset == "COCOSBTC":
+        if asset == "COMBOBTC":
             price = cg.get_price(ids="cocos-bcx", vs_currencies="btc")
             price = "{:.8f}".format(price["cocos-bcx"]["btc"]).strip("0.").lstrip("0")
         else:
@@ -73,7 +72,8 @@ def tracker_clock_string():
                     USDTTRY = exchange.fetch_ticker("USDTTRY")
                     price = float(format(asset_price["last"] / USDTTRY["last"], ".10f"))
                 else:
-                    price = exchange.fetch_ticker(asset)["last"]
+                    _price = exchange.fetch_ticker(asset)
+                    price = (_price["bid"] + _price["ask"]) / 2  # was: _price["last"]
 
                 asset = asset.replace("USDT", "")
                 if 1 <= price <= 10:
@@ -86,6 +86,9 @@ def tracker_clock_string():
                             price = "{:.10f}".format(price).lstrip("0.").lstrip("0")
                         else:
                             price = "{:.8f}".format(price).lstrip("0.").lstrip("0")
+                            if asset == "BONDBTC":
+                                price = round(int(price) / 10)
+
                     elif price > 1000:
                         price = round(price)
                     elif price > 1:
@@ -117,7 +120,7 @@ def tracker_clock_string():
                 else:
                     msg = f"{MSG} {msg} "
         else:
-            msg = "❗ no-internet❗"
+            msg = "❗ no-internet ❗"
 
     return msg
 
@@ -139,7 +142,7 @@ def main():
         else:
             app.title = "Not tracking"
 
-    timer = rumps.Timer(timer_func, sleep_duration)
+    timer = rumps.Timer(timer_func, interval=20)
     timer.start()
     app.run()
 
