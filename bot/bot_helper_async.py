@@ -9,7 +9,7 @@ from typing import Tuple
 
 import aiohttp
 from broker._utils._log import _console_clear, log, ok  # flake8: noqa
-from broker._utils.tools import _date, decimal_count, delete_multiple_lines, print_tb
+from broker._utils.tools import _date, decimal_count, print_tb
 from broker.errors import QuietExit
 
 from bot import cfg
@@ -242,8 +242,7 @@ class BotHelperAsync:
         msg_to_print = f"{bug} {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t"
         if cfg.FIRST_PRINT_CYCLE:
             log(msg_to_print, is_write=False)
-            time.sleep(0.1)
-            delete_multiple_lines(2)
+            print()
         else:
             log(msg_to_print, end="\r", is_write=False)
 
@@ -459,9 +458,6 @@ class BotHelperAsync:
 
     async def spot_balance(self, is_limit=True) -> Tuple[float, float, float, float]:
         """Calculate USDT balance in spot."""
-        if cfg.TYPE == "usdt":
-            log(f"\r{_date(_type='hour')} ", end="", is_write=False)
-
         self.CROSS_READ_FLAG = False
         cfg.BNB_QTY = 0
         cfg.BNB_BALANCE = 0
@@ -572,7 +568,7 @@ class BotHelperAsync:
             #: estimated balance:
             if cfg.MARGIN_BAL > 0.1:
                 _total_balance += float(cfg.MARGIN_BAL)
-                log(f":lion_face: cross_usdt=[cy]${cfg.MARGIN_BAL}[/cy] ", end="")
+                log(f":lion_face: cross=[cy]${cfg.MARGIN_BAL}[/cy] ", end="")
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -607,7 +603,7 @@ class BotHelperAsync:
                 if sum_busd > 0.1:
                     print_str += f"busd={sum_busd + cfg.MARGIN_BAL} "
                 else:
-                    print_str += f"cross_usdt=[cy]${cfg.MARGIN_BAL}[/cy] "
+                    print_str += f"cross=[cy]${cfg.MARGIN_BAL}[/cy] "
             else:
                 cfg.MARGIN_BAL = 0
 
@@ -629,7 +625,7 @@ class BotHelperAsync:
                 if config.asset_list == 0:
                     log(print_str, end="")
                 else:
-                    log(f"\r{_date(_type='hour')} {bug} {print_str}")
+                    log(f"{_date(_type='hour')} {bug} {print_str}")
 
             if sum_busd > 0:
                 log(
@@ -947,7 +943,7 @@ class BotHelperAsync:
 
             return float(cfg.PRICES[asset])
         except Exception as e:
-            log(f"E: {e}")
+            print_tb(e)
             if "binance does not have market symbol" in str(e):
                 try:
                     if "USDT" in asset:

@@ -62,7 +62,7 @@ def tracker_clock_string():
         if asset == "":
             continue
 
-        if asset == "COCOSBTC":
+        if asset == "COMBOBTC":
             price = cg.get_price(ids="cocos-bcx", vs_currencies="btc")
             price = "{:.8f}".format(price["cocos-bcx"]["btc"]).strip("0.").lstrip("0")
         else:

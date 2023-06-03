@@ -64,10 +64,10 @@ password: changeme
 
 *** Details
 #+begin_src bash
-Domain name: alpyr.duckdns.org     | alpybot.duckdns.org
-Scheme: http                       | http
-<IP>                               | same_ip
-Forward: 81                        | 5000
+Domain name: eblocbroker.duckdns.org  | alpybot.duckdns.org
+Scheme: http                          | http
+<IP>                                  | same_ip
+Forward: 81                           | 5000
 [X] Block Comman Exploits
 [X] Websockets Support
 
@@ -77,8 +77,7 @@ Forward: 81                        | 5000
 *** SSL
 #+begin_src bash
 Request new SSLcertificate
-[X] HTTP/2 Support
-[X] Force SSL
+[X] Force SSL        [X] HTTP/2 Support
 [X] HSTS Enables
 
 [SAVE]

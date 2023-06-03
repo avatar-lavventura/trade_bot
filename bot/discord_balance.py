@@ -98,6 +98,8 @@ class Discord_Alpy:
         scheduler.add_job(helper.exchange.record_balance, "cron", hour="*", timezone=tz)
         scheduler.add_job(self.check_delisting, "cron", hour="*", timezone=tz)
 
+        # scheduler.add_job(self.check_delisting, "cron", second="*", timezone=tz)
+
         # daily
         scheduler.add_job(  #: restart at fund times
             self.restart, "cron", year="*", month="*", day="*", hour="03,11,19", minute="00", second="0", timezone=tz
