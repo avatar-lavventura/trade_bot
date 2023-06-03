@@ -16,7 +16,7 @@ bleach==4.1.0
 blinker==1.4
 bs4==0.0.1
 bump2version==1.0.1
-ccxt==3.1.14
+ccxt==3.1.31
 certifi==2021.5.30
 cffi==1.14.6
 cfgv==3.3.0
@@ -26,7 +26,7 @@ chromedriver==2.24.1
 click==8.1.2
 colorama==0.4.4
 commonmark==0.9.1
-cryptography==3.4.7
+cryptography==41.0.1
 dateparser==1.0.0
 decorator==5.0.9
 delete==0.3.0
@@ -102,10 +102,10 @@ quart==0.17.0
 regex==2021.8.21
 requests==2.26.0
 rich==13.3.5
+rumps==0.4.0 ; sys_platform == "darwin"
 ruamel.yaml==0.17.13
 ruamel.yaml.clib==0.2.6
 ruamel.yaml==0.17.13
-rumps==0.4.0
 selenium==3.141.0
 simplejson==3.17.4
 six==1.16.0
@@ -141,4 +141,3 @@ zope.event==4.5.0
 zope.interface==5.4.0
 pyOpenSSL==23.1.1
 types-pyOpenSSL==23.0.0.4
-rumps==0.4.0

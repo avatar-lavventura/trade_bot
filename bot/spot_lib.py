@@ -52,7 +52,7 @@ async def new_order(symbol, side, position_amt, isolated_wallet, usdt_bal, mul=N
         if config.status["root"]["free_usdt"] > abs(new_amount_margin):
             await create_market_order(symbol, new_amount, side)
         else:
-            raise QuietExit(f"warning: not enough free USDT, amount={new_amount} margin={new_amount_margin}")
+            raise QuietExit(f"warning: not enough USDT, amount={new_amount} margin={new_amount_margin}")
     elif _per < 100:
         log(f"warning: Total locked amount is {_per}%", end="")
 

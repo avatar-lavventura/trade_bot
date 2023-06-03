@@ -10,7 +10,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      pyramiding=100000)
 
 IS_BROWSER = false  // should be `false` while adding alerts
-fromMonth = 5
+fromMonth = 6
 fromDay = 1
 thruMonth = 1
 thruDay = 1
@@ -18,7 +18,16 @@ thruYear = 3000
 fromYear = 2023
 if IS_BROWSER
     fromYear := 2021
-    fromMonth := 1
+    fromMonth := 3
+
+//
+shortest = ta.ema(close, 20)
+short = ta.ema(close, 50)
+longer = ta.ema(close, 100)
+longest = ta.ema(close, 200)
+// ema_max = math.max(math.max(math.max(shortest,short), longer), longest)
+ema_max = math.max(shortest,short, longer, longest)
+//
 
 testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
@@ -294,6 +303,9 @@ else
         if wt1 > 53
             is_buy := false
 
+        if col == color.lime and col[1] == color.lime and col_aggr == color.orange and col_aggr[1] == color.orange
+            is_buy := true
+
         if col == color.gray // and is_wt_cross_green
             for i = 2 to 20
                 if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime and low <= low[i] and low <= low[i + 1]
@@ -349,6 +361,9 @@ else
         is_buy := true
 
 if not base_cond and timeframe.period != "45"
+    is_buy := false
+
+if timeframe.period == "45" and close > ema_max
     is_buy := false
 
 if window()

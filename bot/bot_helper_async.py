@@ -216,7 +216,7 @@ class BotHelperAsync:
                 log(f"E: discord: {sub_str}")
 
             if "Service Unavailable" in str(e):
-                self.restart()
+                await self.restart()
 
             cfg.discord_message = f"`{_date(_format='%m-%d %H:%M:%S')}`\n"
             if "Too Many Requests" in sub_str:
@@ -243,7 +243,7 @@ class BotHelperAsync:
         if cfg.FIRST_PRINT_CYCLE:
             log(msg_to_print, is_write=False)
             print()
-        else:
+        elif config._env._status.find_one("real_pos_count")["value"] < 2:
             log(msg_to_print, end="\r", is_write=False)
 
     async def _discord_send(self, msg, lost, pos_count, name, free, only_btc) -> None:
@@ -280,7 +280,12 @@ class BotHelperAsync:
                         else:
                             per_str = ""
                     except Exception as e:
-                        log(f"E: {symbol} {e}")
+                        if "502 Bad Gateway" in str(e):
+                            log(f"E: {symbol} bitmex GET | 502 Bad Gateway")
+                        else:
+                            log(f"E: {symbol} {e}")
+
+                        raise QuietExit
 
                     if symbol in "BTCUSDT":
                         try:
@@ -518,18 +523,24 @@ class BotHelperAsync:
                 if not (self.only_usdt == 0 and only_btc == 0 and cfg.BNB_BALANCE == 0):
                     is_first_line_printed = True
                     if only_btc == 0:
-                        if self.only_usdt == _total_bal_str:
+                        if self.only_usdt == 0:
                             log(
-                                f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | "
-                                % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                f"{bug} f_btc=%.0f bnb=[cy]$%.2f[/cy] | " % (only_btc * 1000, cfg.BNB_BALANCE),
                                 end="",
                             )
                         else:
-                            log(
-                                f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| "
-                                % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
-                                end="",
-                            )
+                            if self.only_usdt == _total_bal_str:
+                                log(
+                                    f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | "
+                                    % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                    end="",
+                                )
+                            else:
+                                log(
+                                    f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| "
+                                    % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                    end="",
+                                )
                     else:
                         log(
                             f"{bug} usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) bnb=[cy]$%.2f[/cy] "

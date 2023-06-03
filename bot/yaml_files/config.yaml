@@ -16,12 +16,12 @@ root:
   # ignore_position_log:
   #   - OAX
   usdt:
-    status: off # "on" or "off"
+    status: on # "on" or "off"
     sleep_interval: 11
     is_manual_trade: false
     auto_buy_bnb: off
     isolated: off
-    cross: on
+    cross: off
     max_pos: 2
     initial: 11
     multiply_ratio: 2 # was 1.13

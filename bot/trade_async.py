@@ -443,11 +443,11 @@ class BotHelper:
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
         if self.strategy.market.lower() == "usdt" and free_balance < config.cfg["root"]["usdt"]["initial"]:
-            raise QuietExit(f"not enough free USDT([cy]${round(free_balance)}[/cy])")
+            raise QuietExit(f"not enough USDT([cy]${round(free_balance)}[/cy])")
 
         # if self.strategy.market == "USDTPERP":
         #     self.pre_check_usdtperp(
-        #         free_balance, f"not enough free usdt([cyan]{round(free_balance)}$[cyan]),side={self.strategy.side}"
+        #         free_balance, f"not enough USDT([cyan]{round(free_balance)}$[cyan]),side={self.strategy.side}"
         #     )
 
     async def trade_main(self, data_msg) -> None:

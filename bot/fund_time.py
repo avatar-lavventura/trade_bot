@@ -83,7 +83,11 @@ class Fund:
     async def _bar_ohlcv_1d(self, symbol):
         times_ts = self.parse_now(datetime.utcnow())
         if symbol == "BTCUSDT":
-            output = await self.bitmex.fetch_ohlcv(symbol="BTC/USDT:USDT", timeframe="1h", limit=24)
+            try:
+                output = await self.bitmex.fetch_ohlcv(symbol="BTC/USDT:USDT", timeframe="1h", limit=24)
+            except:
+                output = await self.binance.fetch_ohlcv(symbol=symbol, timeframe="1h", limit=24)
+
             _bar = self.parse_bar(output)
             cfg.PRICES["BTCUSDT"] = _bar[0][4]
         else:
