@@ -524,10 +524,16 @@ class BotHelperAsync:
                     is_first_line_printed = True
                     if only_btc == 0:
                         if self.only_usdt == 0:
-                            log(
-                                f"{bug} f_btc=%.0f bnb=[cy]$%.2f[/cy] | " % (only_btc * 1000, cfg.BNB_BALANCE),
-                                end="",
-                            )
+                            if only_btc == 0:
+                                log(
+                                    f"{bug} bnb=[cy]$%.2f[/cy] " % (cfg.BNB_BALANCE),
+                                    end="",
+                                )
+                            else:
+                                log(
+                                    f"{bug} f_btc=%.0f bnb=[cy]$%.2f[/cy] " % (only_btc * 1000, cfg.BNB_BALANCE),
+                                    end="",
+                                )
                         else:
                             if self.only_usdt == _total_bal_str:
                                 log(
@@ -948,9 +954,11 @@ class BotHelperAsync:
                 asset_price = await self.spot_fetch_ticker(f"{_asset}TRY")
                 USDTTRY = await self.spot_fetch_ticker("USDTTRY")
                 cfg.PRICES[asset] = float(format(asset_price / USDTTRY, ".10f"))
-            else:
-                #: record prices in case could be used in the same cycle
-                cfg.PRICES[asset] = price_ticker["last"]
+            else:  #: record prices in case could be used in the same cycle
+                if asset == "BONDBTC":
+                    cfg.PRICES[asset] = (price_ticker["ask"] + price_ticker["bid"]) / 2
+                else:
+                    cfg.PRICES[asset] = price_ticker["last"]
 
             return float(cfg.PRICES[asset])
         except Exception as e:

@@ -96,7 +96,8 @@ class Discord_Alpy:
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(helper.exchange.record_balance, "cron", hour="*", timezone=tz)
-        scheduler.add_job(self.check_delisting, "cron", hour="*", timezone=tz)
+        if cfg.TYPE == "usdt":
+            scheduler.add_job(self.check_delisting, "cron", hour="*", timezone=tz)
 
         # scheduler.add_job(self.check_delisting, "cron", second="*", timezone=tz)
 
@@ -162,11 +163,9 @@ class Discord_Alpy:
             log(f"E: {e}")
 
     async def check_delisting(self):
-        url = "https://www.binance.com/en/support/announcement/delisting?c=161&navId=161"
-        if _check_url(url, silent=True):
-            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
-            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
-            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
+        if _check_url("https://www.binance.com/en/support/announcement/delisting?c=161&navId=161", silent=True):
+            for n in range(3):
+                await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
 
     async def update_current_date(self):
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")

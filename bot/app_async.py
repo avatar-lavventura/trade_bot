@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from pathlib import Path
+from typing import Tuple
 
 import quart.flask_patch  # noqa
 from broker._utils._log import log
@@ -82,21 +83,26 @@ async def notify():
 
 
 @app.route("/webhook", methods=["POST"])
-async def webhook() -> (str, int):
+async def webhook() -> Tuple[str, int]:  # type: ignore
     """Receive webhook message from the tradingview-alerts."""
     if request.method != "POST":
         abort(400)
 
     config._reload_cfg()
     data_msg = request.get_data(as_text=True)
+    if data_msg[0:2] == "0x":
+        # https://ebloc-broker-authenticate.duckdns.org/oauth-redirect.php?code=3NVZD3
+        print(data_msg)
+        return "OK", 200
+
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
             await do_alert(data_msg)
             text = "  NONE  "
             if data_msg.upper() == "RED":
-                text = f"  [red]{data_msg.upper()}[/red]  "
+                text = "  :red_circle:  "
             elif data_msg.upper() == "GREEN":
-                text = f"  [green]{data_msg.upper()}[/green]  "
+                text = "  :green_circle:  "
 
             log(
                 f"    {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]  ",
