@@ -17,10 +17,9 @@ thruDay = 1
 thruYear = 3000
 fromYear = 2023
 if IS_BROWSER
-    fromYear := 2021
-    fromMonth := 3
+    fromYear := 2023
+    fromMonth := 4
 
-//
 shortest = ta.ema(close, 20)
 short = ta.ema(close, 50)
 longer = ta.ema(close, 100)
@@ -314,6 +313,11 @@ else
 
                 if col[i] == color.gray and col[i + 1] == color.lime
                     break
+
+        if col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and col[5] == color.lime  and col[6] == color.lime and col[7] == color.lime and col[8] == color.lime and col[9] == color.lime
+            if col == color.gray or col_aggr == color.orange
+                if close < shortest and close < short and close < longer and close < longest
+                    is_buy := true
     else if  timeframe.period == "60"  // 1h
         if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
             is_buy := true
