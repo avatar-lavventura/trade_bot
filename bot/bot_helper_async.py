@@ -191,7 +191,7 @@ class BotHelperAsync:
 
         log()
         _console_clear()
-        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<# ", is_write=False, end="")
         os.execv(sys.argv[0], sys.argv)
 
     async def _discord_sent_msg(self, msg):
@@ -309,7 +309,14 @@ class BotHelperAsync:
 
                     target_str = ""
                     if symbol in config.WATCHLIST_TARGET:
-                        target_str = f"🎯{config.WATCHLIST_TARGET[symbol]}"
+                        target_str = f"🎯{config.WATCHLIST_TARGET[symbol]} "
+
+                    if symbol in config.WATCHLIST_LIQUIDATE:
+                        target_str += f"😨{config.WATCHLIST_LIQUIDATE[symbol]} "
+                        ap = float(asset_price)
+                        risk = ((ap - config.WATCHLIST_LIQUIDATE[symbol]) / ap) * 100
+                        if risk > 0:
+                            target_str += f"⬇{format(risk, '.2f')}%"
 
                     if symbol in config.WATCHLIST_TARGET or symbol in config.WATCHLIST_BAR:
                         msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
@@ -553,6 +560,8 @@ class BotHelperAsync:
                             f"{_total_bal_str}| " % (self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
                             end="",
                         )
+                else:
+                    log(f"{bug} [blue]{_date(_type='hour')}[/blue]")
             elif not (sum_btc == 0 and self.only_usdt == 0 and only_btc == 0 and cfg.BNB_BALANCE == 0):
                 is_first_line_printed = True
                 if only_btc == 0:
@@ -726,14 +735,13 @@ class BotHelperAsync:
                     self.lost += sum(losts)
 
         lost = self.lost
+        free = format(float(config.env[cfg.TYPE].status["free"]), ".2f")  # type: ignore
         if cfg.TYPE == "usdt":
-            free = format(float(config.env["usdt"].status["free"]), ".2f")
             if lost > -5:
                 _msg = cfg.discord_message
             else:
                 _msg = cfg.discord_message_full
         else:
-            free = format(float(config.env["btc"].status["free"]), ".5f")
             if lost > -0.0001:
                 _msg = cfg.discord_message
             else:
@@ -795,6 +803,8 @@ class BotHelperAsync:
                 else:
                     msg = f"{_msg}"
 
+                msg = f":lion_face:{msg}"
+
             config._env.balance_sum.add_single_key("btc", 0)
             config._env.balance_sum.add_single_key("usdt", format(sum_usdt, ".2f"))
         else:
@@ -817,7 +827,10 @@ class BotHelperAsync:
                 if abs(value) < 0.1:
                     msg = f":bee: btc=`{s_btc}` ≈ **{u_btc}**"
                 else:
-                    msg = f":bee: btc=`{s_btc}` ≈ {u_btc} + `${value}` => **`${format(own_usdt, '.2f')}`**"
+                    if value < 0:
+                        msg = f":bee: btc=`{s_btc}` ≈ {u_btc} => **`${format(own_usdt, '.2f')}`**"
+                    else:
+                        msg = f":bee: btc=`{s_btc}` ≈ {u_btc} + `${value}` => **`${format(own_usdt, '.2f')}`**"
             else:
                 msg = (
                     f"{msg}btc=**`{format(sum_btc, '.5f')}`** (:moneybag:**`{format(own_usdt, '.2f')}`**)\n"

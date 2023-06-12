@@ -5,7 +5,7 @@ import os
 import sys
 from contextlib import suppress
 from pathlib import Path
-
+import time
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from broker._utils import _log
@@ -68,7 +68,8 @@ class Discord_Alpy:
             pass
         except Exception as e:
             print_tb(e)
-            breakpoint()  # DEBUG
+            time.sleep(10)
+            self.restart()
 
     def constructor(self):
         helper.exchange._set_bnbusdt()
@@ -186,7 +187,7 @@ class Discord_Alpy:
         open(fn, "w").close()
         log()
         _console_clear()
-        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<#", is_write=False)
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<# ", is_write=False, end="")
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

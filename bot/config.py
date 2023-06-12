@@ -348,6 +348,9 @@ class Config:
         self.reload_wavetrend()
         self.goal = self.yaml_wrapper(self.base_dir / "goal.yaml")
         self.ALERTS = self.alerts["alerts"]
+        if "liquidate" in self.watchlist["watch"]:
+            self.WATCHLIST_LIQUIDATE = self.watchlist["watch"]["liquidate"]
+
         self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
         self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
         self.WATCHLIST = self.watchlist["watch"]["list"]
