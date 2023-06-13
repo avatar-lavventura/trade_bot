@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from broker._utils._log import log
 import ccxt
+from broker._utils._log import log
 
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 exchange.load_markets()
