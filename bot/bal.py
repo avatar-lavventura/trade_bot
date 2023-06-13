@@ -36,14 +36,13 @@ async def process(max_sum, max_val):
     bal_chrome = config.total_balance("btc")
     _sum = int(bal_brave + bal_chrome + WITHDRAWN_USDT + (TRBINANCE_BTC * BTCUSDT) - EKLEME)
     all_btc_asset = format(float(config.env["btc"].balance_sum.find_one("usdt")["value"]) / BTCUSDT, ".8f")
-    if _sum > max_val:
-        max_val = _sum
-        start = "[blue]*****"
-
-    if _sum > max_sum and max_sum != 0 and not start:
-        start = "[green]*****"
 
     max_sum = _sum
+    max_sum = _sum = int(0.21439941 * BTCUSDT + (1576 + 1000 + 500 + 1000 + 500 - 80 - 5))  # delete_me
+    """ uncomment_me
+    if _sum > max_sum and max_sum != 0 and not start:
+        start = "[green]*****"
+    """
     log(f"{_date(_type='compact')} ", h=False, end="")
     c1 = "green on black blink"
     chrome_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
@@ -53,17 +52,27 @@ async def process(max_sum, max_val):
         return
 
     hot_sum = f2(bal_brave + bal_chrome)
+    if float(hot_sum) > max_val:
+        max_val = float(hot_sum)
+        start = "[blue]*****"
+    else:
+        start = ""
+
     hot_btc_sum = format(TRBINANCE_BTC + float(all_btc_asset), ".8f")
 
     if all_btc_asset == 0:
         _str = f"[w][{TRBINANCE_BTC}][/w] |"
     else:
-        _str = f"[w][{TRBINANCE_BTC} + {all_btc_asset} => {hot_btc_sum}][/w] |"
+        if all_btc_asset != hot_btc_sum:
+            _str = f"[w][{TRBINANCE_BTC} + {all_btc_asset} => {hot_btc_sum}][/w]"
+        else:
+            _str = f"[w]{hot_btc_sum}[/w]"
 
-    if chrome_spot_balance > 500:
-        _str = f"{_str} {f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}])"
-    else:
-        _str = f"{_str} {int(bal_brave)} , {int(bal_chrome)}"
+    if bal_brave > 1.0:
+        if chrome_spot_balance > 500:
+            _str = f" | {_str} {f2(bal_brave)} , {f2(bal_chrome)} ([{c1}]${chrome_spot_balance}[/{c1}])"
+        else:
+            _str = f" | {_str} {int(bal_brave)} , {int(bal_chrome)}"
 
     _str = f"{_str} => [[orange]{hot_sum}[/orange] [green]{_sum}[/green]] [ib]{max_val}"
     if goal == 0:
@@ -75,6 +84,7 @@ async def process(max_sum, max_val):
         sh.sheet1.update("A20:D20", [[_timestamp(), int(bal_brave), int(bal_chrome), _sum]])
 
     time.sleep(19)
+    return max_val
 
 
 async def main():
@@ -84,7 +94,7 @@ async def main():
         max_val = goal
 
     while True:
-        await process(max_sum, max_val)
+        max_val = await process(max_sum, max_val)
 
 
 async def close():
@@ -97,7 +107,6 @@ async def close():
 
 
 if __name__ == "__main__":
-    #
     try:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main())

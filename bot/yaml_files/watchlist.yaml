@@ -1,21 +1,12 @@
 watch:
   target:
-    BONDUSDT: 5.3
-    BONDBTC: 17
-  list:
-    - FTMUSDT
-    # - JOEUSDT
-    # - OAXBTC
-    # - OAXUSDT
-    # - LQTYUSDT
-    # - IDUSDT
+    BONDUSDT: 4.30
+    BONDBTC: 168
+  liquidate:
+    BONDBTC: 8128
   bar:
     - BONDBTC
     - BONDUSDT
     - DREPUSDT
-    - PEPEUSDT
-    # - BONDUSDT
-    # - LQTYUSDT
-    # - IDUSDT
-    # - OGBTC
-    # - OGUSDT
+  list:
+    - FTMUSDT

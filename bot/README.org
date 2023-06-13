@@ -22,7 +22,7 @@ First: [[<ip_address>:81/login]]
 
 - [[https://console.cloud.google.com/networking/firewalls][Firewall setup]]
 
-Open port ~443~, ~81~, and ~5000~ in Google Instance, under ~default-allow-http~.
+Open following ports: ~443~, ~81~, and ~5000~
 
 * Enable Port Google-Instance
 

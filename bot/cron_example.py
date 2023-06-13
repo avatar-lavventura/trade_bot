@@ -20,7 +20,7 @@ __ https://stackoverflow.com/a/64270086/2402577
 
 @sched.scheduled_job("cron", hour="12,17")
 def job():
-    print(f"{datetime.now()}: Hello stackoverflow")
+    print(f"{datetime.now()}: Hello World!")
 
 
 try:
