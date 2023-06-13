@@ -3,7 +3,7 @@ watch:
     BONDUSDT: 4.30
     BONDBTC: 168
   liquidate:
-    BONDBTC: 8128
+    BONDBTC: 8126
   bar:
     - BONDBTC
     - BONDUSDT

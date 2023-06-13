@@ -17,8 +17,8 @@ thruDay = 1
 thruYear = 3000
 fromYear = 2023
 if IS_BROWSER
-    fromYear := 2021
-    fromMonth := 3
+    fromYear := 2023
+    fromMonth := 4
 
 shortest = ta.ema(close, 20)
 short = ta.ema(close, 50)

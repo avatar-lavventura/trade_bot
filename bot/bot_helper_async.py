@@ -315,8 +315,11 @@ class BotHelperAsync:
                         target_str += f"😨{config.WATCHLIST_LIQUIDATE[symbol]} "
                         ap = float(asset_price)
                         risk = ((ap - config.WATCHLIST_LIQUIDATE[symbol]) / ap) * 100
-                        if risk > 0:
-                            target_str += f"⬇{format(risk, '.2f')}%"
+                        if risk < 0:
+                            ap = float(asset_price) * 10
+                            risk = ((ap - config.WATCHLIST_LIQUIDATE[symbol]) / ap) * 100
+
+                        target_str += f"⬇{format(risk, '.2f')}%"
 
                     if symbol in config.WATCHLIST_TARGET or symbol in config.WATCHLIST_BAR:
                         msg = f"{msg}\n{symbol:<{width1}} {asset_price:>{6}} {per_str}"
@@ -560,7 +563,7 @@ class BotHelperAsync:
                             f"{_total_bal_str}| " % (self.only_usdt, only_btc * 1000, _free_usdt, cfg.BNB_BALANCE),
                             end="",
                         )
-                else:
+                elif cfg.TYPE == "usdt":
                     log(f"{bug} [blue]{_date(_type='hour')}[/blue]")
             elif not (sum_btc == 0 and self.only_usdt == 0 and only_btc == 0 and cfg.BNB_BALANCE == 0):
                 is_first_line_printed = True
