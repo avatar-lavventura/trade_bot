@@ -2,29 +2,29 @@ alerts:
   less_than: # <
     base:
       pair: BTCUSDT
-      price: 25000
+      price: 24000
       rapid_alert: "on" # more rapid message
       msg: "💣"
     a1:
       pair: BONDBTC
-      price: 0.000102
+      price: 0.000090
       rapid_alert: "on"
     a2:
-      pair: BONDUSDT
-      price: 2.50
+      pair: BONDBUSD
+      price: 3.0
       rapid_alert: "on"
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 30000
+      price: 31000
       rapid_alert: "off"
     a1:
       pair: BONDBTC
-      price: 0.0001450
+      price: 0.00012
       rapid_alert: "on"
     a2:
-      pair: BONDUSDT
-      price: 3.90
+      pair: BONDBUSD
+      price: 3.60
       rapid_alert: "on"
   balance_greater_than:
-    value: 10000
+    value: 20000

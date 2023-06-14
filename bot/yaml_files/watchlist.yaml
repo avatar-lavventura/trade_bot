@@ -1,12 +1,12 @@
 watch:
   target:
-    BONDUSDT: 4.30
-    BONDBTC: 168
+    BONDBUSD: 4.30
+    BONDBTC: 14
   liquidate:
-    BONDBTC: 8126
+    BONDBTC: 650
   bar:
     - BONDBTC
-    - BONDUSDT
+    - BONDBUSD
     - DREPUSDT
   list:
     - FTMUSDT

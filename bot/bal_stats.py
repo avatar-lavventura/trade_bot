@@ -43,7 +43,7 @@ async def process(max_sum, max_val):
     if _sum > max_sum and max_sum != 0 and not start:
         start = "[green]*****"
     """
-    log(f"{_date(_type='compact')} ", h=False, end="")
+    log(f"[cy]<{_date(_type='compact')}>[/cy] ", h=False, end="")
     c1 = "green on black blink"
     chrome_spot_balance = int(float(config.env["btc"].estimated_balance.find_one("only_usdt")["value"]))
     if chrome_spot_balance > 20000:  # over-calculated

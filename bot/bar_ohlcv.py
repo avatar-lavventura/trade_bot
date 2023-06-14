@@ -62,8 +62,6 @@ def _fetch_ohlcv(ohlcv, is_compact=False):
         df = pd.DataFrame(ohlcv, columns=["Open", "High", "Low", "Volume"])
     else:
         df = pd.DataFrame(ohlcv, columns=["Time", "Open", "High", "Low", "Close", "Volume"])
-
-    if not is_compact:
         df["Time"] = [datetime.fromtimestamp(float(time) / 1000) for time in df["Time"]]
         df.set_index("Time", inplace=True)
 

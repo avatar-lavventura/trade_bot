@@ -5,7 +5,7 @@ import urllib  # the lib that handles the url stuff
 
 import requests  # noqa
 
-LATEST_STRING = "Notice of Removal of Trading Pairs - 2023-06-14"
+LATEST_STRING = "Binance Margin Will Delist MBL/BUSD, PUNDIX/BUSD Cross Margin "
 
 
 def _check_url(url, silent=False) -> bool:

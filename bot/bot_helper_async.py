@@ -159,7 +159,11 @@ class BotHelperAsync:
             msg += f"[ib]{_total}[/ib] "
         else:
             msg += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= "
-            msg += f"[{c}]{name}{lost}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
+            if abs(lost) > 0:
+                msg += f"[{c}]{name}{lost}[/{c}] locked=[cy]{cfg.locked_balance}%[/cy] "
+            else:
+                msg += f"locked=[cy]{cfg.locked_balance}%[/cy] "
+
             if float(free) > 1:
                 msg = f"{msg}free=[cy]{name}{free}[/cy] "
 
@@ -173,7 +177,7 @@ class BotHelperAsync:
             if pos_count > 2:
                 log(f"[w]pos={pos_count}[/w] ", h=False, end="")
                 if output:
-                    log(f"[bold][y]perf[/y]=[blue]{output['value']}[/blue][/bold]", h=False)
+                    log(f"[y]perf[/y]=[blue]{output['value']}[/blue]", h=False)
                 else:
                     log("[y]perf[/y]=[blue]0[/blue]", h=False)
             elif output:
@@ -191,7 +195,7 @@ class BotHelperAsync:
 
         log()
         _console_clear()
-        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<# ", is_write=False, end="")
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [pink]<# ", is_write=False, end="")
         os.execv(sys.argv[0], sys.argv)
 
     async def _discord_sent_msg(self, msg):
@@ -242,7 +246,6 @@ class BotHelperAsync:
         msg_to_print = f"{bug} {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t"
         if cfg.FIRST_PRINT_CYCLE:
             log(msg_to_print, is_write=False)
-            print()
         elif config._env._status.find_one("real_pos_count")["value"] < 2:
             log(msg_to_print, end="\r", is_write=False)
 
@@ -1025,7 +1028,7 @@ class BotHelperAsync:
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
                 if "greater than minimum amount precision of" in str(e):
-                    log(f":beer: already closed position for {asset}{cfg.TYPE.upper()}", end="")
+                    log(f":beer: already closed position for [green]{asset}{cfg.TYPE.upper()}[/green]", end="")
                     raise QuietExit
                 else:
                     log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")

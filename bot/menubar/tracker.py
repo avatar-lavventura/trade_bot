@@ -78,6 +78,8 @@ def tracker_clock_string():
                 asset = asset.replace("USDT", "").replace("BUSD", "")
                 if 1 <= price <= 10:
                     price = "{:.3f}".format(price)
+                elif 0.1 <= price <= 1:
+                    price = "{:.4f}".format(price)
                 elif 10 <= price <= 100:
                     price = "{:.2f}".format(price)
                 else:

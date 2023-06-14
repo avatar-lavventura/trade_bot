@@ -104,12 +104,8 @@ async def webhook() -> Tuple[str, int]:  # type: ignore
             elif data_msg.upper() == "GREEN":
                 text = "  :green_circle:  "
 
-            log(
-                f"    {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]  ",
-                end="\r",
-                is_write=False,
-                h=False,
-            )
+            _msg = f"    {_date(_type='hour')}  [y]wt_30m[/y]=[{text}]  "
+            log(_msg, end="\r", is_write=False, h=False)
         else:
             for asset in ["BTC", "USDT", "BUSD"]:
                 if asset in data_msg and config.cfg["root"][asset.lower()]["status"] == "off":
@@ -125,6 +121,7 @@ async def webhook() -> Tuple[str, int]:  # type: ignore
                     log(str(e))
             except Exception as e:
                 print_tb(e)
+
         return "", 200
     else:
         abort(403)

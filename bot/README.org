@@ -117,13 +117,13 @@ curl -X POST http://127.0.0.1:5000/webhook -d "DOGEUSDT,buy,S_enter_1.0,0.5447,7
    ~Balance: 15, PercentBal: 100, Leverage: 1~
 2. [[https://github.com/puppeteer/puppeteer][puppeteer google browser]]
 3. [[https://maildim.com][fake gmail address generator and inbox]]
+   - [[bupsovaspe@gufum.com]]
 4. [[https://temp-sms.org][SMS reciever New Zealand Phone number]]
 5. tv__username__last__used => ~roxanroxanroxan_16~
 6. yb digital card used: 4 times last used ending: **41
 7. ~e2-small~ does the job on google instance
 
 ** Git Push:
-
 #+begin_src bash
 # https://github.com/newren/git-filter-repo#how-do-i-install-it
 git filter-repo --invert-paths --path '.DS_Store' --use-base-name

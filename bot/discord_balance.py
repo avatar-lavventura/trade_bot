@@ -32,7 +32,7 @@ class Discord_Alpy:
         else:
             _log.IS_WRITE = False
 
-        log(f"[cy]**[/cy] bot_type={_type} started [cy]**{100*' '}", "b")
+        log(f"[cy]**[/cy] bot_type={_type} started [cy]**{100*' '}")
         self._type = cfg.TYPE = _type.lower()
         config._env = config.env[cfg.TYPE]
         helper.exchange.init(_type)
@@ -188,7 +188,7 @@ class Discord_Alpy:
         open(fn, "w").close()
         log()
         _console_clear()
-        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [blue]<# ", is_write=False, end="")
+        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [pink]<# ", is_write=False, end="")
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

@@ -238,16 +238,17 @@ class BotHelper:
             order = order["info"]
             #: creates new item or overwrites on it
             config.env[_type].timestamps["root"][self.strategy.asset] = int(order["transactTime"])
+            config.env[_type].hit._inc(self.strategy.asset)
             for item in cfg.order_del_list:
                 with suppress(Exception):
                     del order[item]
 
             with suppress(Exception):
-                del order["fills"]["commissionAsset"]
-                del order["fills"]["commission"]
-                # del order["fills"]["tradeId"]
+                for item in order["fills"]:
+                    del item["qty"]
+                    del item["commission"]
+                    del item["commissionAsset"]
 
-            config.env[_type].hit._inc(self.strategy.asset)
             return order
         except Exception as e:
             if "insufficient balance" in str(e) or "InsufficientFunds" in str(e):

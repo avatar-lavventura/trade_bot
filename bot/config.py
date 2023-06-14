@@ -321,7 +321,6 @@ class Config:
         self.cfg = self.yaml_wrapper(self.base_dir / "config.yaml", auto_dump=False)
         self._c = self.cfg["root"][cfg.TYPE]
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
-        self.discord_msg_above_usdt = self.cfg["root"]["discord_msg_above_usdt"]
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
         self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
         for _type in ["usdt", "btc"]:  # "busd"

@@ -76,7 +76,7 @@ class Fund:
             self.fund_prices[(symbol, times_ts)] = _bar
             # symbol=symbol, timeframe="1d", since=times_ts, limit=1
 
-        # TODO: check timestamp is it frozen or not >1h relative is unresponsive binance
+        # TODO: check timestamp is it frozen or not > 1h relative is unresponsive binance
         self.RECORDS_BAR_1D[symbol] = _bar
         return _bar
 

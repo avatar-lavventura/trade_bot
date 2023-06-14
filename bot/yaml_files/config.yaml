@@ -1,8 +1,7 @@
 root:
   goal: 10000
   is_balance_silent: true
-  isolated_wallet_limit: 150
-  discord_msg_above_usdt: 150
+  isolated_wallet_limit: 200
   take_profit: 0.0045
   locked_percent_limit: 99
   is_write: false
@@ -22,9 +21,9 @@ root:
     auto_buy_bnb: off
     isolated: off
     cross: off
-    max_pos: 2
+    max_pos: 5
     initial: 11
-    multiply_ratio: 2 # was 1.13
+    multiply_ratio: 1.13 # was 1.13
     percent_change_to_add: 3 # was 4
     stop_trade_wt_30m_red: false
     entry_prices:
