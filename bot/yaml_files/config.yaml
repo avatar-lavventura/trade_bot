@@ -21,7 +21,7 @@ root:
     auto_buy_bnb: off
     isolated: off
     cross: off
-    max_pos: 5
+    max_pos: 4
     initial: 11
     multiply_ratio: 1.13 # was 1.13
     percent_change_to_add: 3 # was 4

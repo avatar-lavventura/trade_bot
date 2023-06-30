@@ -10,7 +10,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      pyramiding=100000)
 
 IS_BROWSER = false  // should be `false` while adding alerts
-fromMonth = 6
+fromMonth = 7
 fromDay = 1
 thruMonth = 1
 thruDay = 1
@@ -18,7 +18,7 @@ thruYear = 3000
 fromYear = 2023
 if IS_BROWSER
     fromYear := 2023
-    fromMonth := 4
+    fromMonth := 6
 
 shortest = ta.ema(close, 20)
 short = ta.ema(close, 50)
@@ -38,7 +38,7 @@ window() =>
     time >= start and time <= finish ? true : false
 
 BASE_DURATION = 10000 // equal to 1 second
-SLEEP_DUR = 120 * BASE_DURATION // ~120 seconds
+SLEEP_DUR = 2 * 60 * BASE_DURATION // ~2 minutes
 _now = timenow - 1600000000000
 
 is_sleep_pass = false
@@ -377,7 +377,7 @@ if window()
         if is_buy
             strategy.entry("l", strategy.long, qty=1, alert_message=msg)  // "l": "long"
     else
-        if _now - strategy.position_size > 100000
+        if _now - strategy.position_size > 15 * 60 * BASE_DURATION  // sleeps for 15 minutes
             strategy.close_all()
 
         if is_buy

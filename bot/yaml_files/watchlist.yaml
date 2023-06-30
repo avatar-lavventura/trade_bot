@@ -1,9 +1,9 @@
 watch:
   target:
-    BONDBUSD: 4.30
-    BONDBTC: 14
+    BONDBUSD: 4.05
+    BONDBTC: 13
   liquidate:
-    BONDBTC: 650
+    BONDBTC: 760  # was: 650
   bar:
     - BONDBTC
     - BONDBUSD

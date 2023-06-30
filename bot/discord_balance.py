@@ -188,7 +188,7 @@ class Discord_Alpy:
         open(fn, "w").close()
         log()
         _console_clear()
-        log(f"#> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [pink]<# ", is_write=False, end="")
+        log(f"==> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [pink]<# ", is_write=False, end="")
         os.execv(sys.argv[0], sys.argv)
 
     async def main(self):

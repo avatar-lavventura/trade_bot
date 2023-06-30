@@ -95,6 +95,9 @@ async def webhook() -> Tuple[str, int]:  # type: ignore
         print(data_msg)
         return "OK", 200
 
+    # if ",sell," not in data_msg:
+    #     print(f"\n{data_msg}\n")
+
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"
             await do_alert(data_msg)

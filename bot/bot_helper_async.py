@@ -133,9 +133,11 @@ class BotHelperAsync:
             else:
                 asset_price = await self.spot_fetch_ticker(symbol)
 
-        per_1h = self.calc_per(bar_1h, asset_price, "1h")
-        per_1d = self.calc_per(bar_1d, asset_price, "1d")
-        return asset_price, float(format(per_1h, ".2f")), float(format(per_1d, ".2f"))
+        return (
+            asset_price,
+            float(format(self.calc_per(bar_1h, asset_price, "1h"), ".2f")),
+            float(format(self.calc_per(bar_1d, asset_price, "1d"), ".2f")),
+        )
 
     async def analyze_positions(self, name, lost, pos_count, free, only_btc) -> None:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
@@ -317,10 +319,14 @@ class BotHelperAsync:
                     if symbol in config.WATCHLIST_LIQUIDATE:
                         target_str += f"😨{config.WATCHLIST_LIQUIDATE[symbol]} "
                         ap = float(asset_price)
-                        risk = ((ap - config.WATCHLIST_LIQUIDATE[symbol]) / ap) * 100
+                        wl = config.WATCHLIST_LIQUIDATE[symbol]
+                        if ap > 10000:
+                            wl = wl * 10
+
+                        risk = ((ap - wl) / ap) * 100
                         if risk < 0:
                             ap = float(asset_price) * 10
-                            risk = ((ap - config.WATCHLIST_LIQUIDATE[symbol]) / ap) * 100
+                            risk = ((ap - wl) / ap) * 100
 
                         target_str += f"⬇{format(risk, '.2f')}%"
 
@@ -347,7 +353,6 @@ class BotHelperAsync:
 
                             # high = ohlcv[0][2]
                             df = _fetch_ohlcv(ohlcv, is_compact=True)
-                            # breakpoint()  # DEBUG
                             msg = f"{msg}\n"
                             msg = f"{msg}{symbol} {asset_price:>{6}} {per_str}"
                             msg = f"{msg}\n{df}"
@@ -876,7 +881,7 @@ class BotHelperAsync:
         output = await self.spot_fetch_ticker(asset)
         _amount = float(format(amount / output, ".3f"))
         log(
-            f"#> buying minimum amount of [g]BNB[/g] bnb_balance={cfg.BNB_BALANCE} -- to_buy={_amount}",
+            f"==> buying minimum amount of [g]BNB[/g] bnb_balance={cfg.BNB_BALANCE} -- to_buy={_amount}",
             is_write=False,
             end="",
         )
@@ -991,7 +996,6 @@ class BotHelperAsync:
                         asset = asset.replace("BTC", "BUSD")
                         return await self.spot_fetch_ticker(asset, is_bid_price)
                 except Exception:
-                    # breakpoint()  # DEBUG
                     # TODO: maybe add taking price from mexc?
                     # return await self.spot_fetch_ticker(asset, is_bid_price)
                     raise e

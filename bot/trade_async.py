@@ -191,7 +191,7 @@ class BotHelper:
 
     async def spot_order_limit(self):
         try:
-            log("#> attempting limit order ", end="")
+            log("==> attempting limit order ", end="")
             limit_price, *_ = await self.get_spot_entry()
             symbol = self.strategy.symbol.replace("/", "")
             open_orders = await self.strategy.exchange.fetch_open_orders(symbol=symbol)
@@ -270,7 +270,7 @@ class BotHelper:
 
                         raise e
 
-                log(f"#> re-opening {side} order | ", end="")
+                log(f"==> re-opening {side} order | ", end="")
                 if float(config.env[_type].status["free"]) < config.cfg["root"][_type]["initial"]:
                     raise QuietExit("not enough balance") from None
 
@@ -350,7 +350,7 @@ class BotHelper:
 
             side_color = "green" if self.strategy.side == "BUY" else "red"
             log(
-                f"#> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
+                f"==> opening [{side_color}]{self.strategy.side}[/{side_color}] order in the "
                 f"[blue]{self.strategy.market}[/blue] market for [blue]{self.strategy.asset}[/blue] "
                 f"symbol={self.strategy.symbol} ",
                 end="",

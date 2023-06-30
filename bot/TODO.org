@@ -244,7 +244,7 @@ hatta bu islemi yeterli BNB yoksa force olarak yap
 ** TODO delta_per
 
 #+begin_src org
-#> opening BUY order in the USDT market for OAX OAX/USDT order_qty=29.0
+==> opening BUY order in the USDT market for OAX OAX/USDT order_qty=29.0
 {
 │   'symbol': 'OAXUSDT',
 │   'orderId': '14335628',
@@ -262,8 +262,6 @@ hatta bu islemi yeterli BNB yoksa force olarak yap
 │   │   }
 │   ]
 }
-
-----
 
 wrong calculation for OAX/USDT 29.668 != 29.0
 ** OAX 0.378 e=0.3693 q=29.67 t=0.3711 (2.36%) 0.26 0.57% | 11.21 10.96

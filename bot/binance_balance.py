@@ -121,7 +121,7 @@ async def process_main(obj):
         _sys_exit("KeyError")  # helps to restart the process
     except Exception as e:
         if "quantity is zero" in str(e):
-            log(f"#> {e} [green]don't worry")
+            log(f"==> {e} [green]don't worry")
         elif "Timestamp for this request is outside of the recvWindow" in str(e):
             log("warning: timestamp for this request is outside of the recvWindow")
         else:
