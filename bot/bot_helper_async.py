@@ -1032,7 +1032,7 @@ class BotHelperAsync:
         except Exception as e:
             if type(e).__name__ != "InvalidOrder":
                 if "greater than minimum amount precision of" in str(e):
-                    log(f":beer: already closed position for [green]{asset}{cfg.TYPE.upper()}[/green]", end="")
+                    log(f":beer: Already closed position for [green]{asset}{cfg.TYPE.upper()}[/green]", end="")
                     raise QuietExit
                 else:
                     log(f"E: Failed to create order with {symbol} [cy]{type(e).__name__}[/cy] {e}")
