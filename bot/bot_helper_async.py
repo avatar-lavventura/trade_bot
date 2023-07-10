@@ -320,7 +320,7 @@ class BotHelperAsync:
                         target_str += f"😨{config.WATCHLIST_LIQUIDATE[symbol]} "
                         ap = float(asset_price)
                         wl = config.WATCHLIST_LIQUIDATE[symbol]
-                        if ap > 10000:
+                        if ap > 9000:  # DELETEME
                             wl = wl * 10
 
                         risk = ((ap - wl) / ap) * 100

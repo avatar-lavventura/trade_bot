@@ -10,8 +10,8 @@ alerts:
       price: 0.000090
       rapid_alert: "on"
     a2:
-      pair: BONDBUSD
-      price: 3
+      pair: BONDUSDT
+      price: 2.90
       rapid_alert: "off"
   greater_than: # >
     base:
@@ -23,8 +23,8 @@ alerts:
       price: 0.00012
       rapid_alert: "on"
     a2:
-      pair: BONDBUSD
-      price: 3.50
+      pair: BONDUSDT
+      price: 3.10
       rapid_alert: "on"
   balance_greater_than:
     value: 21400

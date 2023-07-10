@@ -70,7 +70,7 @@ class Discord_Alpy:
         except Exception as e:
             print_tb(e)
             time.sleep(10)
-            self.restart()
+            self._restart()
 
     def constructor(self):
         helper.exchange._set_bnbusdt()
@@ -166,7 +166,7 @@ class Discord_Alpy:
 
     async def check_delisting(self):
         if _check_url("https://www.binance.com/en/support/announcement/delisting?c=161&navId=161", silent=True):
-            for n in range(3):
+            for n in range(2):
                 await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
 
     async def update_current_date(self):
@@ -177,12 +177,8 @@ class Discord_Alpy:
             await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>")
             # await self.channel_notifications.send(f"Funding Rate time, heads up !!!\n<{_date()}>", delete_after=60)
 
-    async def restart(self):
-        """Restart the on going process based on the scheduled time."""
-        with suppress(Exception):
-            await cfg.discord_sent_msg.delete()
-            cfg.discord_sent_msg = None
-
+    def _restart(self):
+        """Restart the on going process based on the scheduled time without using await."""
         #: erase file contents of the log file '~/.bot/balance_btc.log'
         fn = Path.home() / ".bot" / f"balance_{cfg.TYPE}.log"
         open(fn, "w").close()
@@ -190,6 +186,14 @@ class Discord_Alpy:
         _console_clear()
         log(f"==> -=-=- [g]RESTARTING[/g] {_date()} -=-=- [pink]<# ", is_write=False, end="")
         os.execv(sys.argv[0], sys.argv)
+
+    async def restart(self):
+        """Restart the on going process based on the scheduled time."""
+        with suppress(Exception):
+            await cfg.discord_sent_msg.delete()
+            cfg.discord_sent_msg = None
+
+        self._restart()
 
     async def main(self):
         await self.pre_discord_setup()

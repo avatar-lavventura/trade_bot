@@ -18,13 +18,13 @@ root:
     status: on # "on" or "off"
     sleep_interval: 11
     is_manual_trade: false
-    auto_buy_bnb: off
+    auto_buy_bnb: on
     isolated: off
     cross: off
-    max_pos: 4
-    initial: 11
+    max_pos: 4 # 100$ => (4,11) | 300$ => (4,30)
+    initial: 25
     multiply_ratio: 1.13 # was 1.13
-    percent_change_to_add: 3 # was 4
+    percent_change_to_add: 3.5 # was 4
     stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0

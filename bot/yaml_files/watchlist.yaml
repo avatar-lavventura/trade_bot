@@ -6,7 +6,7 @@ watch:
     BONDBTC: 760  # was: 650
   bar:
     - BONDBTC
-    - BONDBUSD
+    - BONDUSDT
     - DREPUSDT
   list:
     - FTMUSDT
