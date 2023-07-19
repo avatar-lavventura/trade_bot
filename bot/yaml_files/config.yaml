@@ -21,8 +21,8 @@ root:
     auto_buy_bnb: on
     isolated: off
     cross: off
-    max_pos: 4 # 100$ => (4,11) | 300$ => (4,30)
-    initial: 25
+    max_pos: 6 # 100$ => (4,11) | 300$ => (4,30)
+    initial: 20
     multiply_ratio: 1.13 # was 1.13
     percent_change_to_add: 3.5 # was 4
     stop_trade_wt_30m_red: false

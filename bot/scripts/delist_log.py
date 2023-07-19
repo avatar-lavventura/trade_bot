@@ -5,7 +5,7 @@ import urllib  # the lib that handles the url stuff
 
 import requests  # noqa
 
-LATEST_STRING = "Binance Margin Will Delist the ALCX/BUSD, ALPACA/BUSD, CVX/BUSD, DOCK/BUSD, LOOM/BUSD, MC/BUSD, MOB/BUSD TROY/BUSD Isolated Margin Pairs"
+LATEST_STRING = "Binance Futures Will Delist and Update the Leverage Margin Tiers of USDⓈ-M LDOBUSD and GALABUSD Perpetual Contracts"
 
 
 def _check_url(url, silent=False) -> bool:

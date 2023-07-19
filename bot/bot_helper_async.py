@@ -531,7 +531,7 @@ class BotHelperAsync:
 
             _end = ""
             if cfg.FIRST_PRINT_CYCLE:
-                _end = f"[blue]{_date(_type='hour')}[/blue][green]\n++++++++++++++++++++++++++++++++++++++++++++++++++[/green]"
+                _end = f"[blue]{_date(_type='hour')}[/blue][green]\n+++++++++++++++++++++++++++++++++++++++++++++++++[/green]"
 
             if float(self.only_usdt) < 0.10:
                 self.only_usdt = 0
@@ -552,19 +552,18 @@ class BotHelperAsync:
                                     f"{bug} f_btc=%.0f bnb=[cy]$%.2f[/cy] " % (only_btc * 1000, cfg.BNB_BALANCE),
                                     end="",
                                 )
+                        elif self.only_usdt == _total_bal_str:
+                            log(
+                                f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | "
+                                % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                end="",
+                            )
                         else:
-                            if self.only_usdt == _total_bal_str:
-                                log(
-                                    f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] | "
-                                    % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
-                                    end="",
-                                )
-                            else:
-                                log(
-                                    f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| "
-                                    % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
-                                    end="",
-                                )
+                            log(
+                                f"{bug} usdt=%.2f f_btc=%.0f bnb=[cy]$%.2f[/cy] total={_total_bal_str}| "
+                                % (self.only_usdt, only_btc * 1000, cfg.BNB_BALANCE),
+                                end="",
+                            )
                     else:
                         log(
                             f"{bug} usdt=%.2f f_btc=%.4f([cy]$[/cy]%.2f) bnb=[cy]$%.2f[/cy] "

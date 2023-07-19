@@ -148,20 +148,28 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def is_cut_loss(self, asset, profit, qty) -> None:
         """Close trade with accepted loss."""
-        if cfg.TYPE == "usdt" and profit < -15:
-            order = await self.strategy.exchange.create_market_sell_order(f"{asset}/{cfg.TYPE.upper()}", qty)
+        # TODO: profit could be 1% of the all money: for testing 2$ for 300$
+        if cfg.TYPE == "usdt" and profit < -2.1:
+            symbol = f"{asset}/{cfg.TYPE.upper()}"
+            open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
+            for order in open_orders:
+                with suppress(Exception):
+                    # the order may already closed if there was a rapid change
+                    await helper.exchange.spot.cancel_order(order["id"], symbol)
+
+            order = await helper.exchange.spot.create_market_sell_order(symbol, qty)
             order = order["info"]
             with suppress(Exception):
                 for k in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
                     del order[k]
 
-            log(f"## CUT LOSS for {asset}={profit}", "bold blue")
+            log(f"==> CUT LOSS for {asset}={profit}", "bold blue")
             log(order)
 
     async def add_to_position(self, asset, qty, asset_price, sum_bal, limit_price) -> None:
         new_qty = qty * config.env[cfg.TYPE].multiply_ratio
         if new_qty * asset_price < 10:
-            # usdt_multiply_ratio may 0.1, minimum order should be more than 10$
+            # usdt_multiply_ratio should be 0.1; minimum order should be more than 10$
             new_qty = qty * 1.05
 
         per = (100.0 * new_qty * asset_price) / sum_bal
@@ -483,7 +491,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         if config.env[_type].is_manual_trade:  # manual trade is on
             return profit
 
-        # self.is_cut_loss(asset, profit, qty_to_consider)
+        await self.is_cut_loss(asset, profit, qty_to_consider)
         config.reload_wavetrend()
         if asset in config.SPOT_IGNORE_LIST:
             # log()
