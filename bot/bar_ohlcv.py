@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
 import calendar
+import re
 from datetime import datetime
 
 import ccxt
 import pandas as pd
 from broker._utils._log import log
 
+from bot import cfg
 from bot.fund_time import Fund
 
 # https://techflare.blog/how-to-get-ohlcv-data-for-your-exchange-with-ccxt-library/
@@ -42,7 +44,7 @@ def one_hr(symbol, _since=60):
     log(ohlcv)
 
 
-def _fetch_ohlcv(ohlcv, is_compact=False):
+def _fetch_ohlcv(ohlcv, symbol, is_compact=False):
     if is_compact:
         _ohl = ohlcv[0][1:-2] + ["{:,.0f}".format(ohlcv[0][-1])]
         if float(_ohl[0]) > 10000:  # for btc
@@ -55,6 +57,14 @@ def _fetch_ohlcv(ohlcv, is_compact=False):
                     _ohl[i] = str(_ohl[i]).lstrip("0.").lstrip("0")
 
         ohlcv = [_ohl]
+        if symbol[-3:] == "BTC":
+            pattern = r"(?m)(?<=\d)\d{3}(?=(?:\d{3})*$)"
+            if float(ohlcv[0][3].replace(",", "")) >= 1000:
+                ohlcv[0][3] = int(float(ohlcv[0][3].replace(",", ".")) * cfg.PRICES["BTCUSDT"])
+            else:
+                ohlcv[0][3] = int(float(ohlcv[0][3]) / 1000 * cfg.PRICES["BTCUSDT"])
+
+            ohlcv[0][3] = re.sub(pattern, r",\g<0>", str(ohlcv[0][3]))
 
     # convert it into Pandas DataFrame
     pd.set_option("display.max_columns", 1000, "display.width", 1000, "display.max_rows", 1000)
@@ -81,20 +91,20 @@ def main(symbol):
 
     # _since = fund.midnight
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="4h", limit=24)
-    df = _fetch_ohlcv(ohlcv)
+    df = _fetch_ohlcv(ohlcv, symbol)
 
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1h", limit=1)
-    df = _fetch_ohlcv(ohlcv, is_compact=True)
+    df = _fetch_ohlcv(ohlcv, symbol, is_compact=True)
 
     ohlcv = binance.fetch_ohlcv(symbol=symbol, timeframe="1d", limit=1)
-    df = _fetch_ohlcv(ohlcv, is_compact=True)
+    df = _fetch_ohlcv(ohlcv, symbol, is_compact=True)
 
     print(df)
     print()
 
 
 if __name__ == "__main__":
-    symbol = "BONDUSDT"
+    # symbol = "JOEUSDT"
     symbol = "BTCUSDT"
     main(symbol)
     # symbol = "FTMUSDT"

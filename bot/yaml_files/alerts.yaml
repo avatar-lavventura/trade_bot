@@ -7,11 +7,11 @@ alerts:
       msg: "💣"
     a1:
       pair: BONDBTC
-      price: 0.000095
-      rapid_alert: "on"
+      price: 0.000085
+      rapid_alert: "off"
     a2:
       pair: BONDUSDT
-      price: 2.89
+      price: 2.20
       rapid_alert: "off"
   greater_than: # >
     base:
@@ -20,11 +20,11 @@ alerts:
       rapid_alert: "off"
     a1:
       pair: BONDBTC
-      price: 0.00012
+      price: 0.0001250
       rapid_alert: "on"
     a2:
       pair: BONDUSDT
       price: 3.10
-      rapid_alert: "on"
+      rapid_alert: "off"
   balance_greater_than:
     value: 21400

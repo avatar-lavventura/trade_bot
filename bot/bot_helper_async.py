@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+import math
 import os
 import sys
 import time
@@ -340,7 +341,7 @@ class BotHelperAsync:
                             await asyncio.sleep(60)
                             raise e
 
-                        df = _fetch_ohlcv(ohlcv, is_compact=True)
+                        df = _fetch_ohlcv(ohlcv, symbol, is_compact=True)
                         msg = f"{msg} {target_str}\n{df}"
                     else:
                         if symbol == "BTCUSDT":
@@ -352,7 +353,7 @@ class BotHelperAsync:
                                 raise e
 
                             # high = ohlcv[0][2]
-                            df = _fetch_ohlcv(ohlcv, is_compact=True)
+                            df = _fetch_ohlcv(ohlcv, symbol, is_compact=True)
                             msg = f"{msg}\n"
                             msg = f"{msg}{symbol} {asset_price:>{6}} {per_str}"
                             msg = f"{msg}\n{df}"
@@ -501,8 +502,14 @@ class BotHelperAsync:
 
             log(f"E: {e}", is_write=False)
 
-        for balance in cfg.BALANCES["info"]["balances"]:
-            sum_btc, sum_usdt, sum_busd = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
+        try:
+            for balance in cfg.BALANCES["info"]["balances"]:
+                sum_btc, sum_usdt, sum_busd = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
+        except QuietExit as e:
+            if e:
+                log(str(e))
+        except Exception as e:
+            print_tb(e)
 
         # ts = config._env.status["timestamp"]
         config._env.estimated_balance.add_single_key("only_usdt", self.only_usdt)
@@ -804,9 +811,12 @@ class BotHelperAsync:
                     # pnl = f"lost=`{format(lost, '.2f')}` "
 
                 if round(sum_usdt) != round(goal) and lost < 0:
-                    msg = f"{_msg}**:lion_face: `${round(sum_usdt)}`** {pnl}:dart: $`{goal}` {_free}{locked_per}"
+                    msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl}:dart: $`{goal}` {_free}{locked_per}"
                 else:
-                    msg = f"{_msg}**:lion_face: `${round(sum_usdt)}`** {pnl} {_free}{locked_per}"
+                    if math.floor(float(sum_usdt)) <= math.floor(float(free)):
+                        msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl} {locked_per}"
+                    else:
+                        msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl} {_free}{locked_per}"
             else:
                 if _msg[-1] == "\n":
                     msg = f"{_msg[:-1]}"
@@ -936,7 +946,7 @@ class BotHelperAsync:
                     log("E: quantity is zero, nothing to do", is_write=False)
             elif "Filter failure: MIN_NOTIONAL" in _e and quantity >= 0.1:
                 quantity += 0.1
-                #: fixes if its overrounded, ex: 1.2000000000000002
+                #: Fix if it is overrounded, ex: 1.2000000000000002
                 quantity = float("{:.1f}".format(quantity))
                 log(f"==> re-opening [green]{side}[/green] order qty={quantity}")
                 return await self.spot_order(quantity, symbol, side, from_ex=True)
@@ -978,10 +988,8 @@ class BotHelperAsync:
                 USDTTRY = await self.spot_fetch_ticker("USDTTRY")
                 cfg.PRICES[asset] = float(format(asset_price / USDTTRY, ".10f"))
             else:  #: record prices in case could be used in the same cycle
-                if asset == "BONDBTC":
-                    cfg.PRICES[asset] = (price_ticker["ask"] + price_ticker["bid"]) / 2
-                else:
-                    cfg.PRICES[asset] = price_ticker["last"]
+                cfg.PRICES[asset] = price_ticker["last"]
+                # cfg.PRICES[asset] = (price_ticker["ask"] + price_ticker["bid"]) / 2
 
             return float(cfg.PRICES[asset])
         except Exception as e:

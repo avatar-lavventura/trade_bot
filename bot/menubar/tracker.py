@@ -14,9 +14,8 @@ from pycoingecko import CoinGeckoAPI
 is_motivation_msg = True
 exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
 assets = ["BTCUSDT", "USDTTRY"]
-assets += ["BONDBUSD", "BONDBTC"]
+# assets += ["JOEUSDT"]
 
-# MSG = "binance: We are unable to provide any donation -- makes you angry."
 MSG = "The most important rule in trading is to protect your capital at all cost."
 
 cg = CoinGeckoAPI()
@@ -88,8 +87,6 @@ def tracker_clock_string():
                             price = "{:.10f}".format(price).lstrip("0.").lstrip("0")
                         else:
                             price = "{:.8f}".format(price).lstrip("0.").lstrip("0")
-                            if asset == "BONDBTC":
-                                price = round(int(price) / 10)
 
                     elif price > 1000:
                         price = round(price)

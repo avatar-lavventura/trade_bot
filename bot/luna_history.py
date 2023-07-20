@@ -23,7 +23,7 @@ def luna_history():
 
 
 def main():
-    symbol = "BOND/BTC"
+    symbol = "JOE/BTC"
     order_history = exchange.fetch_trades(symbol)  # public
     cost = 0
     for item in order_history:

@@ -293,8 +293,7 @@ per_change_delta: 2.2515842 ?= 0.1
 ** TODO record withdrawn BTC as well at stats total_btc maybe?
 
 
-** TODO USDT tarafinda son 1 , 3  6 ayin haftalik volume'unu cikar ever en buyuk degere geldiyse alip yap // yuklu gir
-# BONDUSDT (Barnbridge) is producing a volume breakout this week with the highest volume since July 2022.
+** TODO USDT tarafinda son 1 , 3  6 ayin haftalik volume'unu cikar ever en buyuk degere geldiyse alip yap
 
 
 ** TODO cary watchlist + alert into different process

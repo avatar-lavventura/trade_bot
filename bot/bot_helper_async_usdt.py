@@ -149,7 +149,7 @@ class BotHelperSpotAsync(BotHelperAsync):
     async def is_cut_loss(self, asset, profit, qty) -> None:
         """Close trade with accepted loss."""
         # TODO: profit could be 1% of the all money: for testing 2$ for 300$
-        if cfg.TYPE == "usdt" and profit < -2.1:
+        if cfg.TYPE == "usdt" and profit < -10.0:
             symbol = f"{asset}/{cfg.TYPE.upper()}"
             open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
             for order in open_orders:
@@ -163,7 +163,7 @@ class BotHelperSpotAsync(BotHelperAsync):
                 for k in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
                     del order[k]
 
-            log(f"==> CUT LOSS for {asset}={profit}", "bold blue")
+            log(f"==> [bold blue]CUT-LOSS for[/bold blue] {asset}={profit}")
             log(order)
 
     async def add_to_position(self, asset, qty, asset_price, sum_bal, limit_price) -> None:
@@ -491,7 +491,7 @@ class BotHelperSpotAsync(BotHelperAsync):
         if config.env[_type].is_manual_trade:  # manual trade is on
             return profit
 
-        await self.is_cut_loss(asset, profit, qty_to_consider)
+        # await self.is_cut_loss(asset, profit, qty_to_consider)  # UNCOMMENT
         config.reload_wavetrend()
         if asset in config.SPOT_IGNORE_LIST:
             # log()

@@ -166,8 +166,7 @@ class Discord_Alpy:
 
     async def check_delisting(self):
         if _check_url("https://www.binance.com/en/support/announcement/delisting?c=161&navId=161", silent=True):
-            for n in range(2):
-                await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
+            await self.channel_alerts.send("!!!!! NEW DELISTING(s) SHOW UP !!!!!", delete_after=10)
 
     async def update_current_date(self):
         cfg.CURRENT_DATE = _date(zone="UTC", _type="year")

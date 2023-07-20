@@ -9,6 +9,6 @@ if [ $(is_running "[p]ython3 ./bal.py") -ge 1 ]; then
     tail -f bal.log
 else
     echo "++++++++++++++++++++++++++++++++++++++++++++++++" >> bal.log
-    nohup ./bal.py >> bal.log 2>&1 &
+    nohup ./bal_stats.py >> bal.log 2>&1 &
     tail -f bal.log
 fi
