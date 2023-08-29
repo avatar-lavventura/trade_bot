@@ -21,11 +21,11 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def check_position_to_pass(self, asset, _sum, is_limit, per) -> bool:
         if _sum > config.isolated_wallet_limit:
-            log("pass_a")
+            log(f"   [orange]pass_a[/orange]: '{_sum} > {config.isolated_wallet_limit}'")
             return True
 
         if float(per) > 80:
-            log("pass_b")
+            log("   [orange]pass_b[/orange]: locked percent is above 80")
             return True
 
         if not is_limit or asset in config.SPOT_IGNORE_LIST:
@@ -147,14 +147,13 @@ class BotHelperSpotAsync(BotHelperAsync):
         return (quantity, _sum)
 
     async def is_cut_loss(self, asset, profit, qty) -> None:
-        """Close trade with accepted loss."""
-        # TODO: profit could be 1% of the all money: for testing 2$ for 300$
-        if cfg.TYPE == "usdt" and profit < -10.0:
+        """Close the trade with accepted loss."""
+        if cfg.TYPE == "usdt" and profit < -4.9:
             symbol = f"{asset}/{cfg.TYPE.upper()}"
             open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
             for order in open_orders:
                 with suppress(Exception):
-                    # the order may already closed if there was a rapid change
+                    #: the order may already closed if there was a rapid change
                     await helper.exchange.spot.cancel_order(order["id"], symbol)
 
             order = await helper.exchange.spot.create_market_sell_order(symbol, qty)
@@ -163,7 +162,17 @@ class BotHelperSpotAsync(BotHelperAsync):
                 for k in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
                     del order[k]
 
-            log(f"==> [bold blue]CUT-LOSS for[/bold blue] {asset}={profit}")
+            log(
+                f"==> [alert]!!!!!!!!!!   CUT-LOSS for[/alert] {asset}=[alert]{format(float(profit), '.2f')}   !!!!!!!!!![/alert]"
+            )
+            with suppress(Exception):
+                del order["fills"]
+                del order["selfTradePreventionMode"]
+                del order["workingTime"]
+                del order["side"]
+                del order["clientOrderId"]
+                del order["cummulativeQuoteQty"]
+
             log(order)
 
     async def add_to_position(self, asset, qty, asset_price, sum_bal, limit_price) -> None:
@@ -173,13 +182,16 @@ class BotHelperSpotAsync(BotHelperAsync):
             new_qty = qty * 1.05
 
         per = (100.0 * new_qty * asset_price) / sum_bal
-        log(f"==> new_order_qty={new_qty} | [cy]%{format(float(per), '.2f')}[/cy] of the total asset")
+        log(f"==> new_order_qty={int(new_qty)} | [cy]%{format(float(per), '.2f')}[/cy] of the total asset")
         order = await self.spot_order(new_qty, f"{asset}/{cfg.TYPE.upper()}", "BUY")
         if order:
             order = order["info"]
             for item in cfg.order_del_list + ["fills"]:
                 with suppress(Exception):
                     del order[item]
+
+            with suppress(Exception):
+                del order["price"]
 
             log(f"market_order={order}")
             await self.new_limit_order(asset, limit_price, cfg.TYPE.upper())
@@ -491,19 +503,20 @@ class BotHelperSpotAsync(BotHelperAsync):
         if config.env[_type].is_manual_trade:  # manual trade is on
             return profit
 
-        # await self.is_cut_loss(asset, profit, qty_to_consider)  # UNCOMMENT
+        if config.env[_type].cut_loss:
+            await self.is_cut_loss(asset, profit, qty_to_consider)
+
         config.reload_wavetrend()
         if asset in config.SPOT_IGNORE_LIST:
-            # log()
             return profit
 
         if (_type in ["usdt", "busd"] and config.env[_type].status["free"] < 15) or (
             _type == "btc" and float(config.env["btc"].status["free"]) < 0.0003
         ):
-            pass  # log()
+            pass
         elif (
             profit < 0
-            and per_change <= -2
+            and per_change <= -1
             and per_change <= config.env[_type].percent_change_to_add
             and not await self.check_position_to_pass(asset, _sum, is_limit, per)
         ):

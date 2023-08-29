@@ -13,7 +13,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
 // https://www.ireallytrade.com/newsletters/VIXFix.pdf
 
 IS_BROWSER = false  // should be `false` while adding alerts
-fromMonth = 8
+fromMonth = 5
 fromDay = 1
 thruMonth = 1
 thruDay = 1
@@ -21,7 +21,7 @@ thruYear = 3000
 fromYear = 2023
 if IS_BROWSER
     fromYear := 2023
-    fromMonth := 8
+    fromMonth := 7
 
 shortest = ta.ema(close, 20)
 short = ta.ema(close, 50)
@@ -183,10 +183,10 @@ ma_down = out1 < out1[smoothe]
 
 // cm_williams vix fix formula
 pd = input(22, title="look_back period standard deviation high")  // 1 for 1m
-bbl = input(20, title="bolinger band length")
-mult = input.float(2.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+bbl = input(2, title="bolinger band length")  // 20
+mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up") // 2
 lb = input(50  , title="Look Back Period Percentile High")
-ph = input(.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+ph = input(.99, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.85
 new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
 sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
 sbcc = input(false, title="Show Highlight Bar if WVF IS True")
@@ -235,7 +235,7 @@ daily_per_change = (close - close[86400]) / close[86400] * 100
 
 // buy alerts
 // ==========
-base_cond = (buyVolume > sellVolume or buy == 1)
+base_cond = (buyVolume > sellVolume[2] * 2) and (close < high[1] or close < high[2] or close < high[3] or close < high[4])
 is_buy = false
 if timeframe.isseconds
     if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA
@@ -366,7 +366,7 @@ else
     else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
         is_buy := true
 
-if not base_cond and timeframe.period != "45"
+if not base_cond
     is_buy := false
 
 if timeframe.period == "45" and close > ema_max

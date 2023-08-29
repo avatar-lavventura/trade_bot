@@ -248,7 +248,10 @@ class BotHelper:
                     del item["qty"]
                     del item["commission"]
                     del item["commissionAsset"]
+                    del item["tradeId"]
+                    del item["price"]
 
+            order["fills"] = order["fills"][0]
             return order
         except Exception as e:
             if "insufficient balance" in str(e) or "InsufficientFunds" in str(e):
@@ -321,9 +324,7 @@ class BotHelper:
         elif self.strategy.market in ["USDT", "BUSD"]:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             last_price = output["last"]
-
             initial_amount = config.cfg["root"]["usdt"]["initial"] / last_price
-
             self.strategy.size = self.get_initial_amount(initial_amount, self.strategy.market)
             decimal = self.get_decimal_count(self.strategy.size)
             self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
@@ -441,15 +442,11 @@ class BotHelper:
         the yaml file that is updated from binance_balance.py.
         """
         config._reload()  # TODO could be *SLOW* learn its run-time
+        initial = config.cfg["root"]["usdt"]["initial"]
         self.check_on_going_positions()
         free_balance = config.env[self.strategy.market.lower()].status["free"]
-        if self.strategy.market.lower() == "usdt" and free_balance < config.cfg["root"]["usdt"]["initial"]:
-            raise QuietExit(f"not enough USDT([cy]${round(free_balance)}[/cy])")
-
-        # if self.strategy.market == "USDTPERP":
-        #     self.pre_check_usdtperp(
-        #         free_balance, f"not enough USDT([cyan]{round(free_balance)}$[cyan]),side={self.strategy.side}"
-        #     )
+        if self.strategy.market.lower() == "usdt" and free_balance < initial:
+            raise QuietExit(f"not enough USDT([cy]${round(free_balance)}[/cy]) for [cy]${initial}")
 
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:

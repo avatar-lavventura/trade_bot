@@ -1,7 +1,7 @@
 #!/bin/bash
 
 RED="\033[1;31m"; GREEN='\033[0;32m'; NC='\033[0m';
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo "Illegal number of parameters provide <usdt or btc>"
     exit 1
 fi
@@ -40,7 +40,7 @@ if [ $(is_running "[m]ongodb") -eq 0 ]; then
     exit
 fi
 
-if [ $(is_running "[p]ython3 discord_balance.py $1") -ge 1 ]; then
+if [ $(is_running "[p]ython3 discord_balance.py $1 $2") -ge 1 ]; then
     echo "warning: discord_balance.py for $1 is already running"
     exit
 fi
@@ -55,7 +55,7 @@ clear -x
 fn="balance_"$1".log"
 # check_app
 while true; do
-    python3 discord_balance.py $1
+    python3 discord_balance.py $1 $2
     echo ""
     countdown 30
     echo "countdown [  OK  ]"

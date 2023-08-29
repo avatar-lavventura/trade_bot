@@ -416,7 +416,13 @@ class BotHelperAsync:
 
     async def _fetch_margin_cross_balance(self):
         """Fetch margin balance in cross and estimated in btc."""
-        balances = await exchange.margin_cross.fetch_balance()
+        try:
+            balances = await exchange.margin_cross.fetch_balance()
+        except:
+            log("Trying again to fetch balances...")
+            time.sleep(15)  # at exception catched
+            balances = await exchange.margin_cross.fetch_balance()
+
         if balances["total"]["BNB"] > 0:
             cfg.BNB_QTY += balances["total"]["BNB"]
             if cfg.BNBUSDT == 0:
@@ -695,7 +701,7 @@ class BotHelperAsync:
 
             config._env.estimated_balance.add_single_key("total_balance", own_usdt)
 
-        if cfg.BNB_BALANCE < 0.5 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on":
+        if cfg.BNB_BALANCE < 1.0 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on" and cfg.MY_ORDER != 2:
             try:
                 await self.buy_bnb()
             except Exception as e:
@@ -804,14 +810,16 @@ class BotHelperAsync:
                         f"{locked_per}"
                     )
             elif int(sum_usdt) > 0:
-                goal = round(float(sum_usdt) + float(abs(lost)))
+                goal = float(sum_usdt) + float(abs(lost))
                 pnl = ""
                 if lost > 0:
                     pnl = f"gain=`+{format(lost, '.2f')}` "
                     # pnl = f"lost=`{format(lost, '.2f')}` "
 
                 if round(sum_usdt) != round(goal) and lost < 0:
-                    msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl}:dart: $`{goal}` {_free}{locked_per}"
+                    msg = (
+                        f"{_msg}**:lion_face: `${sum_usdt}`** {pnl}:dart: $`{format(goal, '.2f')}` {_free}{locked_per}"
+                    )
                 else:
                     if math.floor(float(sum_usdt)) <= math.floor(float(free)):
                         msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl} {locked_per}"
@@ -889,8 +897,9 @@ class BotHelperAsync:
 
         output = await self.spot_fetch_ticker(asset)
         _amount = float(format(amount / output, ".3f"))
+        log()
         log(
-            f"==> buying minimum amount of [g]BNB[/g] bnb_balance={cfg.BNB_BALANCE} -- to_buy={_amount}",
+            f"==> buying minimum amount of [g]BNB[/g] bnb_balance={cfg.BNB_BALANCE} => to_buy={_amount}",
             is_write=False,
             end="",
         )
@@ -907,6 +916,11 @@ class BotHelperAsync:
             "executedQty",
             "transactTime",
             "orderId",
+            "selfTradePreventionMode",
+            "fills",
+            "side",
+            "clientOrderId",
+            "workingTime",
         ]:
             with suppress(Exception):
                 del order[item]
@@ -920,8 +934,8 @@ class BotHelperAsync:
         return True
 
     async def spot_order(self, quantity, symbol, side, is_return=False, from_ex=False):
-        if not from_ex:
-            log(f"==> market_buy_order_quantity={quantity}")
+        # if not from_ex:
+        #     log(f"==> market_buy_order_quantity={int(quantity)}")
 
         try:
             return await exchange.spot.create_market_buy_order(symbol, quantity)
@@ -933,7 +947,7 @@ class BotHelperAsync:
                     return
 
                 quantity = quantity / 4  # re-try with much smalleer position size
-                log(f"==> re-opening [green]{side}[/green] 1/4_of_quantity={quantity} for {symbol}")
+                log(f"==> re-opening [green]{side}[/green] 1_over_4_of_the_quantity={quantity} for {symbol}")
                 return await self.spot_order(quantity, symbol, side, is_return=True, from_ex=True)
             elif "Precision is over the maximum defined for this asset" in _e or "Filter failure: LOT_SIZE" in _e:
                 log(f"E: {e} qty={quantity}")
@@ -1003,7 +1017,7 @@ class BotHelperAsync:
                         asset = asset.replace("BTC", "BUSD")
                         return await self.spot_fetch_ticker(asset, is_bid_price)
                 except Exception:
-                    # TODO: maybe add taking price from mexc?
+                    # TODO: maybe add fetching price from mexc?
                     # return await self.spot_fetch_ticker(asset, is_bid_price)
                     raise e
 

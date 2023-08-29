@@ -1,30 +1,29 @@
 root:
-  # goal: 10000
+  isolated_wallet_limit: 10000
   is_balance_silent: true
-  isolated_wallet_limit: 200
-  take_profit: 0.0045
+  take_profit: 0.0043
   locked_percent_limit: 99
   is_write: false
   is_funding_rate_alert: false
   ignore: # for all
-    - BOND
     - DUMMY
   ignore_warning:
-    - BOND
     - DUMMY
   # ignore_position_log:
   #   - OAX
   usdt:
     status: on # "on" or "off"
+    cut_loss: true
     sleep_interval: 11
     is_manual_trade: false
     auto_buy_bnb: on
     isolated: off
     cross: off
-    max_pos: 5 # 100$ => (4,11) | 300$ => (4,30)
-    initial: 11
-    multiply_ratio: 1.13 # was 1.13
-    percent_change_to_add: 3.5 # was 4
+    initial: 200
+    max_pos: 4
+    multiply_ratio: 1.13
+    percent_change_to_add: 2.5 # was: 3.5
+    percent_cut_loss: 4
     stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0
@@ -33,11 +32,12 @@ root:
     alert_if_position_closed: [] # OAX
   btc:
     status: off
+    cut_loss: off
     sleep_interval: 10
     is_manual_trade: false
-    auto_buy_bnb: on
+    auto_buy_bnb: off
     isolated: off
-    cross: on
+    cross: off
     initial: 0.00011
     max_pos: 2
     multiply_ratio: 2 # was 1.13

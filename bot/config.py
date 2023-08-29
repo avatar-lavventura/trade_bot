@@ -38,6 +38,7 @@ class Env:
         self._ts = None
         self.max_pos = None
         self.timestamps = None
+        self.cut_loss = None
 
 
 class Exchange:
@@ -326,6 +327,7 @@ class Config:
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].percent_change_to_add = -abs(self.cfg["root"][_type]["percent_change_to_add"]) + 0.01
             self.env[_type].is_manual_trade = self.cfg["root"][_type]["is_manual_trade"]
+            self.env[_type].cut_loss = self.cfg["root"][_type]["cut_loss"]
             self.env[_type].multiply_ratio = self.cfg["root"][_type]["multiply_ratio"]
             self.env[_type].positions_alert = self.yaml_wrapper(self.base_dir / f"positions_alert_{_type}.yaml")
             self.env[_type].max_pos = self.cfg["root"][_type]["max_pos"]
@@ -352,9 +354,15 @@ class Config:
 
         self.WATCHLIST_TARGET = self.watchlist["watch"]["target"]
         self.WATCHLIST_BAR = self.watchlist["watch"]["bar"]
-        self.WATCHLIST = self.watchlist["watch"]["list"]
+        if "list" in self.watchlist["watch"]:
+            self.WATCHLIST = self.watchlist["watch"]["list"]
+        else:
+            self.WATCHLIST = []
+
         self.WATCHLIST = list(set(self.WATCHLIST + self.WATCHLIST_BAR))
-        self.WATCHLIST.sort()
+        if self.WATCHLIST:
+            self.WATCHLIST.sort()
+
         self.WATCHLIST = ["BTCUSDT"] + self.WATCHLIST
         for _type in ["usdt", "btc"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")

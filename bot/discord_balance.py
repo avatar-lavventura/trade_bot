@@ -26,7 +26,7 @@ logging.getLogger("apscheduler.executors.default").propagate = False
 
 
 class Discord_Alpy:
-    def __init__(self, _type):
+    def __init__(self, _type, my_order):
         if config.cfg["root"]["is_write"]:
             _log.ll.LOG_FILENAME = Path.home() / ".bot" / "program.log"
         else:
@@ -49,6 +49,7 @@ class Discord_Alpy:
         self.channel_notifications: str = ""
         self.channel_name = str(_config["discord"]["CHANNEL_NAME"])
         self.TOKEN = str(_config["discord"]["TOKEN"])
+        cfg.MY_ORDER = self.my_order = int(my_order)
 
     def setup_hook(self):
         self.init_async()
@@ -91,17 +92,19 @@ class Discord_Alpy:
 
         # secondly, each given seconds in cfg.py
         cfg.SLEEP_INTERVAL = config._c["sleep_interval"]
-        scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
+        if self.my_order == 1:
+            scheduler.add_job(self.main, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
+        else:
+            scheduler.add_job(self.main, "cron", second="*/15", timezone=tz)
+
         if config._c["status"] == "on":
             scheduler.add_job(self.fetch_balance, "cron", second=f"*/{cfg.SLEEP_INTERVAL}", timezone=tz)
 
         # hourly
         scheduler.add_job(self.update_current_date, "cron", hour="*", timezone=tz)
         scheduler.add_job(helper.exchange.record_balance, "cron", hour="*", timezone=tz)
-        if cfg.TYPE == "usdt":
-            scheduler.add_job(self.check_delisting, "cron", hour="*", timezone=tz)
-
-        # scheduler.add_job(self.check_delisting, "cron", second="*", timezone=tz)
+        # if cfg.TYPE == "usdt":
+        #     scheduler.add_job(self.check_delisting, "cron", hour="*", timezone=tz)
 
         # daily
         scheduler.add_job(  #: restart at fund times
@@ -202,10 +205,11 @@ class Discord_Alpy:
 def main():
     try:
         _type = sys.argv[1:][0]
+        my_order = sys.argv[1:][1]
     except:
         _type = "usdt"
 
-    alpy = Discord_Alpy(_type)
+    alpy = Discord_Alpy(_type, my_order)
     alpy.setup_hook()
 
 

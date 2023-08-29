@@ -1,10 +1,9 @@
 watch:
   target:
-    BONDUSDT: 3.40
-    BONDBTC: 1300
+    BTCUSDT: 30000
   liquidate:
-    BONDBTC: 8050  # was: 650, 745
+    FTMUSDT: 0.10
   bar:
-    - BTCUSDT
+    - FTMUSDT
   list:
     - FTMUSDT
