@@ -95,8 +95,12 @@ async def webhook() -> Tuple[str, int]:  # type: ignore
         print(data_msg)
         return "OK", 200
 
-    # if ",sell," not in data_msg:
-    #     print(f"\n{data_msg}\n")
+    if data_msg[:4] == "BIST":
+        infos = data_msg.split(",")
+        _symbol = infos[1]
+        _side = infos[2]
+        async with app.lock:
+            await app.bot_trade.bist_discord_send_msg(_symbol, _side)
 
     if data_msg:
         if data_msg in ["red", "green"]:  # "alert_wavetrend"

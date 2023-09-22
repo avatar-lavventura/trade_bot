@@ -448,11 +448,18 @@ class BotHelper:
         if self.strategy.market.lower() == "usdt" and free_balance < initial:
             raise QuietExit(f"not enough USDT([cy]${round(free_balance)}[/cy]) for [cy]${initial}")
 
+    async def bist_discord_send_msg(self, symbol, side) -> None:
+        if side == "buy":
+            await self.discord_client.send_msg(f"```diff\n+{symbol} {side.upper()}\n```", "bist")
+        else:
+            await self.discord_client.send_msg(f"```diff\n-{symbol} {side.upper()}\n```", "bist")
+
     async def trade_main(self, data_msg) -> None:
         if "alert" in data_msg:
             if "abort" in data_msg:
                 log(f"   ABORT {data_msg}", "bold red")
             elif "_bist" in data_msg:
+                ############################################
                 await self.discord_client.send_msg(data_msg, "bist_alpy")
             else:
                 if "USDT" in data_msg:

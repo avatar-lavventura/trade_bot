@@ -1,0 +1,12 @@
+* Task exception was never retrieved
+future: <Task finished name='Task-1' coro=<my_background_task() done, defined at ./main.py:40> exception=Exception("Can't access TradingView's API. HTTP status code: 504. Check for invalid symbol, exchange, or indicators.")>
+Traceback (most recent call last):
+  File "./main.py", line 62, in my_background_task
+    await work(channel)
+  File "./main.py", line 24, in work
+    osc = value.get_analysis().oscillators
+  File "/home/alper/venv/lib/python3.8/site-packages/tradingview_ta/main.py", line 387, in get_analysis
+    return calculate(indicators=self.get_indicators(), indicators_key=self.indicators, screener=self.screener, symbol=self.symbol, exchange=self.exchange, interval=self.interval)
+  File "/home/alper/venv/lib/python3.8/site-packages/tradingview_ta/main.py", line 358, in get_indicators
+    raise Exception("Can't access TradingView's API. HTTP status code: {}. Check for invalid symbol, exchange, or indicators.".format(
+Exception: Can't access TradingView's API. HTTP status code: 504. Check for invalid symbol, exchange, or indicators.

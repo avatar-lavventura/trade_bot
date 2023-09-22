@@ -1,0 +1,21 @@
+//@version=5
+strategy("Momentum Strategy", overlay=true)
+length = input(10)
+price = close
+momentum(seria, length) =>
+    mom = seria - seria[length]
+    mom
+mom0 = momentum(price, length)
+mom1 = momentum( mom0, 1)
+fastLength = input(12)
+slowlength = input(26)
+MACDLength = input(9)
+MACD = ta.ema(close, fastLength) - ta.ema(close, slowlength)
+aMACD = ta.ema(MACD, MACDLength)
+delta = MACD - aMACD
+
+if (mom0 > 0 and mom1 > 0 and ta.crossover(delta, 0))
+    strategy.entry("MomLE", strategy.long, stop=high+syminfo.mintick, comment="MomLE")
+
+if (mom0 < 0 and mom1 < 0 and ta.crossunder(delta, 0))
+    strategy.close_all()

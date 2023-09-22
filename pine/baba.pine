@@ -1,0 +1,31 @@
+//@version=5
+strategy(title="BIST,{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}}",
+     shorttitle="MS",
+     calc_on_every_tick=true,
+     overlay=true)
+
+
+length = input(10)
+price = close
+momentum(seria, length) =>
+    mom = seria - seria[length]
+    mom
+mom0 = momentum(price, length)
+mom1 = momentum( mom0, 1)
+fastLength = input(12)
+slowlength = input(26)
+MACDLength = input(8)
+
+if syminfo.ticker == "ENKAI"
+    fastLength = input(13)
+    slowlength = input(27)
+
+MACD = ta.ema(close, fastLength) - ta.ema(close, slowlength)
+aMACD = ta.ema(MACD, MACDLength)
+delta = MACD - aMACD
+
+if (mom0 > 0 and mom1 > 0 and ta.crossover(delta, 0))
+    strategy.entry("m", strategy.long, stop=high+syminfo.mintick, comment="")
+
+if (mom0 < 0 and mom1 < 0 or ta.crossunder(delta, 0))
+    strategy.close_all()
