@@ -1,0 +1,396 @@
+//@version=5
+// Created by AlperAlimoglu on 01-01-2022 * was prepared for "5m" ; switched to "45m"
+strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_message}},{{close}},",
+     shorttitle="alpy_vix",
+     calc_on_order_fills=true,  // order immediate action
+     process_orders_on_close=true,
+     default_qty_type=strategy.cash,
+     calc_on_every_tick=true,
+     overlay=false,
+     pyramiding=100000)
+
+// https://vimeopro.com/user32804960/tradingview-indicators/video/115923112
+// https://www.ireallytrade.com/newsletters/VIXFix.pdf
+
+IS_BROWSER = true  // should be `false` while adding alerts
+fromMonth = 1
+fromDay = 1
+thruMonth = 1
+thruDay = 1
+thruYear = 3000
+fromYear = 2024
+if IS_BROWSER
+    fromYear := 2024
+    fromMonth := 1
+shortest = ta.ema(close, 20)
+short = ta.ema(close, 50)
+longer = ta.ema(close, 100)
+longest = ta.ema(close, 200)
+// ema_max = math.max(math.max(math.max(shortest,short), longer), longest)
+ema_max = math.max(shortest,short, longer, longest)
+
+testPeriodStart = timestamp(fromYear, fromMonth, fromDay, 0, 0)
+testPeriodStop = timestamp(thruYear, thruMonth, thruDay, 0, 0)
+start = timestamp(fromYear, fromMonth, fromDay, 13, 00)
+finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
+msg = timeframe.period + "_enter"
+msg_aggr = msg + "_aggr"
+window() =>
+    time >= start and time <= finish ? true : false
+
+BASE_DURATION = 10000 // equal to 1 second
+SLEEP_DUR = 5 * 60 * BASE_DURATION // ~5 minutes
+_now = timenow - 1600000000000
+
+is_sleep_pass = false
+if strategy.position_size[0] != 0
+    is_sleep_pass := _now > (math.abs(strategy.position_size) + SLEEP_DUR)
+
+// bomba: https://www.tradingview.com/script/ZfDaDkHX-Quadratic-Semaphore/
+p = input(6)
+length = input(30)
+x1 = bar_index
+x2 = math.sqrt(x1)
+y = high
+
+S11 = math.sum(x2,length) - math.sqrt(math.sum(x1,length)) / length
+S12 = math.sum(x1*x2,length) - (math.sum(x1,length) * math.sum(x2,length)) / length
+S22 = math.sum(math.sqrt(x2),length) - math.sqrt(math.sum(x2,length)) / length
+Sy1 = math.sum (y*x1,length) - (math.sum(y,length) * math.sum(x1,length)) / length
+Sy2 = math.sum (y*x2,length) - (math.sum(y,length) * math.sum(x2,length)) / length
+
+max1 = ta.sma(x1,length)
+max2 = ta.sma(x2,length)
+may = ta.sma(y,length)
+b2 = ((Sy1 * S22) - (Sy2*S12))/(S22*S11 - math.sqrt(S12))
+b3 = ((Sy2 * S11) - (Sy1 * S12))/(S22 * S11 - math.sqrt(S12))
+b1 = may - b2*max1 - b3*max2
+qr = b1 + b2*x1 + b3*x2
+yl = low
+Sy1l = math.sum(yl*x1,length) - (math.sum(yl,length) * math.sum(x1,length)) / length
+Sy2l = math.sum(yl*x2,length) - (math.sum(yl,length) * math.sum(x2,length)) / length
+mayl = ta.sma(yl,length)
+b2l = ((Sy1l * S22) - (Sy2l*S12))/(S22*S11 - math.sqrt(S12))
+b3l = ((Sy2l * S11) - (Sy1l * S12))/(S22 * S11 - math.sqrt(S12))
+b1l = mayl - b2l*max1 - b3l*max2
+qrl = b1l + b2l*x1 + b3l*x2
+period = math.round(p/2)+1
+hh = qr[period]
+ll = qrl[period]
+countH = 0
+countL = 0
+buy=0
+sell=0
+for i = 1 to period-1
+    if qr[i]<hh
+        countH := countH+1
+    if qrl[i]>ll
+        countL := countL+1
+
+for i = period+1 to p+1
+    if qr[i]<hh
+        countH := countH+1
+    if qrl[i]>ll
+        countL := countL+1
+
+if countH==p
+    pivotH = high[period]
+    buy := 1
+
+if countL==p
+    pivotL = low[period]
+    sell := 1
+// bomba ends -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+// buying volume and selling volume
+buyVolume = 0.0
+if high!=low
+    buyVolume := volume*(close-low)/(high-low)
+
+sellVolume = 0.0
+if high!=low
+    sellVolume := volume*(high-close)/(high-low)
+
+//: wave_trend: https://www.tradingview.com/script/2KE8wTuF-Indicator-WaveTrend-Oscillator-WT
+n1 = 10  // channel Length
+n2 = 21  // average Length
+src=hlc3
+esa = ta.ema(src, n1)
+d = ta.ema(math.abs(src - esa), n1)
+ci = (src - esa) / (0.015 * d)
+tci = ta.ema(ci, n2)
+wt1 = tci  // green-line
+wt2 = ta.sma(wt1, 4)  // red-line
+is_wt_cross_green = wt2 < wt1 and wt2[1] > wt1[1] and wt2 < -74
+
+//: hunter
+vwap_period = input(title="Period", defval=5)
+vwap_source = hlc3
+vwap_price_volume = vwap_source * volume
+sum_vwap_source = math.sum(vwap_price_volume, vwap_period)
+sumVolume = math.sum(volume, vwap_period)
+vwap_value = sum_vwap_source / sumVolume
+vwap_above = 0.0
+vwap_above_limit = 0.0
+if close > 0.01
+    vwap_above := vwap_value * (1 + 0.70 / 100)
+    vwap_above_limit := vwap_value * (1 + 1.20 / 100)
+else
+    vwap_above := vwap_value * (1 + 0.80 / 100)
+    vwap_above_limit := vwap_value * (1 + 1.20 / 100)
+
+long_VWMA = vwap_above <= close and close < vwap_above_limit
+
+// https://www.tradingview.com/script/OQs2lVvr-Ultimate-Moving-Average-Multi-TimeFrame-7-MA-Types
+_src = close
+len = input(20, title="Moving Average Length - LookBack Period")
+atype = 1 // input(1,minval=1,maxval=7,title="1=SMA, 2=EMA, 3=WMA, 4=HullMA, 5=VWMA, 6=RMA, 7=TEMA")
+smoothe = 2 // input(2, minval=1, maxval=10, title="Color Smoothing - 1 = No Smoothing")
+doma2 = input(false, title="Optional 2nd Moving Average")
+len2 = input(50, title="Moving Average Length - Optional 2nd MA")
+atype2 = 1 // input(1,minval=1,maxval=7,title="1=SMA, 2=EMA, 3=WMA, 4=HullMA, 5=VWMA, 6=RMA, 7=TEMA")
+
+res = timeframe.period
+//hull ma definition
+hullma = ta.wma(2*ta.wma(_src, len/2)-ta.wma(_src, len), math.round(math.sqrt(len)))
+//TEMA definition
+ema1 = ta.ema(_src, len)
+ema2 = ta.ema(ema1, len)
+ema3 = ta.ema(ema2, len)
+tema = 3 * (ema1 - ema2) + ema3
+
+avg = atype == 1 ? ta.sma(_src,len) : atype == 2 ? ta.ema(_src,len) : atype == 3 ? ta.wma(_src,len) : atype == 4 ? hullma : atype == 5 ? ta.vwma(_src, len) : atype == 6 ? ta.rma(_src,len) : tema
+//2nd Ma - hull ma definition
+hullma2 = ta.wma(2*ta.wma(_src, len2/2)-ta.wma(_src, len2), math.round(math.sqrt(len2)))
+//2nd MA TEMA definition
+sema1 = ta.ema(_src, len2)
+sema2 = ta.ema(sema1, len2)
+sema3 = ta.ema(sema2, len2)
+stema = 3 * (sema1 - sema2) + sema3
+
+avg2 = atype2 == 1 ? ta.sma(src,len2) : atype2 == 2 ? ta.ema(src,len2) : atype2 == 3 ? ta.wma(src,len2) : atype2 == 4 ? hullma2 : atype2 == 5 ? ta.vwma(src, len2) : atype2 == 6 ? ta.rma(src,len2) : tema
+
+out = avg
+out_two = avg2
+
+out1 = request.security(syminfo.tickerid, res, out)
+out2 = request.security(syminfo.tickerid, res, out_two)
+
+ma_up = out1 >= out1[smoothe]
+ma_down = out1 < out1[smoothe]
+// plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
+
+// cm_williams vix fix formula
+pd = input(2, title="look_back period standard deviation high")  // 1 for 1m
+bbl = input(20, title="bolinger band length")  // 20
+mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up") // 2
+lb = input(50  , title="Look Back Period Percentile High")
+ph = input(.99, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.85
+new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
+sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
+sbcc = input(false, title="Show Highlight Bar if WVF IS True")
+new2 = input(false, title="-------Highlight Bars Below Use FILTERED Criteria-------" )
+sbcFilt = input(true, title="Show Highlight Bar For Filtered Entry")
+sbcAggr = input(false, title="Show Highlight Bar For AGGRESSIVE Filtered Entry")
+new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
+sgb = input(false, title="Check Box To Turn Bars Gray?")
+//Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
+ltLB = input.int(99, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
+mtLB = input.int(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
+str = input.int(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
+
+// williams vix fix formula
+wvf = (ta.highest(close, pd) - low) / ta.highest(close, pd) * 100
+sDev = mult * ta.stdev(wvf, bbl)
+midLine = ta.sma(wvf, bbl)
+upper_band = midLine + sDev
+rangeHigh = ta.highest(wvf, lb) * ph
+// filtered bar criteria
+upRange = low > low[1] and close > high[1]
+upRange_aggr = close > close[1] and close > open[1]
+// filtered criteria
+filtered = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and wvf < upper_band and wvf < rangeHigh
+filtered_aggr = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and not(wvf < upper_band and wvf < rangeHigh)
+// alerts criteria
+alert1 = wvf >= upper_band or wvf >= rangeHigh ? true : false
+alert2 = (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and wvf < upper_band and wvf < rangeHigh ? true : false
+alert3 = upRange and close > close[str] and (close < close[ltLB]) and filtered ? true : false
+alert4 = upRange_aggr and close > close[str] and (close < close[ltLB] or close < close[mtLB]) and filtered_aggr ? 1 : 0
+// highlight bar criteria
+barcolor(alert3 ? color.fuchsia : na)  // **
+barcolor(alert4 ? color.orange : na)  // **
+barcolor(sbc and (wvf[1] >= upper_band[1] or wvf[1] >= rangeHigh[1]) and wvf < upper_band and wvf < rangeHigh ? color.aqua : na)
+barcolor(sbcc and (wvf >= upper_band or wvf >= rangeHigh) ? color.lime : na)
+barcolor(sgb and close ? color.gray : na)
+// coloring criteria of williams vix fix
+col = wvf >= upper_band or wvf >= rangeHigh ? color.lime : color.gray
+col_fuchsia = alert3 ? color.fuchsia : na
+col_aggr = alert4 ? color.orange : color.red
+// plots for williams vix fix histogram and alerts
+plot(wvf ? wvf * -1 : na, title="williams vix fix", style=plot.style_columns, linewidth=4, color=col)
+plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.style_columns, linewidth=2, color=color.new(color.orange, 0))
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+daily_per_change = (close - close[86400]) / close[86400] * 100
+
+// buy alerts
+// ==========
+base_cond = (close < high[1] or close < high[2] or close < high[3] or close < high[4]) and (buyVolume > sellVolume[2] * 1.5)
+is_buy = false
+if timeframe.isseconds
+    if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA
+        is_buy := true
+else
+    count = 0
+    ITERATIVE_LIME_BAR_COUNT = 9
+    lowest_value = low[1]
+    for i = 1 to ITERATIVE_LIME_BAR_COUNT  // 9 lime(green) lines could be 1 gray in between
+        if low[i] < lowest_value
+            lowest_value := low[i]
+
+        if col[i] == color.lime
+            count += 1
+
+    // if col_aggr == color.orange and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray
+    //    is_buy := true
+
+    if col == color.gray and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray and low <= lowest_value
+        is_buy := true
+
+    if timeframe.period != "5"
+        if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
+            is_buy := true
+
+    if timeframe.period == "5"  // 5m
+        if alert3[1] or (col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and is_wt_cross_green)
+            is_buy := true
+
+        if is_wt_cross_green and col_aggr == color.orange and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime
+            is_buy := true
+
+        if (col_aggr[1] == color.orange or col_aggr[2] == color.orange) and alert3
+            is_buy := true
+
+        if high < close[1] * 1.00025 or wt1 > 53 or close[1] > out1[1]  // or low[1] == high[1]
+            is_buy := false
+
+        // if wt1 < -65
+        //     for i = 2 to 72
+        //         if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+        //             if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 and low <= low[i + 2] * 1.0025 and low * 0.999 <= low[1]
+        //                 is_buy := true
+
+        //         if col[i] == color.gray and col[i + 1] == color.lime
+        //             break
+
+        //     if col == color.gray and is_wt_cross_green
+        //         for i = 2 to 72
+        //             if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+        //                 if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 // close < low[i]
+        //                     is_buy := true
+
+        //             if col[i] == color.gray and col[i + 1] == color.lime
+        //                 break
+    else if timeframe.period == "30"  // 30m
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and close > close[1] and close < close[3] and close < close[4]
+            is_buy := true
+    else if  timeframe.period == "45"  // 45m
+        // if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+        //     is_buy := true
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime
+            if low <= high[1] and low <= high[2]
+                is_buy := true
+
+        if wt1 > 53
+            is_buy := false
+
+        if col == color.lime and col[1] == color.lime and col_aggr == color.orange and col_aggr[1] == color.orange
+            is_buy := true
+
+        if col == color.gray // and is_wt_cross_green
+            for i = 2 to 20
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime and low <= low[i] and low <= low[i + 1]
+                    is_buy := true
+                    break
+
+                if col[i] == color.gray and col[i + 1] == color.lime
+                    break
+
+        if col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and col[5] == color.lime  and col[6] == color.lime and col[7] == color.lime and col[8] == color.lime and col[9] == color.lime
+            if col == color.gray or col_aggr == color.orange
+                if close < shortest and close < short and close < longer and close < longest
+                    is_buy := true
+    else if  timeframe.period == "60"  // 1h
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+            is_buy := true
+
+        if wt1 > 53
+            is_buy := false
+
+        if (is_wt_cross_green and wt2 <= -53) and col == color.lime
+            is_buy := true
+
+        count := 0
+        if col == color.lime and col[1] == color.gray
+            for i = 1 to 100
+                if wvf > wvf[i]
+                    count += 1
+                else
+                    break
+
+            if count == 100 and close > high[1]
+                is_buy := true
+
+        if ((is_wt_cross_green and wt2 <= -53) and col == color.gray and col[1] == color.gray and col[2] == color.lime) or
+           ((is_wt_cross_green and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray) or
+           ((is_wt_cross_green and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray)
+            is_buy := true
+
+        for i = 2 to 72
+            if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+                if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 and low <= low[i + 2] * 1.0025 and low * 0.999 <= low[1] // close < low[i]
+                    // if there is dump , lower than the previous bar
+                    is_buy := true
+
+            if col[i] == color.gray and col[i + 1] == color.lime
+                break
+
+        if col == color.gray and is_wt_cross_green
+            for i = 2 to 72
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+                    if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 // close < low[i]
+                        is_buy := true
+
+                if col[i] == color.gray and col[i + 1] == color.lime
+                    break
+    else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
+        is_buy := true
+
+
+if not base_cond
+    is_buy := false
+
+if is_wt_cross_green
+    is_buy := true
+
+if timeframe.period == "45" and close > ema_max
+    is_buy := false
+
+if window()
+    if IS_BROWSER
+        // if strategy.position_size[0] != 0
+        //     strategy.close_all()
+        if is_buy
+            strategy.entry("l", strategy.long, qty=1, alert_message=msg)  // "l": "long"
+    else
+        if _now - strategy.position_size > 15 * 60 * BASE_DURATION  // sleeps for 15 minutes
+            strategy.close_all()
+
+        if is_buy
+            if strategy.opentrades[0] == 0  //: needed to close first postion before alerts start
+                strategy.entry("l", strategy.long, qty=_now, alert_message=msg)
+            else if is_sleep_pass
+                strategy.close_all()
+
+// longExitPrice  = strategy.position_avg_price * (1 + 0.005)
+// if (strategy.position_size > 0)
+//     strategy.exit(id="XL TP", limit=longExitPrice)

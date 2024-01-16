@@ -12,7 +12,7 @@ alerts:
   greater_than: # >
     base:
       pair: BTCUSDT
-      price: 31400
+      price: 50000
       rapid_alert: "off"
     a1:
       pair: BTCUSDT

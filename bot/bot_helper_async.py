@@ -249,8 +249,10 @@ class BotHelperAsync:
         msg_to_print = f"{bug} {symbol}=[{c}]{asset_price}[/{c}] {per_str_c_1h} {per_str_c_1d} [blue]{_date(_type='hour')}[/blue]\t"
         if cfg.FIRST_PRINT_CYCLE:
             log(msg_to_print, is_write=False)
+        """
         elif config._env._status.find_one("real_pos_count")["value"] < 2:
             log(msg_to_print, end="\r", is_write=False)
+        """
 
     async def _discord_send(self, msg, lost, pos_count, name, free, only_btc) -> None:
         _time = _date(_format="%m-%d %H:%M:%S")
@@ -522,14 +524,18 @@ class BotHelperAsync:
         own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
         pos_count: int = config._env._status.find_one("count")["value"]
         real_pos_count: int = config._env._status.find_one("real_pos_count")["value"]
-        if real_pos_count == 0 and not cfg.FIRST_PRINT_CYCLE:
-            _console_clear()
-
         sum_usdt = float(format(sum_usdt, ".2f"))
         sum_busd = float(format(sum_busd, ".2f"))
         _sum_usdt = format(sum_usdt, ".2f")
         _da = f"[blue]{_date(_type='hour')}[/blue]"
         _total_balance = float(_sum_usdt) + float(sum_busd)
+        if real_pos_count == 0 and not cfg.FIRST_PRINT_CYCLE:
+            _console_clear()
+            if cfg.TYPE == "usdt":
+                _bnb = float(format(cfg.BNB_BALANCE, ".2f"))
+                _total = float(format(sum_usdt + _bnb, ".2f"))
+                log(f"** usdt={sum_usdt} bnb=[cy]$[/cy]{_bnb} | total={_total}")
+
         if pos_count > 0:
             _free_usdt = float(only_btc) * cfg.PRICES["BTCUSDT"]
             _total_bal_str = ""

@@ -1,7 +1,7 @@
 root:
   isolated_wallet_limit: 10000
   is_balance_silent: true
-  take_profit: 0.0043
+  take_profit: 0.0030
   locked_percent_limit: 99
   is_write: false
   is_funding_rate_alert: false
@@ -11,7 +11,7 @@ root:
     - DUMMY
   # ignore_position_log:
   #   - OAX
-  usdt:
+  usdt: # 58.40
     status: on # "on" or "off"
     cut_loss: true
     sleep_interval: 11
@@ -19,11 +19,11 @@ root:
     auto_buy_bnb: on
     isolated: off
     cross: off
-    initial: 100
-    max_pos: 5
-    multiply_ratio: 1.13
-    percent_change_to_add: 2.5 # was: 3.5
-    percent_cut_loss: 4
+    initial: 11
+    max_pos: 4
+    multiply_ratio: 1
+    percent_change_to_add: 0.99
+    # percent_cut_loss: 1 # TODO: implement
     stop_trade_wt_30m_red: false
     entry_prices:
       DUMMY: 1.0

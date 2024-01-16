@@ -12,16 +12,16 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
 // https://vimeopro.com/user32804960/tradingview-indicators/video/115923112
 // https://www.ireallytrade.com/newsletters/VIXFix.pdf
 
-IS_BROWSER = false  // should be `false` while adding alerts
-fromMonth = 5
+IS_BROWSER = true  // should be `false` while adding alerts
+fromMonth = 1
 fromDay = 1
 thruMonth = 1
 thruDay = 1
 thruYear = 3000
-fromYear = 2023
+fromYear = 2024
 if IS_BROWSER
-    fromYear := 2023
-    fromMonth := 7
+    fromYear := 2024
+    fromMonth := 1
 
 shortest = ta.ema(close, 20)
 short = ta.ema(close, 50)
@@ -182,9 +182,9 @@ ma_down = out1 < out1[smoothe]
 // plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
 
 // cm_williams vix fix formula
-pd = input(22, title="look_back period standard deviation high")  // 1 for 1m
-bbl = input(2, title="bolinger band length")  // 20
-mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up") // 2
+pd = input(22, title="look_back period standard deviation high")
+bbl = input(2, title="bolinger band length")
+mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
 lb = input(50  , title="Look Back Period Percentile High")
 ph = input(.99, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.85
 new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )

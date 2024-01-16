@@ -1,4 +1,15 @@
-* guide
+* Guide
+
+** RUN:
+#+begin_src bash
+./run_app.sh
+#+end_src
+
+--------------
+
+#+begin_src bash
+./run_balance.sh "usdt" 1
+#+end_src
 
 ** tradingview new account
 - restart internet and open new session at Google Chrome

@@ -148,7 +148,8 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def is_cut_loss(self, asset, profit, qty) -> None:
         """Close the trade with accepted loss."""
-        if cfg.TYPE == "usdt" and profit < -4.9:
+        if cfg.TYPE == "usdt" and profit < -9.9:  # -9.9
+            # breakpoint()  # DEBUG
             symbol = f"{asset}/{cfg.TYPE.upper()}"
             open_orders = await helper.exchange.spot.fetch_open_orders(symbol)
             for order in open_orders:
@@ -162,9 +163,9 @@ class BotHelperSpotAsync(BotHelperAsync):
                 for k in ["timeInForce", "orderListId", "price", "status", "type", "origQty", "executedQty"]:
                     del order[k]
 
-            log(
-                f"==> [alert]!!!!!!!!!!   CUT-LOSS for[/alert] {asset}=[alert]{format(float(profit), '.2f')}   !!!!!!!!!![/alert]"
-            )
+            m = "!!!!!!!!!!"
+            _loss = format(float(profit), ".2f")
+            log(f"==> [alert]{m}    CUT-LOSS for[/alert] {asset}=[alert]{_loss}    {m}[/alert]")
             with suppress(Exception):
                 del order["fills"]
                 del order["selfTradePreventionMode"]
@@ -516,7 +517,7 @@ class BotHelperSpotAsync(BotHelperAsync):
             pass
         elif (
             profit < 0
-            and per_change <= -1
+            and per_change <= -0.5
             and per_change <= config.env[_type].percent_change_to_add
             and not await self.check_position_to_pass(asset, _sum, is_limit, per)
         ):

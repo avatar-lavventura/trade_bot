@@ -1,6 +1,6 @@
 #!/bin/bash
 
-wget -Nq https://sandwichfinance.blob.core.windows.net/files/binance_usdt_markets.txt
+wget -O binance_usdt_markets.txt -Nq https://sandwichfinance.blob.core.windows.net/files/binance_usdt_markets.txt
 sed -i '/DOWNUSDT/d' binance_usdt_markets.txt
 sed -i '/UPUSDT/d' binance_usdt_markets.txt
 gawk -i inplace '!a[$0]++' blacklist.txt
