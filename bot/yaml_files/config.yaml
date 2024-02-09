@@ -1,53 +1,55 @@
 root:
-  isolated_wallet_limit: 10000
-  is_balance_silent: true
-  take_profit: 0.0030
-  locked_percent_limit: 99
-  is_write: false
-  is_funding_rate_alert: false
-  ignore: # for all
-    - DUMMY
-  ignore_warning:
-    - DUMMY
-  # ignore_position_log:
-  #   - OAX
-  usdt: # 58.40
-    status: on # "on" or "off"
-    cut_loss: true
-    sleep_interval: 11
-    is_manual_trade: false
-    auto_buy_bnb: on
-    isolated: off
-    cross: off
-    initial: 11
-    max_pos: 4
-    multiply_ratio: 1
-    percent_change_to_add: 0.99
-    # percent_cut_loss: 1 # TODO: implement
-    stop_trade_wt_30m_red: false
-    entry_prices:
-      DUMMY: 1.0
-    change_type: # to btc
-      - DUMMY
-    alert_if_position_closed: [] # OAX
-  btc:
-    status: off
-    cut_loss: off
-    sleep_interval: 10
-    is_manual_trade: false
-    auto_buy_bnb: off
-    isolated: off
-    cross: off
-    initial: 0.00011
-    max_pos: 2
-    multiply_ratio: 2 # was 1.13
-    percent_change_to_add: 3 # was 4
-    stop_trade_wt_30m_red: false
-    entry_prices:
-      DUMMY: 1.0
-    # change_type:  # to usdt
-    #   - OG
-    ignore:
-      - DUMMY
-    alert_if_position_closed:
-      - DUMMY
+    isolated_wallet_limit: 10000
+    is_balance_silent: true
+    take_profit: 0.0039
+    locked_percent_limit: 99
+    is_write: false
+    is_funding_rate_alert: false
+    ignore: # for all
+        - DUMMY
+    ignore_warning:
+        - DUMMY
+        # ignore_position_log:
+        #   - OAX
+    usdt: # 300
+        status: on # "on" or "off"
+        cut_loss: false
+        sleep_interval: 11
+        is_manual_trade: false
+        auto_buy_bnb: on
+        isolated: off
+        cross: off
+        initial: 11
+        max_pos: 1
+        multiply_ratio: 1
+        percent_change_to_add:
+            0.60
+            # percent_cut_loss: 1 # TODO: implement
+        stop_trade_wt_30m_red: false
+        entry_prices:
+            DUMMY: 1.0
+        change_type: # to btc
+            - DUMMY
+        alert_if_position_closed: [] # OAX
+    btc:
+        status: off
+        cut_loss: off
+        sleep_interval: 10
+        is_manual_trade: false
+        auto_buy_bnb: off
+        isolated: off
+        cross: off
+        initial: 0.00011
+        max_pos: 2
+        multiply_ratio: 2 # was 1.13
+        percent_change_to_add: 3 # was 4
+        stop_trade_wt_30m_red: false
+        entry_prices:
+            DUMMY:
+                1.0
+                # change_type:  # to usdt
+                #   - OG
+        ignore:
+            - DUMMY
+        alert_if_position_closed:
+            - DUMMY

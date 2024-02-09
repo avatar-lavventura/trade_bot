@@ -7,7 +7,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      default_qty_type=strategy.cash,
      calc_on_every_tick=true,
      overlay=false,
-     pyramiding=100000)
+     pyramiding=10000)
 
 // https://vimeopro.com/user32804960/tradingview-indicators/video/115923112
 // https://www.ireallytrade.com/newsletters/VIXFix.pdf
@@ -182,11 +182,11 @@ ma_down = out1 < out1[smoothe]
 // plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
 
 // cm_williams vix fix formula
-pd = input(22, title="look_back period standard deviation high")  // 1 for 1m
-bbl = input(2, title="bolinger band length")  // 20
-mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up") // 2
-lb = input(50  , title="Look Back Period Percentile High")
-ph = input(.99, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.85
+pd = input(25, title="look_back period standard deviation high")
+bbl = input(2, title="bolinger band length")
+mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
+lb = input(55  , title="Look Back Period Percentile High")
+ph = input(.99, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
 new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
 sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
 sbcc = input(false, title="Show Highlight Bar if WVF IS True")
@@ -196,9 +196,9 @@ sbcAggr = input(false, title="Show Highlight Bar For AGGRESSIVE Filtered Entry")
 new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
 sgb = input(false, title="Check Box To Turn Bars Gray?")
 //Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
-ltLB = input.int(99, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
+ltLB = input.int(25, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
 mtLB = input.int(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
-str = input.int(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
+str = input.int(1, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
 
 // williams vix fix formula
 wvf = (ta.highest(close, pd) - low) / ta.highest(close, pd) * 100
@@ -233,22 +233,175 @@ plot(alert4 ? alert4 : 0, title="alert aggressive filtered entry", style=plot.st
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 daily_per_change = (close - close[86400]) / close[86400] * 100
 
-base_cond = (buyVolume > sellVolume[1])
-
+// buy alerts
+// ==========
+base_cond = (buyVolume > sellVolume[2] * 2) and (close < high[1] or close < high[2] or close < high[3] or close < high[4])
 is_buy = false
 
-if is_wt_cross_green and wt2 <= -60 and base_cond
+if timeframe.isseconds
+    if (col[1] == color.gray and col == color.lime or col[1] == color.lime and col == color.gray) and long_VWMA
+        is_buy := true
+else
+    count = 0
+    ITERATIVE_LIME_BAR_COUNT = 9
+    lowest_value = low[1]
+    for i = 1 to ITERATIVE_LIME_BAR_COUNT  // 9 lime(green) lines could be 1 gray in between
+        if low[i] < lowest_value
+            lowest_value := low[i]
+
+        if col[i] == color.lime
+            count += 1
+
+    // if col_aggr == color.orange and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray
+    //    is_buy := true
+
+    if col == color.gray and count >= ITERATIVE_LIME_BAR_COUNT - 1 and col[1] != color.gray and low <= lowest_value
+        is_buy := true
+
+    if timeframe.period != "5"
+        if alert3  // and col[1] == color.lime and col == color.gray  // and long_VWMA
+            is_buy := true
+
+    if timeframe.period == "5"  // 5m
+        if alert3[1] or (col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and is_wt_cross_green)
+            is_buy := true
+
+        if is_wt_cross_green and col_aggr == color.orange and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime
+            is_buy := true
+
+        if (col_aggr[1] == color.orange or col_aggr[2] == color.orange) and alert3
+            is_buy := true
+
+        if high < close[1] * 1.00025 or wt1 > 53 or close[1] > out1[1]  // or low[1] == high[1]
+            is_buy := false
+
+        // if wt1 < -65
+        //     for i = 2 to 72
+        //         if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+        //             if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 and low <= low[i + 2] * 1.0025 and low * 0.999 <= low[1]
+        //                 is_buy := true
+
+        //         if col[i] == color.gray and col[i + 1] == color.lime
+        //             break
+
+        //     if col == color.gray and is_wt_cross_green
+        //         for i = 2 to 72
+        //             if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+        //                 if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 // close < low[i]
+        //                     is_buy := true
+
+        //             if col[i] == color.gray and col[i + 1] == color.lime
+        //                 break
+    else if timeframe.period == "30"  // 30m
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and close > close[1] and close < close[3] and close < close[4]
+            is_buy := true
+    else if  timeframe.period == "45"  // 45m
+        // if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+        //     is_buy := true
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime
+            if low <= high[1] and low <= high[2]
+                is_buy := true
+
+        if wt1 > 53
+            is_buy := false
+
+        if col == color.lime and col[1] == color.lime and col_aggr == color.orange and col_aggr[1] == color.orange
+            is_buy := true
+
+        if col == color.gray // and is_wt_cross_green
+            for i = 2 to 20
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime and low <= low[i] and low <= low[i + 1]
+                    is_buy := true
+                    break
+
+                if col[i] == color.gray and col[i + 1] == color.lime
+                    break
+
+        if col[1] == color.lime and col[2] == color.lime and col[3] == color.lime and col[4] == color.lime and col[5] == color.lime  and col[6] == color.lime and col[7] == color.lime and col[8] == color.lime and col[9] == color.lime
+            if col == color.gray or col_aggr == color.orange
+                if close < shortest and close < short and close < longer and close < longest
+                    is_buy := true
+    else if  timeframe.period == "60"  // 1h
+        if col == color.gray and col[1] == color.lime and col[2] == color.lime  and close < close[1] and close < close[2] and close < close[3]
+            is_buy := true
+
+        if wt1 > 53
+            is_buy := false
+
+        if (is_wt_cross_green and wt2 <= -53) and col == color.lime
+            is_buy := true
+
+        count := 0
+        if col == color.lime and col[1] == color.gray
+            for i = 1 to 100
+                if wvf > wvf[i]
+                    count += 1
+                else
+                    break
+
+            if count == 100 and close > high[1]
+                is_buy := true
+
+        if ((is_wt_cross_green and wt2 <= -53) and col == color.gray and col[1] == color.gray and col[2] == color.lime) or
+           ((is_wt_cross_green and wt1 <= -60) and col == color.gray and col[1] == color.gray and col[2] == color.gray) or
+           ((is_wt_cross_green and wt1 <= -53) and col == color.lime and col[1] == color.gray and col[2] == color.gray)
+            is_buy := true
+
+        for i = 2 to 72
+            if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+                if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 and low <= low[i + 2] * 1.0025 and low * 0.999 <= low[1] // close < low[i]
+                    // if there is dump , lower than the previous bar
+                    is_buy := true
+
+            if col[i] == color.gray and col[i + 1] == color.lime
+                break
+
+        if col == color.gray and is_wt_cross_green
+            for i = 2 to 72
+                if col[i] == color.gray and col[i + 1] == color.lime and col[i + 2] == color.lime and col[i + 3] == color.lime
+                    if low <= low[i] * 1.0025 and low <= low[i + 1] * 1.0025 // close < low[i]
+                        is_buy := true
+
+                if col[i] == color.gray and col[i + 1] == color.lime
+                    break
+    else if col_aggr == color.orange and timeframe.period == "240"  // 4hr (60 * 4)
+        is_buy := true
+
+if not base_cond
+    is_buy := false
+
+if timeframe.period == "45" and close > ema_max
+    is_buy := false
+
+
+// Collect the entry prices from all open trades
+priceSum = 0.0
+
+for tradeNumber = 0 to strategy.opentrades - 1
+    priceSum += strategy.opentrades.entry_price(tradeNumber)
+
+// Calculate the average entry price
+avgEntryPrice = priceSum / strategy.opentrades
+
+if alert3 and math.abs(wvf[0]) > 0.50 and wt2 < -10 and wt1 < -10 // and buyVolume > sellVolume
     is_buy := true
 
-if is_wt_cross_green and wt2 <= -74
+if is_wt_cross_green and wt2 <= -80
     is_buy := true
+
+if close > avgEntryPrice * 0.998
+    is_buy := false
 
 if window()
     if IS_BROWSER
+        // if strategy.position_size[0] != 0
+        //     strategy.close_all()
         if is_buy
-            strategy.entry("l", strategy.long, qty=1, alert_message=msg)  // "l": "long"
+            strategy.entry("l", strategy.long, qty=math.abs(100 / close), alert_message=msg)  // "l": "long"
+            strategy.exit("s", "l", limit=close * 1.004, stop=close * 0.97)
+            // strategy.exit("Exit Short", from_entry="l", limit=low * 0.995)
     else
-        if _now - strategy.position_size > 2 * 60 * BASE_DURATION  // sleeps for 2 minutes
+        if _now - strategy.position_size > 1 * 60 * BASE_DURATION  // sleeps for 15 minutes
             strategy.close_all()
 
         if is_buy

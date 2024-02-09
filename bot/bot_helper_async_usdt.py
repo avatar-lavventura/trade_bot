@@ -148,7 +148,7 @@ class BotHelperSpotAsync(BotHelperAsync):
 
     async def is_cut_loss(self, asset, profit, qty) -> None:
         """Close the trade with accepted loss."""
-        if cfg.TYPE == "usdt" and profit < -9.9:  # -9.9
+        if cfg.TYPE == "usdt" and profit < -3:
             # breakpoint()  # DEBUG
             symbol = f"{asset}/{cfg.TYPE.upper()}"
             open_orders = await helper.exchange.spot.fetch_open_orders(symbol)

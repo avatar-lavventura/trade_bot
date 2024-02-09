@@ -544,7 +544,7 @@ class BotHelperAsync:
                 if float(_total_balance) < 0.10:
                     _total_bal_str = "[g]$0[/g] "
                 else:
-                    _total_bal_str = f"[g]${_total_balance}[/g] "
+                    _total_bal_str = f"[g]${format(_total_balance + cfg.BNB_BALANCE, '.2f')}[/g] "
             else:
                 bug = ":bee:"
 
@@ -827,10 +827,11 @@ class BotHelperAsync:
                         f"{_msg}**:lion_face: `${sum_usdt}`** {pnl}:dart: $`{format(goal, '.2f')}` {_free}{locked_per}"
                     )
                 else:
+                    val = format(sum_usdt + cfg.BNB_BALANCE, ".2f")
                     if math.floor(float(sum_usdt)) <= math.floor(float(free)):
-                        msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl} {locked_per}"
+                        msg = f"{_msg}**:lion_face: `${val}`** {pnl} {locked_per}"
                     else:
-                        msg = f"{_msg}**:lion_face: `${sum_usdt}`** {pnl} {_free}{locked_per}"
+                        msg = f"{_msg}**:lion_face: `${val}`** {pnl} {_free}{locked_per}"
             else:
                 if _msg[-1] == "\n":
                     msg = f"{_msg[:-1]}"

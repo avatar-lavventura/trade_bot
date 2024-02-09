@@ -7,18 +7,18 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      default_qty_type=strategy.cash,
      calc_on_every_tick=true,
      overlay=false,
-     pyramiding=100000)
+     pyramiding=5)
 
 // https://vimeopro.com/user32804960/tradingview-indicators/video/115923112
 // https://www.ireallytrade.com/newsletters/VIXFix.pdf
 
 IS_BROWSER = true  // should be `false` while adding alerts
-fromMonth = 1
+fromMonth = 12
 fromDay = 1
 thruMonth = 1
 thruDay = 1
 thruYear = 3000
-fromYear = 2024
+fromYear = 2023
 if IS_BROWSER
     fromYear := 2024
     fromMonth := 1
@@ -182,11 +182,11 @@ ma_down = out1 < out1[smoothe]
 // plot(out1, title="Multi-Timeframe Moving Avg", style=plot.style_line, linewidth=1, color=col1)
 
 // cm_williams vix fix formula
-pd = input(22, title="look_back period standard deviation high")
+pd = input(25, title="look_back period standard deviation high")
 bbl = input(2, title="bolinger band length")
 mult = input.float(5.0, minval=1, maxval=5, title="Bollinger Band Standard Devaition Up")
-lb = input(50  , title="Look Back Period Percentile High")
-ph = input(.99, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%") // 0.85
+lb = input(55  , title="Look Back Period Percentile High")
+ph = input(.98, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
 new = input(false, title="-------Highlight Bars Below Use Original Criteria-------" )
 sbc = input(true, title="Show Highlight Bar if WVF WAS True and IS Now False")
 sbcc = input(false, title="Show Highlight Bar if WVF IS True")
@@ -196,9 +196,9 @@ sbcAggr = input(false, title="Show Highlight Bar For AGGRESSIVE Filtered Entry")
 new3 = input(false, title="Check Below to turn All Bars Gray, Then Check the Boxes Above, And your will have Same Colors As VixFix")
 sgb = input(false, title="Check Box To Turn Bars Gray?")
 //Criteria for Down Trend Definition for Filtered Pivots and Aggressive Filtered Pivots
-ltLB = input.int(99, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
+ltLB = input.int(25, minval=25, maxval=99, title="Long-Term Look Back Current Bar Has To Close Below This Value OR Medium Term--Default=40")
 mtLB = input.int(14, minval=10, maxval=20, title="Medium-Term Look Back Current Bar Has To Close Below This Value OR Long Term--Default=14")
-str = input.int(3, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
+str = input.int(1, minval=1, maxval=9, title="Entry Price Action Strength--Close > X Bars Back---Default=3")
 
 // williams vix fix formula
 wvf = (ta.highest(close, pd) - low) / ta.highest(close, pd) * 100
@@ -373,17 +373,39 @@ if not base_cond
 if timeframe.period == "45" and close > ema_max
     is_buy := false
 
+priceSum = 0.0
 
-if alert3 and math.abs(wvf[0]) > 0.50
+for tradeNumber = 0 to strategy.opentrades - 1
+    priceSum += strategy.opentrades.entry_price(tradeNumber)
+
+// Calculate the average entry price
+avgEntryPrice = priceSum / strategy.opentrades
+
+if syminfo.ticker == "OMUSDT"
+    if math.abs(math.abs(wvf[0]) - math.abs(wvf[1])) > 1 and close[0] < close[1] // and buyVolume > sellVolume
+        is_buy := true
+else
+    if math.abs(math.abs(wvf[0]) - math.abs(wvf[1])) > 1 and close[0] < close[1] and math.abs(wvf[1]) < 0.2
+        is_buy := true
+
+    if alert3 and math.abs(wvf[0]) > 0.50 and wt2 < -10 and wt1 < -10 // and buyVolume > sellVolume
+        is_buy := true
+
+if is_wt_cross_green and wt2 <= -80
     is_buy := true
+
+if strategy.opentrades > 0
+    lastEntryPrice = strategy.opentrades.entry_price(strategy.opentrades - 1)
+    if close > lastEntryPrice * 0.995
+        is_buy := false
 
 if window()
     if IS_BROWSER
         // if strategy.position_size[0] != 0
         //     strategy.close_all()
         if is_buy
-            strategy.entry("l", strategy.long, qty=500, alert_message=msg)  // "l": "long"
-            strategy.exit("s", "l", limit=close * 1.005, stop=strategy.position_avg_price * 0.99)
+            strategy.entry("l", strategy.long, qty=math.abs(100 / close), alert_message=msg)  // "l": "long"
+            strategy.exit("s", "l", limit=close * 1.004, stop=close * 0.97)
             // strategy.exit("Exit Short", from_entry="l", limit=low * 0.995)
     else
         if _now - strategy.position_size > 1 * 60 * BASE_DURATION  // sleeps for 15 minutes
@@ -394,7 +416,3 @@ if window()
                 strategy.entry("l", strategy.long, qty=_now, alert_message=msg)
             else if is_sleep_pass
                 strategy.close_all()
-
-// longExitPrice  = strategy.position_avg_price * (1 + 0.005)
-// if (strategy.position_size > 0)
-//     strategy.exit(id="XL TP", limit=longExitPrice)
