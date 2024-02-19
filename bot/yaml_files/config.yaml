@@ -19,11 +19,11 @@ root:
         auto_buy_bnb: on
         isolated: off
         cross: off
-        initial: 11
+        initial: 10.5
         max_pos: 1
         multiply_ratio: 1
         percent_change_to_add:
-            0.60
+            0.5
             # percent_cut_loss: 1 # TODO: implement
         stop_trade_wt_30m_red: false
         entry_prices:

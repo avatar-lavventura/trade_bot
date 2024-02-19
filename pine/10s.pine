@@ -7,7 +7,7 @@ strategy(title="{{ticker}},{{strategy.order.action}},{{strategy.order.alert_mess
      default_qty_type=strategy.cash,
      calc_on_every_tick=true,
      overlay=false,
-     pyramiding=5)
+     pyramiding=6)
 
 // https://vimeopro.com/user32804960/tradingview-indicators/video/115923112
 // https://www.ireallytrade.com/newsletters/VIXFix.pdf
@@ -380,6 +380,7 @@ for tradeNumber = 0 to strategy.opentrades - 1
 
 // Calculate the average entry price
 avgEntryPrice = priceSum / strategy.opentrades
+// strategy.position_size * avgEntryPrice
 
 if syminfo.ticker == "OMUSDT"
     if math.abs(math.abs(wvf[0]) - math.abs(wvf[1])) > 1 and close[0] < close[1] // and buyVolume > sellVolume
@@ -399,13 +400,19 @@ if strategy.opentrades > 0
     if close > lastEntryPrice * 0.995
         is_buy := false
 
+    if IS_BROWSER
+        if close < avgEntryPrice * 0.995
+            strategy.entry("l", strategy.long, qty=math.abs(strategy.position_size * avgEntryPrice / close), alert_message=msg)  // "l": "long"
+            strategy.exit("s", "l", limit=close * 1.004, stop=close * 0.97)
+
 if window()
     if IS_BROWSER
         // if strategy.position_size[0] != 0
         //     strategy.close_all()
         if is_buy
-            strategy.entry("l", strategy.long, qty=math.abs(100 / close), alert_message=msg)  // "l": "long"
-            strategy.exit("s", "l", limit=close * 1.004, stop=close * 0.97)
+            if strategy.opentrades == 0
+                strategy.entry("l", strategy.long, qty=math.abs(100 / close), alert_message=msg)  // "l": "long"
+                strategy.exit("s", "l", limit=close * 1.004, stop=close * 0.97)
             // strategy.exit("Exit Short", from_entry="l", limit=low * 0.995)
     else
         if _now - strategy.position_size > 1 * 60 * BASE_DURATION  // sleeps for 15 minutes
