@@ -1,9 +1,9 @@
 watch:
-  target:
-    BTCUSDT: 30000
-  liquidate:
-    FTMUSDT: 0.10
-  bar:
-    - AUCTIONUSDT
-  list:
-    - AUCTIONUSDT
+    target:
+        BTCUSDT: 70000
+    liquidate:
+        FTMUSDT: 0.10
+    bar:
+        - FTMUSDT
+    list:
+        - FTMUSDT

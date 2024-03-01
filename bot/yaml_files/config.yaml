@@ -9,9 +9,9 @@ root:
         - DUMMY
     ignore_warning:
         - DUMMY
-        # ignore_position_log:
-        #   - OAX
-    usdt: # 300
+          # ignore_position_log:
+          #   - OAX
+    usdt: # 3240
         status: on # "on" or "off"
         cut_loss: false
         sleep_interval: 11
@@ -19,7 +19,7 @@ root:
         auto_buy_bnb: on
         isolated: off
         cross: off
-        initial: 10.5
+        initial: 10.4
         max_pos: 1
         multiply_ratio: 1
         percent_change_to_add:

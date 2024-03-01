@@ -60,7 +60,7 @@ def _fetch_ohlcv(ohlcv, symbol, is_compact=False):
         if symbol[-3:] == "BTC":
             pattern = r"(?m)(?<=\d)\d{3}(?=(?:\d{3})*$)"
             if float(ohlcv[0][3].replace(",", "")) >= 1000:
-                ohlcv[0][3] = int(float(ohlcv[0][3].replace(",", ".")) * cfg.PRICES["BTCUSDT"])
+                ohlcv[0][3] = int(float(ohlcv[0][3].replace(",", ".").replace(".", "")) * cfg.PRICES["BTCUSDT"])
             else:
                 ohlcv[0][3] = int(float(ohlcv[0][3]) / 1000 * cfg.PRICES["BTCUSDT"])
 

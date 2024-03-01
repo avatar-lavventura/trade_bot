@@ -21,12 +21,12 @@ class TakeProfit:
         if self.take_profit < 0.006 and cfg.TYPE == "usdt" and 1000 < amount < 2500:
             profit += 0.0001  # 0.01% more profit
 
+        """
         if self.take_profit < 0.006 and (
-            (cfg.TYPE == "usdt" and amount > 2500) or (cfg.TYPE == "btc" and amount > 0.05)  # was: amount > 0.009
+            (cfg.TYPE == "usdt" and amount > 5000) or (cfg.TYPE == "btc" and amount > 0.05)  # was: amount > 0.009
         ):
             profit = 1.000 + 0.0095  # 0.95% profit
-
-        # print(f"profit={profit}")
+        """
         return profit
 
     def get_long_tp(self, entry_price, isolated_wallet, decimal) -> float:

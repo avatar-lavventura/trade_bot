@@ -1,22 +1,22 @@
 alerts:
-  less_than: # <
-    base:
-      pair: BTCUSDT
-      price: 24000
-      rapid_alert: "on" # more rapid message
-      msg: "💣"
-    a1:
-      pair: BTCUSDT
-      price: 20000
-      rapid_alert: "off"
-  greater_than: # >
-    base:
-      pair: BTCUSDT
-      price: 50000
-      rapid_alert: "off"
-    a1:
-      pair: BTCUSDT
-      price: 30000
-      rapid_alert: "off"
-  balance_greater_than:
-    value: 10000
+    less_than: # <
+        base:
+            pair: BTCUSDT
+            price: 24000
+            rapid_alert: "on" # more rapid message
+            msg: "💣"
+        a1:
+            pair: STRKUSDT
+            price: 2.00
+            rapid_alert: "off"
+    greater_than: # >
+        base:
+            pair: BTCUSDT
+            price: 70000
+            rapid_alert: "off"
+        a1:
+            pair: STRKUSDT
+            price: 3.0
+            rapid_alert: "off"
+    balance_greater_than:
+        value: 10000
