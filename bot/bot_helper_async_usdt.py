@@ -24,8 +24,9 @@ class BotHelperSpotAsync(BotHelperAsync):
             log(f"   [orange]pass_a[/orange]: '{_sum} > {config.isolated_wallet_limit}'")
             return True
 
-        if float(per) > 80:
-            log("   [orange]pass_b[/orange]: locked percent is above 80")
+        pass_value = 99
+        if float(per) > pass_value:
+            log(f"   [orange]pass_b[/orange]: locked percent is above {pass_value}")
             return True
 
         if not is_limit or asset in config.SPOT_IGNORE_LIST:

@@ -11,7 +11,7 @@ root:
         - DUMMY
           # ignore_position_log:
           #   - OAX
-    usdt: # 3240
+    usdt:
         status: on # "on" or "off"
         cut_loss: false
         sleep_interval: 11
@@ -41,8 +41,8 @@ root:
         cross: off
         initial: 0.00011
         max_pos: 2
-        multiply_ratio: 2 # was 1.13
-        percent_change_to_add: 3 # was 4
+        multiply_ratio: 1
+        percent_change_to_add: 0.5
         stop_trade_wt_30m_red: false
         entry_prices:
             DUMMY:
