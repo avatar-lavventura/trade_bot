@@ -4,6 +4,6 @@ watch:
     liquidate:
         FTMUSDT: 0.10
     bar:
-        - XECUSDT
+        - STRKUSDT
     list:
-        - XECUSDT
+        - STRKUSDT

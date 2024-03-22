@@ -7,7 +7,7 @@ alerts:
             msg: "💣"
         a1:
             pair: STRKUSDT
-            price: 2.00
+            price: 1.90
             rapid_alert: "off"
     greater_than: # >
         base:

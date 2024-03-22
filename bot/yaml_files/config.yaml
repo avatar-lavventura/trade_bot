@@ -6,12 +6,12 @@ root:
     is_write: false
     is_funding_rate_alert: false
     ignore: # for all
-        - DUMMY
+        - PAXG
     ignore_warning:
         - DUMMY
           # ignore_position_log:
           #   - OAX
-    usdt:
+    usdt: # 4900
         status: on # "on" or "off"
         cut_loss: false
         sleep_interval: 11
@@ -20,6 +20,7 @@ root:
         isolated: off
         cross: off
         initial: 10.4
+        strk_initial: 100.0
         max_pos: 1
         multiply_ratio: 1
         percent_change_to_add:
@@ -40,7 +41,7 @@ root:
         isolated: off
         cross: off
         initial: 0.00011
-        max_pos: 2
+        max_pos: 1
         multiply_ratio: 1
         percent_change_to_add: 0.5
         stop_trade_wt_30m_red: false

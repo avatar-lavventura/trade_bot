@@ -324,13 +324,19 @@ class BotHelper:
         elif self.strategy.market in ["USDT", "BUSD"]:
             output = await self.symbol_price(self.strategy.symbol, "spot")
             last_price = output["last"]
-            initial_amount = config.cfg["root"]["usdt"]["initial"] / last_price
+            if self.strategy.symbol == "STRK/USDT":
+                _initial = 10.4
+                initial_amount = _initial / last_price
+            else:
+                initial_amount = config.cfg["root"]["usdt"]["initial"] / last_price
+
             self.strategy.size = self.get_initial_amount(initial_amount, self.strategy.market)
-            decimal = self.get_decimal_count(self.strategy.size)
-            self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
-            if 0 < float(self.strategy.size) < 10 and float(self.strategy.size) * last_price < 10:
-                self.strategy.size = float(self.strategy.size) + 1
+            if self.strategy.symbol != "STRK/USDT":
+                decimal = self.get_decimal_count(self.strategy.size)
                 self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
+                if 0 < float(self.strategy.size) < 10 and float(self.strategy.size) * last_price < 10:
+                    self.strategy.size = float(self.strategy.size) + 1
+                    self.strategy.size = f"{float(self.strategy.size):.{decimal}f}"
 
             if float(self.strategy.size) == 0:
                 self.strategy.size = 0.1
@@ -383,7 +389,9 @@ class BotHelper:
     def check_on_going_positions(self) -> None:
         pos_count = config.env[self.strategy.market.lower()]._status.find_one("count")["value"]
         defined_pos_count = config.env[self.strategy.market.lower()].max_pos
-        if pos_count >= defined_pos_count:
+        if self.strategy.symbol == "PAXG/USDT":
+            pass
+        elif pos_count >= defined_pos_count:
             raise QuietExit(f"warning: {defined_pos_count} pos")
 
     async def _fetch_balance(self):
