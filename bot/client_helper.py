@@ -5,8 +5,8 @@ from contextlib import suppress
 from pathlib import Path
 
 import discord
-from broker._utils.tools import log
-from broker._utils.yaml import Yaml
+from _utils.tools import log
+from _utils.yaml import Yaml
 
 from bot import cfg
 
@@ -17,7 +17,7 @@ logger.setLevel(logging.CRITICAL)
 class DiscordClient:
     def __init__(self):
         _config = Yaml(Path.home() / ".binance.yaml")
-        self.bot = discord.Client()
+        self.bot = discord.Client(intents=discord.Intents.default())
         self.TOKEN = _config["discord"]["TOKEN"]
         self.channel_name = _config["discord"]["CHANNEL_NAME"]
         self.channel = {}

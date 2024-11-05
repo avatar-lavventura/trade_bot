@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
-from bot import cfg
-from bot.config import exchange
+import cfg
+from config import exchange
 
 
 class Fund:

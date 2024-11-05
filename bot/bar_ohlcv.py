@@ -6,10 +6,10 @@ from datetime import datetime
 
 import ccxt
 import pandas as pd
-from broker._utils._log import log
+from _utils._log import log
 
-from bot import cfg
-from bot.fund_time import Fund
+import cfg
+from fund_time import Fund
 
 # https://techflare.blog/how-to-get-ohlcv-data-for-your-exchange-with-ccxt-library/
 

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import asyncio
-import discord
-from pathlib import Path
 import time
-from broker._utils._log import log
-from tradingview_ta import Interval, TA_Handler
-from broker._utils.yaml import Yaml
+from pathlib import Path
 
+import discord
+from broker._utils._log import log
+from broker._utils.yaml import Yaml
+from tradingview_ta import Interval, TA_Handler
 
 cfg = Yaml(Path(f"{Path.home()}/.binance.yaml"))
 client = discord.Client()

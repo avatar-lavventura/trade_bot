@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import logging
 import os
 import sys
@@ -9,15 +10,15 @@ from pathlib import Path
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from broker._utils import _log
-from broker._utils._log import _console_clear, log
-from broker._utils.tools import _date, print_tb
-from broker._utils.yaml import Yaml
-
-from bot import binance_balance, cfg
-from bot import config as helper
-from bot.binance_balance import process_main
-from bot.config import config
+from _utils import _log
+from _utils._log import _console_clear, log
+from _utils.tools import _date, print_tb
+from _utils.yaml import Yaml
+import binance_balance, cfg
+import binance_balance, cfg
+import config as helper
+from binance_balance import process_main
+from config import config
 from scripts.delist_log import _check_url
 
 logging.disable(logging.CRITICAL)
@@ -42,7 +43,8 @@ class Discord_Alpy:
         except Exception as e:
             log(f"E: {e}")
 
-        self.client = discord.Client(intents=discord.Intents.default())
+        # self.client = discord.Client()
+        self.client = discord.Client(intents=discord.Intents.all())
         self.channel: str = ""
         self.channel_alerts: str = ""
         self.channel_log: str = ""
@@ -56,8 +58,9 @@ class Discord_Alpy:
 
     def init_async(self):
         try:
-            self.client.loop.create_task(self.task())
-            self.client.loop.run_until_complete(self.client.start(self.TOKEN))
+            loop = asyncio.get_event_loop()
+            loop.create_task(self.task())
+            loop.run_until_complete(self.client.start(self.TOKEN))
         except KeyboardInterrupt:
             with suppress(KeyboardInterrupt):
                 self.client.loop.run_until_complete(binance_balance.bot_async.close())

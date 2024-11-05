@@ -3,9 +3,9 @@
 import time
 from contextlib import suppress
 
-from broker._utils._log import log
-from broker._utils.tools import _date, decimal_count, print_tb
-from broker.errors import QuietExit
+from _utils._log import log
+from _utils.tools import _date, decimal_count, print_tb
+from errors import QuietExit
 from pymongo import MongoClient
 
 from bot import cfg

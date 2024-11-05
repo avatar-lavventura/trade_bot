@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from bot import cfg
-from bot.config import config
+import cfg
+from config import config
 
 
 class TP_calculate(Exception):

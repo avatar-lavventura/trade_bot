@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # from broker._utils.tools import _date
-from broker.libs.mongodb import BaseMongoClass
+from libs.mongodb import BaseMongoClass
 from pymongo import MongoClient
 
 

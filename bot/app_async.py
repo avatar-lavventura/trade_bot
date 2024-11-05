@@ -5,10 +5,10 @@ import logging
 from pathlib import Path
 from typing import Tuple
 
-import quart.flask_patch  # noqa
-from broker._utils._log import log
-from broker._utils.tools import _date, print_tb
-from broker.errors import QuietExit
+import quart_flask_patch
+from _utils._log import log
+from _utils.tools import _date, print_tb
+from errors import QuietExit
 from flask import abort, request
 from quart import Quart
 
@@ -48,7 +48,7 @@ async def startup():
 
     __ https://pgjones.gitlab.io/quart/how_to_guides/startup_shutdown.html
     """
-    from broker._utils import _log
+    from _utils import _log
 
     import bot.trade_async as bot_trade
     from bot import config as helper

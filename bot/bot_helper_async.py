@@ -9,15 +9,15 @@ from contextlib import suppress
 from typing import Tuple
 
 import aiohttp
-from broker._utils._log import _console_clear, log, ok  # flake8: noqa
-from broker._utils.tools import _date, decimal_count, print_tb
-from broker.errors import QuietExit
+from _utils._log import _console_clear, log, ok  # flake8: noqa
+from _utils.tools import _date, decimal_count, print_tb
+from errors import QuietExit
 
-from bot import cfg
-from bot.bar_ohlcv import _fetch_ohlcv
-from bot.config import config, exchange
-from bot.fund_time import Fund
-from bot.take_profit import TakeProfit
+import cfg
+from bar_ohlcv import _fetch_ohlcv
+from config import config, exchange
+from fund_time import Fund
+from take_profit import TakeProfit
 
 TP = TakeProfit()
 fund = Fund()

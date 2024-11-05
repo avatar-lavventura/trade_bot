@@ -15,7 +15,7 @@ class Discord_Alpy:
     def __init__(self):
         try:
             cfg = Yaml(Path(f"{Path.home()}/.binance.yaml"))
-            self.client = discord.Client()
+            self.client = discord.Client(intents=discord.Intents.all())
             self.channel_name = str(cfg["discord"]["CHANNEL_NAME"])
             self.TOKEN = str(cfg["discord"]["TOKEN"])
             self.client.loop.create_task(self.task())

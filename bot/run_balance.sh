@@ -55,7 +55,7 @@ clear -x
 fn="balance_"$1".log"
 # check_app
 while true; do
-    python3 discord_balance.py $1 $2
+    ~/venv39/bin/python3 discord_balance.py $1 $2
     echo ""
     countdown 30
     echo "countdown [  OK  ]"

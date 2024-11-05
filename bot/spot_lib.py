@@ -3,13 +3,13 @@
 from contextlib import suppress
 from typing import Dict  # noqa: F401
 
-from broker._utils._log import log
-from broker.errors import QuietExit
+from _utils._log import log
+from errors import QuietExit
 
-from bot import cfg
-from bot import config as helper
-from bot.bot_helper_async_usdt import BotHelperSpotAsync
-from bot.config import config
+import cfg
+import config as helper
+from bot_helper_async_usdt import BotHelperSpotAsync
+from config import config
 
 bot_async = BotHelperSpotAsync()
 

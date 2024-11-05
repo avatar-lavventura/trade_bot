@@ -9,15 +9,15 @@ from pathlib import Path
 from typing import Dict  # noqa: F401
 
 import ccxt.async_support as ccxt
-from broker._utils._log import log
-from broker._utils.tools import unix_time_millis
-from broker._utils.yaml import Yaml
+from _utils._log import log
+from _utils.tools import unix_time_millis
+from _utils.yaml import Yaml
 from filelock import FileLock
 from pycoingecko import CoinGeckoAPI
 from pymongo import MongoClient
 
-from bot import cfg
-from bot.mongodb import Mongo
+import cfg
+from mongodb import Mongo
 
 mc = MongoClient()
 

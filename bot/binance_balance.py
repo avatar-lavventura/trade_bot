@@ -3,18 +3,18 @@
 import asyncio
 from contextlib import suppress
 
-from broker._utils._async import _sleep
-from broker._utils._log import log
-from broker._utils.tools import _date, _sys_exit, delete_multiple_lines, print_tb
-from broker.errors import QuietExit
-from broker.libs.math import _percent
+from _utils._async import _sleep
+from _utils._log import log
+from _utils.tools import _date, _sys_exit, delete_multiple_lines, print_tb
+from errors import QuietExit
+from libs.math import _percent
 from ccxt.base.errors import RequestTimeout
 
-from bot import cfg
-from bot import config as helper
-from bot.bot_helper_async_usdt import BotHelperSpotAsync
-from bot.config import config
-from bot.spot_lib import update_spot_timestamps
+import cfg
+import config as helper
+from bot_helper_async_usdt import BotHelperSpotAsync
+from config import config
+from spot_lib import update_spot_timestamps
 
 # from bot.futures.binance_futures import futures_bal
 
