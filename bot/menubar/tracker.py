@@ -12,8 +12,9 @@ from pycoingecko import CoinGeckoAPI
 # rumps.debug_mode(True)
 
 is_motivation_msg = True
-exchange = ccxt.binance({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
-assets = ["BTCUSDT", "USDTTRY"]
+exchange = ccxt.bybit({"options": {"adustForTimeDifference": True}, "enableRateLimit": True})
+
+assets = ["BTCUSDT"]  # "FLTUSDT"
 # assets += ["JOEUSDT"]
 
 MSG = "The most important rule in trading is to protect your capital at all cost."
