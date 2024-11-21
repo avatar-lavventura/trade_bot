@@ -22,7 +22,7 @@ setup(
     keywords=["trading", "bot"],
     install_requires=requirements,
     include_package_data=True,
-    python_requires=">=3.6,<4",
+    python_requires=">=3.9,<4",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

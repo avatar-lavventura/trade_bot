@@ -60,6 +60,7 @@ class Exchange:
     def init_both(self):
         self.spot_usdt = ccxt.binance(self.ops_check("alper_b"))
         self.spot_btc = ccxt.binance(self.ops_check("anne_b"))
+        self.spot_bybit = ccxt.bybit(self.ops_check("bybit"))
 
     def init(self, _type):
         self._type = _type
@@ -69,18 +70,22 @@ class Exchange:
         elif cfg.TYPE == "btc":
             ops = self.ops_check("anne_b")
             self.spot = ccxt.binance(ops)
+        elif cfg.TYPE == "bybit":
+            ops = self.ops_check("bybit")
+            self.spot = ccxt.bybit(ops)
 
-        ops["options"] = {
-            "adustForTimeDifference": True,
-            "defaultMarginMode": "isolated",
-        }
-        self.margin_isolated = ccxt.binance(ops)
+        if not cfg.TYPE == "bybit":
+            ops["options"] = {
+                "adustForTimeDifference": True,
+                "defaultMarginMode": "isolated",
+            }
+            self.margin_isolated = ccxt.binance(ops)
 
-        ops["options"] = {
-            "adustForTimeDifference": True,
-            "defaultMarginMode": "cross",
-        }
-        self.margin_cross = ccxt.binance(ops)
+            ops["options"] = {
+                "adustForTimeDifference": True,
+                "defaultMarginMode": "cross",
+            }
+            self.margin_cross = ccxt.binance(ops)
 
     def ops_check(self, key):
         _cfg = Yaml(Path.home() / ".binance.yaml")
@@ -206,14 +211,14 @@ class Config:
         self._env = None  #: shorted name
         self.env = {}  # type: Dict[str, Env]
         self.prices = {}  # type: Dict[str, Env]
-        for idx in ["usdt", "btc"]:  # "busd"
+        for idx in ["usdt", "btc", "bybit"]:  # "busd"
             self.env[idx] = Env()  # should be initialized before reload()
 
         self._reload()
         self.prices = Mongo(mc, mc["shared"]["prices"])
 
         # self.watchlist_mb = Mongo(mc, mc["watchlist"])
-        for asset in ["usdt", "btc"]:
+        for asset in ["usdt", "btc", "bybit"]:
             self.env[asset].balance = Mongo(mc, mc[asset]["balance"])
             self.env[asset].balance_sum = Mongo(mc, mc[asset]["balance"])  # # TODO: ? same as balance check
             self.env[asset].hit = Mongo(mc, mc[asset]["hit"])
@@ -324,7 +329,7 @@ class Config:
         self.take_profit = float(self.cfg["root"]["take_profit"]) + 0.0001
         self.isolated_wallet_limit = self.cfg["root"]["isolated_wallet_limit"]
         self.is_funding_rate_alert = self.cfg["root"]["is_funding_rate_alert"]
-        for _type in ["usdt", "btc"]:  # "busd"
+        for _type in ["usdt", "btc", "bybit"]:  # "busd"
             self.env[_type].percent_change_to_add = -abs(self.cfg["root"][_type]["percent_change_to_add"]) + 0.01
             self.env[_type].is_manual_trade = self.cfg["root"][_type]["is_manual_trade"]
             self.env[_type].cut_loss = self.cfg["root"][_type]["cut_loss"]
@@ -364,7 +369,7 @@ class Config:
             self.WATCHLIST.sort()
 
         self.WATCHLIST = ["BTCUSDT"] + self.WATCHLIST
-        for _type in ["usdt", "btc"]:  # "busd"
+        for _type in ["usdt", "btc", "bybit"]:  # "busd"
             self.env[_type].status = self.yaml_wrapper(self.base_dir / f"status_{_type}.yaml")
             self.env[_type].risk = self.yaml_wrapper(self.base_dir / f"risk_{_type}.yaml")["root"]
 

@@ -11,6 +11,27 @@ root:
         - DUMMY
           # ignore_position_log:
           #   - OAX
+    bybit:
+        status: on # "on" or "off"
+        cut_loss: false
+        sleep_interval: 11
+        is_manual_trade: false
+        auto_buy_bnb: on
+        isolated: off
+        cross: off
+        initial: 10.4
+        strk_initial: 100.0
+        max_pos: 1
+        multiply_ratio: 1
+        percent_change_to_add:
+            0.5
+            # percent_cut_loss: 1 # TODO: implement
+        stop_trade_wt_30m_red: false
+        entry_prices:
+            DUMMY: 1.0
+        change_type: # to btc
+            - DUMMY
+        alert_if_position_closed: [] # OAX
     usdt: # 4900
         status: on # "on" or "off"
         cut_loss: false

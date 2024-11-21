@@ -144,7 +144,11 @@ class BotHelperAsync:
         c = "red" if float(lost) < 0 < float(cfg.locked_balance) else "green"
         msg = ""
         lost = float(lost)
-        real_pos_count = config._env._status.find_one("real_pos_count")["value"]
+        try:
+            real_pos_count = config._env._status.find_one("real_pos_count")["value"]
+        except:
+            real_pos_count = 0
+
         if name == "mBTC":
             msg += "-=-=-=-=-=-= "
             if lost != 0:
@@ -439,9 +443,10 @@ class BotHelperAsync:
         if not self.CROSS_READ_FLAG:
             self.CROSS_READ_FLAG = True
             cfg.BALANCE_FLAG = True
-            cfg.MARGIN_BAL_BTC = await self._fetch_margin_cross_balance()
-            if cfg.MARGIN_BAL_BTC:
-                cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
+            if cfg.TYPE != "bybit":
+                cfg.MARGIN_BAL_BTC = await self._fetch_margin_cross_balance()
+                if cfg.MARGIN_BAL_BTC:
+                    cfg.MARGIN_BAL = int(float(cfg.MARGIN_BAL_BTC) * cfg.PRICES["BTCUSDT"])
 
     async def _spot_balance(self, balance, sum_btc, sum_usdt, sum_busd):
         asset = balance["asset"]
@@ -455,7 +460,7 @@ class BotHelperAsync:
                 config._env.estimated_balance.add_single_key("only_btc", only_btc)
             elif asset not in cfg.STABLE_COINS:
                 price = await self.spot_fetch_ticker(f"{asset}{cfg.TYPE.upper()}")
-                if cfg.TYPE == "usdt":
+                if cfg.TYPE == "usdt" or cfg.TYPE == "bybit":
                     usdt_amount = quantity * float(price)
                     if usdt_amount > 1:  # below 1$ would not be count as open position
                         config.btc_quantity[asset] = float(balance["free"]) + locked
@@ -509,10 +514,16 @@ class BotHelperAsync:
                 log("", is_write=False)
 
             log(f"E: {e}", is_write=False)
+            print_tb(e)
 
         try:
-            for balance in cfg.BALANCES["info"]["balances"]:
-                sum_btc, sum_usdt, sum_busd = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
+            if cfg.TYPE == "bybit":
+                sum_btc = 0
+                sum_busd = 0
+                sum_usdt = float(cfg.BALANCES["info"]["result"]["list"][0]["totalEquity"])
+            else:
+                for balance in cfg.BALANCES["info"]["balances"]:
+                    sum_btc, sum_usdt, sum_busd = await self._spot_balance(balance, sum_btc, sum_usdt, sum_busd)
         except QuietExit as e:
             if e:
                 log(str(e))
@@ -523,7 +534,11 @@ class BotHelperAsync:
         config._env.estimated_balance.add_single_key("only_usdt", self.only_usdt)
         own_usdt = sum_btc * cfg.PRICES["BTCUSDT"]
         pos_count: int = config._env._status.find_one("count")["value"]
-        real_pos_count: int = config._env._status.find_one("real_pos_count")["value"]
+        try:
+            real_pos_count: int = config._env._status.find_one("real_pos_count")["value"]
+        except:
+            real_pos_count: int = 0
+
         sum_usdt = float(format(sum_usdt, ".2f"))
         sum_busd = float(format(sum_busd, ".2f"))
         _sum_usdt = format(sum_usdt, ".2f")
@@ -707,14 +722,15 @@ class BotHelperAsync:
 
             config._env.estimated_balance.add_single_key("total_balance", own_usdt)
 
-        if cfg.BNB_BALANCE < 1.0 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on" and cfg.MY_ORDER != 2:
-            try:
-                await self.buy_bnb()
-            except Exception as e:
-                if "InsufficientFunds" in str(e) or "insufficient balance" in str(e):
-                    log(f"E: {e}")
-                else:
-                    print_tb(e)
+        if cfg.TYPE != "bybit":
+            if cfg.BNB_BALANCE < 1.0 and config.cfg["root"][cfg.TYPE]["auto_buy_bnb"] == "on" and cfg.MY_ORDER != 2:
+                try:
+                    await self.buy_bnb()
+                except Exception as e:
+                    if "InsufficientFunds" in str(e) or "insufficient balance" in str(e):
+                        log(f"E: {e}")
+                    else:
+                        print_tb(e)
 
         if is_first_line_printed:
             if _end:
@@ -845,7 +861,7 @@ class BotHelperAsync:
         else:
             msg = _msg
             if float(free) > 0:
-                msg = f"{msg}:bee: free=`{free}` (`${format(free * cfg.PRICES['BTCUSDT'], '.2f')}`) "
+                msg = f"{msg}:bee: free=`{free}` (`${format(float(free) * cfg.PRICES['BTCUSDT'], '.2f')}`) "
 
             lost_usdt = format(float(lost) * cfg.PRICES["BTCUSDT"], ".2f")
             s_btc = format(sum_btc, ".5f")
@@ -1070,7 +1086,10 @@ class BotHelperAsync:
 
     async def fetch_balance(self, code) -> float:
         await self._fetch_balance()
-        return cfg.BALANCES[code]["total"]
+        if cfg.TYPE == "bybit":
+            return float(cfg.BALANCES["info"]["result"]["list"][0]["totalEquity"])
+        else:
+            return cfg.BALANCES[code]["total"]
 
     async def _fetch_balance(self) -> None:  # older one
         pos_count = 0
@@ -1079,12 +1098,18 @@ class BotHelperAsync:
         ongoing_positions = []
         cfg.BALANCES = await exchange.spot.fetch_balance()
         for symbol in cfg.BALANCES:
-            if symbol not in cfg.ignore_list and cfg.BALANCES[symbol]["total"] > 0:
-                ongoing_positions.append(symbol)
-                if symbol not in cfg.STABLE_COINS:  # and symbol not in config.SPOT_IGNORE_LIST:
-                    real_pos_count += 1
-                    if symbol not in config.SPOT_IGNORE_LIST:
-                        pos_count += 1
+            if symbol not in cfg.ignore_list:
+                if cfg.TYPE == "bybit":
+                    _total = float(cfg.BALANCES[symbol]["result"]["list"][0]["totalEquity"])
+                else:
+                    _total = cfg.BALANCES[symbol]["total"]
+
+                if symbol not in cfg.ignore_list and _total > 0:
+                    ongoing_positions.append(symbol)
+                    if symbol not in cfg.STABLE_COINS:  # and symbol not in config.SPOT_IGNORE_LIST:
+                        real_pos_count += 1
+                        if symbol not in config.SPOT_IGNORE_LIST:
+                            pos_count += 1
 
         for asset in config.cfg["root"][cfg.TYPE]["entry_prices"]:
             if asset != "DUMMY":
