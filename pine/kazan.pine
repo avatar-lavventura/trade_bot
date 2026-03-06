@@ -1,14 +1,30 @@
 //@version=6
 // ============================================================
-//  ALPY VIX - WaveTrend Strategy (v2.1 - Lookahead Fixed)
+//  ALPY VIX - WaveTrend Self-Calibrating Strategy (v2.2)
 //
-//  CHANGES FROM v2.0:
-//    - Removed calc_on_order_fills and process_orders_on_close
-//      (these caused the "peeking into future" warning)
-//    - SL/TP now anchored to strategy.position_avg_price
-//      instead of close (more accurate fill price)
-//    - Signal delayed by [1] so entry fills at next bar open
-//      (realistic execution, no lookahead)
+//  WHAT'S NEW — PER-SYMBOL AUTO-CALIBRATION:
+//
+//  1. DYNAMIC WT THRESHOLDS
+//     Instead of fixed -45/+45, entry zones are calculated as
+//     the Nth percentile of WT1 over a rolling lookback window.
+//     ENKAI oscillates to -65, FROTO to -35 — each gets its own
+//     threshold automatically. No manual tuning per symbol.
+//
+//  2. ADAPTIVE ATR MULTIPLIERS (Volatility Rank)
+//     ATR is ranked 0-100% vs its own recent range.
+//     High volatility regime  → wider SL, wider TP
+//     Low volatility regime   → tighter SL, tighter TP
+//     Prevents getting stopped out on volatile stocks and
+//     leaving money on the table on quiet ones.
+//
+//  3. ADAPTIVE TREND DETECTION (ADX-based)
+//     ADX threshold is dynamically set to the median ADX of
+//     the symbol. Naturally trending stocks (high ADX baseline)
+//     get a higher bar to pass. Choppy stocks get a lower one.
+//     Result: trades only when THIS stock is in a trend phase.
+//
+//  Everything else unchanged from v2.1 (no lookahead, no
+//  repainting, SL/TP anchored to position_avg_price)
 // ============================================================
 strategy(
   title             = "alpyvix",
@@ -19,9 +35,9 @@ strategy(
   default_qty_value = 1
 )
 
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
 // 1. DATE RANGE
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
 grp_time  = "Date Range"
 fromYear  = input.int(2023, "From Year",  group=grp_time, display=display.none)
 fromMonth = input.int(10,   "From Month", group=grp_time, minval=1, maxval=12, display=display.none)
@@ -34,101 +50,149 @@ start  = timestamp(fromYear, fromMonth, fromDay, 0, 0)
 finish = timestamp(thruYear, thruMonth, thruDay, 23, 59)
 window() => time >= start and time <= finish
 
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
 // 2. WAVETREND SETTINGS
-// ---------------------------------------------
-grp_wt        = "WaveTrend"
-n1            = input.int(10,   "Channel Length",                  group=grp_wt, minval=2,  display=display.none)
-n2            = input.int(21,   "Average Length",                  group=grp_wt, minval=2,  display=display.none)
-wt_smooth     = input.int(4,    "WT2 Smoothing",                   group=grp_wt, minval=1,  display=display.none)
-obL1          = input.float( 60,"Overbought L1",                   group=grp_wt,            display=display.none)
-obL2          = input.float( 53,"Overbought L2",                   group=grp_wt,            display=display.none)
-osL2          = input.float(-53,"Oversold L2",                     group=grp_wt,            display=display.none)
-osL1          = input.float(-60,"Oversold L1",                     group=grp_wt,            display=display.none)
-long_threshold  = input.float(-45,"Long Entry Threshold (WT1 <=)", group=grp_wt,            display=display.none)
-short_threshold = input.float( 45,"Short Entry Threshold (WT1 >=)",group=grp_wt,            display=display.none)
+// ─────────────────────────────────────────────────────
+grp_wt    = "WaveTrend"
+n1        = input.int(10, "Channel Length", group=grp_wt, minval=2, display=display.none)
+n2        = input.int(21, "Average Length", group=grp_wt, minval=2, display=display.none)
+wt_smooth = input.int(4,  "WT2 Smoothing",  group=grp_wt, minval=1, display=display.none)
 
-// ---------------------------------------------
-// 3. TREND FILTER (EMA)
-// ---------------------------------------------
+obL1 = input.float( 60, "Overbought L1", group=grp_wt, display=display.none)
+obL2 = input.float( 53, "Overbought L2", group=grp_wt, display=display.none)
+osL2 = input.float(-53, "Oversold L2",   group=grp_wt, display=display.none)
+osL1 = input.float(-60, "Oversold L1",   group=grp_wt, display=display.none)
+
+// ─────────────────────────────────────────────────────
+// 3. ADAPTIVE WT THRESHOLD SETTINGS
+//    Percentile-based — self-calibrates to each symbol
+// ─────────────────────────────────────────────────────
+grp_adapt      = "Adaptive Thresholds"
+adapt_lookback = input.int(100, "Percentile Lookback (bars)",  group=grp_adapt, minval=20, display=display.none)
+long_pct       = input.float(20,"Long Entry Percentile (0-49)",group=grp_adapt, minval=1, maxval=49, display=display.none)
+short_pct      = input.float(80,"Short Entry Percentile (51-99)",group=grp_adapt, minval=51, maxval=99, display=display.none)
+
+// ─────────────────────────────────────────────────────
+// 4. WAVETREND CALCULATION
+// ─────────────────────────────────────────────────────
+src = hlc3
+esa = ta.ema(src, n1)
+d   = ta.ema(math.abs(src - esa), n1)
+ci  = (src - esa) / (0.015 * d)
+wt1 = ta.ema(ci, n2)
+wt2 = ta.sma(wt1, wt_smooth)
+
+// Dynamic thresholds — Nth percentile of WT1 history
+// Each stock auto-calibrates based on its own WT range
+long_thresh_dyn  = ta.percentile_linear_interpolation(wt1, adapt_lookback, long_pct)
+short_thresh_dyn = ta.percentile_linear_interpolation(wt1, adapt_lookback, short_pct)
+
+// ─────────────────────────────────────────────────────
+// 5. TREND FILTER (EMA)
+// ─────────────────────────────────────────────────────
 grp_trend        = "Trend Filter"
 use_trend_filter = input.bool(false, "Enable EMA Trend Filter", group=grp_trend, display=display.none)
 trend_ema_len    = input.int(200,    "Trend EMA Length",        group=grp_trend, display=display.none)
 trend_ema        = ta.ema(close, trend_ema_len)
+trend_long_ok    = not use_trend_filter or close > trend_ema
+trend_short_ok   = not use_trend_filter or close < trend_ema
 
-// ---------------------------------------------
-// 4. VOLUME FILTER
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
+// 6. ADAPTIVE ADX FILTER
+//    Threshold = median ADX of this symbol → trades only
+//    when THIS stock is trending above its own baseline
+// ─────────────────────────────────────────────────────
+grp_adx        = "Adaptive ADX Filter"
+use_adx        = input.bool(false, "Enable Adaptive ADX Filter", group=grp_adx, display=display.none)
+adx_len        = input.int(14,    "ADX Length",                  group=grp_adx, display=display.none)
+adx_lookback   = input.int(50,    "ADX Median Lookback",         group=grp_adx, display=display.none)
+
+adx_tr  = math.max(math.max(high - low, math.abs(high - close[1])), math.abs(low - close[1]))
+adx_atr = ta.rma(adx_tr, adx_len)
+adx_pdm = ta.rma(math.max(high - high[1], 0), adx_len)
+adx_mdm = ta.rma(math.max(low[1] - low,   0), adx_len)
+adx_pdi = adx_atr != 0 ? adx_pdm / adx_atr * 100 : 0
+adx_mdi = adx_atr != 0 ? adx_mdm / adx_atr * 100 : 0
+adx_dx  = (adx_pdi + adx_mdi) != 0 ? math.abs(adx_pdi - adx_mdi) / (adx_pdi + adx_mdi) * 100 : 0
+adx_val = ta.rma(adx_dx, adx_len)
+
+// Dynamic threshold = 50th percentile (median) of ADX for this symbol
+adx_median  = ta.percentile_linear_interpolation(adx_val, adx_lookback, 50)
+adx_ok      = not use_adx or adx_val > adx_median
+
+// ─────────────────────────────────────────────────────
+// 7. VOLUME FILTER
+// ─────────────────────────────────────────────────────
 grp_vol        = "Volume Filter"
-use_vol_filter = input.bool(false, "Enable Volume Spike Filter",  group=grp_vol, display=display.none)
-vol_ma_len     = input.int(20,    "Volume MA Length",             group=grp_vol, display=display.none)
-vol_mult       = input.float(1.2, "Volume Spike Multiplier",      group=grp_vol, step=0.1, display=display.none)
+use_vol_filter = input.bool(false, "Enable Volume Filter",    group=grp_vol, display=display.none)
+vol_ma_len     = input.int(20,    "Volume MA Length",         group=grp_vol, display=display.none)
+vol_mult       = input.float(1.2, "Volume Spike Multiplier",  group=grp_vol, step=0.1, display=display.none)
 vol_ma         = ta.sma(volume, vol_ma_len)
-vol_spike      = volume > vol_ma * vol_mult
+vol_ok         = not use_vol_filter or volume > vol_ma * vol_mult
 
-// ---------------------------------------------
-// 5. RSI CONFIRMATION
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
+// 8. RSI CONFIRMATION
+// ─────────────────────────────────────────────────────
 grp_rsi        = "RSI Confirmation"
 use_rsi_filter = input.bool(false, "Enable RSI Filter",       group=grp_rsi, display=display.none)
 rsi_len        = input.int(14,    "RSI Length",               group=grp_rsi, display=display.none)
 rsi_long_max   = input.int(50,    "RSI Long Max (< value)",   group=grp_rsi, display=display.none)
 rsi_short_min  = input.int(50,    "RSI Short Min (> value)",  group=grp_rsi, display=display.none)
 rsi_val        = ta.rsi(close, rsi_len)
+rsi_long_ok    = not use_rsi_filter or rsi_val < rsi_long_max
+rsi_short_ok   = not use_rsi_filter or rsi_val > rsi_short_min
 
-// ---------------------------------------------
-// 6. RISK MANAGEMENT
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
+// 9. ADAPTIVE RISK MANAGEMENT
+//    ATR rank scales SL/TP to each stock's volatility regime
+// ─────────────────────────────────────────────────────
 grp_risk      = "Risk Management"
-atr_len       = input.int(14,    "ATR Length",                             group=grp_risk, display=display.none)
-atr_sl_mult   = input.float(1.5, "ATR SL Multiplier",                     group=grp_risk, step=0.1, display=display.none)
-atr_tp_mult   = input.float(3.0, "ATR TP Multiplier",                     group=grp_risk, step=0.1, display=display.none)
-risk_pct      = input.float(1.0, "Risk % Per Trade",                      group=grp_risk, step=0.1, display=display.none)
-max_dd_pct    = input.float(15.0,"Max Drawdown Circuit-Breaker (%)",       group=grp_risk, step=0.5, display=display.none)
+atr_len       = input.int(14,    "ATR Length",                       group=grp_risk, display=display.none)
+atr_sl_mult   = input.float(1.5, "Base SL Multiplier (ATR)",         group=grp_risk, step=0.1, display=display.none)
+atr_tp_mult   = input.float(3.0, "Base TP Multiplier (ATR)",         group=grp_risk, step=0.1, display=display.none)
+atr_lookback  = input.int(50,    "ATR Rank Lookback",                group=grp_risk, display=display.none)
+risk_pct      = input.float(1.0, "Risk % Per Trade",                 group=grp_risk, step=0.1, display=display.none)
+max_dd_pct    = input.float(15.0,"Max Drawdown Circuit-Breaker (%)", group=grp_risk, step=0.5, display=display.none)
 
-atr_val       = ta.atr(atr_len)
+atr_val  = ta.atr(atr_len)
+
+// Volatility rank: where is current ATR in its recent range?
+// 0.0 = very quiet, 1.0 = very volatile
+atr_low  = ta.lowest(atr_val,  atr_lookback)
+atr_high = ta.highest(atr_val, atr_lookback)
+atr_rank = (atr_high > atr_low) ? (atr_val - atr_low) / (atr_high - atr_low) : 0.5
+
+// Scale SL/TP: quiet=base, volatile=up to 50% wider
+vol_scale    = 1.0 + atr_rank * 0.5
+sl_mult_dyn  = atr_sl_mult * vol_scale
+tp_mult_dyn  = atr_tp_mult * vol_scale
+
+// Scale position size inversely — smaller when volatile
+size_scale    = 1.0 - atr_rank * 0.3
 peak_eq       = na(strategy.equity[1]) ? strategy.equity : math.max(strategy.equity, strategy.equity[1])
 drawdown      = (peak_eq - strategy.equity) / peak_eq * 100
 dd_breach     = drawdown >= max_dd_pct
-sl_distance   = atr_val * atr_sl_mult
-qty_from_risk = (strategy.equity * risk_pct / 100) / (sl_distance * syminfo.pointvalue)
+sl_distance   = atr_val * sl_mult_dyn
+qty_from_risk = (strategy.equity * risk_pct / 100 * size_scale) / (sl_distance * syminfo.pointvalue)
 
-// ---------------------------------------------
-// 7. WAVETREND CALCULATION
-// ---------------------------------------------
-src  = hlc3
-esa  = ta.ema(src, n1)
-d    = ta.ema(math.abs(src - esa), n1)
-ci   = (src - esa) / (0.015 * d)
-tci  = ta.ema(ci, n2)
-wt1  = tci
-wt2  = ta.sma(wt1, wt_smooth)
-
-// ---------------------------------------------
-// 8. SIGNAL LOGIC
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
+// 10. SIGNAL LOGIC
+// ─────────────────────────────────────────────────────
 wt_cross_long  = wt1 > wt2 and wt1[1] <= wt2[1]
 wt_cross_short = wt1 < wt2 and wt1[1] >= wt2[1]
 
-in_oversold   = wt1 <= long_threshold
-in_overbought = wt1 >= short_threshold
+// Dynamic zone check — uses this stock's own percentile thresholds
+in_oversold   = wt1 <= long_thresh_dyn
+in_overbought = wt1 >= short_thresh_dyn
 
-trend_long_ok  = not use_trend_filter or close > trend_ema
-trend_short_ok = not use_trend_filter or close < trend_ema
+long_signal  = wt_cross_long  and in_oversold   and trend_long_ok  and adx_ok and vol_ok and rsi_long_ok
+short_signal = wt_cross_short and in_overbought and trend_short_ok and adx_ok and vol_ok and rsi_short_ok
 
-vol_ok       = not use_vol_filter or vol_spike
-rsi_long_ok  = not use_rsi_filter or rsi_val < rsi_long_max
-rsi_short_ok = not use_rsi_filter or rsi_val > rsi_short_min
-
-long_signal  = wt_cross_long  and in_oversold   and trend_long_ok  and vol_ok and rsi_long_ok
-short_signal = wt_cross_short and in_overbought and trend_short_ok and vol_ok and rsi_short_ok
-
-// ---------------------------------------------
-// 9. STRATEGY EXECUTION
-// ---------------------------------------------
-// signal[1]: detected on bar N close, filled at bar N+1 open
-// SL/TP anchored to actual fill price (position_avg_price)
-
+// ─────────────────────────────────────────────────────
+// 11. STRATEGY EXECUTION
+//     signal[1]: detected bar N close → fills bar N+1 open
+//     SL/TP anchored to actual fill price
+// ─────────────────────────────────────────────────────
 if window() and not dd_breach
     if long_signal[1]
         strategy.entry("L", strategy.long,  qty=qty_from_risk, comment=" ", alert_message="LONG")
@@ -138,28 +202,34 @@ if window() and not dd_breach
 if strategy.position_size > 0
     strategy.exit("XL", "L",
       stop    = strategy.position_avg_price - sl_distance,
-      limit   = strategy.position_avg_price + atr_val * atr_tp_mult,
+      limit   = strategy.position_avg_price + atr_val * tp_mult_dyn,
       comment = " ")
 
 if strategy.position_size < 0
     strategy.exit("XS", "S",
       stop    = strategy.position_avg_price + sl_distance,
-      limit   = strategy.position_avg_price - atr_val * atr_tp_mult,
+      limit   = strategy.position_avg_price - atr_val * tp_mult_dyn,
       comment = " ")
 
 if dd_breach
     strategy.close_all(comment="DD")
     alert("Max drawdown reached - trading halted", alert.freq_once_per_bar)
 
-// ---------------------------------------------
-// 10. VISUALS
-// ---------------------------------------------
+// ─────────────────────────────────────────────────────
+// 12. VISUALS
+// ─────────────────────────────────────────────────────
+// OB/OS reference lines
 plot(obL1, "OB L1", color=color.new(color.red,   20), linewidth=1)
 plot(obL2, "OB L2", color=color.new(color.red,   50), linewidth=1, style=plot.style_circles)
 plot(osL2, "OS L2", color=color.new(color.green, 50), linewidth=1, style=plot.style_circles)
 plot(osL1, "OS L1", color=color.new(color.green, 20), linewidth=1)
 hline(0, "Zero", color=color.gray, linestyle=hline.style_dashed)
 
+// Dynamic threshold lines — show where entries actually fire for THIS stock
+plot(long_thresh_dyn,  "Dyn OS Threshold", color=color.new(color.aqua,   40), linewidth=1, style=plot.style_stepline)
+plot(short_thresh_dyn, "Dyn OB Threshold", color=color.new(color.orange, 40), linewidth=1, style=plot.style_stepline)
+
+// WaveTrend lines
 plot(wt1, "WT1 (Signal)",  color=color.new(color.lime, 0), linewidth=2)
 plot(wt2, "WT2 (Trigger)", color=color.new(color.red,  0), linewidth=2)
 plot(wt1 - wt2, "WT Histogram", color=color.new(color.blue, 70), style=plot.style_area)
@@ -172,6 +242,18 @@ plotshape(long_signal,  title="Buy Signal",  style=shape.arrowup,   location=loc
 plotshape(short_signal, title="Sell Signal", style=shape.arrowdown, location=location.abovebar, color=color.new(color.red,  0), size=size.normal)
 
 plot(use_trend_filter ? trend_ema : na, "EMA Trend", color=color.new(color.yellow, 0), linewidth=1)
-
 bgcolor(use_trend_filter and close > trend_ema ? color.new(color.green, 97) : use_trend_filter and close < trend_ema ? color.new(color.red, 97) : na, title="Trend Background")
 bgcolor(dd_breach ? color.new(color.orange, 80) : na, title="Drawdown Alert")
+
+// Info table — shows live calibrated values for current symbol
+var table tbl = table.new(position.top_right, 2, 5, border_color=color.new(color.gray,60), border_width=1)
+table.cell(tbl, 0, 0, "METRIC",      text_color=color.gray,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 1, 0, "VALUE",       text_color=color.gray,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 0, 1, "Dyn OS",      text_color=color.gray,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 1, 1, str.tostring(math.round(long_thresh_dyn,  1)), text_color=color.aqua,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 0, 2, "Dyn OB",      text_color=color.gray,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 1, 2, str.tostring(math.round(short_thresh_dyn, 1)), text_color=color.orange, bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 0, 3, "Vol Regime",  text_color=color.gray,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 1, 3, str.tostring(math.round(atr_rank * 100, 0)) + "%", text_color=atr_rank > 0.6 ? color.red : atr_rank < 0.4 ? color.lime : color.yellow, bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 0, 4, "ADX",         text_color=color.gray,   bgcolor=color.new(color.black,70), text_size=size.small)
+table.cell(tbl, 1, 4, str.tostring(math.round(adx_val, 1)) + (adx_val > adx_median ? " TREND" : " CHOP"), text_color=adx_val > adx_median ? color.lime : color.red, bgcolor=color.new(color.black,70), text_size=size.small)
